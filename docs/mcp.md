@@ -47,6 +47,8 @@ Run `npm run dev` first. Use absolute paths to this repository's `resources/bin/
 
 The service uses a per-user Unix socket at `~/Library/Application Support/Screen Recorder/service.sock` with a private directory and file permissions. Closing or reconnecting an MCP client does not stop an ongoing recording. macOS still controls access to screen, camera, microphone, and input events.
 
+`permissions_request` with `kind: "screen"` or `kind: "input"` opens the corresponding System Settings privacy pane if access remains ungranted after the request. The command returns the actual permission state; opening Settings does not grant access. Quit and reopen after granting screen recording. If Settings shows an enabled entry but the app still cannot access it, remove the outdated entry and add the current app build. `input` requests optional typing-activity detection; mouse movement and click capture work independently of this permission.
+
 ## Command contract
 
 Tools expose the same validated commands as the UI. Tool names replace dots and slashes with underscores; for example `project.open` becomes `project_open`. `tools/list` supplies the current JSON Schemas.
@@ -56,11 +58,11 @@ Tools expose the same validated commands as the UI. Tool names replace dots and 
 | Projects | `project_list`, `project_create`, `project_open`, `project_rename`, `project_save`, `project_import`, `project_delete` |
 | Recording | `app_capabilities`, `permissions_request`, `recording_start`, `recording_pause`, `recording_resume`, `recording_stop`, `recording_camera` |
 | Editing | `timeline_apply`, `history_undo`, `history_redo`, `asset_import`, `transcript_export` |
-| Preview/export | `preview_load`, `preview_seek`, `preview_frame`, `preview_play`, `preview_pause`, `export_start` |
+| Preview/export | `preview_load`, `preview_draft`, `preview_seek`, `preview_frame`, `preview_play`, `preview_pause`, `export_start` |
 | AI/settings | `ai_transcribe`, `ai_cleanSilence`, `ai_assistant`, `ai_models_list`, `ai_models_download`, `settings_get`, `settings_update`, `keychain_set`, `keychain_delete` |
 | Jobs | `jobs_list`, `jobs_get`, `jobs_cancel` |
 
-Read `project_open` before writing and supply its `revision` as `expectedRevision`. Stale revisions fail without changing the project. A `timeline_apply` batch is atomic and uses one undo step. All timed input uses **current output timeline milliseconds**. Returned project annotations use **source milliseconds**. When cutting several intervals, submit cuts from the latest interval backwards so earlier cuts do not shift later inputs.
+Read `project_open` before writing and supply its `revision` as `expectedRevision`. Stale revisions fail without changing the project. A `timeline_apply` batch is atomic and uses one undo step. Timed input uses **current output timeline milliseconds**, except `clip.trim`'s explicit `sourceStartMs`/`sourceEndMs` and `source.restore`'s removed **source** range. Returned project annotations use **source milliseconds**. When cutting several intervals, submit cuts from the latest interval backwards so earlier cuts do not shift later inputs.
 
 ```json
 {
@@ -74,6 +76,10 @@ Read `project_open` before writing and supply its `revision` as `expectedRevisio
 ```
 
 Use a unique `requestId` for a mutation and reuse it only for an identical retry in the same app session. The service retains the latest 1,000 retry receipts. Recording also requires an empty, idle project; export refuses to overwrite existing files.
+
+`timeline_apply` also supports `canvas.update`, `autoZoom.update`, `zoom.update`, `speed`, `clip.trim`, `clip.merge`, and `source.restore`. Use `transcript.text` with a cue's `id` and new `text` to edit words without changing source timestamps. Speed changes apply to every media track through the same mapping; old projects without a segment speed use 1×. `export_start` derives dimensions from the canvas when both dimensions are omitted; explicit dimensions must be supplied together. The 720p, 1080p, and 4K presets include portrait and square output.
+
+`preview_draft` accepts the same `projectId`, `expectedRevision`, and `operations` as an edit batch, after `preview_load` selects the project. It changes only the native preview: saved edits, revisions, and undo history stay intact. Use `timeline_apply` to commit or `preview_load` to restore the saved composition. Send at most one draft request at a time and coalesce interactive updates.
 
 AI, model downloads, and exports return a Job with `id`. Poll `jobs_get` with `{ "jobId": "..." }` until completed, failed, or cancelled. `jobs_cancel` cancels a running operation. Export paths must be absolute, new `.mp4` files outside project storage. `preview_frame` returns a PNG image as MCP image content, plus its local path.
 

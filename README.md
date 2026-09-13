@@ -47,13 +47,16 @@ The Projects library supports creating, opening, renaming, searching, saving, im
 - Independent screen, camera, microphone, and system audio.
 - Circle or square webcam, including timed visibility changes.
 - Nondestructive trim, split, cut, undo, and redo.
-- Cursor highlight, manual zoom, and click-driven automatic zoom.
+- Clip speed, draggable trim/zoom intervals, removed-range restoration, and adjacent clip merging.
+- Cursor highlight, editable zooms, and automatic click/drag/typing-activity framing.
+- Wallpaper, gradient, color, or custom-image backgrounds; blur, padding, rounded screen corners, shadows, and browser frames.
+- Landscape, portrait, square, and 4:5 canvases with matching preview and export.
 - Timed text/images and editable captions.
 - Independent microphone and system audio levels.
 - Shared native preview/export composition, 1080p and 4K H.264/AAC MP4.
 - Local transcription, adjustable silence trimming, and optional AI editing.
 
-All public edit times are **milliseconds on the current output timeline**. Persisted effects and transcript entries use source time. A shared mapping keeps every track synchronized after cuts.
+Timed edits use **milliseconds on the current output timeline**. `clip.trim` explicitly names source endpoints; `source.restore` takes a removed source range. Persisted effects and transcript entries use source time. A shared mapping keeps every track synchronized after cuts and speed changes.
 
 ## AI and MCP
 
@@ -64,6 +67,8 @@ The optional assistant supports OpenAI and Anthropic API keys stored in macOS Ke
 ## Release status
 
 See [validation and release checklist](docs/release.md) for the distinction between automated checks, hardware acceptance, and signed distribution. Product Hunt publication is a separate release step after an installable build passes the checklist.
+
+The [ScreenCursor comparison](docs/screencursor-parity.md) records the public features and video interactions used as the macOS editing target, including the remaining platform boundary.
 
 ## License
 

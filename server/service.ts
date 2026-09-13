@@ -5,7 +5,7 @@ import { EventEmitter } from 'node:events';
 import { setTimeout as delay } from 'node:timers/promises';
 import { z } from 'zod';
 import type { CursorEvent, EditOperation, Project, RecordingStatus, RecordingSource } from '../shared/types.js';
-import { duration } from '../shared/timeline.js';
+import { duration, outputSize } from '../shared/timeline.js';
 import { ProjectStore, appDataDir, atomicJSON } from './store.js';
 import { AppError, captureSchema, checkRevision, errorOf, finite, id, object, operationsSchema, projectSchema, sourceSchema, time } from './validation.js';
 import { applyEdits, silenceCuts, subtitleText, type AudioWindow } from './edits.js';
@@ -40,9 +40,10 @@ export const methodSchemas: Record<string, z.ZodType> = {
   'keychain.set': z.object({ provider, key: z.string().min(10).max(2000).refine(k => !/[\r\n]/.test(k), 'API key must be one line') }).strict(), 'keychain.delete': z.object({ provider }).strict(),
   'jobs.list': z.object({ projectId: id.optional() }).strict(), 'jobs.get': z.object({ jobId: id }).strict(), 'jobs.cancel': z.object({ jobId: id }).strict(),
   'preview.load': withProject, 'preview.bounds': z.object({ x: finite, y: finite, width: finite.min(0).max(16384), height: finite.min(0).max(16384) }).strict(),
+  'preview.draft': z.object({ ...revision, operations: operationsSchema }).strict(),
   'preview.seek': z.object({ timeMs: time }).strict(), 'preview.play': none, 'preview.pause': none, 'preview.status': none,
   'preview.frame': z.object({ ...projectId, timeMs: time }).strict(),
-  'export.start': z.object({ ...projectId, path: absolutePath, width: finite.int().min(320).max(3840).optional(), height: finite.int().min(240).max(2160).optional() }).strict(),
+  'export.start': z.object({ ...projectId, path: absolutePath, quality: z.enum(['720','1080','4k']).optional(), width: finite.int().min(16).max(3840).optional(), height: finite.int().min(16).max(3840).optional() }).strict().refine(p => (p.width === undefined) === (p.height === undefined), 'Supply both width and height, or omit both to use the canvas aspect ratio'),
 };
 const emptyRecording: RecordingStatus = { active: false, paused: false, durationMs: 0, microphoneLevel: 0, systemLevel: 0, cameraVisible: false, cameraEnabled: false };
 const readOnly = new Set(['app.capabilities','app.canQuit','project.list','project.open','settings.get','ai.models/list','jobs.list','jobs.get','preview.status']);
@@ -95,7 +96,7 @@ export class ApplicationService extends EventEmitter {
     return structuredClone(await result);
   }
   private serialize(method: string, action: () => Promise<unknown>) {
-    if (isReadOnly(method) || method.startsWith('preview.')) return action();
+    if (isReadOnly(method) || method.startsWith('preview.') && method !== 'preview.draft' && method !== 'preview.load') return action();
     const result = this.mutationQueue.catch(() => {}).then(action);
     this.mutationQueue = result;
     return result;
@@ -175,9 +176,18 @@ export class ApplicationService extends EventEmitter {
     try { source = sourceSchema.parse(suppliedSource ?? JSON.parse(await fs.readFile(path.join(this.store.dir(projectId), 'recovered-source.json'), 'utf8'))); } catch { /* Preserve media even when metadata is incomplete. */ }
     try {
       const current = await this.store.get(projectId);
+      let events: CursorEvent[] = [];
+      if (source?.cursor && (current.edits.autoZoom?.enabled ?? true)) {
+        try { events = await cursorClicks(await this.store.resolveMedia(projectId, source.cursor)); }
+        catch (error) { console.error('Automatic zoom analysis skipped:', errorOf(error).message); }
+      }
       const project = await this.store.mutate(projectId, current.revision, q => {
         if (source) { q.source = source; q.status = 'ready'; q.edits.segments = [{ startMs: 0, endMs: source.durationMs }]; }
         else { q.status = 'draft'; q.recovered = true; }
+        if (events.length) {
+          try { applyEdits(q, [{ type: 'zooms.auto' }], events); }
+          catch (error) { console.error('Automatic zoom generation skipped:', errorOf(error).message); }
+        }
       }, false, true);
       return this.refreshPreview(await this.thumbnail(project));
     } finally { this.recordingId = undefined; this.store.busy.delete(projectId); }
@@ -349,6 +359,16 @@ export class ApplicationService extends EventEmitter {
       case 'jobs.list': return this.jobs.list(p.projectId);
       case 'jobs.get': return this.jobs.get(p.jobId);
       case 'jobs.cancel': return this.jobs.cancel(p.jobId);
+      case 'preview.draft': {
+        const project = await this.store.get(p.projectId);
+        checkRevision(project.revision, p.expectedRevision); this.store.assertIdle(project.id);
+        if (this.previewId !== project.id) throw new AppError('PREVIEW_NOT_ACTIVE', 'Load this project in the preview before changing its draft');
+        const events = p.operations.some((op: EditOperation) => op.type === 'zooms.auto') && project.source?.cursor ? await cursorClicks(await this.store.resolveMedia(project.id, project.source.cursor)) : [];
+        const draft = structuredClone(project);
+        applyEdits(draft, p.operations, events); projectSchema.parse(draft);
+        if (this.previewId !== project.id) throw new AppError('PREVIEW_NOT_ACTIVE', 'The preview switched to another project');
+        return this.native('preview.load', { project: draft, projectDir: this.store.dir(project.id) });
+      }
       case 'preview.load': {
         const project = await this.sourceProject(p.projectId); this.previewId = project.id;
         return this.native(method, { project, projectDir: this.store.dir(project.id) });
@@ -363,7 +383,7 @@ export class ApplicationService extends EventEmitter {
       case 'export.start': {
         const project = await this.sourceProject(p.projectId), output = await this.outputPath(p.path, ['.mp4']);
         if (this.exporting.has(output)) throw new AppError('EXPORT_BUSY', 'Another export is using that filename.');
-        const width = p.width ?? 1920, height = p.height ?? 1080;
+        const { width, height } = p.width === undefined ? outputSize(project, p.quality) : { width: p.width, height: p.height };
         if (width % 2 || height % 2) throw new AppError('INVALID_INPUT', 'Video dimensions must be even numbers.');
         this.exporting.add(output);
         return this.jobs.start('export', project.id, async (signal, progress, jobId) => {

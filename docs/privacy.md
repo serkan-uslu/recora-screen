@@ -6,7 +6,7 @@ Screen Recorder stores projects and recordings on your Mac. It does not require 
 
 Screen, camera, microphone, and system audio are separate files in the project. The floating camera preview and recorder controls are excluded from the screen source. Hiding the camera in the final composition does not stop the camera source recording; use the separate device control to stop camera capture.
 
-Cursor position and clicks are recorded to animate the pointer and generate zooms. Text typed into other applications is not collected as keyboard event data. Visible on-screen text can be part of the screen recording you select.
+Cursor position, clicks, and drags are recorded to animate the pointer and generate zooms independently of Input Monitoring. With optional macOS Input Monitoring permission, coarse typing-activity markers can help frame typing; typed text and key codes are not stored. Visible on-screen text can be part of the screen recording you select. Browser-frame titles use the selected recording window's title or a title you enter.
 
 Whisper inference and silence analysis run locally. Model and runtime downloads contact their upstream download hosts. After the model has downloaded, local transcription works offline.
 

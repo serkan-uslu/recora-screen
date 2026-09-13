@@ -1,46 +1,75 @@
-import type { Range } from './types.js';
+import type { Project, Range, TimelineSegment } from './types.js';
 
-export const duration = (segments: Range[]) => segments.reduce((n, r) => n + r.endMs - r.startMs, 0);
+export const segmentDuration = (segment: TimelineSegment) => (segment.endMs - segment.startMs) / (segment.speed ?? 1);
+export const duration = (segments: TimelineSegment[]) => segments.reduce((n, r) => n + segmentDuration(r), 0);
 
-export function sourceTime(segments: Range[], timelineMs: number): number {
+export function sourceTime(segments: TimelineSegment[], timelineMs: number): number {
   let remaining = Math.max(0, timelineMs);
   for (const range of segments) {
-    const length = range.endMs - range.startMs;
-    if (remaining < length) return range.startMs + remaining;
+    const length = segmentDuration(range);
+    if (remaining < length) return range.startMs + remaining * (range.speed ?? 1);
     remaining -= length;
   }
   return segments.at(-1)?.endMs ?? 0;
 }
 
-export function timelineTime(segments: Range[], sourceMs: number): number | null {
+export function timelineTime(segments: TimelineSegment[], sourceMs: number): number | null {
   let elapsed = 0;
   for (const range of segments) {
-    if (sourceMs >= range.startMs && sourceMs < range.endMs) return elapsed + sourceMs - range.startMs;
-    elapsed += range.endMs - range.startMs;
+    if (sourceMs >= range.startMs && sourceMs < range.endMs) return elapsed + (sourceMs - range.startMs) / (range.speed ?? 1);
+    elapsed += segmentDuration(range);
   }
   return null;
 }
 
-export function sourceRanges(segments: Range[], startMs: number, endMs: number): Range[] {
-  const result: Range[] = [];
+export function sliceSegments(segments: TimelineSegment[], startMs: number, endMs: number): TimelineSegment[] {
+  const result: TimelineSegment[] = [];
   let elapsed = 0;
   for (const range of segments) {
-    const length = range.endMs - range.startMs;
+    const length = segmentDuration(range), speed = range.speed ?? 1;
     const a = Math.max(startMs, elapsed), b = Math.min(endMs, elapsed + length);
-    if (b > a) result.push({ startMs: range.startMs + a - elapsed, endMs: range.startMs + b - elapsed });
+    if (b > a) result.push({ ...range,
+      startMs: a === elapsed ? range.startMs : Math.min(range.endMs, range.startMs + (a - elapsed) * speed),
+      endMs: b === elapsed + length ? range.endMs : Math.min(range.endMs, range.startMs + (b - elapsed) * speed),
+    });
     elapsed += length;
   }
   return result;
 }
 
-export function subtractRanges(segments: Range[], cuts: Range[]): Range[] {
+export function sourceRanges(segments: TimelineSegment[], startMs: number, endMs: number): Range[] {
+  return sliceSegments(segments, startMs, endMs).map(({ startMs, endMs }) => ({ startMs, endMs }));
+}
+
+export function outputRanges(segments: TimelineSegment[], range: Range): Range[] {
+  let elapsed = 0;
+  const result: Range[] = [];
+  for (const segment of segments) {
+    const startMs = Math.max(segment.startMs, range.startMs), endMs = Math.min(segment.endMs, range.endMs), speed = segment.speed ?? 1;
+    if (endMs > startMs) result.push({ startMs: elapsed + (startMs - segment.startMs) / speed, endMs: elapsed + (endMs - segment.startMs) / speed });
+    elapsed += segmentDuration(segment);
+  }
+  return result;
+}
+
+export function subtractRanges<T extends Range>(segments: T[], cuts: Range[]): T[] {
   return cuts.reduce((ranges, cut) => ranges.flatMap(range => {
     if (cut.endMs <= range.startMs || cut.startMs >= range.endMs) return [range];
-    const kept: Range[] = [];
-    if (cut.startMs > range.startMs) kept.push({ startMs: range.startMs, endMs: cut.startMs });
-    if (cut.endMs < range.endMs) kept.push({ startMs: cut.endMs, endMs: range.endMs });
+    const kept: T[] = [];
+    if (cut.startMs > range.startMs) kept.push({ ...range, endMs: cut.startMs });
+    if (cut.endMs < range.endMs) kept.push({ ...range, startMs: cut.endMs });
     return kept;
   }), segments);
+}
+
+export function outputSize(project: Project, quality: '720' | '1080' | '4k' = '1080'): { width: number; height: number } {
+  const multiplier = quality === '4k' ? 2 : quality === '720' ? 2 / 3 : 1;
+  const sizes = { '16:9': [1920, 1080], '9:16': [1080, 1920], '1:1': [1080, 1080], '4:5': [1080, 1350] } as const;
+  const aspect = project.edits.canvas?.aspectRatio ?? 'source';
+  if (aspect !== 'source') return { width: Math.round(sizes[aspect][0] * multiplier / 2) * 2, height: Math.round(sizes[aspect][1] * multiplier / 2) * 2 };
+  const width = project.source?.width ?? 1920, height = project.source?.height ?? 1080;
+  const scale = 1920 * multiplier / Math.max(width, height);
+  return { width: Math.max(16, Math.round(width * scale / 2) * 2), height: Math.max(16, Math.round(height * scale / 2) * 2) };
 }
 
 export const formatTime = (ms: number) => {

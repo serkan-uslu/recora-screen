@@ -8,6 +8,8 @@ import { fileURLToPath } from 'node:url';
 
 assert.equal(process.platform, 'darwin', 'Signing desktop runtimes requires macOS.');
 const root = fileURLToPath(new URL('../', import.meta.url));
+try { process.loadEnvFile(path.join(root, '.env.local')); }
+catch (error) { if (error.code !== 'ENOENT') throw error; }
 const identity = process.env.APPLE_SIGNING_IDENTITY?.trim() || '-';
 const entitlements = path.join(root, 'src-tauri/Entitlements.plist');
 await access(entitlements, constants.R_OK);

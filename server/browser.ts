@@ -8,7 +8,7 @@ import { AppClient } from './rpc.js';
 import { errorOf } from './validation.js';
 
 const isolated = path.join(os.tmpdir(), `screen-recorder-browser-${process.getuid?.() ?? 'local'}`);
-const service = new ApplicationService({ dataDir: path.join(isolated, 'data'), projectsDir: path.join(isolated, 'projects') });
+const service = new ApplicationService({ dataDir: process.env.SCREENREC_DATA_DIR || path.join(isolated, 'data'), projectsDir: process.env.SCREENREC_PROJECTS_DIR || path.join(isolated, 'projects') });
 await service.initialize();
 const client = new AppClient();
 let desktop = await client.connect(false).then(() => true, () => false);

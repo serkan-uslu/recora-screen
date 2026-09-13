@@ -74,24 +74,56 @@ try {
   assert.equal(duration(project.edits.segments), originalDuration);
   assert.equal(project.edits.overlays.length, 0);
   project = await call('history.redo', { projectId: project.id, expectedRevision: project.revision });
+  project = await call('timeline.apply', { projectId: project.id, expectedRevision: project.revision, operations: [
+    { type: 'speed', startMs: 0, endMs: 1000, speed: 2 },
+    { type: 'canvas.update', settings: { aspectRatio: '9:16', background: 'wallpaper', wallpaper: 'aurora', blur: 12, padding: 0.06, radius: 0.025, shadow: 0.35, frame: 'browser', title: 'MCP portrait acceptance' } },
+    { type: 'zoom.add', zoom: { startMs: 100, endMs: 700, scale: 1.8, x: 0.5, y: 0.5, motion: 'gentle', followCursor: true } },
+    { type: 'transcript.update', segments: [{ id: 'acceptance-cue', startMs: 0, endMs: 500, text: 'Before text edit' }] },
+  ] });
+  assert.equal(duration(project.edits.segments), originalDuration - 1000);
+  const cue = project.transcript[0]!;
+  const zoomId = project.edits.zooms[0]!.id;
+  project = await call('timeline.apply', { projectId: project.id, expectedRevision: project.revision, operations: [
+    { type: 'transcript.text', id: cue.id, text: 'Timing stays intact' },
+    { type: 'zoom.update', id: zoomId, zoom: { startMs: 200, endMs: 800, scale: 2.2, motion: 'snappy' } },
+  ] });
+  assert.equal(project.transcript[0]!.startMs, cue.startMs);
+  assert.equal(project.transcript[0]!.endMs, cue.endMs);
+  assert.equal(project.edits.zooms[0]!.id, zoomId);
+  assert.equal(project.edits.zooms[0]!.scale, 2.2);
+  await call('preview.load', { projectId: project.id });
+  await call('preview.draft', { projectId: project.id, expectedRevision: project.revision, operations: [
+    { type: 'canvas.update', settings: { background: 'color', color: '#d82040' } },
+  ] });
+  const afterDraft = await call<Project>('project.open', { projectId: project.id });
+  assert.equal(afterDraft.revision, project.revision);
+  assert.deepEqual(afterDraft.edits, project.edits, 'Transient preview must not change the saved edit state.');
   await call('preview.load', { projectId: project.id });
   await call('preview.seek', { timeMs: 500 });
   const frame = await client.callTool({ name: 'preview_frame', arguments: { projectId: project.id, timeMs: 500 } });
   assert(!frame.isError && Array.isArray(frame.content) && frame.content.some(c => c.type === 'image'));
+  const frameResult = frame.structuredContent as { result: { path: string } };
+  const png = await fs.readFile(frameResult.result.path);
+  assert(Math.abs(png.readUInt32BE(16) / png.readUInt32BE(20) - 9 / 16) < 0.005, 'Preview must retain the portrait canvas ratio.');
   const exportPath = path.join(artifacts, 'mcp-export.mp4');
-  const exportRequest = { projectId: project.id, path: exportPath, width: 1920, height: 1080, requestId: randomUUID() };
+  const exportRequest = { projectId: project.id, path: exportPath, requestId: randomUUID() };
   const job = await call<Job>('export.start', exportRequest);
   assert.equal((await call<Job>('export.start', exportRequest)).id, job.id);
   await client.close(); client = await connect();
   await finish(job.id);
   assert((await fs.stat(exportPath)).size > 1000);
+  const inspected = await call<Project>('project.import', { path: exportPath, name: 'MCP exported portrait check' });
+  created.push(inspected.id);
+  assert.equal(inspected.source!.width, 1080);
+  assert.equal(inspected.source!.height, 1920);
+  assert(Math.abs(inspected.source!.durationMs - duration(project.edits.segments)) < 80, 'Rendered duration must follow cuts and speed.');
   await call('project.delete', { projectId: project.id, expectedRevision: project.revision });
   created.splice(created.indexOf(project.id), 1);
   assert((await fs.stat(exportPath)).size > 1000, 'Deleting project must retain external MP4.');
   assert.equal((await call<Project>('project.open', { projectId: second.id })).revision, second.revision);
   const remaining = await call<ProjectSummary[]>('project.list');
   assert(baseline.every(p => remaining.some(q => q.id === p.id)), 'Existing projects must survive.');
-  console.log(`Desktop MCP checks passed: ${tools.tools.length} tools, schema/revisions, independent projects, idempotency, reconnect, native preview image, cut/undo/redo, 1080p export and Trash with output preservation.`);
+  console.log(`Desktop MCP checks passed: ${tools.tools.length} tools, schema/revisions, independent projects, idempotency, reconnect, speed/cuts, editable zoom, transcript text timing, portrait preview/export, undo/redo and Trash with output preservation.`);
   console.log(`Artifacts: ${artifacts}`);
 } finally {
   for (const projectId of created) {

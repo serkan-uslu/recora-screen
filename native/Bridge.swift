@@ -62,10 +62,9 @@ final class ExportJob {
         case "permissions.request":
             let kind = try requiredString(params, "kind")
             switch kind {
-            case "screen": _ = CGRequestScreenCaptureAccess()
+            case "screen", "input": try requestDesktopPermission(kind)
             case "camera": _ = await AVCaptureDevice.requestAccess(for: .video)
             case "microphone": _ = await AVCaptureDevice.requestAccess(for: .audio)
-            case "input": _ = CGRequestListenEventAccess()
             default: throw NativeFailure("Unknown permission kind.", code: "invalid_params")
             }
             return permissions()
@@ -83,7 +82,7 @@ final class ExportJob {
             if !sameProject { player?.pause() }
             let built = try await makeComposition(project, directory: directory)
             guard previewLoadID == loadID else { return previewStatus() }
-            let item = AVPlayerItem(asset: built.composition); item.videoComposition = built.video; item.audioMix = built.audio
+            let item = AVPlayerItem(asset: built.composition); item.videoComposition = built.video; item.audioMix = built.audio; item.audioTimePitchAlgorithm = .spectral
             if player == nil { player = AVPlayer() }
             player?.replaceCurrentItem(with: item); player?.actionAtItemEnd = .pause
             preview?.playerLayer.player = player; previewProject = project
@@ -106,7 +105,8 @@ final class ExportJob {
         case "preview.status": return previewStatus()
         case "preview.frame":
             let project = try decode(Project.self, params["project"] ?? [:]), directory = try requiredString(params, "projectDir"), path = try requiredString(params, "path")
-            let built = try await makeComposition(project, directory: directory, width: 960, height: 540)
+            let size = renderDimensions(project, longEdge: 960)
+            let built = try await makeComposition(project, directory: directory, width: Int(size.width), height: Int(size.height))
             let generator = AVAssetImageGenerator(asset: built.composition); generator.videoComposition = built.video
             generator.requestedTimeToleranceBefore = .zero; generator.requestedTimeToleranceAfter = .zero
             let frame = try await generator.image(at: mediaTime((params["timeMs"] as? NSNumber)?.doubleValue ?? 0)).image
@@ -149,6 +149,18 @@ final class ExportJob {
         throw NativeFailure("Timed out loading preview media.", code: "preview_timeout")
     }
     func previewStatus() -> [String: Any] { ["timeMs": milliseconds(player?.currentTime() ?? .zero), "playing": (player?.rate ?? 0) > 0] }
+    func requestDesktopPermission(_ kind: String, check: (() -> Bool)? = nil, request: (() -> Bool)? = nil, openSettings: (URL) -> Bool = { NSWorkspace.shared.open($0) }) throws {
+        guard kind == "screen" || kind == "input" else { throw NativeFailure("Unknown desktop permission kind.", code: "invalid_params") }
+        let screen = kind == "screen"
+        let isGranted = check ?? (screen ? CGPreflightScreenCaptureAccess : CGPreflightListenEventAccess)
+        let requestAccess = request ?? (screen ? CGRequestScreenCaptureAccess : CGRequestListenEventAccess)
+        guard !isGranted() else { return }
+        _ = requestAccess()
+        guard !isGranted() else { return }
+        let pane = screen ? "Privacy_ScreenCapture" : "Privacy_ListenEvent", name = screen ? "Screen & System Audio Recording" : "Input Monitoring"
+        let settings = URL(string: "x-apple.systempreferences:com.apple.preference.security?\(pane)")!
+        guard openSettings(settings) else { throw NativeFailure("Could not open \(name) settings. Open System Settings → Privacy & Security → \(name) and enable Screen Recorder.", code: "settings_unavailable") }
+    }
     func permissions() -> [String: Any] {
         func name(_ status: AVAuthorizationStatus) -> String { switch status { case .authorized: return "authorized"; case .denied: return "denied"; case .restricted: return "restricted"; default: return "notDetermined" } }
         return ["screen": CGPreflightScreenCaptureAccess(), "camera": name(AVCaptureDevice.authorizationStatus(for: .video)), "microphone": name(AVCaptureDevice.authorizationStatus(for: .audio)), "input": CGPreflightListenEventAccess()]
@@ -167,7 +179,9 @@ final class ExportJob {
         let project = try decode(Project.self, params["project"] ?? [:]), directory = try requiredString(params, "projectDir"), path = try requiredString(params, "path"), id = try requiredString(params, "jobId")
         guard jobs[id] == nil else { throw NativeFailure("Export job ID already exists.", code: "conflict") }
         guard !FileManager.default.fileExists(atPath: path) else { throw NativeFailure("Export destination already exists.", code: "file_exists") }
-        let w = params["width"] as? Int ?? 1920, h = params["height"] as? Int ?? 1080
+        let presets: [String: CGSize] = ["1:1": CGSize(width: 1080, height: 1080), "4:5": CGSize(width: 1080, height: 1350)]
+        let size = presets[project.edits.canvas?.aspectRatio ?? "source"] ?? renderDimensions(project, longEdge: 1920)
+        let w = params["width"] as? Int ?? Int(size.width), h = params["height"] as? Int ?? Int(size.height)
         let destination = URL(fileURLWithPath: path), temporary = destination.deletingLastPathComponent().appendingPathComponent(".screenrec-\(UUID().uuidString).mp4")
         try FileManager.default.createDirectory(at: destination.deletingLastPathComponent(), withIntermediateDirectories: true)
         let job = ExportJob(path: path); jobs[id] = job
@@ -177,8 +191,8 @@ final class ExportJob {
                 let built = try await makeComposition(project, directory: directory, width: w, height: h)
                 try Task.checkCancellation()
                 guard job.status != "cancelled" else { return }
-                guard let session = AVAssetExportSession(asset: built.composition, presetName: w > 1920 ? AVAssetExportPreset3840x2160 : AVAssetExportPreset1920x1080) else { throw NativeFailure("Cannot create export session.") }
-                job.session = session; session.videoComposition = built.video; session.audioMix = built.audio; session.shouldOptimizeForNetworkUse = true
+                guard let session = AVAssetExportSession(asset: built.composition, presetName: AVAssetExportPresetHighestQuality) else { throw NativeFailure("Cannot create export session.") }
+                job.session = session; session.videoComposition = built.video; session.audioMix = built.audio; session.audioTimePitchAlgorithm = .spectral; session.shouldOptimizeForNetworkUse = true
                 try await session.export(to: temporary, as: .mp4)
                 guard job.status != "cancelled" else { try? FileManager.default.removeItem(at: temporary); return }
                 try FileManager.default.moveItem(at: temporary, to: destination); job.status = "completed"

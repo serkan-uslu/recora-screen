@@ -1,34 +1,39 @@
 # Graph Report - screen-recorder  (2026-09-13)
 
 ## Corpus Check
-- 48 files · ~44,391 words
+- 90 files · ~68,795 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 698 nodes · 1429 edges · 29 communities (22 shown, 4 thin omitted)
-- Extraction: 93% EXTRACTED · 7% INFERRED · 0% AMBIGUOUS · INFERRED: 104 edges (avg confidence: 0.85)
+- 861 nodes · 1788 edges · 63 communities (39 shown, 16 thin omitted)
+- Extraction: 93% EXTRACTED · 7% INFERRED · 0% AMBIGUOUS · INFERRED: 126 edges (avg confidence: 0.85)
 - Token cost: 0 input · 0 output
 
+## Graph Freshness
+- Built from commit: `99ba049e`
+- Run `git rev-parse HEAD` and compare to check if the graph is stale.
+- Run `graphify update .` after code changes (no API cost).
+
 ## Community Hubs (Navigation)
-- .main
+- Models.swift
 - App.tsx
 - makeComposition
 - CaptureEngine
-- edits.ts
-- service.ts
-- scripts
+- check-desktop-ai.ts
+- validation.ts
+- dependencies
 - bundle
 - Screen Recorder
-- rpc.ts
+- check-camera.ts
 - main.rs
 - compilerOptions
-- AppError
+- ProjectStore
 - devDependencies
 - ApplicationService
 - Jobs
 - permissions
 - verify-bundle.mjs
-- Bridge.swift
+- service.ts
 - prepare-runtime.mjs
 - prepare-whisper.mjs
 - desktop.mjs
@@ -36,75 +41,104 @@
 - check.sh script
 - native/README.md
 - screen-recorder
+- Bridge.swift
+- edits.ts
+- bundle-notices.mjs
+- scripts
+- package-dmg.mjs
+- sign-runtimes.mjs
+- License
+- License
+- License
+- License
+- License
+- License
+- License
+- License
+- License
+- License
+- License
+- package.json
+- mcp.ts
+- .command
+- App
+- NativeFailure
+- .main
+- Timeline
+- AppError
+- check-desktop.ts
+- decode
+- .init
+- Slider
 
 ## God Nodes (most connected - your core abstractions)
-1. `AppError` - 40 edges
-2. `CaptureEngine` - 36 edges
-3. `NativeFailure` - 29 edges
+1. `CaptureEngine` - 43 edges
+2. `AppError` - 41 edges
+3. `NativeFailure` - 32 edges
 4. `ApplicationService` - 26 edges
-5. `ProjectStore` - 22 edges
-6. `makeComposition()` - 21 edges
-7. `App()` - 21 edges
-8. `NativeApp` - 18 edges
-9. `ScreenrecCompositor` - 17 edges
-10. `scripts` - 17 edges
+5. `App()` - 25 edges
+6. `makeComposition()` - 22 edges
+7. `ProjectStore` - 22 edges
+8. `duration()` - 21 edges
+9. `ScreenrecCompositor` - 20 edges
+10. `applyEdits()` - 20 edges
 
 ## Surprising Connections (you probably didn't know these)
+- `subtitleText()` --calls--> `outputRanges()`  [EXTRACTED]
+  server/edits.ts → shared/timeline.ts
+- `Timeline()` --calls--> `segmentDuration()`  [EXTRACTED]
+  src/App.tsx → shared/timeline.ts
 - `App()` --calls--> `duration()`  [EXTRACTED]
   src/App.tsx → shared/timeline.ts
-- `ExportDialog()` --calls--> `duration()`  [EXTRACTED]
+- `ZoomProperties()` --calls--> `duration()`  [EXTRACTED]
   src/App.tsx → shared/timeline.ts
-- `TranscriptPanel()` --calls--> `timelineTime()`  [EXTRACTED]
+- `Timeline()` --calls--> `outputRanges()`  [EXTRACTED]
   src/App.tsx → shared/timeline.ts
-- `audioReader()` --calls--> `NativeFailure`  [INFERRED]
-  native/Audio.swift → native/Models.swift
-- `pcmData()` --calls--> `NativeFailure`  [INFERRED]
-  native/Audio.swift → native/Models.swift
 
 ## Import Cycles
 - None detected.
 
-## Communities (29 total, 4 thin omitted)
+## Communities (63 total, 16 thin omitted)
 
-### Community 0 - ".main"
-Cohesion: 0.06
-Nodes (74): AVAssetExportSession, AVAssetReader, AVAssetReaderTrackOutput, AVPlayer, AVPlayerItem, Codable, Foundation, analyzeAudio() (+66 more)
+### Community 0 - "Models.swift"
+Cohesion: 0.21
+Nodes (28): Codable, Audio, CameraSettings, CanvasSettings, Captions, CaptureSettings, Cursor, CursorEvent (+20 more)
 
 ### Community 1 - "App.tsx"
-Cohesion: 0.05
-Nodes (50): formatTime(), AppCapabilities, Asset, CameraSettings, CaptureSettings, CaptureSource, Device, EditOperation (+42 more)
+Cohesion: 0.06
+Nodes (30): Asset, AutoZoomSettings, CameraSettings, CanvasSettings, CaptureSettings, CaptureSource, Device, EditOperation (+22 more)
 
 ### Community 2 - "makeComposition"
-Cohesion: 0.06
-Nodes (43): AppKit, AVAsynchronousVideoCompositionRequest, AVFoundation, AVMutableAudioMix, AVMutableComposition, AVMutableVideoComposition, AVVideoCompositing, AVVideoCompositionInstructionProtocol (+35 more)
+Cohesion: 0.07
+Nodes (47): AppKit, AVAsynchronousVideoCompositionRequest, AVFoundation, AVMutableAudioMix, AVMutableComposition, AVMutableVideoComposition, AVVideoCompositing, AVVideoCompositionInstructionProtocol (+39 more)
 
 ### Community 3 - "CaptureEngine"
-Cohesion: 0.09
-Nodes (37): AVAssetWriter, AVAssetWriterInput, AVCaptureConnection, AVCaptureOutput, AVCaptureSession, AVCaptureVideoDataOutputSampleBufferDelegate, CaptureSettings, CGSize (+29 more)
-
-### Community 4 - "edits.ts"
 Cohesion: 0.08
-Nodes (31): created, env, video, ai, audio, directory, original, text (+23 more)
+Nodes (37): AVCaptureConnection, AVCaptureOutput, AVCaptureSession, AVCaptureVideoDataOutputSampleBufferDelegate, CaptureSettings, CFMachPort, CFRunLoopSource, CGWindowID (+29 more)
 
-### Community 5 - "service.ts"
-Cohesion: 0.06
-Nodes (41): eventSchema, AudioWindow, absolutePath, emptyRecording, model, NativeCall, none, projectId (+33 more)
+### Community 4 - "check-desktop-ai.ts"
+Cohesion: 0.07
+Nodes (25): cachedModel, client, dataDir, env, fixture, installedModel, probe, resources (+17 more)
 
-### Community 6 - "scripts"
-Cohesion: 0.05
-Nodes (42): lucide-react, @modelcontextprotocol/sdk, dependencies, lucide-react, @modelcontextprotocol/sdk, react, react-dom, @tauri-apps/api (+34 more)
+### Community 5 - "validation.ts"
+Cohesion: 0.10
+Nodes (20): audio, autoZoom, camera, canvas, captions, color, cursor, editState (+12 more)
+
+### Community 6 - "dependencies"
+Cohesion: 0.12
+Nodes (17): lucide-react, @modelcontextprotocol/sdk, dependencies, lucide-react, @modelcontextprotocol/sdk, react, react-dom, @tauri-apps/api (+9 more)
 
 ### Community 7 - "bundle"
 Cohesion: 0.05
-Nodes (36): app, icons/128x128@2x.png, icons/128x128.png, icons/32x32.png, icons/icon.icns, ../native/build/libscreenrec.dylib, app, security (+28 more)
+Nodes (37): app, icons/128x128@2x.png, icons/128x128.png, icons/32x32.png, icons/icon.icns, ../native/build/libscreenrec.dylib, app, security (+29 more)
 
 ### Community 8 - "Screen Recorder"
-Cohesion: 0.07
-Nodes (24): Claude Code, Claude Desktop, Codex, Command contract, Development, MCP setup, Local processing, MCP (+16 more)
+Cohesion: 0.06
+Nodes (30): Claude Code, Claude Desktop, Codex, Command contract, Development, MCP setup, Local processing, MCP (+22 more)
 
-### Community 9 - "rpc.ts"
-Cohesion: 0.12
-Nodes (18): client, isolated, server, service, pending, send(), service, callAppTool() (+10 more)
+### Community 9 - "check-camera.ts"
+Cohesion: 0.13
+Nodes (11): artifacts, client, finish(), native, pattern, client, isolated, server (+3 more)
 
 ### Community 10 - "main.rs"
 Cohesion: 0.12
@@ -112,19 +146,19 @@ Nodes (23): AppHandle, Arc, Box, c_char, Child, ChildStdin, Mutex, Reply (+15 mo
 
 ### Community 11 - "compilerOptions"
 Cohesion: 0.08
-Nodes (23): DOM, DOM.Iterable, ES2023, node, server, shared, src, vite/client (+15 more)
+Nodes (24): DOM, DOM.Iterable, ES2023, node, scripts/*.ts, server, shared, src (+16 more)
 
-### Community 12 - "AppError"
+### Community 12 - "ProjectStore"
 Cohesion: 0.21
-Nodes (4): ProjectStore, AppError, checkRevision(), Project
+Nodes (3): ProjectStore, checkRevision(), Project
 
 ### Community 13 - "devDependencies"
 Cohesion: 0.11
 Nodes (19): esbuild, devDependencies, esbuild, @tauri-apps/cli, tsx, @types/node, @types/react, @types/react-dom (+11 more)
 
 ### Community 14 - "ApplicationService"
-Cohesion: 0.23
-Nodes (4): cursorClicks(), ready, ApplicationService, setup()
+Cohesion: 0.26
+Nodes (3): cursorClicks(), ApplicationService, setup()
 
 ### Community 15 - "Jobs"
 Cohesion: 0.19
@@ -138,9 +172,9 @@ Nodes (11): core:default, dialog:allow-open, dialog:allow-save, main, opener:all
 Cohesion: 0.35
 Nodes (10): binariesIn(), walk(), dependencies(), inside(), portableReference(), run(), runpaths(), systemPath() (+2 more)
 
-### Community 18 - "Bridge.swift"
-Cohesion: 0.22
-Nodes (8): CChar, screenrec_attach_window(), screenrec_command(), NativeCallback, ScreenCaptureKit, Security, UnsafeMutableRawPointer, UnsafePointer
+### Community 18 - "service.ts"
+Cohesion: 0.10
+Nodes (24): eventSchema, subtitleText(), absolutePath, emptyRecording, model, NativeCall, none, projectId (+16 more)
 
 ### Community 19 - "prepare-runtime.mjs"
 Cohesion: 0.29
@@ -154,25 +188,93 @@ Nodes (4): buildDir, checkout, current, output
 Cohesion: 0.50
 Nodes (3): args, child, env
 
+### Community 29 - "Bridge.swift"
+Cohesion: 0.12
+Nodes (13): CChar, PreviewView, screenrec_attach_window(), screenrec_command(), NSCoder, NSRect, NativeCallback, NSView (+5 more)
+
+### Community 30 - "edits.ts"
+Cohesion: 0.21
+Nodes (24): assistant(), applyEdits(), AudioWindow, checkedRange(), coalesceSegments(), found(), mergeRanges(), silenceCuts() (+16 more)
+
+### Community 31 - "bundle-notices.mjs"
+Cohesion: 0.28
+Nodes (10): json(), licenseFiles(), main(), missing, npmNotices(), root, rustNotices(), section() (+2 more)
+
+### Community 32 - "scripts"
+Cohesion: 0.12
+Nodes (17): scripts, build, desktop:build, desktop:check, dev, dev:server, dev:web, mcp (+9 more)
+
+### Community 33 - "package-dmg.mjs"
+Cohesion: 0.25
+Nodes (7): app, bundleRoot, output, outputDirectory, pending, root, { version }
+
+### Community 51 - "package.json"
+Cohesion: 0.22
+Nodes (8): description, engines, node, license, name, private, type, version
+
+### Community 52 - "mcp.ts"
+Cohesion: 0.22
+Nodes (8): callAppTool(), createMcpServer(), descriptions, toolMethods, isReadOnly(), methodSchemas, ready(), object()
+
+### Community 53 - ".command"
+Cohesion: 0.18
+Nodes (15): AVAssetExportSession, AVPlayer, AVPlayerItem, ExportJob, .result, NativeApp, Any, Bool (+7 more)
+
+### Community 54 - "App"
+Cohesion: 0.15
+Nodes (18): command(), messageOf(), pickPath(), App(), backToLibrary(), cancelDraftPreview(), history(), importProject() (+10 more)
+
+### Community 55 - "NativeFailure"
+Cohesion: 0.14
+Nodes (20): AVAssetReader, AVAssetReaderTrackOutput, Error, Foundation, LocalizedError, analyzeAudio(), audioReader(), pcmData() (+12 more)
+
+### Community 56 - ".main"
+Cohesion: 0.21
+Nodes (13): CGImage, NativeCheck, Bool, CGRect, Data, Double, Int, Project (+5 more)
+
+### Community 57 - "Timeline"
+Cohesion: 0.23
+Nodes (19): apply(), draftPreview(), importImage(), CameraPanel(), CanvasPanel(), number(), OverlaysPanel(), RangeSummary() (+11 more)
+
+### Community 58 - "AppError"
+Cohesion: 0.35
+Nodes (8): pending, ready, send(), service, readLines(), serveSocket(), AppError, errorOf()
+
+### Community 59 - "check-desktop.ts"
+Cohesion: 0.18
+Nodes (5): created, env, resources, video, ProjectSummary
+
+### Community 60 - "decode"
+Cohesion: 0.40
+Nodes (6): decode(), jsonObject(), readCursor(), Any, Data, T
+
+### Community 61 - ".init"
+Cohesion: 0.40
+Nodes (4): AVAssetWriter, AVAssetWriterInput, CGSize, URL
+
+### Community 62 - "Slider"
+Cohesion: 0.83
+Nodes (4): Slider(), cancelGesture(), releasePointer(), resetValue()
+
 ## Knowledge Gaps
-- **196 isolated node(s):** `Security`, `CoreMedia`, `CoreText`, `.sourcePixelBufferAttributes`, `.requiredPixelBufferAttributesForRenderContext` (+191 more)
-  These have ≤1 connection - possible missing edges or undocumented components. (Counts symbols only; 297 node(s) total have ≤1 connection when file, concept and rationale nodes are included.)
-- **4 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
+- **252 isolated node(s):** `Security`, `CoreMedia`, `CoreText`, `.sourcePixelBufferAttributes`, `.requiredPixelBufferAttributesForRenderContext` (+247 more)
+  These have ≤1 connection - possible missing edges or undocumented components. (Counts symbols only; 378 node(s) total have ≤1 connection when file, concept and rationale nodes are included.)
+- **16 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `CaptureEngine` connect `CaptureEngine` to `.main`, `makeComposition`?**
+- **Why does `CaptureEngine` connect `CaptureEngine` to `Models.swift`, `makeComposition`?**
   _High betweenness centrality (0.018) - this node is a cross-community bridge._
-- **Why does `duration()` connect `edits.ts` to `App.tsx`, `service.ts`, `ApplicationService`?**
-  _High betweenness centrality (0.016) - this node is a cross-community bridge._
-- **Why does `NativeFailure` connect `CaptureEngine` to `.main`, `Bridge.swift`, `makeComposition`?**
-  _High betweenness centrality (0.016) - this node is a cross-community bridge._
-- **Are the 21 inferred relationships involving `NativeFailure` (e.g. with `analyzeAudio()` and `audioReader()`) actually correct?**
-  _`NativeFailure` has 21 INFERRED edges - model-reasoned connections that need verification._
+- **Why does `duration()` connect `edits.ts` to `App.tsx`, `check-desktop-ai.ts`, `ApplicationService`, `service.ts`, `App`, `Timeline`, `check-desktop.ts`?**
+  _High betweenness centrality (0.015) - this node is a cross-community bridge._
+- **Why does `NativeFailure` connect `NativeFailure` to `Models.swift`, `makeComposition`, `CaptureEngine`, `Bridge.swift`, `.command`, `.main`, `.init`?**
+  _High betweenness centrality (0.014) - this node is a cross-community bridge._
+- **Are the 24 inferred relationships involving `NativeFailure` (e.g. with `analyzeAudio()` and `audioReader()`) actually correct?**
+  _`NativeFailure` has 24 INFERRED edges - model-reasoned connections that need verification._
 - **What connects `Security`, `CoreMedia`, `CoreText` to the rest of the system?**
-  _196 weakly-connected nodes found - possible documentation gaps or missing edges._
-- **Should `.main` be split into smaller, more focused modules?**
-  _Cohesion score 0.05605124685426676 - nodes in this community are weakly interconnected._
+  _252 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `App.tsx` be split into smaller, more focused modules?**
-  _Cohesion score 0.05093167701863354 - nodes in this community are weakly interconnected._
+  _Cohesion score 0.05758582502768549 - nodes in this community are weakly interconnected._
+- **Should `makeComposition` be split into smaller, more focused modules?**
+  _Cohesion score 0.0742447516641065 - nodes in this community are weakly interconnected._

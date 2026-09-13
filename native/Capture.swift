@@ -71,11 +71,14 @@ final class CaptureEngine: NSObject, SCStreamOutput, SCStreamDelegate, AVCapture
     private var writers: [String: TrackWriter] = [:]
     private var origin = CMTime.zero; private var originResolved = false; private var pausedAt: CMTime?; private var pauseOffset = CMTime.zero
     private var settings: CaptureSettings?; private var projectID: String?; private var directory = ""
+    private var sourceTitle = ""
     private var active = false; private var errorMessage: String?; private var stopping = false
     private var micLevel = 0.0, systemLevel = 0.0
     private var cursorBatch: [CursorEvent] = []; private var cursorFile: FileHandle?; private var cursorCount = 0
     private var cursorTimer: Timer?; private var captureRect = CGRect.zero; private var capturedWindowID: CGWindowID?
     private var cursorContentRect = CGRect(x: 0, y: 0, width: 1, height: 1)
+    private var typingTap: CFMachPort?; private var typingRunLoopSource: CFRunLoopSource?; private var lastTypingMs = -1000.0
+    private var lastInteractionPosition: CGPoint?; private var lastPointerPosition: CGPoint?; private var pointerPressed = false
     private var lastBoundsCheck = Date.distantPast; private var lastRecoveryMs = 0.0
     private var cameraRanges: [MediaRange] = []; private var cameraRangeStart: Double?
     private var startupInProgress = false; private var finalizing = false
@@ -100,13 +103,14 @@ final class CaptureEngine: NSObject, SCStreamOutput, SCStreamDelegate, AVCapture
         let content = try await SCShareableContent.excludingDesktopWindows(false, onScreenWindowsOnly: true)
         let numericID = UInt32(settings.sourceId.split(separator: ":").last ?? "")
         let filter: SCContentFilter
-        var rectangle: CGRect
+        var rectangle: CGRect, title: String
         if settings.sourceKind == "display", let display = content.displays.first(where: { $0.displayID == numericID }) {
             let ownApps = content.applications.filter { $0.processID == getpid() }
             filter = SCContentFilter(display: display, excludingApplications: ownApps, exceptingWindows: [])
             rectangle = CGDisplayBounds(display.displayID)
+            title = "Display \(display.displayID)"
         } else if settings.sourceKind == "window", let window = content.windows.first(where: { $0.windowID == numericID }), window.owningApplication?.processID != getpid() {
-            filter = SCContentFilter(desktopIndependentWindow: window); rectangle = window.frame
+            filter = SCContentFilter(desktopIndependentWindow: window); rectangle = window.frame; title = window.title ?? ""
         } else { throw NativeFailure("The selected screen/window no longer exists.", code: "source_unavailable") }
         if let region = settings.region {
             guard [region.x, region.y, region.width, region.height].allSatisfy({ $0.isFinite }), region.width > 0, region.height > 0, region.x >= 0, region.y >= 0, region.x + region.width <= rectangle.width, region.y + region.height <= rectangle.height else { throw NativeFailure("Capture region is outside the selected source.", code: "invalid_params") }
@@ -170,6 +174,7 @@ final class CaptureEngine: NSObject, SCStreamOutput, SCStreamDelegate, AVCapture
         queue.sync {
             self.cursorFile = newCursorFile; self.cursorBatch = []; self.cursorCount = 0; self.lastRecoveryMs = 0
             self.cameraRanges = []; self.cameraRangeStart = nil; self.cursorContentRect = CGRect(x: 0, y: 0, width: 1, height: 1)
+            self.sourceTitle = title; self.lastTypingMs = -1000; self.lastInteractionPosition = nil; self.lastPointerPosition = nil; self.pointerPressed = false
             self.capturedWindowID = settings.sourceKind == "window" ? numericID : nil
             self.writers = newWriters; self.stream = newStream; self.systemStream = newSystemStream; self.cameraSession = newCamera; self.settings = settings
             self.directory = directory; self.projectID = projectID; self.origin = CMClockGetTime(CMClockGetHostTimeClock()); self.originResolved = false
@@ -187,6 +192,7 @@ final class CaptureEngine: NSObject, SCStreamOutput, SCStreamDelegate, AVCapture
         startupSucceeded = true
         if let newCamera { showBubble(session: newCamera, shape: settings.cameraShape) }
         cursorTimer = Timer.scheduledTimer(withTimeInterval: 1 / 30, repeats: true) { [weak self] _ in self?.sampleCursor() }
+        startTypingMonitoring()
         return status()
     }
     @MainActor private func showBubble(session: AVCaptureSession, shape: String) {
@@ -212,7 +218,13 @@ final class CaptureEngine: NSObject, SCStreamOutput, SCStreamDelegate, AVCapture
         queue.async {
             guard self.active, self.pausedAt == nil, self.originResolved else { return }
             let elapsed = self.elapsedMs()
-            if let p = cursorPosition(point, captureRect: self.captureRect, normalizedContentRect: self.cursorContentRect) { self.cursorBatch.append(CursorEvent(tMs: elapsed, x: p.x, y: p.y, click: clicking)) }
+            if let p = cursorPosition(point, captureRect: self.captureRect, normalizedContentRect: self.cursorContentRect) {
+                let moved = self.lastPointerPosition.map { hypot(p.x - $0.x, p.y - $0.y) > 0.002 } ?? false
+                let kind: String? = clicking && !self.pointerPressed ? "click" : clicking && moved ? "drag" : nil
+                if clicking { self.lastInteractionPosition = p }
+                self.lastPointerPosition = p; self.cursorBatch.append(CursorEvent(tMs: elapsed, x: p.x, y: p.y, click: clicking, kind: kind))
+            }
+            self.pointerPressed = clicking
             do {
                 if self.cursorBatch.count >= 60 { try self.flushCursor() }
                 if elapsed - self.lastRecoveryMs >= 5000 { try self.persistRecovery(duration: elapsed); self.lastRecoveryMs = elapsed }
@@ -225,11 +237,48 @@ final class CaptureEngine: NSObject, SCStreamOutput, SCStreamDelegate, AVCapture
         for event in cursorBatch { if cursorCount > 0 { data.append(44) }; data.append(try JSONEncoder().encode(event)); cursorCount += 1 }
         try cursorFile.write(contentsOf: data); cursorBatch.removeAll(keepingCapacity: true)
     }
+    @MainActor private func startTypingMonitoring() {
+        stopTypingMonitoring()
+        guard CGPreflightListenEventAccess() else { return }
+        let mask = CGEventMask(1) << CGEventType.keyDown.rawValue
+        guard let tap = CGEvent.tapCreate(tap: .cgSessionEventTap, place: .tailAppendEventTap, options: .listenOnly, eventsOfInterest: mask, callback: { _, type, event, context in
+            if let context {
+                // The singleton outlives its tap. Its source runs on the main run loop;
+                // only the event type is used, never text, keycodes or other fields.
+                let engine = Unmanaged<CaptureEngine>.fromOpaque(context).takeUnretainedValue()
+                if type == .keyDown { engine.sampleTyping() }
+                else if type == .tapDisabledByTimeout, CGPreflightListenEventAccess(), let tap = engine.typingTap { CGEvent.tapEnable(tap: tap, enable: true) }
+                // A tap disabled by user input stays disabled until the next recording.
+            }
+            return Unmanaged.passUnretained(event)
+        }, userInfo: Unmanaged.passUnretained(self).toOpaque()) else { return }
+        guard let source = CFMachPortCreateRunLoopSource(kCFAllocatorDefault, tap, 0) else { CFMachPortInvalidate(tap); return }
+        typingTap = tap; typingRunLoopSource = source
+        CFRunLoopAddSource(CFRunLoopGetMain(), source, .commonModes)
+    }
+    @MainActor private func stopTypingMonitoring() {
+        if let tap = typingTap { CGEvent.tapEnable(tap: tap, enable: false) }
+        if let source = typingRunLoopSource { CFRunLoopRemoveSource(CFRunLoopGetMain(), source, .commonModes); CFRunLoopSourceInvalidate(source) }
+        if let tap = typingTap { CFMachPortInvalidate(tap) }
+        typingRunLoopSource = nil; typingTap = nil
+    }
+    private func sampleTyping() {
+        let mouse = NSEvent.mouseLocation, point = CGPoint(x: mouse.x, y: CGDisplayBounds(CGMainDisplayID()).height - mouse.y)
+        queue.async {
+            guard self.active, self.pausedAt == nil, self.originResolved else { return }
+            let elapsed = self.elapsedMs(); guard elapsed - self.lastTypingMs >= 600 else { return }
+            guard let current = cursorPosition(point, captureRect: self.captureRect, normalizedContentRect: self.cursorContentRect) else { return }
+            let focus = self.lastInteractionPosition ?? current
+            self.cursorBatch.append(CursorEvent(tMs: elapsed, x: focus.x, y: focus.y, click: nil, kind: "typing")); self.lastTypingMs = elapsed
+            do { if self.cursorBatch.count >= 60 { try self.flushCursor() } }
+            catch { self.errorMessage = error.localizedDescription; Task { @MainActor in if self.status()["active"] as? Bool == true { _ = try? await self.stop() } } }
+        }
+    }
     private func currentSource(duration: Double) -> RecordingSource? {
         guard let settings else { return nil }
         var ranges = cameraRanges.map { MediaRange(startMs: max(0, $0.startMs), endMs: min(duration, $0.endMs)) }.filter { $0.endMs > $0.startMs }
         if let start = cameraRangeStart, duration > start { ranges.append(MediaRange(startMs: start, endMs: duration)) }
-        return RecordingSource(durationMs: duration, width: settings.width, height: settings.height, fps: 30, screen: "media/screen.mov", camera: (writers["camera"]?.samples ?? 0) > 0 ? "media/camera.mov" : nil, microphone: (writers["microphone"]?.samples ?? 0) > 0 ? "media/microphone.mov" : nil, systemAudio: (writers["systemAudio"]?.samples ?? 0) > 0 ? "media/system.mov" : nil, cursor: "media/cursor.json", cameraActiveRanges: ranges)
+        return RecordingSource(durationMs: duration, width: settings.width, height: settings.height, fps: 30, screen: "media/screen.mov", camera: (writers["camera"]?.samples ?? 0) > 0 ? "media/camera.mov" : nil, microphone: (writers["microphone"]?.samples ?? 0) > 0 ? "media/microphone.mov" : nil, systemAudio: (writers["systemAudio"]?.samples ?? 0) > 0 ? "media/system.mov" : nil, cursor: "media/cursor.json", cameraActiveRanges: ranges, title: sourceTitle)
     }
     private func persistRecovery(duration: Double) throws {
         try flushCursor(); try cursorFile?.synchronize()
@@ -258,6 +307,7 @@ final class CaptureEngine: NSObject, SCStreamOutput, SCStreamDelegate, AVCapture
         guard !finalizing, status()["active"] as? Bool == true else { throw NativeFailure("No active recording or finalization is already underway.") }
         finalizing = true; defer { finalizing = false }
         cursorTimer?.invalidate(); cursorTimer = nil; bubble?.close(); bubble = nil; bubbleView = nil
+        stopTypingMonitoring()
         let end = queue.sync { () -> CMTime in stopping = true; finalDuration = elapsedMs(); return mediaTime(finalDuration) }
         if let stream { try? await stream.stopCapture() }
         if let systemStream { try? await systemStream.stopCapture() }

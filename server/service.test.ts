@@ -6,13 +6,14 @@ import os from 'node:os';
 import { setTimeout as delay } from 'node:timers/promises';
 import { Client } from '@modelcontextprotocol/sdk/client/index.js';
 import { InMemoryTransport } from '@modelcontextprotocol/sdk/inMemory.js';
-import { ApplicationService, type NativeCall } from './service.js';
+import { ApplicationService, methodSchemas, type NativeCall } from './service.js';
 import { ProjectStore } from './store.js';
 import { AppClient, serveSocket } from './rpc.js';
 import { createMcpServer } from './mcp.js';
 import { cursorClicks } from './cursor.js';
 import { applyEdits, silenceCuts, subtitleText } from './edits.js';
-import { sourceSchema } from './validation.js';
+import { sourceSchema, projectSchema } from './validation.js';
+import { duration, outputRanges } from '../shared/timeline.js';
 import type { Job, Project } from '../shared/types.js';
 
 async function setup(t: TestContext, native?: NativeCall) {
@@ -178,6 +179,205 @@ test('cursor stream handles missing closing bracket, held clicks and off-capture
   const {root}=await setup(t); const file=path.join(root,'cursor.json');
   await fs.writeFile(file,'[{"tMs":1,"x":-1,"y":0,"click":true},{"tMs":2,"x":0,"y":0,"click":false},{"tMs":3,"x":0.5,"y":0.5,"click":true},{"tMs":4,"x":0.5,"y":0.5,"click":true}');
   assert.deepEqual(await cursorClicks(file),[{tMs:3,x:0.5,y:0.5,click:true}]);
+  const held = [0, 1000, 3000, 6000].map(tMs => ({ tMs, x: 0.5, y: 0.5, click: true, kind: 'click' }));
+  await fs.writeFile(file, JSON.stringify(held));
+  assert.deepEqual(await cursorClicks(file), [held[0]]);
+  const unpaired = [0, 3000].map(tMs => ({ tMs, x: 0.5, y: 0.5, kind: 'click' }));
+  await fs.writeFile(file, JSON.stringify(unpaired));
+  assert.deepEqual(await cursorClicks(file), unpaired);
+});
+
+test('speed changes, cuts, splits and trims preserve source annotations and synchronized subtitle timing', async t => {
+  const { service } = await setup(t); let p = await ready(service);
+  p = await service.store.mutate(p.id, p.revision, q => {
+    q.transcript = [{ id: 'words', startMs: 2000, endMs: 4000, text: 'Keep this timing' }];
+    q.edits.camera.hiddenRanges = [{ startMs: 2000, endMs: 5000 }];
+    q.edits.zooms = [{ id: 'focus', startMs: 1500, endMs: 5500, x: 0.3, y: 0.4, scale: 2 }];
+    q.edits.overlays = [{ id: 'label', startMs: 2000, endMs: 4000, kind: 'text', text: 'Hello', x: 0.2, y: 0.2, width: 0.4, fontSize: 30, color: '#ffffff', animation: 'fade' }];
+  }, false);
+  const original = structuredClone(p);
+  p = await service.command('timeline.apply', { projectId: p.id, expectedRevision: p.revision, operations: [{ type: 'speed', startMs: 1000, endMs: 5000, speed: 2 }] });
+  assert.equal(duration(p.edits.segments), 8000);
+  assert.match(subtitleText(p, 'srt'), /00:00:01,500 --> 00:00:02,500/);
+  p = await service.command('timeline.apply', { projectId: p.id, expectedRevision: p.revision, operations: [{ type: 'cut', startMs: 1750, endMs: 2250 }] });
+  assert.deepEqual(p.edits.segments, [{ startMs: 0, endMs: 1000 }, { startMs: 1000, endMs: 2500, speed: 2 }, { startMs: 3500, endMs: 5000, speed: 2 }, { startMs: 5000, endMs: 10000 }]);
+  assert.equal(duration(p.edits.segments), 7500);
+  assert.deepEqual(p.edits.camera, original.edits.camera);
+  assert.deepEqual(p.edits.zooms, original.edits.zooms);
+  assert.deepEqual(p.edits.overlays, original.edits.overlays);
+  assert.deepEqual(p.transcript, original.transcript);
+  assert.deepEqual(outputRanges(p.edits.segments, p.transcript[0]!), [{ startMs: 1500, endMs: 1750 }, { startMs: 1750, endMs: 2000 }]);
+  p = await service.command('timeline.apply', { projectId: p.id, expectedRevision: p.revision, operations: [{ type: 'split', atMs: 1250 }, { type: 'trim', startMs: 1100, endMs: 2400 }] });
+  assert(p.edits.segments.every(segment => segment.speed === 2));
+  assert.equal(p.edits.segments[0]!.startMs, 1200);
+  assert.equal(p.edits.segments.at(-1)!.endMs, 4800);
+  assert.equal(duration(p.edits.segments), 1300);
+  assert.deepEqual((await service.store.get(p.id)).edits, p.edits);
+});
+
+test('zoom partial updates and transcript text corrections preserve source times after speed and cuts', async t => {
+  const { service } = await setup(t); let p = await ready(service);
+  p = await service.command('timeline.apply', { projectId: p.id, expectedRevision: p.revision, operations: [
+    { type: 'zoom.add', zoom: { startMs: 2000, endMs: 6000, x: 0.5, y: 0.5, scale: 2 } },
+    { type: 'transcript.update', segments: [{ id: 'words', startMs: 2000, endMs: 6000, text: 'Before' }] },
+    { type: 'speed', startMs: 0, endMs: 10000, speed: 2 },
+  ] });
+  const zoomId = p.edits.zooms[0]!.id;
+  p = await service.command('timeline.apply', { projectId: p.id, expectedRevision: p.revision, operations: [
+    { type: 'zoom.update', id: zoomId, zoom: { motion: 'snappy', followCursor: false, x: 0.2 } },
+    { type: 'transcript.text', id: 'words', text: 'Corrected' },
+  ] });
+  assert.equal(p.edits.zooms[0]!.startMs, 2000); assert.equal(p.edits.zooms[0]!.endMs, 6000);
+  assert.deepEqual(p.transcript, [{ id: 'words', startMs: 2000, endMs: 6000, text: 'Corrected' }]);
+  p = await service.command('timeline.apply', { projectId: p.id, expectedRevision: p.revision, operations: [{ type: 'zoom.update', id: zoomId, zoom: { startMs: 500 } }] });
+  assert.equal(p.edits.zooms[0]!.startMs, 1000); assert.equal(p.edits.zooms[0]!.endMs, 6000);
+  p = await service.command('timeline.apply', { projectId: p.id, expectedRevision: p.revision, operations: [{ type: 'cut', startMs: 0, endMs: 3500 }] });
+  await assert.rejects(service.command('timeline.apply', { projectId: p.id, expectedRevision: p.revision, operations: [{ type: 'zoom.update', id: zoomId, zoom: { startMs: 100 } }] }), { code: 'INVALID_RANGE' });
+  p = await service.command('timeline.apply', { projectId: p.id, expectedRevision: p.revision, operations: [{ type: 'zoom.update', id: zoomId, zoom: { startMs: 100, endMs: 500 } }] });
+  assert.equal(p.edits.zooms[0]!.startMs, 7200); assert.equal(p.edits.zooms[0]!.endMs, 8000);
+});
+
+test('clip extension, merging and source restoration preserve neighboring speeds and source annotations', async t => {
+  const { service } = await setup(t); let p = await ready(service);
+  p = await service.store.mutate(p.id, p.revision, q => {
+    q.edits.segments = [{ startMs: 1000, endMs: 3000, speed: 2 }, { startMs: 5000, endMs: 7000, speed: 0.5 }];
+    q.transcript = [{ id: 'words', startMs: 2000, endMs: 6000, text: 'Source annotation' }];
+  }, false);
+  const original = structuredClone(p);
+  p = await service.command('timeline.apply', { projectId: p.id, expectedRevision: p.revision, operations: [{ type: 'clip.trim', index: 0, sourceStartMs: 500, sourceEndMs: 4000 }] });
+  assert.deepEqual(p.edits.segments, [{ startMs: 500, endMs: 4000, speed: 2 }, original.edits.segments[1]]);
+  await assert.rejects(service.command('timeline.apply', { projectId: p.id, expectedRevision: p.revision, operations: [{ type: 'clip.trim', index: 0, sourceStartMs: 0, sourceEndMs: 6000 }] }), { code: 'INVALID_RANGE' });
+  p = await service.command('timeline.apply', { projectId: p.id, expectedRevision: p.revision, operations: [{ type: 'source.restore', startMs: 2000, endMs: 8000 }] });
+  assert.deepEqual(p.edits.segments, [{ startMs: 500, endMs: 4000, speed: 2 }, { startMs: 4000, endMs: 5000 }, { startMs: 5000, endMs: 7000, speed: 0.5 }, { startMs: 7000, endMs: 8000 }]);
+  assert.deepEqual(p.transcript, original.transcript);
+  await assert.rejects(service.command('timeline.apply', { projectId: p.id, expectedRevision: p.revision, operations: [{ type: 'clip.merge', index: 0 }] }), { code: 'INCOMPATIBLE_CLIPS' });
+  p = await service.command('timeline.apply', { projectId: p.id, expectedRevision: p.revision, operations: [{ type: 'split', atMs: 500 }, { type: 'clip.merge', index: 0 }] });
+  assert.deepEqual(p.edits.segments[0], { startMs: 500, endMs: 4000, speed: 2 });
+  const restored = structuredClone(p);
+  p = await service.command('timeline.apply', { projectId: p.id, expectedRevision: p.revision, operations: [{ type: 'source.restore', startMs: 2000, endMs: 8000 }] });
+  assert.deepEqual(p.edits.segments, restored.edits.segments);
+});
+
+test('silence analysis maps source RMS windows onto the speed-adjusted output timeline', async t => {
+  const { service } = await setup(t); const p = await ready(service);
+  p.edits.segments = [{ startMs: 0, endMs: 4000, speed: 2 }, { startMs: 6000, endMs: 10000, speed: 0.5 }];
+  const cuts = silenceCuts(p, [{ startMs: 1000, endMs: 8000, db: -80 }], [{ startMs: 2000, endMs: 3000, db: -10 }], -40, 700, 100);
+  assert.deepEqual(cuts, [{ startMs: 550, endMs: 950 }, { startMs: 1550, endMs: 5800 }]);
+  applyEdits(p, cuts.toReversed().map(range => ({ type: 'cut', ...range })));
+  assert.deepEqual(p.edits.segments, [{ startMs: 0, endMs: 1100, speed: 2 }, { startMs: 1900, endMs: 3100, speed: 2 }, { startMs: 7900, endMs: 10000, speed: 0.5 }]);
+});
+
+test('legacy projects retain full-frame defaults while canvas updates validate imported image assets', async t => {
+  const { service } = await setup(t); let p = await ready(service);
+  p = await service.store.mutate(p.id, p.revision, q => { delete q.edits.canvas; delete q.edits.autoZoom; }, false);
+  assert.equal(projectSchema.parse(p).edits.canvas, undefined);
+  p = await service.command('timeline.apply', { projectId: p.id, expectedRevision: p.revision, operations: [{ type: 'canvas.update', settings: { color: '#aabbcc' } }] });
+  assert.equal(p.edits.canvas!.aspectRatio, 'source'); assert.equal(p.edits.canvas!.padding, 0); assert.equal(p.edits.canvas!.background, 'hidden');
+  await assert.rejects(service.command('timeline.apply', { projectId: p.id, expectedRevision: p.revision, operations: [{ type: 'canvas.update', settings: { background: 'image', assetId: 'missing' } }] }), { code: 'INVALID_ASSET' });
+  assert.equal(projectSchema.safeParse({ ...p, edits: { ...p.edits, segments: [{ startMs: 0, endMs: 1000, speed: 9 }] } }).success, false);
+  assert.equal(methodSchemas['export.start']!.safeParse({ projectId: p.id, path: '/tmp/export.mp4', width: 1080 }).success, false);
+  assert.equal(methodSchemas['export.start']!.safeParse({ projectId: p.id, path: '/tmp/export.mp4', width: 2160, height: 3840 }).success, true);
+});
+
+test('cursor activity detects clicks, held drags and typing while bounding long-recording candidates', async t => {
+  const { root } = await setup(t); const file = path.join(root, 'activity.json');
+  await fs.writeFile(file, [
+    { tMs: 0, x: 0.1, y: 0.1, click: true },
+    { tMs: 500, x: 0.5, y: 0.5, click: true },
+    { tMs: 600, x: 0.5, y: 0.5, click: false },
+    { tMs: 2000, x: 0.8, y: 0.4, kind: 'typing' },
+    { tMs: 2100, x: 0.8, y: 0.4, kind: 'typing' },
+  ].map(value => JSON.stringify(value)).join('\n'));
+  const events = await cursorClicks(file);
+  assert.equal(events.length, 3); assert.equal(events[1]!.kind, 'drag'); assert.equal(events[2]!.kind, 'typing');
+  await fs.writeFile(file, Array.from({ length: 11000 }, (_, i) => JSON.stringify({ tMs: i * 700, x: 0.5, y: 0.5, kind: 'typing' })).join('\n'));
+  const long = await cursorClicks(file); assert(long.length <= 10000); assert(long.at(-1)!.tMs >= 10998 * 700);
+  await fs.writeFile(file, '[{"tMs":1');
+  await assert.rejects(cursorClicks(file), { code: 'INVALID_CURSOR' });
+});
+
+test('auto zoom uses click, drag and typing activity with merged settings on a sped-up timeline', async t => {
+  const { service } = await setup(t); const p = await ready(service);
+  p.edits.segments = [{ startMs: 0, endMs: 10000, speed: 2 }];
+  applyEdits(p, [{ type: 'autoZoom.update', settings: { leadMs: 200, holdMs: 400, gapMs: 100, motion: 'snappy' } }, { type: 'zooms.auto', scale: 2.5 }], [
+    { tMs: 1000, x: 0.2, y: 0.2, click: true }, { tMs: 3000, x: 0.5, y: 0.4, kind: 'drag' }, { tMs: 5000, x: 0.7, y: 0.6, kind: 'typing' },
+  ]);
+  assert.deepEqual(p.edits.zooms.map(({ startMs, endMs }) => ({ startMs, endMs })), [{ startMs: 600, endMs: 1800 }, { startMs: 2600, endMs: 3800 }, { startMs: 4600, endMs: 5800 }]);
+  assert(p.edits.zooms.every(zoom => zoom.scale === 2.5 && zoom.motion === 'snappy' && zoom.followCursor));
+  assert.equal(p.edits.autoZoom!.holdMs, 400);
+});
+
+test('finishing capture generates automatic zooms and preserves a recording when cursor metadata is damaged', async t => {
+  let source: Record<string, unknown> = {};
+  const { service } = await setup(t, async method => {
+    if (method === 'recording.start') return { active: true };
+    if (method === 'recording.stop') return { source };
+    if (method.startsWith('preview.')) return {};
+    throw Error(method);
+  });
+  for (const broken of [false, true]) {
+    const p = await service.command('project.create', { name: 'Auto zoom capture' });
+    await service.command('recording.start', { projectId: p.id, settings: { sourceId: 'display', sourceKind: 'display', systemAudio: false, cameraShape: 'circle', width: 1920, height: 1080, fps: 30 } });
+    await fs.writeFile(path.join(service.store.dir(p.id), 'media', 'screen.mov'), 'captured media');
+    await fs.writeFile(path.join(service.store.dir(p.id), 'media', 'cursor.json'), broken ? '[{"tMs":' : JSON.stringify([{ tMs: 1000, x: 0.4, y: 0.6, kind: 'typing' }]));
+    source = { durationMs: 5000, width: 1920, height: 1080, fps: 30, screen: 'media/screen.mov', cursor: 'media/cursor.json', title: 'Captured window' };
+    const finished = await service.command('recording.stop');
+    assert.equal(finished.status, 'ready'); assert.equal(finished.source.title, 'Captured window');
+    assert.equal(finished.edits.zooms.length, broken ? 0 : 1);
+    assert.equal(service.store.busy.has(p.id), false);
+    assert.equal(await fs.readFile(path.join(service.store.dir(p.id), 'media', 'screen.mov'), 'utf8'), 'captured media');
+  }
+});
+
+test('draft preview changes render state without saving or adding history; final edits replace the draft', async t => {
+  let preview: Project | undefined;
+  const { service } = await setup(t, async (method, params) => {
+    if (method === 'preview.load') { preview = structuredClone(params!.project as Project); return { playing: false }; }
+    throw Error(method);
+  });
+  const p = await ready(service), before = await service.store.read(p.id);
+  await assert.rejects(service.command('preview.draft', { projectId: p.id, expectedRevision: p.revision, operations: [{ type: 'camera.update', settings: { x: 0.1 } }] }), { code: 'PREVIEW_NOT_ACTIVE' });
+  await service.command('preview.load', { projectId: p.id });
+  let changes = 0; service.on('project-changed', () => changes++);
+  await service.command('preview.draft', { projectId: p.id, expectedRevision: p.revision, operations: [{ type: 'camera.update', settings: { x: 0.1 } }] });
+  assert.equal(preview!.edits.camera.x, 0.1); assert.equal(preview!.revision, p.revision);
+  assert.deepEqual(await service.store.read(p.id), before); assert.equal(changes, 0);
+  const [_, committed] = await Promise.all([
+    service.command('preview.draft', { projectId: p.id, expectedRevision: p.revision, operations: [{ type: 'camera.update', settings: { x: 0.2 } }] }),
+    service.command('timeline.apply', { projectId: p.id, expectedRevision: p.revision, operations: [{ type: 'camera.update', settings: { x: 0.3 } }] }),
+  ]);
+  assert.equal(preview!.edits.camera.x, 0.3); assert.equal(preview!.revision, committed.revision);
+  assert.equal(changes, 1);
+  await assert.rejects(service.command('preview.draft', { projectId: p.id, expectedRevision: p.revision, operations: [{ type: 'camera.update', settings: { x: 0.4 } }] }), { code: 'REVISION_CONFLICT' });
+  const undone = await service.command('history.undo', { projectId: p.id, expectedRevision: committed.revision });
+  assert.deepEqual(undone.edits, p.edits);
+});
+
+test('cancellation reload follows a queued draft behind an unrelated long mutation', async t => {
+  let release!: () => void, entered!: () => void;
+  const gate = new Promise<void>(resolve => { release = resolve; });
+  const started = new Promise<void>(resolve => { entered = resolve; });
+  const loads: number[] = [];
+  const { service } = await setup(t, async (method, params) => {
+    if (method === 'permissions.request') { entered(); await gate; return {}; }
+    if (method === 'preview.load') { loads.push((params!.project as Project).edits.camera.x); return {}; }
+    throw Error(method);
+  });
+  const p = await ready(service);
+  await service.command('preview.load', { projectId: p.id });
+  const mutation = service.command('permissions.request', { kind: 'input' });
+  await started;
+  let reads = 0;
+  const get = service.store.get.bind(service.store);
+  service.store.get = projectId => { reads++; return get(projectId); };
+  const draft = service.command('preview.draft', { projectId: p.id, expectedRevision: p.revision, operations: [{ type: 'camera.update', settings: { x: 0.1 } }] });
+  const cancelled = service.command('preview.load', { projectId: p.id });
+  const readsWhileBlocked = reads;
+  release();
+  await Promise.all([mutation, draft, cancelled]);
+  assert.equal(readsWhileBlocked, 0);
+  assert.deepEqual(loads, [p.edits.camera.x, 0.1, p.edits.camera.x]);
+  assert.deepEqual(await service.store.get(p.id), p);
 });
 
 for (const provider of ['openai','anthropic'] as const) test(`${provider} mocked tool cycle stages edits and commits exactly one undo group`,async t=>{
