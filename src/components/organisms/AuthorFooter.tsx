@@ -1,13 +1,21 @@
 import { author } from "../../../shared/brand";
 import { useAuthorLinks } from "../../controllers/useAuthorLinks";
+import { ArrowUpRight } from "lucide-react";
 import { Dialog } from "./Dialog";
 
 export function AuthorFooter({ onAbout }: { onAbout: () => void }) {
   const { error, open } = useAuthorLinks();
   return <div className="author-card">
     <small>BUILT BY</small>
-    <button className="author-name" onClick={onAbout}>{author.name}</button>
-    <div>{[["GitHub", author.repository], ["serkanuslu.com", author.website]].map(([label, href]) =>
+    <button className="author-profile" onClick={onAbout} aria-label={`About ${author.name}`}>
+      <span className="author-avatar" aria-hidden="true">SU</span>
+      <span className="author-identity">
+        <strong>{author.name}</strong>
+        <span>Creator</span>
+      </span>
+      <ArrowUpRight size={14} aria-hidden="true" />
+    </button>
+    <div className="author-links">{[["GitHub", author.repository], ["serkanuslu.com", author.website]].map(([label, href]) =>
       <a key={href} href={href} target="_blank" rel="noreferrer" onClick={e => open(e, href!)}>{label}</a>)}</div>
     {error && <p role="alert">{error}</p>}
   </div>;

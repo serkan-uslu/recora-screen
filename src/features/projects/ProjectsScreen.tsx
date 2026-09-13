@@ -4,6 +4,7 @@ import {
   FileVideo,
   Folder,
   FolderOpen,
+  CircleHelp,
   Keyboard,
   LoaderCircle,
   Monitor,
@@ -67,27 +68,28 @@ export function ProjectsScreen({
   return (
     <div className="library-layout">
       <aside className="library-sidebar">
-        <div className="workspace-label">YOUR WORKSPACE</div>
-        <button className="sidebar-link selected">
-          <Folder size={17} />
-          All projects<span>{projects.length}</span>
-        </button>
-        <div className="sidebar-bottom">
+        <nav className="sidebar-navigation" aria-label="Workspace">
+          <div className="workspace-label">YOUR WORKSPACE</div>
+          <button className="sidebar-link selected">
+            <Folder size={17} />
+            All projects<span>{projects.length}</span>
+          </button>
           <button className="sidebar-link" onClick={() => setModal("help")}>
+            <CircleHelp size={17} />
             How to use
           </button>
-          <div className="privacy-card">
-            <ShieldCheck size={22} />
-            <strong>Made to stay yours.</strong>
-            <p>Your recordings and projects live on your Mac.</p>
-            <span>Local projects. No limits.</span>
-          </div>
           <button className="sidebar-link" onClick={() => setModal("settings")}>
             <Keyboard size={17} />
             Settings & MCP
           </button>
-          <div className="app-version">
-            SCREEN RECORDER <span>OPEN SOURCE</span>
+        </nav>
+        <div className="sidebar-bottom">
+          <div className="privacy-card">
+            <ShieldCheck size={22} />
+            <div>
+              <strong>Local by design</strong>
+              <p>Your projects stay on your Mac.</p>
+            </div>
           </div>
           <AuthorFooter onAbout={() => setModal("about")} />
         </div>

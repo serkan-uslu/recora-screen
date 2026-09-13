@@ -792,9 +792,9 @@
     "semantic_hash": ""
   },
   "src/components/organisms/AuthorFooter.tsx": {
-    "mtime": 1789308842.8337376,
-    "seen": 1789311190.4420109,
-    "ast_hash": "e3382e5849c36fa01fae7d067f8f3d82",
+    "mtime": 1789311907.7721634,
+    "seen": 1789311934.281814,
+    "ast_hash": "2fbc10a4f57785035dc1130c9f4b1c40",
     "semantic_hash": ""
   },
   "src/components/organisms/Dialog.tsx": {
@@ -1140,9 +1140,9 @@
     "semantic_hash": ""
   },
   "docs/editor-validation.md": {
-    "mtime": 1789311188.674275,
-    "seen": 1789311190.442055,
-    "ast_hash": "923de749dda5fd8c839cc795f2f1a128",
+    "mtime": 1789311338.0551074,
+    "seen": 1789311339.7387,
+    "ast_hash": "abc475cb401ad20dd7c97a7d8a13e17c",
     "semantic_hash": ""
   }
 }

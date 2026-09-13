@@ -792,9 +792,9 @@
     "semantic_hash": ""
   },
   "src/components/organisms/AuthorFooter.tsx": {
-    "mtime": 1789308842.8337376,
-    "seen": 1789311190.4420109,
-    "ast_hash": "e3382e5849c36fa01fae7d067f8f3d82",
+    "mtime": 1789311907.7721634,
+    "seen": 1789311934.281814,
+    "ast_hash": "2fbc10a4f57785035dc1130c9f4b1c40",
     "semantic_hash": ""
   },
   "src/components/organisms/Dialog.tsx": {
@@ -948,9 +948,9 @@
     "semantic_hash": ""
   },
   "src/features/projects/ProjectsScreen.tsx": {
-    "mtime": 1789308842.8339624,
-    "seen": 1789311190.442028,
-    "ast_hash": "b46a3ae5fda0edc7c772f478bd570cff",
+    "mtime": 1789312404.7653892,
+    "seen": 1789312425.807217,
+    "ast_hash": "a580f86eb6456d899f7563e7cc3722fc",
     "semantic_hash": ""
   },
   "src/features/recording/CaptureDialog.tsx": {

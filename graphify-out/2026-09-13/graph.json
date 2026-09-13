@@ -5038,7 +5038,7 @@
       "file_type": "code",
       "norm_label": "aboutdialog()",
       "source_file": "src/components/organisms/AuthorFooter.tsx",
-      "source_location": "L15"
+      "source_location": "L23"
     },
     {
       "id": "src_components_organisms_authorfooter_authorfooter",
@@ -5050,7 +5050,7 @@
       "file_type": "code",
       "norm_label": "authorfooter()",
       "source_file": "src/components/organisms/AuthorFooter.tsx",
-      "source_location": "L5"
+      "source_location": "L6"
     },
     {
       "id": "src_controllers_useauthorlinks_useauthorlinks",
@@ -11231,7 +11231,7 @@
       "node_kind": "heading",
       "norm_label": "signed-app bounded capture reports",
       "source_file": "docs/editor-validation.md",
-      "source_location": "L50"
+      "source_location": "L54"
     },
     {
       "id": "server_camera_layout_test",
@@ -18318,7 +18318,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/organisms/AuthorFooter.tsx",
-      "source_location": "L16",
+      "source_location": "L24",
       "weight": 1.0
     },
     {
@@ -18330,7 +18330,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/organisms/AuthorFooter.tsx",
-      "source_location": "L6",
+      "source_location": "L7",
       "weight": 1.0
     },
     {
@@ -25170,7 +25170,7 @@
       "confidence_score": 1.0,
       "context": "import",
       "source_file": "src/components/organisms/AuthorFooter.tsx",
-      "source_location": "L3",
+      "source_location": "L4",
       "weight": 1.0
     },
     {
@@ -28774,7 +28774,7 @@
       "confidence_score": 1.0,
       "context": "import",
       "source_file": "src/components/organisms/AuthorFooter.tsx",
-      "source_location": "L3",
+      "source_location": "L4",
       "weight": 1.0
     },
     {
@@ -33560,7 +33560,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "docs/editor-validation.md",
-      "source_location": "L50",
+      "source_location": "L54",
       "weight": 1.0
     },
     {
@@ -37916,7 +37916,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/components/organisms/AuthorFooter.tsx",
-      "source_location": "L15",
+      "source_location": "L23",
       "weight": 1.0
     },
     {
@@ -37927,7 +37927,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/components/organisms/AuthorFooter.tsx",
-      "source_location": "L5",
+      "source_location": "L6",
       "weight": 1.0
     },
     {
@@ -44487,5 +44487,5 @@
     }
   ],
   "hyperedges": [],
-  "built_at_commit": "752e4bcfc754fb1b6ade654121fc5431a0587a99"
+  "built_at_commit": "68f34067bf389d1daa7167c6a3bb643c5f44f674"
 }
