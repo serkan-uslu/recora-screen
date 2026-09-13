@@ -73,3 +73,6 @@ The [ScreenCursor comparison](docs/screencursor-parity.md) records the public fe
 ## License
 
 MIT. Dependency and model license notices are listed in [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
+## Contributor navigation
+
+See [architecture and layer boundaries](docs/architecture.md), [theme tokens](docs/design-system.md), and [the static website and analytics setup](docs/website.md). The in-app **How to use** dialog covers the creator workflow. Contact [Serkan Uslu](https://serkanuslu.com) at [info@serkanuslu.com](mailto:info@serkanuslu.com).

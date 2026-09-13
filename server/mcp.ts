@@ -4,8 +4,8 @@ import { CallToolRequestSchema, ListToolsRequestSchema } from '@modelcontextprot
 import { z } from 'zod';
 import { promises as fs } from 'node:fs';
 import { pathToFileURL } from 'node:url';
-import { AppClient } from './rpc.js';
-import { errorOf } from './validation.js';
+import { AppClient } from './infrastructure/rpc.js';
+import { errorOf } from './contracts/validation.js';
 import { isReadOnly, methodSchemas } from './service.js';
 
 export const toolMethods = Object.fromEntries(Object.keys(methodSchemas).map(method => [method.replace(/[./]/g, '_'), method]));

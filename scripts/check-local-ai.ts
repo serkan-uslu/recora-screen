@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
 import { mkdir } from 'node:fs/promises';
 import path from 'node:path';
-import { LocalAI } from '../server/ai.js';
+import { LocalAI } from '../server/services/ai.js';
 
 const directory = path.resolve('.cache/local-ai-check');
 await mkdir(directory, { recursive: true });

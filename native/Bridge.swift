@@ -35,10 +35,32 @@ public func screenrec_attach_window(_ pointer: UnsafeMutableRawPointer?) {
 }
 
 final class PreviewView: NSView {
-    let playerLayer = AVPlayerLayer()
-    override init(frame: NSRect) { super.init(frame: frame); wantsLayer = true; layer?.backgroundColor = NSColor.black.cgColor; layer?.addSublayer(playerLayer); playerLayer.videoGravity = .resizeAspect }
+    let playerLayer = AVPlayerLayer(), selectionLayer = CAShapeLayer(), handlesLayer = CAShapeLayer()
+    var canvasSize = CGSize(width: 1920, height: 1080), selectedRect: CGRect?
+    override init(frame: NSRect) {
+        super.init(frame: frame); wantsLayer = true; layer?.backgroundColor = NSColor.black.cgColor
+        layer?.addSublayer(playerLayer); playerLayer.videoGravity = .resizeAspect
+        selectionLayer.fillColor = nil; selectionLayer.strokeColor = NSColor.controlAccentColor.cgColor; selectionLayer.lineWidth = 1.5
+        handlesLayer.fillColor = NSColor.controlAccentColor.cgColor; handlesLayer.strokeColor = NSColor.black.cgColor; handlesLayer.lineWidth = 1
+        layer?.addSublayer(selectionLayer); layer?.addSublayer(handlesLayer)
+    }
     required init?(coder: NSCoder) { fatalError("init(coder:) unavailable") }
-    override func layout() { super.layout(); CATransaction.begin(); CATransaction.setDisableActions(true); playerLayer.frame = bounds; CATransaction.commit() }
+    override func layout() {
+        super.layout(); CATransaction.begin(); CATransaction.setDisableActions(true)
+        playerLayer.frame = bounds; selectionLayer.frame = bounds; handlesLayer.frame = bounds
+        selectionLayer.contentsScale = window?.backingScaleFactor ?? 2; handlesLayer.contentsScale = selectionLayer.contentsScale
+        if let selectedRect, canvasSize.width > 0, canvasSize.height > 0 {
+            let scale = min(bounds.width / canvasSize.width, bounds.height / canvasSize.height)
+            let size = CGSize(width: canvasSize.width * scale, height: canvasSize.height * scale)
+            let rect = CGRect(x: (bounds.width - size.width) / 2 + selectedRect.minX * size.width, y: (bounds.height - size.height) / 2 + (1 - selectedRect.maxY) * size.height, width: selectedRect.width * size.width, height: selectedRect.height * size.height)
+            selectionLayer.path = CGPath(rect: rect, transform: nil)
+            let handles = CGMutablePath()
+            for x in [rect.minX, rect.maxX] { for y in [rect.minY, rect.maxY] { handles.addRect(CGRect(x: x - 4, y: y - 4, width: 8, height: 8)) } }
+            handlesLayer.path = handles
+        } else { selectionLayer.path = nil; handlesLayer.path = nil }
+        CATransaction.commit()
+    }
+    func select(_ rect: CGRect?, canvas: CGSize) { selectedRect = rect; canvasSize = canvas; needsLayout = true; layoutSubtreeIfNeeded() }
     override func hitTest(_ point: NSPoint) -> NSView? { nil }
 }
 final class ExportJob {
@@ -50,6 +72,14 @@ final class ExportJob {
 @MainActor final class NativeApp {
     static let shared = NativeApp()
     weak var window: NSWindow?; var preview: PreviewView?; var player: AVPlayer?; var previewProject: Project?; var previewLoadID = UUID()
+    var previewBuilt: BuiltComposition?, previewStructure: Data?, previewItemID = UUID()
+    var previewRevision = -1, previewSequence = -1
+    var previewTargetProjectID: String?
+    let previewMetrics = PreviewRenderMetrics()
+    var selectedItem: (kind: String, id: String)?
+    var playbackObserver: Any?
+    var pendingSeek: (time: CMTime, item: AVPlayerItem)?, seeking = false
+    var seekWaiters: [CheckedContinuation<Void, Never>] = []
     var jobs: [String: ExportJob] = [:]
     func attach(_ window: NSWindow) {
         if self.window !== window { preview?.removeFromSuperview(); preview = nil }
@@ -69,36 +99,86 @@ final class ExportJob {
             }
             return permissions()
         case "recording.start": return try await CaptureEngine.shared.start(projectID: requiredString(params, "projectId"), directory: requiredString(params, "projectDir"), settings: decode(CaptureSettings.self, params["settings"] ?? [:]))
-        case "recording.pause": return try CaptureEngine.shared.pause()
-        case "recording.resume": return try CaptureEngine.shared.resume()
+        case "recording.pause": return try await CaptureEngine.shared.pause()
+        case "recording.resume": return try await CaptureEngine.shared.resume()
         case "recording.stop": return try await CaptureEngine.shared.stop()
         case "recording.status": return CaptureEngine.shared.status()
         case "recording.camera": return await CaptureEngine.shared.camera(params)
-        case "preview.load":
-            let project = try decode(Project.self, params["project"] ?? [:]), directory = try requiredString(params, "projectDir")
-            let loadID = UUID(); previewLoadID = loadID
+        case "preview.load", "preview.update":
+            let startedAt = ProcessInfo.processInfo.systemUptime
+            let object = params["project"] as? [String: Any] ?? [:]
+            let project = try decode(Project.self, object), directory = try requiredString(params, "projectDir")
+            let revision = (params["revision"] as? Int) ?? (params["expectedRevision"] as? Int) ?? (object["revision"] as? Int) ?? 0
+            let sequence = params["sequence"] as? Int ?? 0
+            if method == "preview.update" {
+                guard previewProject?.id == project.id && previewTargetProjectID == project.id else { throw NativeFailure("Preview belongs to another project.", code: "preview_replaced") }
+                guard revision >= previewRevision else { return previewStatus() }
+                if revision == previewRevision, sequence < previewSequence { return previewStatus() }
+            }
+            let loadID = UUID(); previewLoadID = loadID; previewTargetProjectID = project.id
+            previewRevision = revision; previewSequence = sequence
+            let structure = try mediaStructure(project, directory: directory)
             let sameProject = previewProject?.id == project.id
+            if sameProject && structure == previewStructure, let previous = previewBuilt, let item = player?.currentItem {
+                let built = try await updateComposition(project, previous: previous)
+                guard previewLoadID == loadID, player?.currentItem === item else { return previewStatus() }
+                built.instruction.previewMetrics = previewMetrics
+                previewMetrics.begin(id: built.instruction.renderID, kind: "update", started: startedAt, inputAtMs: (params["inputAtMs"] as? NSNumber)?.doubleValue)
+                // Replacing the video composition also redraws a paused frame (Apple QA1966).
+                item.videoComposition = built.video; item.audioMix = built.audio
+                previewBuilt = built; previewProject = project; previewRevision = revision; previewSequence = sequence
+                updateSelection(); return previewStatus()
+            }
             let time = sameProject ? (player?.currentTime() ?? .zero) : .zero, playing = sameProject && (player?.rate ?? 0) > 0
-            if !sameProject { player?.pause() }
+            if !sameProject { player?.pause(); selectedItem = nil }
             let built = try await makeComposition(project, directory: directory)
             guard previewLoadID == loadID else { return previewStatus() }
+            built.instruction.previewMetrics = previewMetrics
+            previewMetrics.begin(id: built.instruction.renderID, kind: "load", started: startedAt, inputAtMs: (params["inputAtMs"] as? NSNumber)?.doubleValue)
             let item = AVPlayerItem(asset: built.composition); item.videoComposition = built.video; item.audioMix = built.audio; item.audioTimePitchAlgorithm = .spectral
-            if player == nil { player = AVPlayer() }
+            if player == nil {
+                player = AVPlayer()
+                playbackObserver = player?.addPeriodicTimeObserver(forInterval: CMTime(value: 1, timescale: 30), queue: .main) { [weak self] _ in
+                    MainActor.assumeIsolated { if self?.selectedItem != nil { self?.updateSelection() } }
+                }
+            }
+            pendingSeek = nil
             player?.replaceCurrentItem(with: item); player?.actionAtItemEnd = .pause
-            preview?.playerLayer.player = player; previewProject = project
+            preview?.playerLayer.player = player; previewProject = project; previewBuilt = built; previewStructure = structure; previewItemID = UUID()
+            previewRevision = revision; previewSequence = sequence
             try await ready(item)
             guard previewLoadID == loadID else { return previewStatus() }
             await seek(CMTimeMinimum(time, mediaTime(timelineDuration(project.edits.segments))))
-            if playing { player?.play() }; return previewStatus()
+            guard previewLoadID == loadID else { return previewStatus() }
+            if playing { player?.play() }; updateSelection(); return previewStatus()
+        case "preview.metrics": return previewMetrics.snapshot(reset: params["reset"] as? Bool ?? false)
+        case "preview.geometry":
+            let time = (params["timeMs"] as? NSNumber)?.doubleValue ?? milliseconds(player?.currentTime() ?? .zero)
+            guard time.isFinite, time >= 0 else { throw NativeFailure("Invalid geometry time.", code: "invalid_params") }
+            return previewGeometry(at: time)
+        case "preview.selection":
+            if let hex = params["color"] as? String {
+                guard hex.range(of: "^#[0-9a-fA-F]{6}([0-9a-fA-F]{2})?$", options: .regularExpression) != nil else { throw NativeFailure("Invalid selection color.", code: "invalid_params") }
+                preview?.selectionLayer.strokeColor = color(hex).cgColor; preview?.handlesLayer.fillColor = color(hex).cgColor
+            }
+            if let selection = params["selection"] as? [String: Any] {
+                guard let kind = selection["kind"] as? String, kind == "camera" || kind == "overlay" else { throw NativeFailure("Invalid preview selection.", code: "invalid_params") }
+                let id = selection["id"] as? String ?? (kind == "camera" ? "camera" : "")
+                guard kind == "camera" || previewProject?.edits.overlays.contains(where: { $0.id == id }) == true else { throw NativeFailure("Selected overlay is unavailable.", code: "not_found") }
+                selectedItem = (kind, id)
+            } else { selectedItem = nil }
+            updateSelection(); return previewGeometry(at: milliseconds(player?.currentTime() ?? .zero))
         case "preview.bounds":
             let x = (params["x"] as? NSNumber)?.doubleValue ?? 0, y = (params["y"] as? NSNumber)?.doubleValue ?? 0, width = (params["width"] as? NSNumber)?.doubleValue ?? 0, height = (params["height"] as? NSNumber)?.doubleValue ?? 0
             guard [x, y, width, height].allSatisfy({ $0.isFinite }) else { throw NativeFailure("Invalid preview bounds.") }
             if let content = window?.contentView, let preview { preview.isHidden = width <= 0 || height <= 0; preview.frame = CGRect(x: x, y: content.bounds.height - y - height, width: max(0, width), height: max(0, height)); preview.layoutSubtreeIfNeeded() }
             return ["visible": preview?.isHidden == false]
         case "preview.seek":
+            let startedAt = ProcessInfo.processInfo.systemUptime
             let t = (params["timeMs"] as? NSNumber)?.doubleValue ?? 0; guard t.isFinite, t >= 0 else { throw NativeFailure("Invalid playback time.") }
             guard let item = player?.currentItem else { throw NativeFailure("No preview loaded.", code: "empty_project") }
             try await ready(item)
+            if let instruction = previewBuilt?.instruction { previewMetrics.begin(id: instruction.renderID, kind: "seek", started: startedAt, targetMs: min(t, max(0, timelineDuration(instruction.project.edits.segments) - 1000 / 30)), inputAtMs: (params["inputAtMs"] as? NSNumber)?.doubleValue) }
             await seek(mediaTime(t)); return previewStatus()
         case "preview.play": player?.play(); return previewStatus()
         case "preview.pause": player?.pause(); return previewStatus()
@@ -134,10 +214,52 @@ final class ExportJob {
         }
     }
     func seek(_ time: CMTime) async {
-        guard let player else { return }
-        _ = await withCheckedContinuation { (continuation: CheckedContinuation<Bool, Never>) in
-            player.seek(to: time, toleranceBefore: .zero, toleranceAfter: .zero) { completed in continuation.resume(returning: completed) }
+        guard let item = player?.currentItem else { return }
+        let end = max(0, timelineDuration(previewProject?.edits.segments ?? []) - 1000 / 30)
+        pendingSeek = (mediaTime(max(0, min(end, milliseconds(time)))), item)
+        await withCheckedContinuation { continuation in
+            seekWaiters.append(continuation)
+            guard !seeking else { return }
+            seeking = true
+            Task { @MainActor in
+                // A seek in flight is allowed to finish; intermediate pending targets are discarded.
+                while let target = pendingSeek {
+                    pendingSeek = nil
+                    guard player?.currentItem === target.item else { continue }
+                    _ = await withCheckedContinuation { (done: CheckedContinuation<Bool, Never>) in
+                        target.item.seek(to: target.time, toleranceBefore: .zero, toleranceAfter: .zero) { done.resume(returning: $0) }
+                    }
+                    updateSelection()
+                }
+                seeking = false
+                let completed = seekWaiters; seekWaiters.removeAll(keepingCapacity: true)
+                for waiter in completed { waiter.resume() }
+            }
         }
+    }
+    func previewGeometry(at time: Double) -> [String: Any] {
+        guard let built = previewBuilt else { return ["width": 0, "height": 0, "items": []] }
+        let instruction = built.instruction, project = instruction.project, size = built.video.renderSize
+        let bounds = CGRect(origin: .zero, size: size), sourceMs = sourceTime(project.edits.segments, time)
+        var items: [[String: Any]] = []
+        func add(_ kind: String, _ id: String, _ rect: CGRect) {
+            items.append(["kind": kind, "id": id, "x": Double(rect.minX / size.width), "y": Double(1 - rect.maxY / size.height), "width": Double(rect.width / size.width), "height": Double(rect.height / size.height)])
+        }
+        if cameraVisible(project, at: sourceMs) {
+            add("camera", "camera", cameraRect(cameraVisual(instruction.cameraRuns, at: time, fallback: CameraVisual(project.edits.camera)), bounds: bounds))
+        }
+        for overlay in project.edits.overlays where sourceMs >= overlay.startMs && sourceMs < overlay.endMs {
+            add("overlay", overlay.id, overlayRect(overlay, sourceMs: sourceMs, bounds: bounds, images: instruction.images))
+        }
+        return ["width": Double(size.width), "height": Double(size.height), "items": items]
+    }
+    func updateSelection() {
+        guard let preview else { return }
+        let geometry = previewGeometry(at: milliseconds(player?.currentTime() ?? .zero))
+        let items = geometry["items"] as? [[String: Any]] ?? []
+        let selected = items.first { $0["kind"] as? String == selectedItem?.kind && $0["id"] as? String == selectedItem?.id }
+        let rect = selected.map { CGRect(x: $0["x"] as! Double, y: $0["y"] as! Double, width: $0["width"] as! Double, height: $0["height"] as! Double) }
+        preview.select(rect, canvas: previewBuilt?.video.renderSize ?? .zero)
     }
     func ready(_ item: AVPlayerItem) async throws {
         for _ in 0..<500 {
@@ -148,7 +270,7 @@ final class ExportJob {
         }
         throw NativeFailure("Timed out loading preview media.", code: "preview_timeout")
     }
-    func previewStatus() -> [String: Any] { ["timeMs": milliseconds(player?.currentTime() ?? .zero), "playing": (player?.rate ?? 0) > 0] }
+    func previewStatus() -> [String: Any] { let time = milliseconds(player?.currentTime() ?? .zero); return ["timeMs": time, "playing": (player?.rate ?? 0) > 0, "seeking": seeking, "itemId": previewItemID.uuidString, "geometry": previewGeometry(at: time)] }
     func requestDesktopPermission(_ kind: String, check: (() -> Bool)? = nil, request: (() -> Bool)? = nil, openSettings: (URL) -> Bool = { NSWorkspace.shared.open($0) }) throws {
         guard kind == "screen" || kind == "input" else { throw NativeFailure("Unknown desktop permission kind.", code: "invalid_params") }
         let screen = kind == "screen"

@@ -5,7 +5,7 @@ import { promises as fs } from 'node:fs';
 import path from 'node:path';
 import { randomUUID } from 'node:crypto';
 import { setTimeout as delay } from 'node:timers/promises';
-import { AppClient } from '../server/rpc.js';
+import { AppClient } from '../server/infrastructure/rpc.js';
 import type { AppCapabilities, Project, Job } from '../shared/types.js';
 
 assert(process.env.SCREENREC_DATA_DIR, 'Set SCREENREC_DATA_DIR to the isolated desktop service.');

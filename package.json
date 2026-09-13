@@ -5,7 +5,9 @@
   "type": "module",
   "license": "MIT",
   "description": "A local-first, MCP-controlled screen recording studio for macOS.",
-  "engines": { "node": ">=22.12" },
+  "engines": {
+    "node": ">=22.12"
+  },
   "scripts": {
     "dev": "node scripts/desktop.mjs dev",
     "dev:web": "vite --host 127.0.0.1",
@@ -22,7 +24,12 @@
     "prepare:desktop": "npm run prepare:runtime && npm run prepare:whisper && node scripts/build-server.mjs && node scripts/bundle-notices.mjs && node scripts/sign-runtimes.mjs",
     "desktop:build": "npm run prepare:desktop && node scripts/desktop.mjs build && node scripts/package-dmg.mjs",
     "desktop:check": "node scripts/desktop.mjs check",
-    "mcp": "tsx server/mcp.ts"
+    "mcp": "tsx server/mcp.ts",
+    "dev:site": "vite --config website/vite.config.ts",
+    "build:site": "node scripts/prepare-site-download.mjs && vite build --config website/vite.config.ts",
+    "preview:site": "vite preview --config website/vite.config.ts",
+    "test:site": "tsx --test website/src/*.test.ts",
+    "stats:downloads": "node scripts/download-stats.mjs"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.27.1",

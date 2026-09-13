@@ -1,14 +1,14 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
 use serde_json::{json, Value};
-use std::{collections::HashMap, ffi::{CStr, CString}, io::{BufRead, BufReader, Write}, os::raw::{c_char, c_void}, path::PathBuf, process::{Child, ChildStdin, Command, Stdio}, sync::{Arc, Mutex, OnceLock, atomic::{AtomicU64, Ordering}}, time::Duration};
+use std::{collections::HashMap, ffi::{CStr, CString}, io::{BufRead, BufReader, Write}, os::raw::{c_char, c_void}, path::PathBuf, process::{Child, ChildStdin, Command, Stdio}, sync::{mpsc, Arc, Mutex, OnceLock, atomic::{AtomicU64, Ordering}}, time::Duration};
 use tauri::{Emitter, Manager};
 use tokio::sync::oneshot;
 use tauri_plugin_global_shortcut::{Code, GlobalShortcutExt, Modifiers, Shortcut, ShortcutState};
 
 type Reply = Result<Value, Value>;
 type Waiters = Arc<Mutex<HashMap<String, oneshot::Sender<Reply>>>>;
-static NODE_INPUT: OnceLock<Arc<Mutex<ChildStdin>>> = OnceLock::new();
+static NATIVE_REPLIES: OnceLock<mpsc::Sender<String>> = OnceLock::new();
 static NEXT_ID: AtomicU64 = AtomicU64::new(1);
 
 #[cfg(target_os = "macos")]
@@ -19,20 +19,21 @@ extern "C" {
 
 extern "C" fn native_reply(pointer: *const c_char) {
     if pointer.is_null() { return; }
-    let text = unsafe { CStr::from_ptr(pointer) }.to_string_lossy();
-    match serde_json::from_str::<Value>(&text) {
+    // Copy the borrowed Swift buffer before returning; parsing and pipe backpressure stay off the UI thread.
+    let text = unsafe { CStr::from_ptr(pointer) }.to_string_lossy().into_owned();
+    if let Some(replies) = NATIVE_REPLIES.get() { let _ = replies.send(text); }
+}
+
+fn write_native_reply(text: &str, writer: &mut impl Write) -> std::io::Result<()> {
+    match serde_json::from_str::<Value>(text) {
         Ok(mut response) => {
-            let id = response["id"].take();
-            let Some(object) = response.as_object_mut() else { return; };
+            let Some(object) = response.as_object_mut() else { return Ok(()); };
+            let id = object.remove("id").unwrap_or(Value::Null);
             object.insert("nativeResponse".into(), id);
-            if let Some(input) = NODE_INPUT.get() {
-                if let Ok(mut writer) = input.lock() {
-                    let _ = writeln!(writer, "{}", response);
-                    let _ = writer.flush();
-                }
-            }
+            writeln!(writer, "{}", response)?;
+            writer.flush()
         }
-        Err(error) => eprintln!("Native bridge returned invalid JSON: {error}"),
+        Err(error) => { eprintln!("Native bridge returned invalid JSON: {error}"); Ok(()) }
     }
 }
 
@@ -100,7 +101,17 @@ impl Backend {
             .env("SCREENREC_APP_BUNDLE", app_bundle)
             .stdin(Stdio::piped()).stdout(Stdio::piped()).stderr(Stdio::inherit()).spawn()?;
         let input = Arc::new(Mutex::new(child.stdin.take().ok_or("Missing Node stdin")?));
-        NODE_INPUT.set(input.clone()).map_err(|_| "Backend already initialized")?;
+        let (reply_sender, replies) = mpsc::channel::<String>();
+        NATIVE_REPLIES.set(reply_sender).map_err(|_| "Backend already initialized")?;
+        let reply_input = input.clone();
+        std::thread::Builder::new().name("screenrec.native-replies".into()).spawn(move || {
+            for text in replies {
+                let Ok(mut writer) = reply_input.lock() else { break; };
+                if let Err(error) = write_native_reply(&text, &mut *writer) {
+                    eprintln!("Native reply could not reach project service: {error}"); break;
+                }
+            }
+        })?;
         let output = child.stdout.take().ok_or("Missing Node stdout")?;
         let pending: Waiters = Arc::new(Mutex::new(HashMap::new()));
         let waits = pending.clone();
@@ -235,7 +246,21 @@ fn main() {
 
 #[cfg(test)]
 mod tests {
-    use super::recording_shortcut_method;
+    use super::{recording_shortcut_method, write_native_reply};
+
+    #[test]
+    fn native_reply_preserves_protocol_and_survives_malformed_payloads() {
+        let mut output = Vec::new();
+        write_native_reply(r#"{"id":"native-12","result":{"active":true}}"#, &mut output).unwrap();
+        let response: serde_json::Value = serde_json::from_slice(&output).unwrap();
+        assert_eq!(response["nativeResponse"], "native-12");
+        assert_eq!(response["result"]["active"], true);
+        assert!(response.get("id").is_none());
+        assert_eq!(output.last(), Some(&b'\n'));
+        let length = output.len();
+        for invalid in ["no JSON", "[]", "null"] { write_native_reply(invalid, &mut output).unwrap(); }
+        assert_eq!(output.len(), length);
+    }
 
     #[test]
     fn recording_shortcuts_choose_the_validated_backend_method() {

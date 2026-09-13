@@ -9,7 +9,7 @@ import { Client } from '@modelcontextprotocol/sdk/client/index.js';
 import { StdioClientTransport } from '@modelcontextprotocol/sdk/client/stdio.js';
 import type { Job, Project, TranscriptSegment } from '../shared/types.js';
 import { duration } from '../shared/timeline.js';
-import { hashFile, models } from '../server/ai.js';
+import { hashFile, models } from '../server/services/ai.js';
 
 const dataDir = path.resolve(process.env.SCREENREC_DATA_DIR || '');
 assert(process.env.SCREENREC_DATA_DIR && dataDir.startsWith(path.resolve('.cache') + path.sep), 'Run against an isolated SCREENREC_DATA_DIR inside this repository’s .cache directory.');

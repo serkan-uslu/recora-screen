@@ -14,10 +14,9 @@ export type RecordingSource = {
   cameraActiveRanges?: Range[]; title?: string;
 };
 export type CursorEvent = { tMs: number; x: number; y: number; click?: boolean; kind?: 'click' | 'drag' | 'typing' };
-export type CameraSettings = {
-  visible: boolean; shape: 'circle' | 'square'; x: number; y: number; size: number;
-  shadow: boolean; hiddenRanges: Range[];
-};
+export type CameraLayoutSettings = { shape: 'circle' | 'square'; x: number; y: number; size: number; shadow: boolean };
+export type CameraLayout = CameraLayoutSettings & Range & { id: string };
+export type CameraSettings = CameraLayoutSettings & { visible: boolean; hiddenRanges: Range[]; layouts: CameraLayout[] };
 export type ZoomMotion = 'gentle' | 'snappy';
 export type Zoom = Range & { id: string; scale: number; x: number; y: number; motion?: ZoomMotion; followCursor?: boolean };
 export type AutoZoomSettings = { enabled: boolean; scale: number; leadMs: number; holdMs: number; gapMs: number; motion: ZoomMotion; followCursor: boolean };
@@ -44,7 +43,7 @@ export type EditState = {
   captions: { enabled: boolean; fontSize: number; color: string; background: string };
 };
 export type Project = {
-  schemaVersion: 1; id: string; name: string; createdAt: string; updatedAt: string;
+  schemaVersion: 2; id: string; name: string; createdAt: string; updatedAt: string;
   revision: number; status: 'draft' | 'recording' | 'ready';
   source?: RecordingSource; edits: EditState; transcript: TranscriptSegment[]; assets: Asset[];
   recovered?: boolean;
@@ -60,8 +59,10 @@ export type EditOperation =
   | { type: 'clip.trim'; index: number; sourceStartMs: number; sourceEndMs: number }
   | { type: 'clip.merge'; index: number }
   | ({ type: 'source.restore' } & Range)
-  | { type: 'camera.update'; settings: Partial<Omit<CameraSettings, 'hiddenRanges'>> }
+  | { type: 'camera.update'; settings: Partial<Omit<CameraSettings, 'hiddenRanges' | 'layouts'>> }
   | ({ type: 'camera.hide'; hidden: boolean } & Range)
+  | ({ type: 'camera.layout.set'; settings: Partial<CameraLayoutSettings> } & Range)
+  | ({ type: 'camera.layout.remove' } & Range)
   | { type: 'zoom.add'; zoom: Omit<Zoom, 'id'> }
   | { type: 'zoom.update'; id: string; zoom: Partial<Omit<Zoom, 'id'>> }
   | { type: 'zoom.remove'; id: string }
@@ -86,6 +87,11 @@ export type RecordingStatus = {
   active: boolean; paused: boolean; durationMs: number; projectId?: string;
   microphoneLevel: number; systemLevel: number; cameraVisible: boolean; cameraEnabled: boolean;
   cameraRunning?: boolean;
+  phase?: 'idle' | 'starting' | 'recording' | 'paused' | 'finalizing';
+  monitoring?: {
+    pointer: 'active' | 'inactive'; input: 'active' | 'unavailable' | 'failed' | 'inactive'; message?: string;
+    pointerSamples: number; clicks: number; drags: number; typingEvents: number; firstPointerMs?: number;
+  };
   error?: string;
 };
 export type AppCapabilities = {
@@ -107,7 +113,7 @@ export function defaultAutoZoom(): AutoZoomSettings {
 export function defaultEdits(): EditState {
   return {
     segments: [],
-    camera: { visible: true, shape: 'circle', x: 0.76, y: 0.60, size: 0.2, shadow: true, hiddenRanges: [] },
+    camera: { visible: true, shape: 'circle', x: 0.76, y: 0.60, size: 0.2, shadow: true, hiddenRanges: [], layouts: [] },
     zooms: [], overlays: [], canvas: defaultCanvas(), autoZoom: defaultAutoZoom(), audio: { microphoneVolume: 1, systemVolume: 1 },
     cursor: { visible: true, highlight: true, smooth: true, size: 1 },
     captions: { enabled: false, fontSize: 42, color: '#ffffff', background: '#111318' },

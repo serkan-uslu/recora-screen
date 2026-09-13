@@ -11,6 +11,98 @@ func cursorPosition(_ point: CGPoint, captureRect: CGRect, normalizedContentRect
 }
 import CoreMedia
 
+// A dedicated run loop keeps tracking alive while macOS menus or window drags own the main loop.
+// Only pointer geometry and activity markers leave this monitor; key contents are never read.
+final class CaptureInputMonitor: @unchecked Sendable {
+    struct Sample {
+        var hostTime: CMTime; var point: CGPoint; var pressed: Bool; var kind: String?
+        var focusedWindow: CGWindowID? = nil
+    }
+    private let lock = NSLock()
+    private var loop: CFRunLoop?; private var tap: CFMachPort?
+    private var stopping = false; private var stopWaiters: [CheckedContinuation<Void, Never>] = []
+    let receive: (Sample) -> Void
+    let state: (String, String?) -> Void
+    init(receive: @escaping (Sample) -> Void, state: @escaping (String, String?) -> Void) { self.receive = receive; self.state = state }
+    static func pointer() -> CGPoint { CGEvent(source: nil)?.location ?? .zero }
+    static func pressed() -> Bool { CGEventSource.buttonState(.combinedSessionState, button: .left) || CGEventSource.buttonState(.combinedSessionState, button: .right) || CGEventSource.buttonState(.combinedSessionState, button: .center) }
+    static func focusedWindow() -> CGWindowID? {
+        guard let pid = NSWorkspace.shared.frontmostApplication?.processIdentifier,
+              let windows = CGWindowListCopyWindowInfo([.optionOnScreenOnly, .excludeDesktopElements], kCGNullWindowID) as? [[String: Any]] else { return nil }
+        return windows.first { ($0[kCGWindowOwnerPID as String] as? Int32) == pid && ($0[kCGWindowLayer as String] as? Int) == 0 }?[kCGWindowNumber as String] as? CGWindowID
+    }
+    func start() async {
+        await withCheckedContinuation { ready in
+            let thread = Thread { [self] in
+                let runLoop = CFRunLoopGetCurrent()!
+                lock.lock(); loop = runLoop; lock.unlock()
+                let types: [CGEventType] = [.leftMouseDown, .rightMouseDown, .otherMouseDown, .leftMouseUp, .rightMouseUp, .otherMouseUp, .leftMouseDragged, .rightMouseDragged, .otherMouseDragged, .keyDown]
+                let mask = types.reduce(CGEventMask(0)) { $0 | (CGEventMask(1) << $1.rawValue) }
+                var source: CFRunLoopSource?
+                if CGPreflightListenEventAccess() {
+                    tap = CGEvent.tapCreate(tap: .cgSessionEventTap, place: .tailAppendEventTap, options: .listenOnly, eventsOfInterest: mask, callback: { _, type, event, context in
+                        guard let context else { return Unmanaged.passUnretained(event) }
+                        let monitor = Unmanaged<CaptureInputMonitor>.fromOpaque(context).takeUnretainedValue()
+                        monitor.handle(type, event: event)
+                        return Unmanaged.passUnretained(event)
+                    }, userInfo: Unmanaged.passUnretained(self).toOpaque())
+                    if let tap { source = CFMachPortCreateRunLoopSource(kCFAllocatorDefault, tap, 0) }
+                    if let source { CFRunLoopAddSource(runLoop, source, .commonModes); state("active", nil) }
+                    else { state("failed", "Input monitoring could not start. Reopen the app after granting Input Monitoring permission.") }
+                } else { state("unavailable", "Input Monitoring is off. Pointer movement still records; typing and short-click detection require permission.") }
+                let timer = CFRunLoopTimerCreateWithHandler(kCFAllocatorDefault, CFAbsoluteTimeGetCurrent(), 1 / 30, 0, 0) { [self] _ in
+                    receive(Sample(hostTime: CMClockGetTime(CMClockGetHostTimeClock()), point: Self.pointer(), pressed: Self.pressed(), kind: nil))
+                }!
+                CFRunLoopAddTimer(runLoop, timer, .commonModes)
+                ready.resume()
+                lock.lock(); let shouldRun = !stopping; lock.unlock()
+                if shouldRun { CFRunLoopRun() }
+                CFRunLoopTimerInvalidate(timer)
+                if let source { CFRunLoopRemoveSource(runLoop, source, .commonModes); CFRunLoopSourceInvalidate(source) }
+                if let tap { CFMachPortInvalidate(tap) }; tap = nil
+                lock.lock(); loop = nil; let waiters = stopWaiters; stopWaiters = []; lock.unlock()
+                for waiter in waiters { waiter.resume() }
+            }
+            thread.name = "screenrec.input"; thread.qualityOfService = .userInteractive; thread.start()
+        }
+    }
+    static func activity(for type: CGEventType) -> String? {
+        switch type {
+        case .keyDown: return "typing"
+        case .leftMouseDown, .rightMouseDown, .otherMouseDown: return "click"
+        case .leftMouseDragged, .rightMouseDragged, .otherMouseDragged: return "drag"
+        default: return nil
+        }
+    }
+    private func handle(_ type: CGEventType, event: CGEvent) {
+        if type == .tapDisabledByTimeout || type == .tapDisabledByUserInput {
+            if type == .tapDisabledByTimeout, CGPreflightListenEventAccess(), let tap {
+                CGEvent.tapEnable(tap: tap, enable: true)
+                if CGEvent.tapIsEnabled(tap: tap) { state("active", nil); return }
+            }
+            state("failed", "Input monitoring stopped. Pointer movement continues; restart recording to restore input events."); return
+        }
+        let kind = Self.activity(for: type)
+        let down = type == .leftMouseDown || type == .rightMouseDown || type == .otherMouseDown
+        let up = type == .leftMouseUp || type == .rightMouseUp || type == .otherMouseUp
+        receive(Sample(hostTime: CMClockGetTime(CMClockGetHostTimeClock()), point: event.location, pressed: down || (!up && Self.pressed()), kind: kind, focusedWindow: kind == "typing" ? Self.focusedWindow() : nil))
+    }
+    func stop() async {
+        await withCheckedContinuation { continuation in
+            lock.lock(); stopping = true
+            guard let loop else { lock.unlock(); continuation.resume(); return }
+            stopWaiters.append(continuation); lock.unlock()
+            CFRunLoopPerformBlock(loop, CFRunLoopMode.commonModes.rawValue) { CFRunLoopStop(loop) }; CFRunLoopWakeUp(loop)
+        }
+    }
+}
+
+func typingPosition(point: CGPoint, lastInteraction: CGPoint?, captureRect: CGRect, contentRect: CGRect, capturedWindow: CGWindowID?, focusedWindow: CGWindowID?) -> CGPoint? {
+    if let capturedWindow, capturedWindow != focusedWindow { return nil }
+    // A focused captured window still receives typing when the pointer has left its bounds.
+    return lastInteraction ?? cursorPosition(point, captureRect: captureRect, normalizedContentRect: contentRect) ?? (capturedWindow != nil ? CGPoint(x: contentRect.midX, y: contentRect.midY) : nil)
+}
+
 final class TrackWriter {
     let writer: AVAssetWriter; let input: AVAssetWriterInput; let video: Bool
     var lastVideo: CMSampleBuffer?; var samples = 0
@@ -75,9 +167,14 @@ final class CaptureEngine: NSObject, SCStreamOutput, SCStreamDelegate, AVCapture
     private var active = false; private var errorMessage: String?; private var stopping = false
     private var micLevel = 0.0, systemLevel = 0.0
     private var cursorBatch: [CursorEvent] = []; private var cursorFile: FileHandle?; private var cursorCount = 0
-    private var cursorTimer: Timer?; private var captureRect = CGRect.zero; private var capturedWindowID: CGWindowID?
+    private var inputMonitor: CaptureInputMonitor?; private var captureRect = CGRect.zero; private var capturedWindowID: CGWindowID?
     private var cursorContentRect = CGRect(x: 0, y: 0, width: 1, height: 1)
-    private var typingTap: CFMachPort?; private var typingRunLoopSource: CFRunLoopSource?; private var lastTypingMs = -1000.0
+    private var lastTypingMs = -1000.0
+    private var inputState = "inactive", inputMessage: String?
+    private var pointerSamples = 0, clickCount = 0, dragCount = 0, typingCount = 0; private var firstPointerMs: Double?
+    private let statusLock = NSLock()
+    private var cachedStatus: [String: Any] = ["active": false, "paused": false, "durationMs": 0, "phase": "idle", "cameraEnabled": false, "cameraVisible": false, "cameraRunning": false, "microphoneLevel": 0, "systemLevel": 0, "monitoring": ["pointer": "inactive", "input": "inactive", "pointerSamples": 0, "clicks": 0, "drags": 0, "typingEvents": 0]]
+    private let inputLock = NSLock(); private var pendingInput: [CaptureInputMonitor.Sample] = []; private var drainingInput = false; private var inputOverflowed = false
     private var lastInteractionPosition: CGPoint?; private var lastPointerPosition: CGPoint?; private var pointerPressed = false
     private var lastBoundsCheck = Date.distantPast; private var lastRecoveryMs = 0.0
     private var cameraRanges: [MediaRange] = []; private var cameraRangeStart: Double?
@@ -85,17 +182,23 @@ final class CaptureEngine: NSObject, SCStreamOutput, SCStreamDelegate, AVCapture
     private var bubble: NSPanel?; private var bubbleView: CameraBubbleView?
     private var cameraVisible = false, cameraEnabled = false
     private var finalDuration = 0.0
-    func status() -> [String: Any] {
-        queue.sync {
-            var result: [String: Any] = ["active": active, "paused": pausedAt != nil, "durationMs": active ? elapsedMs() : finalDuration, "microphoneLevel": micLevel, "systemLevel": systemLevel, "cameraVisible": cameraVisible, "cameraEnabled": cameraEnabled, "cameraRunning": cameraSession?.isRunning ?? false]
-            if let projectID { result["projectId"] = projectID }; if let errorMessage { result["error"] = errorMessage }; return result
-        }
+    func status() -> [String: Any] { statusLock.lock(); defer { statusLock.unlock() }; return cachedStatus }
+    // Called on the capture queue; readers never wait for encoders, filesystem sync or device setup.
+    private func publishStatus() {
+        var monitor: [String: Any] = ["pointer": inputMonitor != nil && active && !stopping ? "active" : "inactive", "input": inputState, "pointerSamples": pointerSamples, "clicks": clickCount, "drags": dragCount, "typingEvents": typingCount]
+        if let inputMessage { monitor["message"] = inputMessage }; if let firstPointerMs { monitor["firstPointerMs"] = firstPointerMs }
+        let phase = finalizing ? "finalizing" : startupInProgress ? "starting" : active ? (pausedAt == nil ? "recording" : "paused") : "idle"
+        var result: [String: Any] = ["active": active || startupInProgress || finalizing, "paused": pausedAt != nil, "durationMs": active && !stopping ? elapsedMs() : finalDuration, "phase": phase, "monitoring": monitor, "microphoneLevel": micLevel, "systemLevel": systemLevel, "cameraVisible": cameraVisible, "cameraEnabled": cameraEnabled, "cameraRunning": cameraEnabled]
+        if let projectID { result["projectId"] = projectID }; if let errorMessage { result["error"] = errorMessage }
+        statusLock.lock(); cachedStatus = result; statusLock.unlock()
     }
     private func elapsedMs() -> Double { originResolved ? max(0, milliseconds((pausedAt ?? CMClockGetTime(CMClockGetHostTimeClock())) - origin - pauseOffset)) : 0 }
-    @MainActor func start(projectID: String, directory: String, settings: CaptureSettings) async throws -> [String: Any] {
-        guard !startupInProgress, !finalizing, !(status()["active"] as? Bool ?? false) else { throw NativeFailure("A recording is already active.", code: "recording_active") }
-        startupInProgress = true
-        defer { startupInProgress = false }
+    func start(projectID: String, directory: String, settings: CaptureSettings) async throws -> [String: Any] {
+        try queue.sync {
+            guard !startupInProgress, !finalizing, !active else { throw NativeFailure("A recording is already active.", code: "recording_active") }
+            startupInProgress = true; self.projectID = projectID; finalDuration = 0; errorMessage = nil; inputState = "inactive"; inputMessage = nil; pointerSamples = 0; clickCount = 0; dragCount = 0; typingCount = 0; firstPointerMs = nil; publishStatus()
+        }
+        defer { queue.sync { startupInProgress = false; publishStatus() } }
         guard CGPreflightScreenCaptureAccess() else { throw NativeFailure("Screen recording permission is required.", code: "permission_required") }
         guard settings.width >= 64, settings.height >= 64, settings.width <= 3840, settings.height <= 2160, settings.width % 2 == 0, settings.height % 2 == 0, settings.fps == 30 else { throw NativeFailure("Capture supports even dimensions up to 3840×2160 at 30 fps.", code: "invalid_params") }
         if let id = settings.microphoneId, !id.isEmpty, AVCaptureDevice.authorizationStatus(for: .audio) != .authorized { throw NativeFailure("Microphone permission is required.", code: "permission_required") }
@@ -174,25 +277,40 @@ final class CaptureEngine: NSObject, SCStreamOutput, SCStreamDelegate, AVCapture
         queue.sync {
             self.cursorFile = newCursorFile; self.cursorBatch = []; self.cursorCount = 0; self.lastRecoveryMs = 0
             self.cameraRanges = []; self.cameraRangeStart = nil; self.cursorContentRect = CGRect(x: 0, y: 0, width: 1, height: 1)
-            self.sourceTitle = title; self.lastTypingMs = -1000; self.lastInteractionPosition = nil; self.lastPointerPosition = nil; self.pointerPressed = false
+            self.sourceTitle = title; self.lastTypingMs = -1000; self.pointerSamples = 0; self.clickCount = 0; self.dragCount = 0; self.typingCount = 0; self.firstPointerMs = nil; self.lastBoundsCheck = .distantPast; self.lastInteractionPosition = nil; self.lastPointerPosition = nil; self.pointerPressed = false
             self.capturedWindowID = settings.sourceKind == "window" ? numericID : nil
             self.writers = newWriters; self.stream = newStream; self.systemStream = newSystemStream; self.cameraSession = newCamera; self.settings = settings
             self.directory = directory; self.projectID = projectID; self.origin = CMClockGetTime(CMClockGetHostTimeClock()); self.originResolved = false
             self.pauseOffset = .zero; self.pausedAt = nil; self.active = true; self.stopping = false; self.errorMessage = nil
             self.cameraEnabled = newCamera != nil; self.cameraVisible = newCamera != nil; self.captureRect = rectangle; self.micLevel = 0; self.systemLevel = 0
         }
+        let monitor = CaptureInputMonitor(receive: { [weak self] sample in self?.enqueueInput(sample) }, state: { [weak self] state, message in
+            self?.queue.async { guard let self else { return }; self.inputState = state; self.inputMessage = message; self.publishStatus() }
+        })
+        queue.sync { inputMonitor = monitor; publishStatus() }
+        await monitor.start()
         do {
             if let newCamera { await withCheckedContinuation { continuation in cameraControlQueue.async { newCamera.startRunning(); continuation.resume() } } }
             if let newSystemStream { try await newSystemStream.startCapture() }
             try await newStream.startCapture()
         } catch {
-            if let newSystemStream { try? await newSystemStream.stopCapture() }
-            queue.sync { active = false; for writer in writers.values { writer.writer.cancelWriting() } }; newCamera?.stopRunning(); throw error
+            let hasFrames = queue.sync { (writers["screen"]?.samples ?? 0) > 0 }
+            if hasFrames {
+                // A driver can fail after delivering valid frames. Keep those files and recovery metadata.
+                startupSucceeded = true
+                queue.sync { startupInProgress = false }
+                _ = try? await stop()
+            } else {
+                if let newSystemStream { try? await newSystemStream.stopCapture() }
+                await monitor.stop()
+                queue.sync { active = false; inputMonitor = nil; inputState = "inactive"; for writer in writers.values { writer.writer.cancelWriting() }; publishStatus() }
+                newCamera?.stopRunning()
+            }
+            throw error
         }
         startupSucceeded = true
-        if let newCamera { showBubble(session: newCamera, shape: settings.cameraShape) }
-        cursorTimer = Timer.scheduledTimer(withTimeInterval: 1 / 30, repeats: true) { [weak self] _ in self?.sampleCursor() }
-        startTypingMonitoring()
+        if let newCamera { await showBubble(session: newCamera, shape: settings.cameraShape) }
+        queue.sync { startupInProgress = false; publishStatus() }
         return status()
     }
     @MainActor private func showBubble(session: AVCaptureSession, shape: String) {
@@ -202,77 +320,69 @@ final class CaptureEngine: NSObject, SCStreamOutput, SCStreamDelegate, AVCapture
         let view = CameraBubbleView(frame: CGRect(x: 0, y: 0, width: 220, height: 220)); view.shape = shape; view.preview.session = session
         panel.contentView = view; panel.orderFrontRegardless(); bubble = panel; bubbleView = view
     }
-    private func sampleCursor() {
-        let position = NSEvent.mouseLocation
-        let point = CGPoint(x: position.x, y: CGDisplayBounds(CGMainDisplayID()).height - position.y)
-        let clicking = NSEvent.pressedMouseButtons != 0
+    private func enqueueInput(_ sample: CaptureInputMonitor.Sample) {
+        inputLock.lock()
+        // Bound retained input during a stalled media/disk queue. Stop safely rather than grow with recording duration.
+        if pendingInput.count < 4096 { pendingInput.append(sample) } else { inputOverflowed = true }
+        let schedule = !drainingInput; drainingInput = true; inputLock.unlock()
+        guard schedule else { return }
+        queue.async { [self] in
+            inputLock.lock(); let samples = pendingInput, overflowed = inputOverflowed
+            pendingInput = []; inputOverflowed = false; drainingInput = false; inputLock.unlock()
+            for sample in samples { sampleInput(sample) }
+            if overflowed { failRecording(NativeFailure("The recording disk cannot keep up with input metadata. Recording stopped; completed media is preserved.")) }
+        }
+    }
+    private func sampleInput(_ sample: CaptureInputMonitor.Sample) {
+        guard active, !stopping, pausedAt == nil, originResolved else { return }
+        let elapsed = milliseconds(sample.hostTime - origin - pauseOffset)
+        guard elapsed >= 0 else { return }
         if Date().timeIntervalSince(lastBoundsCheck) > 0.5 {
             lastBoundsCheck = Date()
             if let id = capturedWindowID, let info = CGWindowListCopyWindowInfo(.optionIncludingWindow, id) as? [[String: Any]], let bounds = info.first?[kCGWindowBounds as String] as? [String: Any], let rect = CGRect(dictionaryRepresentation: bounds as CFDictionary) {
-                queue.async {
-                    if let r = self.settings?.region { self.captureRect = CGRect(x: rect.minX + r.x, y: rect.minY + r.y, width: r.width, height: r.height) }
-                    else { self.captureRect = rect }
-                }
+                if let r = settings?.region { captureRect = CGRect(x: rect.minX + r.x, y: rect.minY + r.y, width: r.width, height: r.height) }
+                else { captureRect = rect }
             }
         }
-        queue.async {
-            guard self.active, self.pausedAt == nil, self.originResolved else { return }
-            let elapsed = self.elapsedMs()
-            if let p = cursorPosition(point, captureRect: self.captureRect, normalizedContentRect: self.cursorContentRect) {
-                let moved = self.lastPointerPosition.map { hypot(p.x - $0.x, p.y - $0.y) > 0.002 } ?? false
-                let kind: String? = clicking && !self.pointerPressed ? "click" : clicking && moved ? "drag" : nil
-                if clicking { self.lastInteractionPosition = p }
-                self.lastPointerPosition = p; self.cursorBatch.append(CursorEvent(tMs: elapsed, x: p.x, y: p.y, click: clicking, kind: kind))
+        defer { publishStatus() }
+        if sample.kind == "typing" {
+            guard elapsed - lastTypingMs >= 600, let focus = typingPosition(point: sample.point, lastInteraction: lastInteractionPosition, captureRect: captureRect, contentRect: cursorContentRect, capturedWindow: capturedWindowID, focusedWindow: sample.focusedWindow) else { return }
+            cursorBatch.append(CursorEvent(tMs: elapsed, x: focus.x, y: focus.y, click: nil, kind: "typing")); lastTypingMs = elapsed; typingCount += 1
+        } else {
+            if let p = cursorPosition(sample.point, captureRect: captureRect, normalizedContentRect: cursorContentRect) {
+                let moved = lastPointerPosition.map { hypot(p.x - $0.x, p.y - $0.y) > 0.002 } ?? false
+                let kind = sample.kind ?? (inputState != "active" ? (sample.pressed && !pointerPressed ? "click" : sample.pressed && moved ? "drag" : nil) : nil)
+                if sample.pressed { lastInteractionPosition = p }
+                lastPointerPosition = p; cursorBatch.append(CursorEvent(tMs: elapsed, x: p.x, y: p.y, click: sample.pressed, kind: kind))
+                pointerSamples += 1; if firstPointerMs == nil { firstPointerMs = elapsed }
+                if kind == "click" { clickCount += 1 }; if kind == "drag" { dragCount += 1 }
             }
-            self.pointerPressed = clicking
-            do {
-                if self.cursorBatch.count >= 60 { try self.flushCursor() }
-                if elapsed - self.lastRecoveryMs >= 5000 { try self.persistRecovery(duration: elapsed); self.lastRecoveryMs = elapsed }
-            } catch { self.errorMessage = error.localizedDescription; Task { @MainActor in if self.status()["active"] as? Bool == true { _ = try? await self.stop() } } }
+            pointerPressed = sample.pressed
+        }
+        do {
+            if cursorBatch.count >= 60 { try flushCursor() }
+            if elapsed - lastRecoveryMs >= 5000 { try persistRecovery(duration: elapsed); lastRecoveryMs = elapsed }
+        } catch { failRecording(error) }
+    }
+    private func failRecording(_ error: Error) {
+        guard errorMessage == nil else { return }
+        errorMessage = error.localizedDescription; finalDuration = elapsedMs(); stopping = true; publishStatus()
+        Task {
+            while self.status()["phase"] as? String == "starting" { try? await Task.sleep(nanoseconds: 10_000_000) }
+            if self.status()["active"] as? Bool == true { _ = try? await self.stop() }
         }
     }
     private func flushCursor() throws {
         guard let cursorFile, !cursorBatch.isEmpty else { return }
         var data = Data()
-        for event in cursorBatch { if cursorCount > 0 { data.append(44) }; data.append(try JSONEncoder().encode(event)); cursorCount += 1 }
-        try cursorFile.write(contentsOf: data); cursorBatch.removeAll(keepingCapacity: true)
-    }
-    @MainActor private func startTypingMonitoring() {
-        stopTypingMonitoring()
-        guard CGPreflightListenEventAccess() else { return }
-        let mask = CGEventMask(1) << CGEventType.keyDown.rawValue
-        guard let tap = CGEvent.tapCreate(tap: .cgSessionEventTap, place: .tailAppendEventTap, options: .listenOnly, eventsOfInterest: mask, callback: { _, type, event, context in
-            if let context {
-                // The singleton outlives its tap. Its source runs on the main run loop;
-                // only the event type is used, never text, keycodes or other fields.
-                let engine = Unmanaged<CaptureEngine>.fromOpaque(context).takeUnretainedValue()
-                if type == .keyDown { engine.sampleTyping() }
-                else if type == .tapDisabledByTimeout, CGPreflightListenEventAccess(), let tap = engine.typingTap { CGEvent.tapEnable(tap: tap, enable: true) }
-                // A tap disabled by user input stays disabled until the next recording.
-            }
-            return Unmanaged.passUnretained(event)
-        }, userInfo: Unmanaged.passUnretained(self).toOpaque()) else { return }
-        guard let source = CFMachPortCreateRunLoopSource(kCFAllocatorDefault, tap, 0) else { CFMachPortInvalidate(tap); return }
-        typingTap = tap; typingRunLoopSource = source
-        CFRunLoopAddSource(CFRunLoopGetMain(), source, .commonModes)
-    }
-    @MainActor private func stopTypingMonitoring() {
-        if let tap = typingTap { CGEvent.tapEnable(tap: tap, enable: false) }
-        if let source = typingRunLoopSource { CFRunLoopRemoveSource(CFRunLoopGetMain(), source, .commonModes); CFRunLoopSourceInvalidate(source) }
-        if let tap = typingTap { CFMachPortInvalidate(tap) }
-        typingRunLoopSource = nil; typingTap = nil
-    }
-    private func sampleTyping() {
-        let mouse = NSEvent.mouseLocation, point = CGPoint(x: mouse.x, y: CGDisplayBounds(CGMainDisplayID()).height - mouse.y)
-        queue.async {
-            guard self.active, self.pausedAt == nil, self.originResolved else { return }
-            let elapsed = self.elapsedMs(); guard elapsed - self.lastTypingMs >= 600 else { return }
-            guard let current = cursorPosition(point, captureRect: self.captureRect, normalizedContentRect: self.cursorContentRect) else { return }
-            let focus = self.lastInteractionPosition ?? current
-            self.cursorBatch.append(CursorEvent(tMs: elapsed, x: focus.x, y: focus.y, click: nil, kind: "typing")); self.lastTypingMs = elapsed
-            do { if self.cursorBatch.count >= 60 { try self.flushCursor() } }
-            catch { self.errorMessage = error.localizedDescription; Task { @MainActor in if self.status()["active"] as? Bool == true { _ = try? await self.stop() } } }
+        let encoder = JSONEncoder(), offset = try cursorFile.offset()
+        for (index, event) in cursorBatch.enumerated() { if cursorCount + index > 0 { data.append(44) }; data.append(try encoder.encode(event)) }
+        do { try cursorFile.write(contentsOf: data) }
+        catch {
+            // Do not leave a partial JSON event in front of a later recovery flush.
+            try? cursorFile.truncate(atOffset: offset); try? cursorFile.seek(toOffset: offset); throw error
         }
+        cursorCount += cursorBatch.count; cursorBatch.removeAll(keepingCapacity: true)
     }
     private func currentSource(duration: Double) -> RecordingSource? {
         guard let settings else { return nil }
@@ -284,10 +394,10 @@ final class CaptureEngine: NSObject, SCStreamOutput, SCStreamDelegate, AVCapture
         try flushCursor(); try cursorFile?.synchronize()
         if let source = currentSource(duration: duration), (writers["screen"]?.samples ?? 0) > 0 { try JSONEncoder().encode(source).write(to: URL(fileURLWithPath: directory).appendingPathComponent("recovered-source.json"), options: .atomic) }
     }
-    func pause() throws -> [String: Any] { try queue.sync { guard active else { throw NativeFailure("No active recording.") }; if pausedAt == nil { pausedAt = CMClockGetTime(CMClockGetHostTimeClock()) } }; return status() }
-    func resume() throws -> [String: Any] { try queue.sync { guard active else { throw NativeFailure("No active recording.") }; if let t = pausedAt { pauseOffset = pauseOffset + CMClockGetTime(CMClockGetHostTimeClock()) - t; pausedAt = nil } }; return status() }
-    @MainActor func camera(_ params: [String: Any]) async -> [String: Any] {
-        guard !finalizing, !startupInProgress, status()["active"] as? Bool == true else { return status() }
+    func pause() async throws -> [String: Any] { try queue.sync { guard active, !startupInProgress, !finalizing else { throw NativeFailure("No active recording or a recording transition is underway.") }; if pausedAt == nil { pausedAt = CMClockGetTime(CMClockGetHostTimeClock()) }; publishStatus() }; return status() }
+    func resume() async throws -> [String: Any] { try queue.sync { guard active, !startupInProgress, !finalizing else { throw NativeFailure("No active recording or a recording transition is underway.") }; if let t = pausedAt { pauseOffset = pauseOffset + CMClockGetTime(CMClockGetHostTimeClock()) - t; pausedAt = nil }; publishStatus() }; return status() }
+    func camera(_ params: [String: Any]) async -> [String: Any] {
+        guard queue.sync(execute: { !finalizing && !startupInProgress && active }) else { return status() }
         let requestedEnabled = params["enabled"] as? Bool
         queue.sync {
             if let visible = params["visible"] as? Bool { cameraVisible = visible }
@@ -298,22 +408,30 @@ final class CaptureEngine: NSObject, SCStreamOutput, SCStreamDelegate, AVCapture
         }
         if let enabled = requestedEnabled, let session = cameraSession {
             await withCheckedContinuation { continuation in cameraControlQueue.async { if enabled { session.startRunning() } else { session.stopRunning() }; continuation.resume() } }
-            queue.sync { cameraEnabled = enabled && active }
+            queue.sync { cameraEnabled = enabled && active && !stopping }
         }
-        if let shape = params["shape"] as? String { bubbleView?.shape = shape == "square" ? "square" : "circle" }
-        let s = status(); if s["cameraVisible"] as? Bool == true && s["cameraEnabled"] as? Bool == true { bubble?.orderFrontRegardless() } else { bubble?.orderOut(nil) }; return s
+        queue.sync { publishStatus() }
+        let s = status()
+        await MainActor.run {
+            if let shape = params["shape"] as? String { bubbleView?.shape = shape == "square" ? "square" : "circle" }
+            if s["cameraVisible"] as? Bool == true && s["cameraEnabled"] as? Bool == true { bubble?.orderFrontRegardless() } else { bubble?.orderOut(nil) }
+        }
+        return s
     }
-    @MainActor func stop() async throws -> [String: Any] {
-        guard !finalizing, status()["active"] as? Bool == true else { throw NativeFailure("No active recording or finalization is already underway.") }
-        finalizing = true; defer { finalizing = false }
-        cursorTimer?.invalidate(); cursorTimer = nil; bubble?.close(); bubble = nil; bubbleView = nil
-        stopTypingMonitoring()
-        let end = queue.sync { () -> CMTime in stopping = true; finalDuration = elapsedMs(); return mediaTime(finalDuration) }
+    func stop() async throws -> [String: Any] {
+        let end = try queue.sync { () -> CMTime in
+            guard !finalizing, !startupInProgress, active else { throw NativeFailure("No active recording or finalization is already underway.") }
+            finalizing = true; if !stopping { finalDuration = elapsedMs() }; stopping = true; publishStatus(); return mediaTime(finalDuration)
+        }
+        defer { queue.sync { finalizing = false; publishStatus() } }
+        await MainActor.run { bubble?.close(); bubble = nil; bubbleView = nil }
+        await inputMonitor?.stop()
+        queue.sync { inputMonitor = nil; inputState = "inactive"; publishStatus() }
         if let stream { try? await stream.stopCapture() }
         if let systemStream { try? await systemStream.stopCapture() }
         if let cameraSession { await withCheckedContinuation { continuation in cameraControlQueue.async { cameraSession.stopRunning(); continuation.resume() } } }
         let snapshot = queue.sync { () -> [String: TrackWriter] in active = false; return writers }
-        defer { queue.sync { try? cursorFile?.close(); cursorFile = nil; self.stream = nil; self.systemStream = nil; self.cameraSession = nil; writers = [:]; pausedAt = nil; cameraEnabled = false; cameraVisible = false } }
+        defer { queue.sync { try? cursorFile?.close(); cursorFile = nil; self.stream = nil; self.systemStream = nil; self.cameraSession = nil; writers = [:]; pausedAt = nil; cameraEnabled = false; cameraVisible = false; publishStatus() } }
         var finishError: Error?
         for writer in snapshot.values { do { try await writer.finish(at: end) } catch { finishError = error } }
         guard let screen = snapshot["screen"], screen.samples > 0, let source = queue.sync(execute: { currentSource(duration: finalDuration) }) else { throw finishError ?? NativeFailure("Screen recording produced no frames; check permission and source.") }
@@ -321,7 +439,7 @@ final class CaptureEngine: NSObject, SCStreamOutput, SCStreamDelegate, AVCapture
         if let finishError { throw finishError }
         return ["source": try jsonObject(source)]
     }
-    func stream(_ stream: SCStream, didStopWithError error: Error) { queue.async { self.errorMessage = error.localizedDescription }; Task { @MainActor in if self.status()["active"] as? Bool == true { _ = try? await self.stop() } } }
+    func stream(_ stream: SCStream, didStopWithError error: Error) { queue.async { if !self.finalizing { self.failRecording(error) } } }
     func stream(_ stream: SCStream, didOutputSampleBuffer sampleBuffer: CMSampleBuffer, of type: SCStreamOutputType) {
         guard sampleBuffer.isValid, active, pausedAt == nil else { return }
         if type == .screen {
@@ -346,6 +464,8 @@ final class CaptureEngine: NSObject, SCStreamOutput, SCStreamDelegate, AVCapture
             guard kind == "screen" else { return }
             origin = clock.map { CMSyncConvertTime(sample.presentationTimeStamp, from: $0, to: CMClockGetHostTimeClock()) } ?? sample.presentationTimeStamp
             originResolved = true; pauseOffset = .zero
+            // Seed the first frame immediately, before startup waits for camera/system audio return.
+            sampleInput(CaptureInputMonitor.Sample(hostTime: origin, point: CaptureInputMonitor.pointer(), pressed: CaptureInputMonitor.pressed(), kind: nil))
         }
         var count = 0
         guard CMSampleBufferGetSampleTimingInfoArray(sample, entryCount: 0, arrayToFill: nil, entriesNeededOut: &count) == noErr, count > 0 else { return }
@@ -361,13 +481,11 @@ final class CaptureEngine: NSObject, SCStreamOutput, SCStreamDelegate, AVCapture
         do {
             let before = writer.samples; try writer.append(retimed)
             if kind == "camera", cameraRangeStart == nil, writer.samples > before { cameraRangeStart = milliseconds(timing[0].presentationTimeStamp) }
-        } catch {
-            errorMessage = error.localizedDescription; stopping = true
-            Task { @MainActor in if self.status()["active"] as? Bool == true { _ = try? await self.stop() } }
-        }
+        } catch { failRecording(error) }
         if kind == "microphone" || kind == "systemAudio" {
             let level = Self.level(sample); if kind == "microphone" { micLevel = level } else { systemLevel = level }
         }
+        publishStatus()
     }
     private static func level(_ buffer: CMSampleBuffer) -> Double {
         guard let block = CMSampleBufferGetDataBuffer(buffer), let format = buffer.formatDescription, let asbd = CMAudioFormatDescriptionGetStreamBasicDescription(format)?.pointee else { return 0 }

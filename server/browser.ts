@@ -4,8 +4,8 @@ import { promises as fs } from 'node:fs';
 import path from 'node:path';
 import os from 'node:os';
 import { ApplicationService } from './service.js';
-import { AppClient } from './rpc.js';
-import { errorOf } from './validation.js';
+import { AppClient } from './infrastructure/rpc.js';
+import { errorOf } from './contracts/validation.js';
 
 const isolated = path.join(os.tmpdir(), `screen-recorder-browser-${process.getuid?.() ?? 'local'}`);
 const service = new ApplicationService({ dataDir: process.env.SCREENREC_DATA_DIR || path.join(isolated, 'data'), projectsDir: process.env.SCREENREC_PROJECTS_DIR || path.join(isolated, 'projects') });

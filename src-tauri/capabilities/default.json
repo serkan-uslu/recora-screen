@@ -2,6 +2,34 @@
   "$schema": "../gen/schemas/desktop-schema.json",
   "identifier": "main",
   "description": "Desktop controls for the local Screen Recorder window.",
-  "windows": ["main"],
-  "permissions": ["core:default", "dialog:allow-open", "dialog:allow-save", "opener:allow-open-path", "opener:allow-reveal-item-in-dir"]
+  "windows": [
+    "main"
+  ],
+  "permissions": [
+    "core:default",
+    "dialog:allow-open",
+    "dialog:allow-save",
+    "opener:allow-open-path",
+    "opener:allow-reveal-item-in-dir",
+    {
+      "identifier": "opener:allow-open-url",
+      "allow": [
+        {
+          "url": "https://github.com/serkan-uslu"
+        },
+        {
+          "url": "https://medium.com/@serkan-uslu"
+        },
+        {
+          "url": "https://serkanuslu.com"
+        },
+        {
+          "url": "mailto:info@serkanuslu.com"
+        },
+        {
+          "url": "https://github.com/serkan-uslu/screen-recorder"
+        }
+      ]
+    }
+  ]
 }

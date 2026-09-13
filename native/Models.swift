@@ -20,8 +20,13 @@ struct RecordingSource: Codable {
     var title: String? = nil
 }
 struct CursorEvent: Codable { var tMs: Double; var x: Double; var y: Double; var click: Bool?; var kind: String? = nil }
+struct CameraLayout: Codable {
+    var id: String; var startMs: Double; var endMs: Double
+    var shape: String; var x: Double; var y: Double; var size: Double; var shadow: Bool
+}
 struct CameraSettings: Codable {
     var visible: Bool; var shape: String; var x: Double; var y: Double; var size: Double; var shadow: Bool; var hiddenRanges: [MediaRange]
+    var layouts: [CameraLayout]? = nil
 }
 struct Zoom: Codable { var id: String; var startMs: Double; var endMs: Double; var scale: Double; var x: Double; var y: Double; var motion: String? = nil; var followCursor: Bool? = nil }
 struct CanvasSettings: Codable {

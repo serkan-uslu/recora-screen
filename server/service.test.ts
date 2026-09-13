@@ -7,12 +7,12 @@ import { setTimeout as delay } from 'node:timers/promises';
 import { Client } from '@modelcontextprotocol/sdk/client/index.js';
 import { InMemoryTransport } from '@modelcontextprotocol/sdk/inMemory.js';
 import { ApplicationService, methodSchemas, type NativeCall } from './service.js';
-import { ProjectStore } from './store.js';
-import { AppClient, serveSocket } from './rpc.js';
+import { ProjectStore } from './infrastructure/ProjectStore.js';
+import { AppClient, serveSocket } from './infrastructure/rpc.js';
 import { createMcpServer } from './mcp.js';
-import { cursorClicks } from './cursor.js';
-import { applyEdits, silenceCuts, subtitleText } from './edits.js';
-import { sourceSchema, projectSchema } from './validation.js';
+import { cursorClicks } from './domain/cursor.js';
+import { applyEdits, silenceCuts, subtitleText } from './domain/edits.js';
+import { sourceSchema, projectSchema } from './contracts/validation.js';
 import { duration, outputRanges } from '../shared/timeline.js';
 import type { Job, Project } from '../shared/types.js';
 
@@ -85,6 +85,17 @@ test('official MCP client and UI command share one revision and one undo history
   assert.equal(ui.edits.camera.shape,'square'); assert.equal(ui.revision,result.structuredContent.result.revision);
   const undone = await service.command('history.undo',{projectId:p.id,expectedRevision:ui.revision});
   assert.equal(undone.edits.camera.shape,'circle');
+  assert(tools.tools.some(tool => tool.name === 'camera_layout_set'));
+  const layout: any = await client.callTool({ name: 'camera_layout_set', arguments: { projectId: p.id, expectedRevision: undone.revision, startMs: 1000, endMs: 3000, settings: { x: 0.1, size: 0.35 } } });
+  assert.equal(layout.isError, undefined);
+  const layoutProject = await service.command('project.open', { projectId: p.id });
+  assert.equal(layoutProject.edits.camera.layouts[0].x, 0.1);
+  assert.equal(layoutProject.revision, layout.structuredContent.result.revision);
+  await assert.rejects(service.command('camera.layout.remove', { projectId: p.id, expectedRevision: undone.revision, startMs: 1000, endMs: 3000 }), { code: 'REVISION_CONFLICT' });
+  const removed = await service.command('camera.layout.remove', { projectId: p.id, expectedRevision: layoutProject.revision, startMs: 1000, endMs: 3000 });
+  assert.deepEqual(removed.edits.camera.layouts, []);
+  const restored = await service.command('history.undo', { projectId: p.id, expectedRevision: removed.revision });
+  assert.deepEqual(restored.edits.camera.layouts, layoutProject.edits.camera.layouts);
 });
 
 test('private socket client coalesces concurrent initial connections and emits project changes', async t => {
@@ -112,11 +123,12 @@ test('backup recovery and source traversal validation protect project media', as
 
 test('busy recordings block editing/trash/quit; native auto-stop reconciles recovered media', async t => {
   let active = false;
-  const previewLoads: string[] = [];
+  const previewLoads: string[] = [], previewUpdates: string[] = [];
   const { service } = await setup(t,async (method,p) => {
     if (method === 'recording.start') { active = true; return {active:true,projectId:p!.projectId}; }
     if (method === 'recording.status') return {active};
     if (method === 'preview.load') { previewLoads.push((p!.project as Project).id); return {}; }
+    if (method === 'preview.update') { previewUpdates.push((p!.project as Project).id); return {}; }
     if (method.startsWith('preview.')) return {};
     throw new Error(method);
   });
@@ -126,14 +138,18 @@ test('busy recordings block editing/trash/quit; native auto-stop reconciles reco
   await service.command('recording.start',{projectId:project.id,settings:{sourceId:'display',sourceKind:'display',systemAudio:false,cameraShape:'circle',width:1920,height:1080,fps:30}});
   await assert.rejects(service.command('project.delete',{projectId:project.id}),{code:'PROJECT_BUSY'});
   assert.equal((await service.command('app.canQuit')).canQuit,false);
+  await assert.rejects(service.command('app.shutdown'), { code: 'APP_BUSY' });
   await fs.writeFile(path.join(service.store.dir(project.id),'recovered-source.json'),JSON.stringify({durationMs:5000,width:1920,height:1080,fps:30,screen:'media/screen.mov',cameraActiveRanges:[{startMs:0,endMs:2500}]}));
   active = false;
-  await service.command('recording.status');
+  const finalizing = await service.command('recording.status');
+  assert.equal(finalizing.phase, 'finalizing');
+  for (let i = 0; i < 100 && service.store.busy.has(project.id); i++) await delay(5);
   assert.equal((await service.store.get(project.id)).status,'ready');
   assert.equal((await service.command('app.canQuit')).canQuit,true);
   assert.deepEqual(previewLoads,[previewProject.id]);
   await service.command('timeline.apply',{projectId:previewProject.id,expectedRevision:previewProject.revision,operations:[{type:'camera.update',settings:{visible:false}}]});
-  assert.deepEqual(previewLoads,[previewProject.id,previewProject.id]);
+  assert.deepEqual(previewLoads,[previewProject.id]);
+  assert.deepEqual(previewUpdates,[previewProject.id]);
 });
 
 test('project delete routes to native Trash and active jobs prevent it', async t => {
@@ -332,7 +348,7 @@ test('finishing capture generates automatic zooms and preserves a recording when
 test('draft preview changes render state without saving or adding history; final edits replace the draft', async t => {
   let preview: Project | undefined;
   const { service } = await setup(t, async (method, params) => {
-    if (method === 'preview.load') { preview = structuredClone(params!.project as Project); return { playing: false }; }
+    if (method === 'preview.load' || method === 'preview.update') { preview = structuredClone(params!.project as Project); return { playing: false }; }
     throw Error(method);
   });
   const p = await ready(service), before = await service.store.read(p.id);
@@ -353,14 +369,14 @@ test('draft preview changes render state without saving or adding history; final
   assert.deepEqual(undone.edits, p.edits);
 });
 
-test('cancellation reload follows a queued draft behind an unrelated long mutation', async t => {
+test('cancel resets the current draft without waiting for unrelated permission work', async t => {
   let release!: () => void, entered!: () => void;
   const gate = new Promise<void>(resolve => { release = resolve; });
   const started = new Promise<void>(resolve => { entered = resolve; });
   const loads: number[] = [];
   const { service } = await setup(t, async (method, params) => {
     if (method === 'permissions.request') { entered(); await gate; return {}; }
-    if (method === 'preview.load') { loads.push((params!.project as Project).edits.camera.x); return {}; }
+    if (method === 'preview.load' || method === 'preview.update') { loads.push((params!.project as Project).edits.camera.x); return {}; }
     throw Error(method);
   });
   const p = await ready(service);
@@ -371,11 +387,11 @@ test('cancellation reload follows a queued draft behind an unrelated long mutati
   const get = service.store.get.bind(service.store);
   service.store.get = projectId => { reads++; return get(projectId); };
   const draft = service.command('preview.draft', { projectId: p.id, expectedRevision: p.revision, operations: [{ type: 'camera.update', settings: { x: 0.1 } }] });
-  const cancelled = service.command('preview.load', { projectId: p.id });
-  const readsWhileBlocked = reads;
+  const cancelled = service.command('preview.reset', { projectId: p.id, expectedRevision: p.revision, sequence: 2 });
+  await Promise.all([draft, cancelled]);
+  assert(reads > 0, 'preview edits and cancellation remain responsive during permission requests');
   release();
-  await Promise.all([mutation, draft, cancelled]);
-  assert.equal(readsWhileBlocked, 0);
+  await mutation;
   assert.deepEqual(loads, [p.edits.camera.x, 0.1, p.edits.camera.x]);
   assert.deepEqual(await service.store.get(p.id), p);
 });
@@ -407,4 +423,164 @@ test('AI provider failure leaves staged changes uncommitted and API keys out of 
   assert.equal(result.status,'failed'); assert.match(result.error!,/429/); assert.deepEqual(await service.store.get(original.id),original);
   assert(!(await fs.readFile(path.join(service.store.dir(original.id),'project.json'),'utf8')).includes('test-key-not-real'));
   assert(!(await fs.readFile(path.join(root,'data','jobs.json'),'utf8')).includes('test-key-not-real'));
+});
+
+function deferred<T>() {
+  let resolve!: (value: T) => void;
+  const promise = new Promise<T>(done => { resolve = done; });
+  return { promise, resolve };
+}
+const captureSettings = { sourceId: 'display', sourceKind: 'display', systemAudio: false, cameraShape: 'circle', width: 1920, height: 1080, fps: 30 };
+
+test('recording start and stop leave other projects editable, retain device exclusivity and deduplicate retries', async t => {
+  const startup = deferred<void>(), startEntered = deferred<void>(), stop = deferred<void>(), stopEntered = deferred<void>();
+  let starts = 0, stops = 0;
+  const source = { durationMs: 5000, width: 1920, height: 1080, fps: 30, screen: 'media/screen.mov' };
+  const { service } = await setup(t, async method => {
+    if (method === 'recording.start') { starts++; startEntered.resolve(); await startup.promise; return { active: true }; }
+    if (method === 'recording.stop') { stops++; stopEntered.resolve(); await stop.promise; return { source }; }
+    if (method === 'recording.status') return { active: false };
+    if (method.startsWith('preview.')) return {};
+    throw Error(method);
+  });
+  t.after(() => { startup.resolve(); stop.resolve(); });
+  const recording = await service.command('project.create', { name: 'Recording' });
+  const other = await ready(service);
+  const startArgs = { projectId: recording.id, settings: captureSettings, requestId: 'one-start' };
+  const firstStart = service.command('recording.start', startArgs), retryStart = service.command('recording.start', startArgs);
+  await startEntered.promise;
+  const startupStatus = await service.command('recording.status');
+  assert.equal(startupStatus.phase, 'starting'); assert.equal(startupStatus.active, true);
+  const edited = await Promise.race([
+    service.command('timeline.apply', { projectId: other.id, expectedRevision: other.revision, operations: [{ type: 'camera.update', settings: { x: 0.2 } }] }),
+    delay(1000).then(() => { throw Error('Other project edit blocked behind recording startup'); }),
+  ]);
+  assert.equal(edited.edits.camera.x, 0.2); assert.equal(starts, 1);
+  startup.resolve(); assert.deepEqual(await firstStart, await retryStart);
+  await assert.rejects(service.command('recording.start', { projectId: other.id, settings: captureSettings }), { code: 'RECORDING_ACTIVE' });
+  await assert.rejects(service.command('timeline.apply', { projectId: recording.id, expectedRevision: recording.revision + 1, operations: [{ type: 'camera.update', settings: { visible: false } }] }), { code: 'PROJECT_BUSY' });
+  const stopArgs = { projectId: recording.id, requestId: 'one-stop' };
+  const firstStop = service.command('recording.stop', stopArgs), retryStop = service.command('recording.stop', stopArgs);
+  await stopEntered.promise;
+  const finalizing = await service.command('recording.status');
+  assert.equal(finalizing.phase, 'finalizing'); assert.equal(finalizing.active, true);
+  assert.equal((await service.command('app.canQuit')).canQuit, false);
+  const renamed = await Promise.race([
+    service.command('project.rename', { projectId: other.id, expectedRevision: edited.revision, name: 'Edited while finalizing' }),
+    delay(1000).then(() => { throw Error('Other project rename blocked behind recording finalization'); }),
+  ]);
+  assert.equal(renamed.name, 'Edited while finalizing'); assert.equal(stops, 1);
+  stop.resolve();
+  const result = await firstStop;
+  assert.equal(result.id, recording.id); assert.equal(result.status, 'ready'); assert.deepEqual(result, await retryStop);
+  assert.equal(service.store.busy.has(recording.id), false);
+});
+
+test('a delayed inactive status cannot finalize a capture which started after the request', async t => {
+  const status = deferred<any>(), entered = deferred<void>();
+  const source = { durationMs: 1000, width: 1920, height: 1080, fps: 30, screen: 'media/screen.mov' };
+  const { service } = await setup(t, async method => {
+    if (method === 'recording.status') { entered.resolve(); return status.promise; }
+    if (method === 'recording.start') return { active: true };
+    if (method === 'recording.stop') return { source };
+    if (method.startsWith('preview.')) return {};
+    throw Error(method);
+  });
+  const capture = await service.command('project.create');
+  const stale = service.command('recording.status');
+  await entered.promise;
+  await service.command('recording.start', { projectId: capture.id, settings: captureSettings });
+  status.resolve({ active: false }); await stale;
+  await delay(20);
+  assert.equal(service.store.busy.has(capture.id), true);
+  assert.equal((await service.store.get(capture.id)).status, 'recording');
+  await service.command('recording.stop', { projectId: capture.id });
+});
+
+test('a previous recording status cannot finalize the next recording after device reuse', async t => {
+  const status = deferred<any>(), entered = deferred<void>();
+  const source = { durationMs: 1000, width: 1920, height: 1080, fps: 30, screen: 'media/screen.mov' };
+  const { service } = await setup(t, async method => {
+    if (method === 'recording.status') { entered.resolve(); return status.promise; }
+    if (method === 'recording.start') return { active: true };
+    if (method === 'recording.stop') return { source };
+    if (method.startsWith('preview.')) return {};
+    throw Error(method);
+  });
+  const first = await service.command('project.create'), next = await service.command('project.create');
+  await service.command('recording.start', { projectId: first.id, settings: captureSettings });
+  const stale = service.command('recording.status'); await entered.promise;
+  await service.command('recording.stop', { projectId: first.id });
+  await service.command('recording.start', { projectId: next.id, settings: captureSettings });
+  status.resolve({ active: false, projectId: first.id }); await stale;
+  await delay(20);
+  assert.equal(service.store.busy.has(next.id), true);
+  assert.equal((await service.store.get(next.id)).status, 'recording');
+  await service.command('recording.stop', { projectId: next.id });
+});
+
+test('preview sequences reject stale drafts after reset, revision changes and project switches', async t => {
+  const updates: Project[] = [], loads: string[] = [];
+  const { service } = await setup(t, async (method, params) => {
+    if (method === 'preview.load') { loads.push((params!.project as Project).id); return {}; }
+    if (method === 'preview.update') { updates.push(structuredClone(params!.project as Project)); return {}; }
+    throw Error(method);
+  });
+  const p = await ready(service), other = await ready(service);
+  await service.command('preview.load', { projectId: p.id });
+  const draft = (sequence: number, x: number, expectedRevision = p.revision) => service.command('preview.draft', {
+    projectId: p.id, expectedRevision, sequence, operations: [{ type: 'camera.update', settings: { x } }],
+  });
+  await draft(5, 0.1);
+  assert.deepEqual(await draft(4, 0.2), { superseded: true });
+  await service.command('preview.reset', { projectId: p.id, expectedRevision: p.revision, sequence: 6 });
+  assert.deepEqual(await draft(5, 0.3), { superseded: true });
+  assert.deepEqual(updates.map(p => p.edits.camera.x), [0.1, p.edits.camera.x]);
+  assert.deepEqual((await service.store.get(p.id)).edits, p.edits);
+  const committed = await service.command('timeline.apply', { projectId: p.id, expectedRevision: p.revision, operations: [{ type: 'camera.update', settings: { x: 0.4 } }] });
+  await assert.rejects(draft(100, 0.7), { code: 'REVISION_CONFLICT' });
+  await service.command('preview.load', { projectId: other.id });
+  await assert.rejects(draft(101, 0.8, committed.revision), { code: 'PREVIEW_NOT_ACTIVE' });
+  assert.equal(updates.at(-1)!.edits.camera.x, 0.4);
+  assert.deepEqual(loads, [p.id, other.id]);
+});
+
+test('shutdown waits for in-flight project writes and rejects new work before reporting ready', async t => {
+  const { service } = await setup(t);
+  const p = await ready(service), saving = deferred<void>(), release = deferred<void>();
+  const persist = service.store.persist.bind(service.store);
+  service.store.persist = async document => { saving.resolve(); await release.promise; await persist(document); };
+  t.after(() => release.resolve());
+  const renamed = service.command('project.rename', { projectId: p.id, expectedRevision: p.revision, name: 'Saved before quit' });
+  await saving.promise;
+  let readyToQuit = false;
+  const closing = service.command('app.shutdown').then(result => { readyToQuit = true; return result; });
+  await assert.rejects(service.command('project.create'), { code: 'APP_CLOSING' });
+  assert.equal(readyToQuit, false);
+  release.resolve(); await renamed;
+  assert.deepEqual(await closing, { ready: true });
+  assert.equal((await new ProjectStore(service.store.root).get(p.id)).name, 'Saved before quit');
+});
+
+test('an edit committed during initial preview preparation is rendered after the load completes', async t => {
+  let preview: Project | undefined;
+  const { service } = await setup(t, async (method, params) => {
+    if (method === 'preview.load' || method === 'preview.update') { preview = structuredClone(params!.project as Project); return {}; }
+    throw Error(method);
+  });
+  const p = await ready(service), preparing = deferred<void>(), release = deferred<void>();
+  const resolveMedia = service.store.resolveMedia.bind(service.store);
+  let delayed = false;
+  service.store.resolveMedia = async (id, file) => {
+    if (id === p.id && !delayed) { delayed = true; preparing.resolve(); await release.promise; }
+    return resolveMedia(id, file);
+  };
+  t.after(() => release.resolve());
+  const loading = service.command('preview.load', { projectId: p.id });
+  await preparing.promise;
+  const editing = service.command('timeline.apply', { projectId: p.id, expectedRevision: p.revision, operations: [{ type: 'camera.update', settings: { x: 0.2 } }] });
+  await delay(20); release.resolve();
+  const [, committed] = await Promise.all([loading, editing]);
+  assert.equal(preview!.revision, committed.revision);
+  assert.equal(preview!.edits.camera.x, 0.2);
 });

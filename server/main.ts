@@ -1,7 +1,7 @@
 import { randomUUID } from 'node:crypto';
 import { ApplicationService } from './service.js';
-import { AppError, errorOf } from './validation.js';
-import { readLines, serveSocket } from './rpc.js';
+import { AppError, errorOf } from './contracts/validation.js';
+import { readLines, serveSocket } from './infrastructure/rpc.js';
 
 const send = (value: unknown) => process.stdout.write(JSON.stringify(value) + '\n');
 const pending = new Map<string, { resolve: (value: any) => void; reject: (error: unknown) => void; timer: NodeJS.Timeout }>();

@@ -6,6 +6,7 @@ import CoreImage
     @MainActor static func main() async {
         do {
             _ = NSApplication.shared
+            renderMetricChecks()
             try permissionRequestChecks()
             if CommandLine.arguments.count > 1 && CommandLine.arguments[1] == "--permissions-check" {
                 print("Screen and input permission checks passed: already granted, granted after request, settings fallback, stale request result, clear open failure. No system permissions were requested or changed."); return
@@ -29,7 +30,7 @@ import CoreImage
                 let settings = CaptureSettings(sourceId: selected["id"] as! String, sourceKind: "window", region: nil, cameraId: nil, microphoneId: "BuiltInMicrophoneDevice", systemAudio: true, cameraShape: "circle", width: 1280, height: 720, fps: 30)
                 _ = try await CaptureEngine.shared.start(projectID: "capture-check", directory: dir.path, settings: settings)
                 try await Task.sleep(nanoseconds: 1_500_000_000)
-                _ = try CaptureEngine.shared.pause(); try await Task.sleep(nanoseconds: 300_000_000); _ = try CaptureEngine.shared.resume()
+                _ = try await CaptureEngine.shared.pause(); try await Task.sleep(nanoseconds: 300_000_000); _ = try await CaptureEngine.shared.resume()
                 try await Task.sleep(nanoseconds: 1_500_000_000)
                 let result = try await CaptureEngine.shared.stop()
                 print(String(decoding: try JSONSerialization.data(withJSONObject: result), as: UTF8.self))
@@ -58,11 +59,15 @@ import CoreImage
             let dir = FileManager.default.temporaryDirectory.appendingPathComponent("screenrec-native-check-\(UUID().uuidString)", isDirectory: true)
             try FileManager.default.createDirectory(at: dir.appendingPathComponent("media"), withIntermediateDirectories: true)
             let source = dir.appendingPathComponent("media/screen.mov"), camera = dir.appendingPathComponent("media/camera.mov")
-            try await syntheticVideo(source, camera: false); try await syntheticVideo(camera, camera: true)
+            let previewWidth = CommandLine.arguments.contains("--preview-4k-check") ? 3840 : 640, previewHeight = previewWidth * 9 / 16
+            try await syntheticVideo(source, camera: false, height: previewHeight, width: previewWidth); try await syntheticVideo(camera, camera: true)
             try (wavHeader(16000 * 2 * 4) + syntheticAudio()).write(to: dir.appendingPathComponent("media/mic.wav"))
             let cursor = (0..<120).map { CursorEvent(tMs: Double($0) * 1000 / 30, x: 0.2 + Double($0) / 240, y: 0.2 + Double($0) / 600, click: $0 > 80) }
             try JSONEncoder().encode(cursor).write(to: dir.appendingPathComponent("media/cursor.json"))
-            var project = Project(schemaVersion: 1, id: "test", name: "Synthetic native check", source: RecordingSource(durationMs: 4000, width: 640, height: 360, fps: 30, screen: "media/screen.mov", camera: "media/camera.mov", microphone: "media/mic.wav", systemAudio: nil, cursor: "media/cursor.json"), edits: EditState(segments: [MediaRange(startMs: 0, endMs: 1000), MediaRange(startMs: 2000, endMs: 4000)], camera: CameraSettings(visible: true, shape: "circle", x: 0.72, y: 0.55, size: 0.2, shadow: true, hiddenRanges: [MediaRange(startMs: 2200, endMs: 2800)]), zooms: [Zoom(id: "z", startMs: 100, endMs: 900, scale: 1.7, x: 0.3, y: 0.3)], overlays: [Overlay(id: "text", kind: "text", startMs: 2000, endMs: 4000, text: "Merhaba dünya — İstanbul", assetId: nil, x: 0.05, y: 0.08, width: 0.65, fontSize: 54, color: "#ffffff", animation: "fade")], audio: EditState.Audio(microphoneVolume: 0.8, systemVolume: 1), cursor: EditState.Cursor(visible: true, highlight: true, smooth: true, size: 1), captions: EditState.Captions(enabled: true, fontSize: 42, color: "#ffffff", background: "#111318")), transcript: [TranscriptSegment(id: "s", startMs: 2000, endMs: 4000, text: "Altyazı: ş ğ ü ı ö ç")], assets: [])
+            var project = Project(schemaVersion: 2, id: "test", name: "Synthetic native check", source: RecordingSource(durationMs: 4000, width: previewWidth, height: previewHeight, fps: 30, screen: "media/screen.mov", camera: "media/camera.mov", microphone: "media/mic.wav", systemAudio: nil, cursor: "media/cursor.json"), edits: EditState(segments: [MediaRange(startMs: 0, endMs: 1000), MediaRange(startMs: 2000, endMs: 4000)], camera: CameraSettings(visible: true, shape: "circle", x: 0.72, y: 0.55, size: 0.2, shadow: true, hiddenRanges: [MediaRange(startMs: 2200, endMs: 2800)]), zooms: [Zoom(id: "z", startMs: 100, endMs: 900, scale: 1.7, x: 0.3, y: 0.3)], overlays: [Overlay(id: "text", kind: "text", startMs: 2000, endMs: 4000, text: "Merhaba dünya — İstanbul", assetId: nil, x: 0.05, y: 0.08, width: 0.65, fontSize: 54, color: "#ffffff", animation: "fade")], audio: EditState.Audio(microphoneVolume: 0.8, systemVolume: 1), cursor: EditState.Cursor(visible: true, highlight: true, smooth: true, size: 1), captions: EditState.Captions(enabled: true, fontSize: 42, color: "#ffffff", background: "#111318")), transcript: [TranscriptSegment(id: "s", startMs: 2000, endMs: 4000, text: "Altyazı: ş ğ ü ı ö ç")], assets: [])
+            try cameraLayoutChecks(project)
+            try await livePreviewChecks(project, directory: dir)
+            if CommandLine.arguments.contains("--preview-check") || CommandLine.arguments.contains("--preview-4k-check") { print("Live preview checks passed: stable player item, paused frame redraw, geometry, native handles, coalesced seek, stale draft rejection and camera ranges. Artifacts: \(dir.path)"); return }
             assert(readCursor(Data("[{\"tMs\":0,\"x\":0.5,\"y\":0.5},{\"tMs\":".utf8)).count == 1)
             project.source?.fps = 29.999998092651367
             let fractional = try decode(Project.self, jsonObject(project)); assert(fractional.source!.fps > 29.99 && fractional.source!.fps < 30)
@@ -336,6 +341,131 @@ import CoreImage
         assert(narrow["width"] as? Int == width && narrow["height"] as? Int == 1080)
         }
     }
+    static func renderMetricChecks() {
+        let metrics = PreviewRenderMetrics(), started = ProcessInfo.processInfo.systemUptime - 0.005
+        metrics.begin(id: "current", kind: "update", started: started, inputAtMs: Date().timeIntervalSince1970 * 1000 - 50)
+        metrics.finish(id: "previous", timeMs: 200)
+        assert(metrics.snapshot()["count"] as? Int == 0)
+        metrics.finish(id: "current", timeMs: 200)
+        let sample = (metrics.snapshot()["samples"] as! [[String: Any]])[0]
+        assert((sample["latencyMs"] as! Double) >= 5 && (sample["inputLatencyMs"] as! Double) >= 50)
+        metrics.begin(id: "seek", kind: "seek", started: started, targetMs: 1000, inputAtMs: .infinity)
+        metrics.finish(id: "seek", timeMs: 200); assert(metrics.snapshot()["count"] as? Int == 1)
+        metrics.finish(id: "seek", timeMs: 1000); assert(metrics.snapshot()["inputCount"] as? Int == 1)
+        for _ in 0..<1005 { metrics.begin(id: "bounded", kind: "update", started: started); metrics.finish(id: "bounded", timeMs: 0) }
+        assert(metrics.snapshot()["count"] as? Int == 1000)
+        assert(metrics.snapshot(reset: true)["count"] as? Int == 0)
+    }
+    static func cameraLayoutChecks(_ original: Project) throws {
+        var project = original
+        project.edits.camera.hiddenRanges = []
+        project.edits.camera.layouts = [CameraLayout(id: "range", startMs: 500, endMs: 3500, shape: "square", x: 0.1, y: 0.2, size: 0.3, shadow: false)]
+        let runs = cameraOutputRuns(project), base = CameraVisual(project.edits.camera)
+        assert(runs.count == 3 && runs[1].startMs == 500 && runs[1].endMs == 2500, "Camera layout did not join across a source cut")
+        let inside = cameraVisual(runs, at: 1000, fallback: base)
+        assert(inside.x == 0.1 && inside.size == 0.3, "Cut restarted the camera transition")
+        let before = cameraVisual(runs, at: 350, fallback: base), middle = cameraVisual(runs, at: 500, fallback: base), after = cameraVisual(runs, at: 650, fallback: base)
+        assert(before.x == base.x && abs(middle.x - (base.x + 0.1) / 2) < 0.00001 && after.x == 0.1)
+        project.edits.segments = [MediaRange(startMs: 0, endMs: 1000, speed: 2), MediaRange(startMs: 2000, endMs: 4000, speed: 0.5)]
+        let sped = cameraOutputRuns(project)
+        assert(sped[1].startMs == 250 && sped[1].endMs == 3500)
+        project.edits.camera.layouts?.append(CameraLayout(id: "next", startMs: 3500, endMs: 3550, shape: "circle", x: 0.5, y: 0.6, size: 0.2, shadow: true))
+        let short = cameraOutputRuns(project)
+        let midpoint = cameraVisual(short, at: 3500, fallback: base)
+        assert(abs(midpoint.x - 0.3) < 0.0001, "Adjacent layouts did not share one shortened transition")
+        project.edits.camera.layouts = []
+        assert(cameraOutputRuns(project).count == 1)
+    }
+    @MainActor static func livePreviewChecks(_ original: Project, directory: URL) async throws {
+        let app = NativeApp.shared
+        let window = NSWindow(contentRect: CGRect(x: 0, y: 0, width: 800, height: 600), styleMask: [.titled], backing: .buffered, defer: false)
+        app.attach(window)
+        var project = original; project.edits.camera.hiddenRanges = []; project.edits.zooms = []; project.edits.overlays = []; project.edits.captions.enabled = false
+        _ = try await app.command("preview.load", ["project": try jsonObject(project), "projectDir": directory.path, "revision": 4])
+        _ = try await app.command("preview.seek", ["timeMs": 800])
+        let item = app.player!.currentItem!, itemID = app.previewItemID
+        let media = app.previewBuilt!.composition, priorVideo = item.videoComposition
+        project.edits.camera.x = 0.1
+        _ = try await app.command("preview.update", ["project": try jsonObject(project), "projectDir": directory.path, "revision": 4, "sequence": 2])
+        assert(app.player?.currentItem === item && app.previewBuilt?.composition === media && app.previewItemID == itemID, "Property edit rebuilt the player or media")
+        assert(item.videoComposition !== priorVideo && item.videoComposition != nil, "Paused property edit did not replace render instructions")
+        assert(abs(milliseconds(app.player!.currentTime()) - 800) < 34)
+        let geometry = try await app.command("preview.geometry", ["timeMs": 800]) as! [String: Any]
+        let camera = (geometry["items"] as! [[String: Any]]).first { $0["kind"] as? String == "camera" }!
+        assert(abs((camera["x"] as! Double) - 0.1) < 0.00001)
+        _ = try await app.command("preview.bounds", ["x": 20, "y": 20, "width": 640, "height": 360])
+        _ = try await app.command("preview.selection", ["selection": ["kind": "camera"]])
+        assert(app.preview?.selectionLayer.path != nil && app.preview?.handlesLayer.path != nil)
+        var stale = project; stale.edits.camera.x = 0.6
+        _ = try await app.command("preview.update", ["project": try jsonObject(stale), "projectDir": directory.path, "revision": 4, "sequence": 1])
+        assert(app.previewProject?.edits.camera.x == 0.1, "Out-of-order gesture applied")
+        _ = try await app.command("preview.update", ["project": try jsonObject(stale), "projectDir": directory.path, "revision": 3, "sequence": 100])
+        assert(app.previewProject?.edits.camera.x == 0.1, "Old revision applied")
+        // `async let` children may enter the actor in any order. Signal each entry before
+        // launching its successor so "latest" means the last submitted seek, not source order.
+        func startSeek(_ time: Double) async -> Task<Void, Never> {
+            var task: Task<Void, Never>!
+            await withCheckedContinuation { (entered: CheckedContinuation<Void, Never>) in
+                task = Task { @MainActor in
+                    entered.resume()
+                    await app.seek(mediaTime(time))
+                }
+            }
+            return task
+        }
+        for _ in 0..<10 {
+            let first = await startSeek(200), second = await startSeek(1800)
+            await app.seek(mediaTime(2400))
+            await first.value; await second.value
+            let actual = milliseconds(app.player!.currentTime())
+            assert(abs(actual - 2400) < 34 && !app.seeking, "Chase seek did not finish at latest target: \(actual)ms")
+        }
+        project.edits.overlays = original.edits.overlays
+        _ = try await app.command("preview.load", ["project": try jsonObject(project), "projectDir": directory.path])
+        let overlayGeometry = app.previewGeometry(at: 2400)["items"] as! [[String: Any]]
+        let overlay = overlayGeometry.first { $0["id"] as? String == "text" }!
+        let instruction = app.previewBuilt!.instruction, bounds = CGRect(origin: .zero, size: app.previewBuilt!.video.renderSize)
+        let rectangle = overlayRect(project.edits.overlays[0], sourceMs: 3400, bounds: bounds, images: instruction.images)
+        assert(abs((overlay["height"] as! Double) * bounds.height - rectangle.height) < 0.0001, "Text handle measurements diverged from compositor")
+        _ = try await app.command("preview.selection", ["selection": NSNull()])
+        assert(app.preview?.selectionLayer.path == nil)
+        _ = app.previewMetrics.snapshot(reset: true)
+        for index in 0..<25 {
+            project.edits.camera.x = 0.1 + Double(index % 10) * 0.04
+            _ = try await app.command("preview.update", ["project": try jsonObject(project), "projectDir": directory.path, "sequence": index + 1])
+            for _ in 0..<500 {
+                if (app.previewMetrics.snapshot()["count"] as? Int ?? 0) > index { break }
+                try await Task.sleep(nanoseconds: 2_000_000)
+            }
+            assert((app.previewMetrics.snapshot()["count"] as? Int ?? 0) > index, "Paused update did not produce a new composited frame")
+        }
+        let metrics = app.previewMetrics.snapshot()
+        project.edits.camera.layouts = [CameraLayout(id: "layout", startMs: 500, endMs: 3500, shape: "square", x: 0.1, y: 0.2, size: 0.3, shadow: false)]
+        _ = try await app.command("preview.update", ["project": try jsonObject(project), "projectDir": directory.path, "sequence": 30])
+        let layoutBuilt = app.previewBuilt!, layoutGenerator = AVAssetImageGenerator(asset: layoutBuilt.composition)
+        layoutGenerator.videoComposition = layoutBuilt.video
+        layoutGenerator.requestedTimeToleranceBefore = .zero; layoutGenerator.requestedTimeToleranceAfter = .zero
+        let layoutFrame = try await layoutGenerator.image(at: mediaTime(800)).image
+        let cameraBox = cameraRect(cameraVisual(layoutBuilt.instruction.cameraRuns, at: 800, fallback: CameraVisual(project.edits.camera)), bounds: CGRect(origin: .zero, size: layoutBuilt.video.renderSize))
+        let layoutPixel = pixel(layoutFrame, x: Int(cameraBox.midX), y: Int(layoutBuilt.video.renderSize.height - cameraBox.midY))
+        assert(layoutPixel[1] > layoutPixel[0] + 80, "Camera range layout did not affect rendered pixels")
+        try JSONSerialization.data(withJSONObject: metrics, options: [.prettyPrinted, .sortedKeys]).write(to: directory.appendingPathComponent("preview-metrics.json"))
+        print("Native paused-update latency (\(project.source!.width)×\(project.source!.height), command arrival to compositor completion, 25 samples): p95=\(metrics["p95Ms"]!)ms")
+        let beforeCut = app.previewItemID
+        project.edits.segments = [MediaRange(startMs: 0, endMs: 2000)]
+        _ = try await app.command("preview.update", ["project": try jsonObject(project), "projectDir": directory.path, "revision": 1])
+        assert(app.previewItemID != beforeCut && abs(milliseconds(app.previewBuilt!.composition.duration) - 2000) < 1, "Structural edit reused incompatible media tracks")
+        assert(milliseconds(app.player!.currentTime()) <= 2000 && milliseconds(app.player!.currentTime()) >= 1933, "Cut preview did not clamp the old playhead to the remaining timeline")
+        var newest = project; newest.edits.camera.x = 0.22
+        let update = Task { @MainActor in try await app.command("preview.update", ["project": try jsonObject(newest), "projectDir": directory.path, "revision": 1, "sequence": 20]) }
+        await Task.yield()
+        _ = try await app.command("preview.update", ["project": try jsonObject(project), "projectDir": directory.path, "revision": 1, "sequence": 19])
+        _ = try await update.value
+        assert(app.previewProject?.edits.camera.x == 0.22, "An older async update superseded a newer gesture")
+        var unsupported = project; unsupported.schemaVersion = 99
+        do { _ = try await makeComposition(unsupported, directory: directory.path); assertionFailure("Unsupported project version accepted") }
+        catch { assert((error as? NativeFailure)?.code == "unsupported_version") }
+    }
     static func tonePitch(_ url: URL, fromMs: Double, toMs: Double) async throws -> Double {
         let (reader, output) = try await audioReader(url)
         var previous: Int16 = 0, crossings = 0, count = 0
@@ -355,16 +485,16 @@ import CoreImage
         var data = Data()
         for index in 0..<(16000 * 4) { let amplitude = (index / 16000) % 2 == 0 ? sin(Double(index) * 2 * .pi * 440 / 16000) * 8000 : 0; var value = Int16(amplitude).littleEndian; withUnsafeBytes(of: &value) { data.append(contentsOf: $0) } }; return data
     }
-    static func syntheticVideo(_ url: URL, camera: Bool, height: Int = 360) async throws {
+    static func syntheticVideo(_ url: URL, camera: Bool, height: Int = 360, width: Int = 640) async throws {
         let writer = try AVAssetWriter(outputURL: url, fileType: .mov)
-        let input = AVAssetWriterInput(mediaType: .video, outputSettings: [AVVideoCodecKey: AVVideoCodecType.h264, AVVideoWidthKey: 640, AVVideoHeightKey: height])
-        let adapter = AVAssetWriterInputPixelBufferAdaptor(assetWriterInput: input, sourcePixelBufferAttributes: [kCVPixelBufferPixelFormatTypeKey as String: kCVPixelFormatType_32BGRA, kCVPixelBufferWidthKey as String: 640, kCVPixelBufferHeightKey as String: height])
+        let input = AVAssetWriterInput(mediaType: .video, outputSettings: [AVVideoCodecKey: AVVideoCodecType.h264, AVVideoWidthKey: width, AVVideoHeightKey: height])
+        let adapter = AVAssetWriterInputPixelBufferAdaptor(assetWriterInput: input, sourcePixelBufferAttributes: [kCVPixelBufferPixelFormatTypeKey as String: kCVPixelFormatType_32BGRA, kCVPixelBufferWidthKey as String: width, kCVPixelBufferHeightKey as String: height])
         writer.add(input); guard writer.startWriting() else { throw writer.error! }; writer.startSession(atSourceTime: .zero)
         let context = CIContext()
         for i in 0..<120 {
             while !input.isReadyForMoreMediaData { try await Task.sleep(nanoseconds: 2_000_000) }
             var buffer: CVPixelBuffer?; CVPixelBufferPoolCreatePixelBuffer(kCFAllocatorDefault, adapter.pixelBufferPool!, &buffer)
-            let bounds = CGRect(x: 0, y: 0, width: 640, height: height)
+            let bounds = CGRect(x: 0, y: 0, width: width, height: height)
             let base = CIImage(color: camera ? CIColor(red: 0.05, green: 0.9, blue: 0.1) : CIColor(red: 0.45, green: 0.08, blue: 0.18)).cropped(to: bounds)
             let tile = CIImage(color: CIColor(red: 0.2, green: 0.2, blue: 0.9)).cropped(to: CGRect(x: i * 3, y: 60, width: 55, height: 70))
             context.render(camera ? base : tile.composited(over: base), to: buffer!)
