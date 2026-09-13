@@ -1,0 +1,19 @@
+{
+  "package": "selectors",
+  "version": "0.36.1",
+  "repository": "https://github.com/servo/stylo",
+  "revision": "635e1a19d02960588a00e189bd4bd5bdb150ec3d",
+  "files": [
+    {
+      "file": "LICENSE-MPL-2.0.txt",
+      "url": "https://www.mozilla.org/media/MPL/2.0/index.txt",
+      "sha256": "3f3d9e0024b1921b067d6f7f88deb4a60cbe7a78e76c64e3f1d7fc3b779b9d04"
+    },
+    {
+      "file": "NOTICE.txt",
+      "url": "https://raw.githubusercontent.com/servo/stylo/635e1a19d02960588a00e189bd4bd5bdb150ec3d/selectors/lib.rs",
+      "sha256": "766674381e88a468d55e07de3596987391cf0e8beebe51baf4fddf11078785b3",
+      "note": "Exact leading license notice from the pinned crate source."
+    }
+  ]
+}

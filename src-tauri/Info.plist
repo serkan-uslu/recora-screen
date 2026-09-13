@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0"><dict>
+  <key>NSCameraUsageDescription</key><string>Record your camera as a separate, editable video track.</string>
+  <key>NSMicrophoneUsageDescription</key><string>Record your narration as a separate audio track.</string>
+  <key>NSAudioCaptureUsageDescription</key><string>Record system audio alongside your screen.</string>
+  <key>NSScreenCaptureUsageDescription</key><string>Record the screen or window you select.</string>
+  <key>NSHighResolutionCapable</key><true/>
+  <key>LSMinimumSystemVersion</key><string>15.0</string>
+</dict></plist>

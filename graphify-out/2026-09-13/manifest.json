@@ -1,0 +1,392 @@
+{
+  "native/Audio.swift": {
+    "mtime": 1789295850.022758,
+    "seen": 1789296675.099481,
+    "ast_hash": "5042ae50169ffb95a59e3457765466bf",
+    "semantic_hash": ""
+  },
+  "native/Bridge.swift": {
+    "mtime": 1789296341.8119552,
+    "seen": 1789296675.099485,
+    "ast_hash": "ef05626b13623209066f8d7fd05860ab",
+    "semantic_hash": ""
+  },
+  "native/Capture.swift": {
+    "mtime": 1789296143.372726,
+    "seen": 1789296675.0994859,
+    "ast_hash": "8ec9406348a8d5a00e63de5c4385c2c9",
+    "semantic_hash": ""
+  },
+  "native/Check.swift": {
+    "mtime": 1789296371.2867613,
+    "seen": 1789296675.0994859,
+    "ast_hash": "fc67cdfbdbea2dd8c3bd5518d71d1749",
+    "semantic_hash": ""
+  },
+  "native/Composition.swift": {
+    "mtime": 1789296143.372506,
+    "seen": 1789296675.099487,
+    "ast_hash": "5cb107291ac53bf41d5a78dc142d9f7f",
+    "semantic_hash": ""
+  },
+  "native/Models.swift": {
+    "mtime": 1789296230.7236266,
+    "seen": 1789296675.099487,
+    "ast_hash": "d3ae062cdca3bb91841490bb930d30b1",
+    "semantic_hash": ""
+  },
+  "native/build.sh": {
+    "mtime": 1789295779.595131,
+    "seen": 1789296675.099488,
+    "ast_hash": "4000ebac23b4f8b5f6c25f55122817ca",
+    "semantic_hash": ""
+  },
+  "native/check.sh": {
+    "mtime": 1789295248.022262,
+    "seen": 1789296675.099488,
+    "ast_hash": "d3a49e63763fd587b448e07de8675c05",
+    "semantic_hash": ""
+  },
+  "package.json": {
+    "mtime": 1789296603.3131316,
+    "seen": 1789296675.099489,
+    "ast_hash": "1531311861a10d2e453e6c398bedf93b",
+    "semantic_hash": ""
+  },
+  "scripts/build-server.mjs": {
+    "mtime": 1789294695.3142538,
+    "seen": 1789296675.099489,
+    "ast_hash": "f3aa609fa5d549db58c7e7f123a0450a",
+    "semantic_hash": ""
+  },
+  "scripts/check-desktop.ts": {
+    "mtime": 1789296173.5362368,
+    "seen": 1789296675.0994902,
+    "ast_hash": "7041cb68e22366abf3f70506f3d1958f",
+    "semantic_hash": ""
+  },
+  "scripts/check-local-ai.ts": {
+    "mtime": 1789295438.8813794,
+    "seen": 1789296675.0994902,
+    "ast_hash": "1cac09386f92c2d9eef9063ccf323316",
+    "semantic_hash": ""
+  },
+  "scripts/desktop.mjs": {
+    "mtime": 1789294984.2965043,
+    "seen": 1789296675.0994911,
+    "ast_hash": "c0ee189f2d691feddc3485b0f6a4bb01",
+    "semantic_hash": ""
+  },
+  "scripts/make-icon.swift": {
+    "mtime": 1789294914.5986316,
+    "seen": 1789296675.0994911,
+    "ast_hash": "69c2b1806d928ad4c7464cda4ce8e094",
+    "semantic_hash": ""
+  },
+  "scripts/prepare-runtime.mjs": {
+    "mtime": 1789296376.2180314,
+    "seen": 1789296675.099492,
+    "ast_hash": "0ee48897fb7dbf0d96dad4a327045899",
+    "semantic_hash": ""
+  },
+  "scripts/prepare-whisper.mjs": {
+    "mtime": 1789295846.0906858,
+    "seen": 1789296675.099492,
+    "ast_hash": "0dda943adfd771d959e5aac971bfb315",
+    "semantic_hash": ""
+  },
+  "scripts/verify-bundle.mjs": {
+    "mtime": 1789296527.6642647,
+    "seen": 1789296675.099493,
+    "ast_hash": "e0afc992fcc54b89757f0dfc86b6eb23",
+    "semantic_hash": ""
+  },
+  "server/ai.ts": {
+    "mtime": 1789295727.7354116,
+    "seen": 1789296675.099493,
+    "ast_hash": "9c987b62983abf196fd266bbbb5f411e",
+    "semantic_hash": ""
+  },
+  "server/browser.ts": {
+    "mtime": 1789295559.826726,
+    "seen": 1789296675.099494,
+    "ast_hash": "740da33b64fb26eba3d246c538d5a3b6",
+    "semantic_hash": ""
+  },
+  "server/cursor.ts": {
+    "mtime": 1789295727.7346516,
+    "seen": 1789296675.099494,
+    "ast_hash": "7d3c3f344c153cf39189945bdcedba60",
+    "semantic_hash": ""
+  },
+  "server/edits.ts": {
+    "mtime": 1789296047.677386,
+    "seen": 1789296675.099494,
+    "ast_hash": "60a69c2b5ab412ae5ab7324ed4f774ac",
+    "semantic_hash": ""
+  },
+  "server/jobs.ts": {
+    "mtime": 1789294978.9888387,
+    "seen": 1789296675.099495,
+    "ast_hash": "07cf3d41c398e1e5b35551c42e974c8d",
+    "semantic_hash": ""
+  },
+  "server/main.ts": {
+    "mtime": 1789296256.2084372,
+    "seen": 1789296675.099495,
+    "ast_hash": "6bff920e260e87d7400d790207443162",
+    "semantic_hash": ""
+  },
+  "server/mcp.ts": {
+    "mtime": 1789295521.8695273,
+    "seen": 1789296675.099496,
+    "ast_hash": "69573651acc2a1c93dc842055266cea1",
+    "semantic_hash": ""
+  },
+  "server/rpc.ts": {
+    "mtime": 1789296047.6765513,
+    "seen": 1789296675.099496,
+    "ast_hash": "3e08f8b2964bbc25379876f8cda5614d",
+    "semantic_hash": ""
+  },
+  "server/service.test.ts": {
+    "mtime": 1789296256.2087379,
+    "seen": 1789296675.0994968,
+    "ast_hash": "a517e1b7c2e5c4e6e639b3e58d8e0534",
+    "semantic_hash": ""
+  },
+  "server/service.ts": {
+    "mtime": 1789296256.2081397,
+    "seen": 1789296675.0994968,
+    "ast_hash": "62719ff3bde4561aac728c5b0ab2ce6e",
+    "semantic_hash": ""
+  },
+  "server/store.ts": {
+    "mtime": 1789296169.9960752,
+    "seen": 1789296675.099498,
+    "ast_hash": "de8dbf9ebc01ec99f750838fd36e8ebe",
+    "semantic_hash": ""
+  },
+  "server/validation.ts": {
+    "mtime": 1789295304.9633155,
+    "seen": 1789296675.099498,
+    "ast_hash": "b9317e6b9e4b6257fe0dd86620ba64d8",
+    "semantic_hash": ""
+  },
+  "shared/timeline.test.ts": {
+    "mtime": 1789294695.3146198,
+    "seen": 1789296675.099499,
+    "ast_hash": "8c05c8b2ab4c2b65642df52df7ce9b2f",
+    "semantic_hash": ""
+  },
+  "shared/timeline.ts": {
+    "mtime": 1789294462.5223587,
+    "seen": 1789296675.099499,
+    "ast_hash": "8864c0ba651d7c462b8cb32912329ef7",
+    "semantic_hash": ""
+  },
+  "shared/types.ts": {
+    "mtime": 1789296376.2175357,
+    "seen": 1789296675.0995,
+    "ast_hash": "e596caec11e5880071e2334657a0a936",
+    "semantic_hash": ""
+  },
+  "src-tauri/Cargo.toml": {
+    "mtime": 1789296377.802346,
+    "seen": 1789296675.0995,
+    "ast_hash": "64d04fd981d48df7acedf8761af89f1a",
+    "semantic_hash": ""
+  },
+  "src-tauri/build.rs": {
+    "mtime": 1789294984.2969868,
+    "seen": 1789296675.0995011,
+    "ast_hash": "5b4d97dc418759ad66158417b3dd133c",
+    "semantic_hash": ""
+  },
+  "src-tauri/capabilities/default.json": {
+    "mtime": 1789294819.6618361,
+    "seen": 1789296675.0995011,
+    "ast_hash": "44f9ad56445f5e42ff2e6390ff08f1df",
+    "semantic_hash": ""
+  },
+  "src-tauri/src/main.rs": {
+    "mtime": 1789296377.8026617,
+    "seen": 1789296675.099502,
+    "ast_hash": "f35efece84a4d5011fe68d522edb0a03",
+    "semantic_hash": ""
+  },
+  "src-tauri/tauri.conf.json": {
+    "mtime": 1789296603.3128223,
+    "seen": 1789296675.099502,
+    "ast_hash": "8272621260f4135ea5df971196ead239",
+    "semantic_hash": ""
+  },
+  "src/App.tsx": {
+    "mtime": 1789296382.7877731,
+    "seen": 1789296675.099502,
+    "ast_hash": "48ae90d01c63763efb3d54f4060f8a67",
+    "semantic_hash": ""
+  },
+  "src/api.ts": {
+    "mtime": 1789296178.597397,
+    "seen": 1789296675.099503,
+    "ast_hash": "8d45617678eb1b439b28c682d9f07b0b",
+    "semantic_hash": ""
+  },
+  "src/main.tsx": {
+    "mtime": 1789296178.7855597,
+    "seen": 1789296675.099503,
+    "ast_hash": "b10cc23e037e00a74cdc9416030d8306",
+    "semantic_hash": ""
+  },
+  "tsconfig.json": {
+    "mtime": 1789294695.3134766,
+    "seen": 1789296675.0995042,
+    "ast_hash": "4246195096972e59b8bfad7296af5132",
+    "semantic_hash": ""
+  },
+  "vite.config.ts": {
+    "mtime": 1789294695.3136475,
+    "seen": 1789296675.0995042,
+    "ast_hash": "ddef4db7bf4d8dc27504a5c39d031910",
+    "semantic_hash": ""
+  },
+  ".github/workflows/checks.yml": {
+    "mtime": 1789295153.0284307,
+    "seen": 1789296675.099505,
+    "ast_hash": "d1619402ee55b8bee3af943b24377f1e",
+    "semantic_hash": ""
+  },
+  ".github/workflows/release.yml": {
+    "mtime": 1789296527.6645312,
+    "seen": 1789296675.099506,
+    "ast_hash": "406201cab66625ec8897d1dc84208112",
+    "semantic_hash": ""
+  },
+  "README.md": {
+    "mtime": 1789295153.0279481,
+    "seen": 1789296675.099506,
+    "ast_hash": "7bd3c34cc0fccfe0382d3c2b9849f503",
+    "semantic_hash": ""
+  },
+  "THIRD_PARTY_NOTICES.md": {
+    "mtime": 1789295153.0283003,
+    "seen": 1789296675.0995069,
+    "ast_hash": "81c13b2c276e522d3531720ace2b5683",
+    "semantic_hash": ""
+  },
+  "docs/mcp.md": {
+    "mtime": 1789295991.4117742,
+    "seen": 1789296675.0995069,
+    "ast_hash": "1e945cca0a6baa5399ab230563b2ecb5",
+    "semantic_hash": ""
+  },
+  "docs/privacy.md": {
+    "mtime": 1789295799.0605447,
+    "seen": 1789296675.0995069,
+    "ast_hash": "ddcf640aa6215eeb4c530c9a6cdded26",
+    "semantic_hash": ""
+  },
+  "docs/release.md": {
+    "mtime": 1789295991.4119806,
+    "seen": 1789296675.099508,
+    "ast_hash": "ecc76d5e8834547461716f7e9594de64",
+    "semantic_hash": ""
+  },
+  "index.html": {
+    "mtime": 1789294695.3138266,
+    "seen": 1789296675.099508,
+    "ast_hash": "0a90eb2b2bd054adc528fbc2ca238e33",
+    "semantic_hash": ""
+  },
+  "native/README.md": {
+    "mtime": 1789295931.056764,
+    "seen": 1789296675.099509,
+    "ast_hash": "e9c765cd2c05a9f5451bec3fb8fe7dec",
+    "semantic_hash": ""
+  },
+  "src-tauri/icons/128x128.png": {
+    "mtime": 1789294919.0898728,
+    "seen": 1789296675.099509,
+    "ast_hash": "1672d1cf2c4351fd78039f050db2f47e",
+    "semantic_hash": ""
+  },
+  "src-tauri/icons/128x128@2x.png": {
+    "mtime": 1789294919.0908194,
+    "seen": 1789296675.09951,
+    "ast_hash": "5e1dc8f8569ce9aa0d83a1e04b6356a0",
+    "semantic_hash": ""
+  },
+  "src-tauri/icons/32x32.png": {
+    "mtime": 1789294919.089292,
+    "seen": 1789296675.09951,
+    "ast_hash": "ab70084757d94c69a625b58bb8b893b4",
+    "semantic_hash": ""
+  },
+  "src-tauri/icons/icon.iconset/icon_128x128.png": {
+    "mtime": 1789294919.0951068,
+    "seen": 1789296675.0995111,
+    "ast_hash": "1672d1cf2c4351fd78039f050db2f47e",
+    "semantic_hash": ""
+  },
+  "src-tauri/icons/icon.iconset/icon_128x128@2x.png": {
+    "mtime": 1789294919.0959454,
+    "seen": 1789296675.0995111,
+    "ast_hash": "5e1dc8f8569ce9aa0d83a1e04b6356a0",
+    "semantic_hash": ""
+  },
+  "src-tauri/icons/icon.iconset/icon_16x16.png": {
+    "mtime": 1789294919.0937355,
+    "seen": 1789296675.0995111,
+    "ast_hash": "fee62fa254223306ec8f3518a565ae89",
+    "semantic_hash": ""
+  },
+  "src-tauri/icons/icon.iconset/icon_16x16@2x.png": {
+    "mtime": 1789294919.0941846,
+    "seen": 1789296675.099512,
+    "ast_hash": "ab70084757d94c69a625b58bb8b893b4",
+    "semantic_hash": ""
+  },
+  "src-tauri/icons/icon.iconset/icon_256x256.png": {
+    "mtime": 1789294919.0967672,
+    "seen": 1789296675.099512,
+    "ast_hash": "5e1dc8f8569ce9aa0d83a1e04b6356a0",
+    "semantic_hash": ""
+  },
+  "src-tauri/icons/icon.iconset/icon_256x256@2x.png": {
+    "mtime": 1789294919.0990062,
+    "seen": 1789296675.099513,
+    "ast_hash": "19ca01b9280b6380c16d3d774500d543",
+    "semantic_hash": ""
+  },
+  "src-tauri/icons/icon.iconset/icon_32x32.png": {
+    "mtime": 1789294919.0944355,
+    "seen": 1789296675.099513,
+    "ast_hash": "ab70084757d94c69a625b58bb8b893b4",
+    "semantic_hash": ""
+  },
+  "src-tauri/icons/icon.iconset/icon_32x32@2x.png": {
+    "mtime": 1789294919.094727,
+    "seen": 1789296675.099514,
+    "ast_hash": "1a370f7bf28768a52ccae7b43a5c24a0",
+    "semantic_hash": ""
+  },
+  "src-tauri/icons/icon.iconset/icon_512x512.png": {
+    "mtime": 1789294919.101426,
+    "seen": 1789296675.099514,
+    "ast_hash": "19ca01b9280b6380c16d3d774500d543",
+    "semantic_hash": ""
+  },
+  "src-tauri/icons/icon.iconset/icon_512x512@2x.png": {
+    "mtime": 1789294919.1090877,
+    "seen": 1789296675.099515,
+    "ast_hash": "179f97fc6397e295b73126911b9d2413",
+    "semantic_hash": ""
+  },
+  "src-tauri/icons/icon.png": {
+    "mtime": 1789294919.093072,
+    "seen": 1789296675.099515,
+    "ast_hash": "19ca01b9280b6380c16d3d774500d543",
+    "semantic_hash": ""
+  }
+}

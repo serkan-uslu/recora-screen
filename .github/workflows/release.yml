@@ -1,0 +1,61 @@
+name: Development macOS artifacts (not notarized)
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: development-macos-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: macos-15
+    timeout-minutes: 90
+    env:
+      APPLE_SIGNING_IDENTITY: '-'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Install dependencies
+        run: npm ci
+      - name: Check project and timeline behavior
+        run: npm test
+      - name: Check native composition and audio
+        run: npm run test:native
+      - name: Check bundle verifier
+        run: node scripts/verify-bundle.mjs --self-test
+      - name: Build and verify host architecture application and DMG
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p artifacts
+          npm run desktop:build | tee artifacts/build-verification.txt
+      - name: Collect development ZIP and DMG
+        shell: bash
+        run: |
+          set -euo pipefail
+          app='src-tauri/target/release/bundle/macos/Screen Recorder.app'
+          architecture="$(uname -m)"
+          /usr/bin/ditto -c -k --sequesterRsrc --keepParent "$app" "artifacts/Screen-Recorder-macOS-$architecture-development.app.zip"
+          cp src-tauri/target/release/bundle/dmg/*.dmg artifacts/
+          printf '%s\n' 'Development artifacts only. The application is ad-hoc signed, not Developer ID signed or notarized. Gatekeeper may prevent opening a downloaded copy. No public release was published.' > artifacts/READ-ME.txt
+          cd artifacts
+          /usr/bin/shasum -a 256 ./*.dmg ./*.zip > SHA256SUMS
+      - name: Upload development artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: screen-recorder-macos-${{ runner.arch }}-development-not-notarized
+          path: artifacts/
+          if-no-files-found: error
+          retention-days: 14
+      - name: Record artifact status
+        shell: bash
+        run: |
+          printf '%s\n' '### Development build only' 'Host architecture app and DMG were built and checked.' 'The app has an ad-hoc signature. It is not Developer ID signed or notarized.' 'This workflow uploads build artifacts and does not create or publish a GitHub Release.' >> "$GITHUB_STEP_SUMMARY"

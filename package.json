@@ -1,0 +1,48 @@
+{
+  "name": "screen-recorder",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "license": "MIT",
+  "description": "A local-first, MCP-controlled screen recording studio for macOS.",
+  "engines": { "node": ">=22.12" },
+  "scripts": {
+    "dev": "node scripts/desktop.mjs dev",
+    "dev:web": "vite --host 127.0.0.1",
+    "dev:server": "tsx server/browser.ts",
+    "build": "npm run typecheck && vite build && node scripts/build-server.mjs",
+    "typecheck": "tsc --noEmit",
+    "test": "tsx --test server/*.test.ts shared/*.test.ts",
+    "test:ai": "tsx scripts/check-local-ai.ts",
+    "test:native": "bash native/check.sh",
+    "test:desktop": "tsx scripts/check-desktop.ts",
+    "verify:bundle": "node scripts/verify-bundle.mjs",
+    "prepare:runtime": "node scripts/prepare-runtime.mjs",
+    "prepare:whisper": "node scripts/prepare-whisper.mjs",
+    "prepare:desktop": "npm run prepare:runtime && npm run prepare:whisper && node scripts/build-server.mjs && node scripts/bundle-notices.mjs && node scripts/sign-runtimes.mjs",
+    "desktop:build": "npm run prepare:desktop && node scripts/desktop.mjs build && node scripts/package-dmg.mjs",
+    "desktop:check": "node scripts/desktop.mjs check",
+    "mcp": "tsx server/mcp.ts"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.27.1",
+    "@tauri-apps/api": "^2.10.1",
+    "@tauri-apps/plugin-dialog": "^2.6.0",
+    "@tauri-apps/plugin-opener": "^2.5.3",
+    "lucide-react": "^0.577.0",
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0",
+    "zod": "^4.3.6"
+  },
+  "devDependencies": {
+    "@tauri-apps/cli": "^2.10.1",
+    "@types/node": "^22.19.0",
+    "@types/react": "^19.2.0",
+    "@types/react-dom": "^19.2.0",
+    "@vitejs/plugin-react": "^5.1.4",
+    "esbuild": "^0.27.3",
+    "tsx": "^4.21.0",
+    "typescript": "^5.9.3",
+    "vite": "^7.3.1"
+  }
+}

@@ -1,0 +1,40 @@
+{
+  "$schema": "https://schema.tauri.app/config/2",
+  "productName": "Screen Recorder",
+  "version": "0.1.0",
+  "identifier": "com.screenrecorder.desktop",
+  "build": {
+    "beforeDevCommand": "npm run prepare:desktop && npm run dev:web",
+    "beforeBuildCommand": "npm run build",
+    "devUrl": "http://127.0.0.1:1420",
+    "frontendDist": "../dist"
+  },
+  "app": {
+    "windows": [{
+      "label": "main", "title": "Screen Recorder", "width": 1440, "height": 940,
+      "minWidth": 1080, "minHeight": 700, "backgroundColor": "#111316",
+      "titleBarStyle": "Overlay", "hiddenTitle": true,
+      "trafficLightPosition": { "x": 20, "y": 23 }
+    }],
+    "security": {
+      "csp": "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' asset: http://asset.localhost data: blob:; media-src 'self' asset: http://asset.localhost blob:; connect-src ipc: http://ipc.localhost 'self'; object-src 'none'; base-uri 'self'",
+      "assetProtocol": { "enable": true, "scope": [] }
+    }
+  },
+  "bundle": {
+    "active": true,
+    "targets": ["app"],
+    "category": "Video",
+    "icon": ["icons/32x32.png", "icons/128x128.png", "icons/128x128@2x.png", "icons/icon.icns"],
+    "shortDescription": "A local-first recording studio controlled by you and your AI.",
+    "resources": { "../resources/": "" },
+    "macOS": {
+      "minimumSystemVersion": "15.0",
+      "signingIdentity": "-",
+      "hardenedRuntime": false,
+      "frameworks": ["../native/build/libscreenrec.dylib"],
+      "entitlements": "Entitlements.plist",
+      "infoPlist": "Info.plist"
+    }
+  }
+}

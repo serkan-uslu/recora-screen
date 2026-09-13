@@ -1,0 +1,16 @@
+node_modules/
+dist/
+resources/
+native/build/
+native/.build/
+src-tauri/target/
+src-tauri/gen/
+.DS_Store
+.env
+.env.*
+!.env.example
+*.log
+.cache/
+artifacts/
+graphify-out/.graphify_*
+graphify-out/cache/
