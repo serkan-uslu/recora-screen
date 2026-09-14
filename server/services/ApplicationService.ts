@@ -204,7 +204,12 @@ export class ApplicationService extends EventEmitter {
         }
       : null;
     try {
-      return { ...(await this.native("capabilities", {})), nativeAvailable: true, mcp };
+      return {
+        ...(await this.native("capabilities", {})),
+        nativeAvailable: true,
+        mcp,
+        mcpPermissions: this.settings.mcpPermissions,
+      };
     } catch (error) {
       return {
         nativeAvailable: false,
@@ -219,6 +224,7 @@ export class ApplicationService extends EventEmitter {
         cameras: [],
         microphones: [],
         recording: emptyRecording,
+        mcpPermissions: this.settings.mcpPermissions,
         error: errorOf(error).message,
         mcp,
       };

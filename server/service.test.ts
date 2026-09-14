@@ -217,6 +217,54 @@ test("official MCP client and UI command share one revision and one undo history
   assert.deepEqual(restored.edits.camera.layouts, layoutProject.edits.camera.layouts);
 });
 
+test("MCP access policy blocks protected commands until the desktop setting enables them", async (t) => {
+  const { service } = await setup(t);
+  const project = await service.command("project.create", { name: "Protected" });
+  const server = createMcpServer((method, params) => service.command(method, params));
+  const client = new Client({ name: "policy-test", version: "1" });
+  const [clientTransport, serverTransport] = InMemoryTransport.createLinkedPair();
+  await server.connect(serverTransport);
+  await client.connect(clientTransport);
+  t.after(async () => {
+    await client.close();
+    await server.close();
+  });
+
+  for (const [name, arguments_] of [
+    ["recording_start", { projectId: project.id }],
+    ["project_delete", { projectId: project.id }],
+    ["keychain_set", { provider: "openai", key: "unused-test-key" }],
+    ["permissions_request", { kind: "screen" }],
+  ] as const) {
+    const denied = await client.callTool({ name, arguments: arguments_ });
+    assert.equal(
+      (denied.structuredContent as { error: { code: string } }).error.code,
+      "MCP_PERMISSION_DENIED",
+    );
+  }
+
+  const settings = await service.command("settings.get");
+  assert.deepEqual(settings.mcpPermissions, {
+    read: true,
+    edit: true,
+    export: true,
+    recording: false,
+    sensitive: false,
+    destructive: false,
+  });
+  await service.command("settings.update", {
+    mcpPermissions: { ...settings.mcpPermissions, sensitive: true },
+  });
+  const allowed = await client.callTool({
+    name: "permissions_request",
+    arguments: { kind: "screen" },
+  });
+  assert.equal(
+    (allowed.structuredContent as { error: { code: string } }).error.code,
+    "NATIVE_UNAVAILABLE",
+  );
+});
+
 test("private socket client coalesces concurrent initial connections and emits project changes", async (t) => {
   const { service, root } = await setup(t);
   const socket = path.join(root, "service.sock"),

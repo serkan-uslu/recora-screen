@@ -8,6 +8,7 @@ import {
   cameraLayoutSettings,
   time,
 } from "@/server/contracts/validation.js";
+import { defaultMcpPermissions, type McpPermissionCategory } from "@/shared/types.js";
 const none = z.object({}).strict(),
   projectId = { projectId: id },
   revision = { ...projectId, expectedRevision: finite.int().min(0) };
@@ -18,6 +19,16 @@ const absolutePath = z
   .refine((p) => path.isAbsolute(p) && !p.includes("\0"), "An absolute file path is required");
 const provider = z.enum(["openai", "anthropic"]);
 const model = z.enum(["base", "small"]);
+export const mcpPermissionsSchema = z
+  .object({
+    read: z.boolean(),
+    edit: z.boolean(),
+    export: z.boolean(),
+    recording: z.boolean(),
+    sensitive: z.boolean(),
+    destructive: z.boolean(),
+  })
+  .strict();
 export const settingsSchema = z
   .object({
     provider,
@@ -25,6 +36,7 @@ export const settingsSchema = z
     anthropicModel: z.string().regex(/^[a-zA-Z0-9._:-]{1,100}$/),
     transcriptionModel: model,
     language: z.string().regex(/^(auto|[a-z]{2,3})$/),
+    mcpPermissions: mcpPermissionsSchema.default(defaultMcpPermissions),
   })
   .strict();
 const withProject = z.object(projectId).strict();
@@ -191,3 +203,22 @@ const readOnly = new Set([
   "preview.geometry",
 ]);
 export const isReadOnly = (method: string) => readOnly.has(method);
+
+const permissionOverrides: Partial<Record<string, McpPermissionCategory>> = {
+  "app.shutdown": "destructive",
+  "permissions.request": "sensitive",
+  "project.delete": "destructive",
+  "transcript.export": "export",
+  "ai.assistant": "sensitive",
+  "settings.update": "sensitive",
+  "keychain.set": "sensitive",
+  "keychain.delete": "sensitive",
+  "export.start": "export",
+};
+
+export function mcpPermissionCategory(method: string): McpPermissionCategory {
+  const override = permissionOverrides[method];
+  if (override) return override;
+  if (method.startsWith("recording.")) return "recording";
+  return isReadOnly(method) ? "read" : "edit";
+}

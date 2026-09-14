@@ -1,5 +1,23 @@
 export type Range = { startMs: number; endMs: number };
 export type TimelineSegment = Range & { speed?: number };
+export const mcpPermissionCategories = [
+  "read",
+  "edit",
+  "export",
+  "recording",
+  "sensitive",
+  "destructive",
+] as const;
+export type McpPermissionCategory = (typeof mcpPermissionCategories)[number];
+export type McpPermissions = Record<McpPermissionCategory, boolean>;
+export const defaultMcpPermissions: McpPermissions = {
+  read: true,
+  edit: true,
+  export: true,
+  recording: false,
+  sensitive: false,
+  destructive: false,
+};
 type CaptureSource = {
   id: string;
   name: string;

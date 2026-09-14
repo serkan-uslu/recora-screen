@@ -2,8 +2,14 @@ import { useState } from "react";
 import { AudioLines, Check, Download, Keyboard, Save, Sparkles, Trash2 } from "lucide-react";
 import { Field } from "@/src/components/molecules/Field";
 import { Dialog } from "@/src/components/organisms/Dialog";
+import { Switch } from "@/src/components/atoms/Switch";
 import { formatMcpConfig, type McpClient } from "@/shared/mcp-config";
 import { type Settings, type McpConfig, type Model } from "@/src/controllers/studioTypes";
+import {
+  defaultMcpPermissions,
+  mcpPermissionCategories,
+  type McpPermissionCategory,
+} from "@/shared/types";
 
 export function SettingsDialog({
   settings,
@@ -29,6 +35,9 @@ export function SettingsDialog({
   const [key, setKey] = useState("");
   const [copyStatus, setCopyStatus] = useState("");
   const [client, setClient] = useState<McpClient>("codex");
+  const [mcpPermissions, setMcpPermissions] = useState(
+    settings?.mcpPermissions ?? defaultMcpPermissions,
+  );
   const mcpConfig = mcp ? formatMcpConfig(client, mcp) : "";
   return (
     <Dialog
@@ -267,6 +276,32 @@ export function SettingsDialog({
             its model provider. MCP requires no API key in this app; your client’s plan or usage
             charges may still apply.
           </div>
+          <h3 className="panel-section">MCP ACCESS</h3>
+          <p className="helper">
+            Choose what connected agents may do. Recording, API keys, permission prompts and project
+            deletion stay blocked until you enable their category here.
+          </p>
+          <div className="mcp-permissions">
+            {mcpPermissionCategories.map((category) => (
+              <Switch
+                key={category}
+                label={mcpPermissionLabels[category]}
+                checked={mcpPermissions[category]}
+                disabled={busy}
+                onChange={(checked) =>
+                  setMcpPermissions((current) => ({ ...current, [category]: checked }))
+                }
+              />
+            ))}
+          </div>
+          <button
+            className="button secondary full"
+            disabled={busy}
+            onClick={() => onSave({ mcpPermissions })}
+          >
+            <Save size={14} />
+            Save MCP access
+          </button>
           <h3 className="panel-section">KEYBOARD SHORTCUTS</h3>
           <div className="shortcut-list">
             <span>
@@ -299,3 +334,12 @@ export function SettingsDialog({
     </Dialog>
   );
 }
+
+const mcpPermissionLabels: Record<McpPermissionCategory, string> = {
+  read: "Read projects and preview state",
+  edit: "Create projects and edit timelines",
+  export: "Export video and subtitles",
+  recording: "Control screen recording",
+  sensitive: "Use cloud AI, Keychain and permission prompts",
+  destructive: "Delete projects and shut down the app",
+};

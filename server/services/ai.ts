@@ -5,7 +5,12 @@ import { spawn } from "node:child_process";
 import type { ReadableStream } from "node:stream/web";
 import { Readable, Transform } from "node:stream";
 import { pipeline } from "node:stream/promises";
-import type { Project, TranscriptSegment } from "@/shared/types.js";
+import {
+  defaultMcpPermissions,
+  type McpPermissions,
+  type Project,
+  type TranscriptSegment,
+} from "@/shared/types.js";
 import { duration } from "@/shared/timeline.js";
 import { outputRanges } from "@/server/domain/edits.js";
 import { AppError, operationsSchema, object, errorOf } from "@/server/contracts/validation.js";
@@ -210,6 +215,7 @@ export type AISettings = {
   anthropicModel: string;
   transcriptionModel: "base" | "small";
   language: string;
+  mcpPermissions: McpPermissions;
 };
 export const defaultSettings: AISettings = {
   provider: "openai",
@@ -217,6 +223,7 @@ export const defaultSettings: AISettings = {
   anthropicModel: "claude-sonnet-4-6",
   transcriptionModel: "small",
   language: "auto",
+  mcpPermissions: { ...defaultMcpPermissions },
 };
 const editDescription =
   "Apply sequential edits in one atomic undoable batch. Times use CURRENT OUTPUT milliseconds except clip.trim sourceStartMs/sourceEndMs and source.restore startMs/endMs, which explicitly use SOURCE time. Cuts, trim and speed shift later output times; work backwards for multiple ranges. Keep source-time annotations attached to their content. Use transcript.text to correct words by id without changing timing. Zoom/overlay updates only remap provided times; omitted times stay attached to source. canvas.update and autoZoom.update merge partial settings. zooms.auto regenerates from recorded click/drag/typing activity with optional settings overrides. clip.merge requires source-contiguous equal-speed clips; source.restore adds missing source ranges at normal speed, preserving kept speeds. Coordinates and relative sizes use 0–1; colors use hex.";

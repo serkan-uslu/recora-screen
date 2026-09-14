@@ -11,8 +11,14 @@ import { z } from "zod";
 import { promises as fs } from "node:fs";
 import { pathToFileURL } from "node:url";
 import { AppClient } from "@/server/infrastructure/rpc.js";
-import { errorOf } from "@/server/contracts/validation.js";
-import { isReadOnly, methodSchemas } from "@/server/service.js";
+import { AppError, errorOf, object } from "@/server/contracts/validation.js";
+import {
+  isReadOnly,
+  mcpPermissionCategory,
+  mcpPermissionsSchema,
+  methodSchemas,
+} from "@/server/service.js";
+import { defaultMcpPermissions } from "@/shared/types.js";
 
 export const toolMethods = Object.fromEntries(
   Object.keys(methodSchemas).map((method) => [method.replace(/[./]/g, "_"), method]),
@@ -25,6 +31,17 @@ export async function callAppTool(
   const method = toolMethods[name];
   if (!method) throw new Error(`Unknown tool: ${name}`);
   return call(method, args);
+}
+
+export function assertMcpPermission(method: string, settings: unknown) {
+  const raw = object(settings).mcpPermissions;
+  const permissions = raw ? mcpPermissionsSchema.parse(raw) : defaultMcpPermissions;
+  const category = mcpPermissionCategory(method);
+  if (!permissions[category])
+    throw new AppError(
+      "MCP_PERMISSION_DENIED",
+      `MCP ${category} commands are disabled. Enable ${category} access in Settings > MCP & shortcuts.`,
+    );
 }
 export function createMcpServer(
   call: (method: string, params: Record<string, unknown>) => Promise<unknown>,
@@ -64,6 +81,9 @@ export function createMcpServer(
   }));
   server.setRequestHandler(CallToolRequestSchema, async (request) => {
     try {
+      const method = toolMethods[request.params.name];
+      if (!method) throw new Error(`Unknown tool: ${request.params.name}`);
+      assertMcpPermission(method, await call("settings.get", {}));
       const result = await callAppTool(call, request.params.name, request.params.arguments ?? {});
       const content: (TextContent | ImageContent)[] = [
         { type: "text", text: JSON.stringify(result) ?? "null" },
