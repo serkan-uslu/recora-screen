@@ -126,9 +126,9 @@
     "semantic_hash": ""
   },
   "server/service.test.ts": {
-    "mtime": 1789373915.6602798,
-    "seen": 1789373971.654171,
-    "ast_hash": "220aec8e4281a7f3ef852d00a703de03",
+    "mtime": 1789374835.5183074,
+    "seen": 1789374959.1322281,
+    "ast_hash": "6c08318378bc717c791e6d0c7b03fca7",
     "semantic_hash": ""
   },
   "server/service.ts": {
@@ -720,9 +720,9 @@
     "semantic_hash": ""
   },
   "server/infrastructure/ProjectStore.ts": {
-    "mtime": 1789365311.9578445,
-    "seen": 1789365355.1959958,
-    "ast_hash": "d58a23ccd50ed0b8cce326c8595b8711",
+    "mtime": 1789374549.989584,
+    "seen": 1789374959.1322198,
+    "ast_hash": "2543affd5357468f21fe048847609061",
     "semantic_hash": ""
   },
   "server/infrastructure/rpc.ts": {
@@ -744,9 +744,9 @@
     "semantic_hash": ""
   },
   "server/services/ai.ts": {
-    "mtime": 1789369804.2738683,
-    "seen": 1789370214.485655,
-    "ast_hash": "adb666440fbe1bcdf07da189656d3e21",
+    "mtime": 1789374759.6468358,
+    "seen": 1789374959.132239,
+    "ast_hash": "a3b1286f4f94635d08080d00c4c54ae9",
     "semantic_hash": ""
   },
   "shared/brand.ts": {
@@ -1278,9 +1278,9 @@
     "semantic_hash": ""
   },
   "server/services/EditingService.ts": {
-    "mtime": 1789368472.4690413,
-    "seen": 1789368595.175524,
-    "ast_hash": "1dcefa819d27866cc1de0b19bac15075",
+    "mtime": 1789374549.9906304,
+    "seen": 1789374959.132232,
+    "ast_hash": "5467e4676c67b3c8ca03f79eed5e8756",
     "semantic_hash": ""
   },
   "server/services/ExportService.ts": {
@@ -1296,9 +1296,9 @@
     "semantic_hash": ""
   },
   "server/services/ProjectService.ts": {
-    "mtime": 1789368503.8732686,
-    "seen": 1789368595.175526,
-    "ast_hash": "fcbff88041888bd4e1def7a02080a29f",
+    "mtime": 1789374549.9899864,
+    "seen": 1789374959.132236,
+    "ast_hash": "57752a5af6659138e8074a93b6bcc350",
     "semantic_hash": ""
   },
   "server/services/RecordingService.ts": {

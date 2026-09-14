@@ -133,6 +133,9 @@ export class ProjectService {
   }
 
   private async importProject(inputPath: string, name?: string) {
+    const inputInfo = await fs.lstat(inputPath);
+    if (inputInfo.isSymbolicLink())
+      throw new AppError("INVALID_PATH", "Symbolic links cannot be imported");
     const info = await fs.stat(inputPath);
     if (!info.isDirectory() && path.extname(inputPath).toLowerCase() !== ".json") {
       const sourceInfo = await this.native("media.inspect", { path: inputPath });
@@ -165,6 +168,8 @@ export class ProjectService {
     }
     const sourceDir = await fs.realpath(info.isDirectory() ? inputPath : path.dirname(inputPath));
     const manifest = info.isDirectory() ? path.join(inputPath, "project.json") : inputPath;
+    if ((await fs.lstat(manifest)).isSymbolicLink())
+      throw new AppError("INVALID_PATH", "Symbolic links cannot be imported");
     if ((await fs.stat(manifest)).size > 50_000_000)
       throw new AppError("INVALID_PROJECT", "Project manifest exceeds 50 MB.");
     const data: unknown = JSON.parse(await fs.readFile(manifest, "utf8"));
@@ -180,7 +185,10 @@ export class ProjectService {
     const copy = async (relative: string) => {
       const existing = copied.get(relative);
       if (existing) return existing;
-      const full = await fs.realpath(path.join(sourceDir, relative));
+      const unresolved = path.join(sourceDir, relative);
+      if ((await fs.lstat(unresolved)).isSymbolicLink())
+        throw new AppError("INVALID_PATH", "Symbolic links cannot be imported");
+      const full = await fs.realpath(unresolved);
       if (!full.startsWith(sourceDir + path.sep))
         throw new AppError("INVALID_PATH", "Imported media must stay inside the source project.");
       const destination = `media/${randomUUID()}${path.extname(relative)}`;

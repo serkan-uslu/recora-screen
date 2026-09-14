@@ -365,11 +365,26 @@ export class ProjectStore extends EventEmitter {
   async copyMedia(projectId: string, input: string, relative: string): Promise<string> {
     if (!path.isAbsolute(input) || input.includes("\0"))
       throw new AppError("INVALID_PATH", "Select an absolute file path");
+    if ((await fs.lstat(input)).isSymbolicLink())
+      throw new AppError("INVALID_PATH", "Symbolic links cannot be imported");
     const source = await fs.realpath(input);
     if (!(await fs.stat(source)).isFile())
       throw new AppError("INVALID_PATH", "Select a regular file");
-    const target = path.join(this.dir(projectId), relative);
+    const normalized = path.normalize(relative);
+    if (
+      !relative ||
+      relative.includes("\0") ||
+      path.isAbsolute(relative) ||
+      normalized === ".." ||
+      normalized.startsWith(`..${path.sep}`)
+    )
+      throw new AppError("INVALID_PATH", "Media destination must stay inside this project");
+    const base = await fs.realpath(this.dir(projectId));
+    const target = path.join(base, normalized);
     await fs.mkdir(path.dirname(target), { recursive: true, mode: 0o700 });
+    const parent = await fs.realpath(path.dirname(target));
+    if (parent !== base && !parent.startsWith(`${base}${path.sep}`))
+      throw new AppError("INVALID_PATH", "Media destination must stay inside this project");
     await fs.copyFile(source, target, constants.COPYFILE_EXCL);
     return relative;
   }

@@ -66,6 +66,9 @@ export class EditingService {
     this.store.assertIdle(p.projectId);
     const project = await this.store.get(p.projectId);
     if (p.expectedRevision !== undefined) checkRevision(project.revision, p.expectedRevision);
+    const inputInfo = await fs.lstat(p.path);
+    if (inputInfo.isSymbolicLink())
+      throw new AppError("INVALID_PATH", "Symbolic links cannot be imported");
     const info = await fs.stat(p.path);
     if (!info.isFile() || info.size > 50_000_000)
       throw new AppError("INVALID_ASSET", "Select a PNG, JPEG or WebP image smaller than 50 MB.");

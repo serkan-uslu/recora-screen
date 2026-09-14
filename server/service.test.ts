@@ -434,7 +434,7 @@ test("private socket client coalesces concurrent initial connections and emits p
 });
 
 test("backup recovery and source traversal validation protect project media", async (t) => {
-  const { service } = await setup(t);
+  const { service, root } = await setup(t);
   const p = await ready(service);
   await service.command("project.rename", {
     projectId: p.id,
@@ -455,6 +455,39 @@ test("backup recovery and source traversal validation protect project media", as
   );
   await fs.symlink(os.tmpdir(), path.join(service.store.dir(p.id), "escape"));
   await assert.rejects(service.store.resolveMedia(p.id, "escape"), { code: "INVALID_PATH" });
+
+  const external = path.join(root, "external.png");
+  await fs.writeFile(
+    external,
+    Buffer.from([137, 80, 78, 71, 13, 10, 26, 10, 0, 0, 0, 0, 0, 0, 0, 0]),
+  );
+  const sourceLink = path.join(root, "source-link.png");
+  await fs.symlink(external, sourceLink);
+  await assert.rejects(service.command("asset.import", { projectId: p.id, path: sourceLink }), {
+    code: "INVALID_PATH",
+  });
+  await assert.rejects(service.command("project.import", { path: sourceLink }), {
+    code: "INVALID_PATH",
+  });
+  await assert.rejects(service.store.copyMedia(p.id, sourceLink, "assets/link.png"), {
+    code: "INVALID_PATH",
+  });
+  await assert.rejects(service.store.copyMedia(p.id, external, "../outside.png"), {
+    code: "INVALID_PATH",
+  });
+  await assert.rejects(service.store.copyMedia(p.id, external, "media/screen.mov"), {
+    code: "EEXIST",
+  });
+  const externalDirectory = path.join(root, "external-assets");
+  await fs.mkdir(externalDirectory);
+  await fs.symlink(externalDirectory, path.join(service.store.dir(p.id), "assets"));
+  await assert.rejects(service.store.copyMedia(p.id, external, "assets/new.png"), {
+    code: "INVALID_PATH",
+  });
+  assert.equal(
+    await fs.readFile(path.join(service.store.dir(p.id), "media", "screen.mov"), "utf8"),
+    "immutable screen fixture",
+  );
 });
 
 test("persistence failures keep the last project, block navigation flow and preserve damaged folders", async (t) => {
@@ -1370,6 +1403,64 @@ for (const provider of ["openai", "anthropic"] as const)
     assert.deepEqual(undone.edits, original.edits);
   });
 
+test("cloud assistant sends only editable metadata through every project read", async (t) => {
+  const apiKey = "private-test-key";
+  const { service } = await setup(t, async (method) => {
+    if (method === "keychain.get") return { key: apiKey };
+    throw new Error(method);
+  });
+  let project = await ready(service);
+  await fs.mkdir(path.join(service.store.dir(project.id), "assets"));
+  await fs.writeFile(path.join(service.store.dir(project.id), "assets", "private.png"), "asset");
+  project = await service.store.mutate(
+    project.id,
+    project.revision,
+    (current) => {
+      current.source!.title = "Demo source";
+      current.transcript = [
+        { id: "words", startMs: 100, endMs: 900, text: "Necessary transcript" },
+      ];
+      current.assets = [
+        { id: "image", name: "Visible asset", path: "assets/private.png", kind: "image" },
+      ];
+    },
+    false,
+  );
+  const bodies: string[] = [];
+  const originalFetch = globalThis.fetch;
+  t.after(() => {
+    globalThis.fetch = originalFetch;
+  });
+  globalThis.fetch = async (_url, options) => {
+    bodies.push(String(options!.body));
+    return bodies.length === 1
+      ? Response.json({
+          output: [
+            {
+              type: "function_call",
+              name: "project_read",
+              call_id: "read",
+              arguments: "{}",
+            },
+          ],
+        })
+      : Response.json({
+          output: [{ type: "message", content: [{ type: "output_text", text: "Done" }] }],
+        });
+  };
+  const job: Job = await service.command("ai.assistant", {
+    projectId: project.id,
+    prompt: "Read this project",
+  });
+  const result = await waitJob(service, job.id);
+  assert.equal(result.status, "completed", result.error);
+  const payload = bodies.join("\n");
+  assert.match(payload, /Necessary transcript/);
+  assert.match(payload, /Demo source/);
+  for (const privateValue of [apiKey, "media/screen.mov", "media/mic.wav", "assets/private.png"])
+    assert(!payload.includes(privateValue), `${privateValue} escaped into the cloud payload`);
+});
+
 test("AI provider failure leaves staged changes uncommitted and API keys out of project storage", async (t) => {
   const { service, root } = await setup(t, async (method) => {
     if (method === "keychain.get") return { key: "test-key-not-real" };
@@ -1396,7 +1487,10 @@ test("AI provider failure leaves staged changes uncommitted and API keys out of 
             },
           ],
         })
-      : Response.json({ error: { message: "Quota exhausted" } }, { status: 429 });
+      : Response.json(
+          { error: { message: "Quota exhausted for test-key-not-real" } },
+          { status: 429 },
+        );
   const job = await service.command("ai.assistant", {
     projectId: original.id,
     prompt: "Hide camera",
@@ -1404,6 +1498,8 @@ test("AI provider failure leaves staged changes uncommitted and API keys out of 
   const result = await waitJob(service, job.id);
   assert.equal(result.status, "failed");
   assert.match(result.error!, /429/);
+  assert.match(result.error!, /\[redacted\]/);
+  assert(!result.error!.includes("test-key-not-real"));
   assert.deepEqual(await service.store.get(original.id), original);
   assert(
     !(
