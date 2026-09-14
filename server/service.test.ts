@@ -373,6 +373,96 @@ test("busy recordings block editing/trash/quit; native auto-stop reconciles reco
   assert.deepEqual(previewUpdates, [previewProject.id]);
 });
 
+test("interrupted recordings recover completed metadata and preserve media when metadata is corrupt", async (t) => {
+  const screenBytes = Buffer.from("completed screen media");
+  const { root, service } = await setup(t, async (method, params) => {
+    if (method === "recording.start") {
+      const directory = params!.projectDir as string;
+      await fs.writeFile(path.join(directory, "media", "screen.mov"), screenBytes);
+      await fs.writeFile(
+        path.join(directory, "recovered-source.json"),
+        JSON.stringify({
+          durationMs: 1500,
+          width: 1280,
+          height: 720,
+          fps: 30,
+          screen: "media/screen.mov",
+        }),
+      );
+      return { active: true, projectId: params!.projectId };
+    }
+    throw new Error(method);
+  });
+  const interrupted = await service.command("project.create", { name: "Interrupted" });
+  await service.command("recording.start", {
+    projectId: interrupted.id,
+    settings: {
+      sourceId: "display:1",
+      sourceKind: "display",
+      systemAudio: false,
+      cameraShape: "circle",
+      width: 1280,
+      height: 720,
+      fps: 30,
+    },
+  });
+
+  const restarted = new ApplicationService({
+    projectsDir: service.store.root,
+    dataDir: path.join(root, "restarted-data"),
+  });
+  await restarted.initialize();
+  const recovered = await restarted.command("project.open", { projectId: interrupted.id });
+  assert.equal(recovered.status, "ready");
+  assert.equal(recovered.recovered, true);
+  assert.equal(recovered.source.screen, "media/screen.mov");
+  assert.deepEqual(
+    await fs.readFile(path.join(restarted.store.dir(interrupted.id), recovered.source.screen)),
+    screenBytes,
+  );
+  await restarted.command("project.save", { projectId: interrupted.id });
+
+  let corrupt = await restarted.command("project.create", { name: "Corrupt recovery metadata" });
+  corrupt = await restarted.store.mutate(
+    corrupt.id,
+    corrupt.revision,
+    (project) => {
+      project.status = "recording";
+    },
+    false,
+  );
+  const corruptMedia = path.join(restarted.store.dir(corrupt.id), "media", "screen.mov");
+  await fs.writeFile(corruptMedia, screenBytes);
+  await fs.writeFile(path.join(restarted.store.dir(corrupt.id), "recovered-source.json"), "{bad");
+
+  const afterCorruption = new ApplicationService({
+    projectsDir: service.store.root,
+    dataDir: path.join(root, "second-restart-data"),
+  });
+  await afterCorruption.initialize();
+  const protectedDraft = await afterCorruption.command("project.open", {
+    projectId: corrupt.id,
+  });
+  assert.equal(protectedDraft.status, "draft");
+  assert.equal(protectedDraft.recovered, true);
+  assert.deepEqual(await fs.readFile(corruptMedia), screenBytes);
+  await assert.rejects(
+    afterCorruption.command("recording.start", {
+      projectId: corrupt.id,
+      settings: {
+        sourceId: "display:1",
+        sourceKind: "display",
+        systemAudio: false,
+        cameraShape: "circle",
+        width: 1280,
+        height: 720,
+        fps: 30,
+      },
+    }),
+    { code: "RECOVERABLE_MEDIA" },
+  );
+});
+
 test("project delete routes to native Trash and active jobs prevent it", async (t) => {
   let trashed = "";
   const { service } = await setup(t, async (method, p) => {
