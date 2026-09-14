@@ -305,6 +305,91 @@ test("backup recovery and source traversal validation protect project media", as
   await assert.rejects(service.store.resolveMedia(p.id, "escape"), { code: "INVALID_PATH" });
 });
 
+test("persistence failures keep the last project, block navigation flow and preserve damaged folders", async (t) => {
+  const { service } = await setup(t);
+  let project = await ready(service);
+  const other = await service.command("project.create", { name: "Other" });
+  const manifest = path.join(service.store.dir(project.id), "project.json");
+  const before = await fs.readFile(manifest, "utf8");
+
+  await fs.chmod(service.store.dir(project.id), 0o500);
+  try {
+    await assert.rejects(
+      service.command("project.rename", {
+        projectId: project.id,
+        expectedRevision: project.revision,
+        name: "Write must fail",
+      }),
+    );
+  } finally {
+    await fs.chmod(service.store.dir(project.id), 0o700);
+  }
+  assert.equal(await fs.readFile(manifest, "utf8"), before);
+  assert(service.store.saveFailure);
+  assert.equal((await service.command("app.canQuit")).canQuit, false);
+
+  const rename = fs.rename;
+  fs.rename = async (from, to) => {
+    if (to === manifest) throw Object.assign(new Error("Injected rename failure"), { code: "EIO" });
+    return rename(from, to);
+  };
+  try {
+    await assert.rejects(
+      service.command("project.rename", {
+        projectId: project.id,
+        expectedRevision: project.revision,
+        name: "Rename must fail",
+      }),
+      { code: "EIO" },
+    );
+  } finally {
+    fs.rename = rename;
+  }
+  assert.equal(
+    (await service.command("project.open", { projectId: project.id })).name,
+    project.name,
+  );
+
+  fs.rename = async (from, to) => {
+    if (to === manifest)
+      throw Object.assign(new Error("No space left on device"), { code: "ENOSPC" });
+    return rename(from, to);
+  };
+  let switched = false;
+  try {
+    await assert.rejects(
+      (async () => {
+        await service.command("project.save", { projectId: project.id });
+        switched = true;
+        await service.command("project.open", { projectId: other.id });
+      })(),
+      { code: "ENOSPC" },
+    );
+  } finally {
+    fs.rename = rename;
+  }
+  assert.equal(switched, false);
+  project = await service.command("project.rename", {
+    projectId: project.id,
+    expectedRevision: project.revision,
+    name: "Healthy save",
+  });
+  assert.equal(service.store.saveFailure, undefined);
+
+  const media = path.join(service.store.dir(project.id), project.source!.screen);
+  const mediaBefore = await fs.readFile(media);
+  await fs.writeFile(path.join(service.store.dir(project.id), "project.backup.json"), "{bad");
+  assert.equal(
+    (await service.command("project.open", { projectId: project.id })).name,
+    "Healthy save",
+  );
+  await fs.writeFile(manifest, "{also bad");
+  await assert.rejects(service.command("project.open", { projectId: project.id }), {
+    code: "CORRUPT_PROJECT",
+  });
+  assert.deepEqual(await fs.readFile(media), mediaBefore);
+});
+
 test("busy recordings block editing/trash/quit; native auto-stop reconciles recovered media", async (t) => {
   let active = false;
   const previewLoads: string[] = [],
