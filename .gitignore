@@ -13,6 +13,8 @@ src-tauri/gen/
 .cache/
 artifacts/
 website/public/downloads/
+website/.next/
+website/out/
 graphify-out/.graphify_*
 graphify-out/cache/
 playwright-report/

@@ -627,6 +627,162 @@ h2 {
 .skip:focus {
   top: 10px;
 }
+.docs-hero {
+  padding: 78px 0 60px;
+  border-bottom: 1px solid var(--line);
+}
+.docs-hero h1 {
+  margin: 20px 0;
+  font-size: clamp(58px, 8vw, 92px);
+}
+.docs-hero > p:last-child {
+  max-width: 670px;
+  color: var(--muted);
+  font-size: 17px;
+  line-height: 1.7;
+}
+.docs-layout {
+  display: grid;
+  grid-template-columns: 220px minmax(0, 760px);
+  justify-content: space-between;
+  gap: 80px;
+  padding: 56px 0 110px;
+}
+.docs-toc {
+  position: sticky;
+  top: 28px;
+  align-self: start;
+  display: grid;
+  gap: 4px;
+}
+.docs-toc > span {
+  margin-bottom: 12px;
+}
+.docs-toc a {
+  padding: 9px 12px;
+  border-left: 1px solid var(--line);
+  color: var(--muted);
+  font-size: 12px;
+}
+.docs-toc a:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+.docs-content {
+  min-width: 0;
+}
+.docs-section {
+  scroll-margin-top: 28px;
+  padding: 10px 0 68px;
+  border-bottom: 1px solid var(--line);
+}
+.docs-section + .docs-section {
+  padding-top: 68px;
+}
+.docs-section h2 {
+  margin-bottom: 24px;
+}
+.docs-section h3 {
+  margin: 30px 0 10px;
+  font-size: 18px;
+}
+.docs-section p,
+.docs-section li {
+  color: var(--muted);
+  font-size: 14px;
+  line-height: 1.8;
+}
+.docs-section p + p,
+.docs-section p + ul,
+.docs-section p + ol,
+.docs-section ul + p,
+.docs-section ol + p {
+  margin-top: 16px;
+}
+.docs-section ul,
+.docs-section ol {
+  margin: 16px 0 0;
+  padding-left: 22px;
+}
+.docs-section strong {
+  color: var(--text);
+}
+.docs-section a {
+  color: var(--accent);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.docs-callout {
+  margin: 24px 0;
+  padding: 20px 22px;
+  border: 1px solid color-mix(in srgb, var(--accent) 34%, var(--line));
+  border-radius: var(--radius-md);
+  background: color-mix(in srgb, var(--accent) 5%, var(--surface));
+}
+.docs-callout p {
+  color: var(--text);
+}
+.docs-steps {
+  counter-reset: docs-step;
+  list-style: none;
+  padding: 0 !important;
+}
+.docs-steps li {
+  counter-increment: docs-step;
+  position: relative;
+  padding: 18px 18px 18px 58px;
+  border-bottom: 1px solid var(--line);
+}
+.docs-steps li::before {
+  content: counter(docs-step, decimal-leading-zero);
+  position: absolute;
+  left: 14px;
+  color: var(--accent);
+  font: 11px monospace;
+}
+.docs-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  margin-top: 24px;
+}
+.docs-card {
+  padding: 20px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  background: var(--surface);
+}
+.docs-card h3 {
+  margin: 0 0 8px;
+}
+.docs-card p {
+  font-size: 12px;
+}
+.docs-section pre {
+  max-width: 100%;
+  overflow-x: auto;
+  margin: 20px 0;
+  padding: 20px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  background: #101212;
+  color: var(--text);
+  font:
+    12px/1.7 ui-monospace,
+    SFMono-Regular,
+    Menlo,
+    monospace;
+}
+.docs-section code:not(pre code) {
+  padding: 2px 5px;
+  border-radius: 4px;
+  background: var(--raised);
+  color: var(--text);
+  font-size: 0.88em;
+}
+.docs-architecture {
+  white-space: pre-wrap;
+}
 @media (max-width: 850px) {
   .wrap {
     width: calc(100% - 36px);
@@ -668,6 +824,10 @@ h2 {
   }
   .section {
     padding-top: 70px;
+  }
+  .docs-layout {
+    grid-template-columns: 180px minmax(0, 1fr);
+    gap: 35px;
   }
 }
 @media (max-width: 540px) {
@@ -757,6 +917,28 @@ h2 {
   }
   .conversation {
     padding: 22px;
+  }
+  .docs-hero {
+    padding: 50px 0 38px;
+  }
+  .docs-hero h1 {
+    font-size: 58px;
+    letter-spacing: -3px;
+  }
+  .docs-layout {
+    display: block;
+    padding-top: 26px;
+  }
+  .docs-toc {
+    position: static;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    margin-bottom: 45px;
+  }
+  .docs-toc > span {
+    grid-column: 1 / -1;
+  }
+  .docs-grid {
+    grid-template-columns: 1fr;
   }
   .faq {
     gap: 35px;

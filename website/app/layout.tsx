@@ -1,0 +1,46 @@
+import type { Metadata, Viewport } from "next";
+import type { ReactNode } from "react";
+import { product } from "@/shared/brand";
+import { Analytics } from "@/website/components/Analytics";
+import { SiteFooter } from "@/website/components/SiteFooter";
+import { SiteHeader } from "@/website/components/SiteHeader";
+import { assetPath, site } from "@/website/lib/site";
+import "@/website/src/styles.css";
+
+export const metadata: Metadata = {
+  metadataBase: new URL(site.SITE_URL),
+  title: { default: `${product.name} — Record once. Edit less.`, template: `%s — ${product.name}` },
+  description: product.description,
+  applicationName: product.name,
+  category: "technology",
+  icons: { icon: assetPath("icon.svg") },
+  alternates: { canonical: site.SITE_URL },
+  openGraph: {
+    type: "website",
+    siteName: product.name,
+    title: `${product.name} — Record once. Edit less.`,
+    description:
+      "Automatic zooms, camera, local AI and MCP control from Claude or Codex in one open-source macOS studio.",
+    url: site.SITE_URL,
+    images: [{ url: site.SOCIAL_IMAGE, width: 1231, height: 768, alt: `${product.name} editor` }],
+  },
+  twitter: { card: "summary_large_image", images: [site.SOCIAL_IMAGE] },
+};
+
+export const viewport: Viewport = { themeColor: "#151717", width: "device-width", initialScale: 1 };
+
+export default function RootLayout({ children }: Readonly<{ children: ReactNode }>) {
+  return (
+    <html lang="en">
+      <body>
+        <a className="skip" href="#main">
+          Skip to content
+        </a>
+        <SiteHeader />
+        {children}
+        <SiteFooter />
+        <Analytics />
+      </body>
+    </html>
+  );
+}

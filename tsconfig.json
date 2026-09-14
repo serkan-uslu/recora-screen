@@ -23,8 +23,8 @@
     "server",
     "scripts/*.ts",
     "vite.config.ts",
-    "website/src",
-    "website/vite.config.ts",
+    "website/**/*.ts",
+    "website/**/*.tsx",
     "tests",
     "playwright.config.ts"
   ]

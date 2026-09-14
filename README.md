@@ -13,6 +13,7 @@ _Actual desktop app with clean demonstration footage. Screen Recorder is the wor
 The source is available under the MIT license. **There is no verified public beta download yet.** Version 0.1.0 targets Apple silicon and macOS 15+. The local development package bundles Node and Whisper; end users will not need to install Node.
 
 - [Build and run from source](#develop).
+- [Product documentation](https://serkan-uslu.github.io/screen-recorder/documentation/).
 - [Release status and remaining checks](docs/release.md).
 - Planned product site: [serkan-uslu.github.io/screen-recorder](https://serkan-uslu.github.io/screen-recorder/). Pages publication is pending. Locally, `npm run dev:site` serves `http://127.0.0.1:4174/`.
 

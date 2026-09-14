@@ -28,13 +28,3 @@ export function siteValues(site: string, download = "") {
       : "Preview build: public beta validation and notarization are pending.",
   };
 }
-
-export function replaceSiteValues(html: string, values: Record<string, string>) {
-  return html.replace(/\{\{([A-Z_]+)\}\}/g, (_, key: string) => {
-    if (!(key in values)) throw new Error(`Unknown site placeholder: ${key}`);
-    return values[key]!.replaceAll("&", "&amp;")
-      .replaceAll('"', "&quot;")
-      .replaceAll("<", "&lt;")
-      .replaceAll(">", "&gt;");
-  });
-}

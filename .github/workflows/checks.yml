@@ -22,7 +22,8 @@ jobs:
       - run: npm run test:e2e
       - run: npm run build:site
         env:
-          VITE_DOWNLOAD_URL: https://github.com/serkan-uslu/screen-recorder/releases/latest/download/Screen-Recorder_0.1.0_macOS-arm64.dmg
+          NEXT_PUBLIC_DOWNLOAD_URL: https://github.com/serkan-uslu/screen-recorder/releases/latest/download/Screen-Recorder_0.1.0_macOS-arm64.dmg
+          NEXT_PUBLIC_BASE_PATH: /screen-recorder
       - run: npm run test:native
       - run: npm run prepare:runtime
       - run: npm run desktop:check

@@ -7,14 +7,16 @@
     "shared/*.test.ts",
     "scripts/*.{ts,mjs}",
     "website/src/*.test.ts",
-    "website/src/main.ts"
+    "website/app/{layout,robots,sitemap,manifest}.tsx",
+    "website/app/{robots,sitemap,manifest}.ts",
+    "website/app/**/page.tsx"
   ],
   "project": [
     "src/**/*.{ts,tsx}",
     "server/**/*.ts",
     "shared/**/*.ts",
     "scripts/*.{ts,mjs}",
-    "website/src/**/*.ts",
+    "website/**/*.{ts,tsx}",
     "tests/**/*.ts",
     "*.{ts,mjs}"
   ],

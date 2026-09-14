@@ -176,7 +176,7 @@ if (process.argv.includes("--self-check")) {
   const cargo = (await readFile(path.join(root, "src-tauri/Cargo.toml"), "utf8")).match(
     /^version\s*=\s*"([^"]+)"/m,
   )?.[1];
-  const download = process.env.VITE_DOWNLOAD_URL || release.downloadUrl;
+  const download = process.env.NEXT_PUBLIC_DOWNLOAD_URL || release.downloadUrl;
   const exactUrl = releaseUrl(download, product.repository, packageJson.version, release.assetName);
   const evidencePath =
     siteOnly && exactUrl
@@ -277,7 +277,7 @@ if (process.argv.includes("--self-check")) {
     );
     check(
       "analytics-configured",
-      /^https:\/\//.test(process.env.VITE_PLAUSIBLE_SCRIPT_URL || ""),
+      /^https:\/\//.test(process.env.NEXT_PUBLIC_PLAUSIBLE_SCRIPT_URL || ""),
       "The Plausible HTTPS pa-*.js script must be configured",
     );
     if (exactUrl) {

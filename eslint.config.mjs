@@ -3,6 +3,7 @@ import { defineConfig, globalIgnores } from "eslint/config";
 import prettier from "eslint-config-prettier";
 import hooks from "eslint-plugin-react-hooks";
 import a11y from "eslint-plugin-jsx-a11y";
+import next from "@next/eslint-plugin-next";
 import globals from "globals";
 import ts from "typescript-eslint";
 
@@ -19,6 +20,9 @@ export default defineConfig(
     "src-tauri/gen/**",
     "graphify-out/**",
     "website/public/**",
+    "website/.next/**",
+    "website/out/**",
+    "website/next-env.d.ts",
     "marketing/product-hunt/assets/**",
   ]),
   {
@@ -77,17 +81,26 @@ export default defineConfig(
     },
   },
   {
-    files: ["src/**/*.{ts,tsx}", "website/src/**/*.ts"],
+    files: ["src/**/*.{ts,tsx}", "website/**/*.{ts,tsx}"],
     languageOptions: { globals: globals.browser },
   },
   {
-    files: ["src/**/*.{ts,tsx}"],
+    files: ["src/**/*.{ts,tsx}", "website/**/*.{ts,tsx}"],
     plugins: { "react-hooks": hooks },
     rules: { "react-hooks/rules-of-hooks": "error", "react-hooks/exhaustive-deps": "error" },
   },
   {
-    files: ["src/**/*.tsx"],
+    files: ["src/**/*.tsx", "website/**/*.tsx"],
     extends: [a11y.flatConfigs.recommended],
+  },
+  {
+    files: ["website/**/*.{ts,tsx}"],
+    plugins: { "@next/next": next },
+    rules: {
+      ...next.configs.recommended.rules,
+      ...next.configs["core-web-vitals"].rules,
+      "@next/next/no-html-link-for-pages": "off",
+    },
   },
   prettier,
 );
