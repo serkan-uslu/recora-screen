@@ -852,9 +852,9 @@
     "semantic_hash": ""
   },
   "src/controllers/useStudioController.ts": {
-    "mtime": 1789365314.220232,
-    "seen": 1789365355.1960242,
-    "ast_hash": "9fdfa3d4f0904df2437a46e4dc404c9c",
+    "mtime": 1789371916.2976296,
+    "seen": 1789371968.6724591,
+    "ast_hash": "3272441074416a086b281ff0ec7dfb42",
     "semantic_hash": ""
   },
   "src/features/assistant/AssistantPanel.tsx": {
@@ -1389,6 +1389,42 @@
     "mtime": 1789368820.555157,
     "seen": 1789369557.8851159,
     "ast_hash": "3457c3dc69151805a539d563f979c942",
+    "semantic_hash": ""
+  },
+  "src/controllers/controllerTypes.ts": {
+    "mtime": 1789371605.5266287,
+    "seen": 1789371968.672449,
+    "ast_hash": "1bfd3a0bcb929838ac5b36b4a4efc932",
+    "semantic_hash": ""
+  },
+  "src/controllers/useAssistantController.ts": {
+    "mtime": 1789371605.5268512,
+    "seen": 1789371968.672451,
+    "ast_hash": "e09f30228b6d405789345dc3e886b2c7",
+    "semantic_hash": ""
+  },
+  "src/controllers/useExportController.ts": {
+    "mtime": 1789371605.5279493,
+    "seen": 1789371968.6724532,
+    "ast_hash": "d47fe2972e52dec058eb819c399a068c",
+    "semantic_hash": ""
+  },
+  "src/controllers/useJobsController.ts": {
+    "mtime": 1789371872.5873694,
+    "seen": 1789371968.6724539,
+    "ast_hash": "ccab6a169dcd481a481b035565d80193",
+    "semantic_hash": ""
+  },
+  "src/controllers/useProjectController.ts": {
+    "mtime": 1789371860.6869488,
+    "seen": 1789371968.672456,
+    "ast_hash": "b1cdf2643f7ed6fb1918a5366510ce40",
+    "semantic_hash": ""
+  },
+  "src/controllers/useRecordingController.ts": {
+    "mtime": 1789371605.527383,
+    "seen": 1789371968.672458,
+    "ast_hash": "9524bc55ade7e6e155dc7341907bbca6",
     "semantic_hash": ""
   }
 }
