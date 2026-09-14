@@ -30,6 +30,6 @@ Generated builds, vendored assets, and hashed launch evidence are excluded from 
 
 ## Imports
 
-`@/` resolves from the repository root: `@/shared/types`, `@/server/contracts/validation.js`, and `@/src/components/atoms/IconButton`. TypeScript paths configure type checking, tsx, and esbuild; both Vite configurations use the same root for UI and CSS imports. ESLint rejects relative module imports. Filesystem resource paths are not module imports and retain their existing semantics. Bundled Node services resolve aliases at build time, so installed apps need no alias loader.
+`@/` resolves TypeScript and JavaScript modules from the repository root: `@/shared/types`, `@/server/contracts/validation.js`, and `@/src/components/atoms/IconButton`. TypeScript paths configure type checking, tsx, and esbuild; both Vite configurations use the same root. ESLint rejects relative module imports. CSS `@import` and filesystem resource paths retain relative paths because they are resolved by their own loaders. Bundled Node services resolve aliases at build time, so installed apps need no alias loader.
 
 The website Vite CLI uses the installed `tsx` loader with `--configLoader native`, so aliases also work while loading its configuration, before Vite initializes its own resolver.

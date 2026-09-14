@@ -1,4 +1,4 @@
-@import "@/design-system/tokens.css";
+@import "../design-system/tokens.css";
 :root {
   font-family: var(--font-sans);
   color: color-mix(in srgb, var(--color-neutral) 20%, var(--color-white));
