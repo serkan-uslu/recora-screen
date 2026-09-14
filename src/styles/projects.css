@@ -3,11 +3,19 @@
   flex: 1;
   min-height: 0;
 }
+.app.library::before {
+  content: "";
+  height: 48px;
+  min-height: 48px;
+  border-bottom: 1px solid var(--line);
+  background: color-mix(in srgb, var(--color-neutral) 18%, var(--color-black));
+  -webkit-app-region: drag;
+}
 .library-sidebar {
   width: 214px;
   min-width: 214px;
   border-right: 1px solid var(--line);
-  padding: 32px 18px 17px;
+  padding: 24px 18px 17px;
   display: flex;
   flex-direction: column;
   background: color-mix(in srgb, var(--color-neutral) 18%, var(--color-black));
@@ -100,7 +108,7 @@
   max-width: 1530px;
   flex: 1;
   min-width: 0;
-  padding: 51px 54px 0;
+  padding: 24px 54px 0;
   overflow: auto;
   display: flex;
   flex-direction: column;
@@ -143,7 +151,10 @@
   color: color-mix(in srgb, var(--color-neutral) 100%, var(--color-white));
   margin-top: 6px;
 }
-.library-title-row > .button {
+.library-title-actions {
+  display: flex;
+  align-items: center;
+  gap: 9px;
   margin-top: 17px;
 }
 .library-toolbar {
@@ -174,11 +185,6 @@
   width: 100%;
   font-size: 11px;
   outline: none;
-}
-.search-box kbd {
-  font-size: 11px;
-  border-color: color-mix(in srgb, var(--color-neutral) 41%, var(--color-black));
-  color: color-mix(in srgb, var(--color-neutral) 76%, var(--color-black));
 }
 .library-toolbar-actions {
   display: flex;

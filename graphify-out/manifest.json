@@ -48,9 +48,9 @@
     "semantic_hash": ""
   },
   "package.json": {
-    "mtime": 1789378335.0234401,
-    "seen": 1789379382.912212,
-    "ast_hash": "5dd60669c685c54378f22b8c119e67c7",
+    "mtime": 1789408181.8740077,
+    "seen": 1789408332.5247538,
+    "ast_hash": "b8ea75045391b38c607033a299176f06",
     "semantic_hash": ""
   },
   "scripts/build-server.mjs": {
@@ -792,9 +792,9 @@
     "semantic_hash": ""
   },
   "src/components/organisms/AuthorFooter.tsx": {
-    "mtime": 1789365311.9646618,
-    "seen": 1789365355.196016,
-    "ast_hash": "531d55fc758df957d8acc946d64ec88f",
+    "mtime": 1789408969.0569396,
+    "seen": 1789409076.5809689,
+    "ast_hash": "0d78f807382448d49068f17a0395ecb8",
     "semantic_hash": ""
   },
   "src/components/organisms/Dialog.tsx": {
@@ -810,9 +810,9 @@
     "semantic_hash": ""
   },
   "src/components/organisms/StudioHeader.tsx": {
-    "mtime": 1789365311.965712,
-    "seen": 1789365355.196018,
-    "ast_hash": "08adcb8557686a1057b770c6c0f19426",
+    "mtime": 1789408925.233796,
+    "seen": 1789409076.580971,
+    "ast_hash": "ed443ee326de5bbc861269e19a65c269",
     "semantic_hash": ""
   },
   "src/controllers/StudioContexts.ts": {
@@ -948,9 +948,9 @@
     "semantic_hash": ""
   },
   "src/features/projects/ProjectsScreen.tsx": {
-    "mtime": 1789365311.99065,
-    "seen": 1789365355.196033,
-    "ast_hash": "33400130df7627a0de905612feb25be9",
+    "mtime": 1789408853.294215,
+    "seen": 1789409076.580999,
+    "ast_hash": "7f26b87dee1d6aa8f4aa8150df9b57c3",
     "semantic_hash": ""
   },
   "src/features/recording/CaptureDialog.tsx": {
@@ -1038,8 +1038,8 @@
     "semantic_hash": ""
   },
   "website/public/icon.svg": {
-    "mtime": 1789379261.8322592,
-    "seen": 1789379382.9123578,
+    "mtime": 1789409055.8091648,
+    "seen": 1789409076.5810711,
     "ast_hash": "777a2e8e600e0beebd17eb58e7bfd6c3",
     "semantic_hash": ""
   },
@@ -1542,8 +1542,8 @@
     "semantic_hash": ""
   },
   "website/next-env.d.ts": {
-    "mtime": 1789378859.583064,
-    "seen": 1789379382.912313,
+    "mtime": 1789408313.5866985,
+    "seen": 1789408332.52486,
     "ast_hash": "8195d2c60ce847a459ae9d308d6a5724",
     "semantic_hash": ""
   },
@@ -1569,6 +1569,12 @@
     "mtime": 1789378503.8325033,
     "seen": 1789379382.9123468,
     "ast_hash": "5c27369b226fcf2be8a6cfe52224e767",
+    "semantic_hash": ""
+  },
+  "vercel.json": {
+    "mtime": 1789409018.4643586,
+    "seen": 1789409076.581019,
+    "ast_hash": "cfb48c6826d44e2cdd7ce24a31fc1525",
     "semantic_hash": ""
   }
 }

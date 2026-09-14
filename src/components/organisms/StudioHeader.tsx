@@ -1,8 +1,8 @@
 import {
   ArrowDownToLine,
   Check,
-  ChevronDown,
   LoaderCircle,
+  PencilLine,
   Redo2,
   Save,
   Settings2,
@@ -51,7 +51,7 @@ export function StudioHeader({
           <span className="header-divider" />
           <button className="project-title" onClick={() => void renameProject(project)}>
             {project.name}
-            <ChevronDown size={13} />
+            <PencilLine size={12} />
           </button>
           <span className="save-indicator">
             {busy ? <LoaderCircle className="spin" size={12} /> : <Check size={12} />}
@@ -69,45 +69,45 @@ export function StudioHeader({
       )}
       <div className="header-actions">
         {project && (
-          <>
-            <div className="history-actions">
-              <IconButton
-                label="Undo (⌘Z)"
-                disabled={projectBusy}
-                onClick={() => void history("undo")}
-              >
-                <Undo2 />
-              </IconButton>
-              <IconButton
-                label="Redo (⇧⌘Z)"
-                disabled={projectBusy}
-                onClick={() => void history("redo")}
-              >
-                <Redo2 />
-              </IconButton>
-            </div>
+          <div className="history-actions">
+            <IconButton
+              label="Undo (⌘Z)"
+              disabled={projectBusy}
+              onClick={() => void history("undo")}
+            >
+              <Undo2 />
+            </IconButton>
+            <IconButton
+              label="Redo (⇧⌘Z)"
+              disabled={projectBusy}
+              onClick={() => void history("redo")}
+            >
+              <Redo2 />
+            </IconButton>
+          </div>
+        )}
+        <IconButton label="Settings" onClick={() => setModal("settings")}>
+          <Settings2 />
+        </IconButton>
+        {project && (
+          <div className="output-actions">
             <button
               className="button subtle save-button"
               disabled={projectBusy}
               onClick={() => void saveDraft()}
             >
               <Save size={15} />
-              Save Draft
+              Save draft
             </button>
-          </>
-        )}
-        <IconButton label="Settings" onClick={() => setModal("settings")}>
-          <Settings2 />
-        </IconButton>
-        {project && (
-          <button
-            className="button primary"
-            disabled={!project.source || projectBusy}
-            onClick={() => setModal("export")}
-          >
-            <ArrowDownToLine size={15} />
-            Export video
-          </button>
+            <button
+              className="button primary"
+              disabled={!project.source || projectBusy}
+              onClick={() => setModal("export")}
+            >
+              <ArrowDownToLine size={15} />
+              Export video
+            </button>
+          </div>
         )}
       </div>
     </header>

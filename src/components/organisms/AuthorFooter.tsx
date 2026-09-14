@@ -4,7 +4,6 @@ import { ArrowUpRight } from "lucide-react";
 import { Dialog } from "@/src/components/organisms/Dialog";
 
 export function AuthorFooter({ onAbout }: { onAbout: () => void }) {
-  const { error, open } = useAuthorLinks();
   return (
     <div className="author-card">
       <small>BUILT BY</small>
@@ -18,23 +17,6 @@ export function AuthorFooter({ onAbout }: { onAbout: () => void }) {
         </span>
         <ArrowUpRight size={14} aria-hidden="true" />
       </button>
-      <div className="author-links">
-        {[
-          ["GitHub", author.repository],
-          ["serkanuslu.com", author.website],
-        ].map(([label, href]) => (
-          <a
-            key={href}
-            href={href}
-            target="_blank"
-            rel="noreferrer"
-            onClick={(e) => open(e, href!)}
-          >
-            {label}
-          </a>
-        ))}
-      </div>
-      {error && <p role="alert">{error}</p>}
     </div>
   );
 }
@@ -46,24 +28,56 @@ export function AboutDialog({ onClose }: { onClose: () => void }) {
       subtitle="Creator of Screen Recorder. Built for people who share what they know."
       onClose={onClose}
     >
-      <p>Questions, feedback, or ideas? Get in touch.</p>
       <div className="about-links">
-        {[
-          ["GitHub profile", author.github],
-          ["Medium", author.medium],
-          ["serkanuslu.com", author.website],
-          [author.email, `mailto:${author.email}`],
-        ].map(([label, href]) => (
-          <a
-            className="button secondary"
-            key={href}
-            href={href}
-            target="_blank"
-            rel="noreferrer"
-            onClick={(e) => open(e, href!)}
-          >
-            {label}
-          </a>
+        {(
+          [
+            [
+              "PROJECT",
+              [
+                [
+                  "Screen Recorder on GitHub",
+                  "Explore the source, report an issue, or contribute to the project.",
+                  author.repository,
+                ],
+              ],
+            ],
+            [
+              "CREATOR",
+              [
+                ["GitHub profile", "Discover Serkan’s other open-source work.", author.github],
+                ["Medium", "Read articles about software, products, and AI.", author.medium],
+                ["serkanuslu.com", "See Serkan’s work and current projects.", author.website],
+              ],
+            ],
+            [
+              "CONTACT",
+              [
+                [
+                  author.email,
+                  "Send questions, feedback, or collaboration ideas.",
+                  `mailto:${author.email}`,
+                ],
+              ],
+            ],
+          ] as const
+        ).map(([title, links]) => (
+          <section className="about-section" key={title}>
+            <h3>{title}</h3>
+            {links.map(([label, description, href]) => (
+              <a
+                className="about-link"
+                key={href}
+                href={href}
+                target="_blank"
+                rel="noreferrer"
+                onClick={(e) => open(e, href)}
+              >
+                <strong>{label}</strong>
+                <span>{description}</span>
+                <ArrowUpRight size={15} aria-hidden="true" />
+              </a>
+            ))}
+          </section>
         ))}
       </div>
       {error && <p role="alert">{error}</p>}

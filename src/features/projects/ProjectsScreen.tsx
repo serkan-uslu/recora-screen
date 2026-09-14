@@ -103,14 +103,24 @@ export function ProjectsScreen({
             </h1>
             <p>Record something worth sharing. Make it your own.</p>
           </div>
-          <button
-            className="button primary large"
-            disabled={busy || !connected}
-            onClick={() => setModal("new")}
-          >
-            <Plus size={18} />
-            New project
-          </button>
+          <div className="library-title-actions">
+            <button
+              className="button secondary large"
+              disabled={busy || !connected}
+              onClick={() => void importProject()}
+            >
+              <FolderOpen size={17} />
+              Open project
+            </button>
+            <button
+              className="button primary large"
+              disabled={busy || !connected}
+              onClick={() => setModal("new")}
+            >
+              <Plus size={18} />
+              New project
+            </button>
+          </div>
         </div>
         <div className="library-toolbar">
           <div className="search-box">
@@ -121,17 +131,8 @@ export function ProjectsScreen({
               value={search}
               onChange={(e) => setSearch(e.target.value)}
             />
-            <kbd>⌕</kbd>
           </div>
           <div className="library-toolbar-actions">
-            <button
-              className="button subtle"
-              disabled={busy || !connected}
-              onClick={() => void importProject()}
-            >
-              <FolderOpen size={15} />
-              Open folder
-            </button>
             <label className="sort-control">
               <SlidersHorizontal size={14} />
               <select
