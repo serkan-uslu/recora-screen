@@ -1,0 +1,53 @@
+name: Publish verified beta website
+
+on:
+  workflow_dispatch:
+    inputs:
+      download_url:
+        description: Exact HTTPS GitHub Release DMG URL for this version
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: github-pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    env:
+      VITE_SITE_URL: https://serkan-uslu.github.io/screen-recorder/
+      VITE_DOWNLOAD_URL: ${{ inputs.download_url }}
+      VITE_PLAUSIBLE_SCRIPT_URL: ${{ vars.PLAUSIBLE_SCRIPT_URL }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+      - run: npm ci
+      - name: Verify candidate evidence and exact published asset
+        run: npm run check:launch -- --site
+      - run: npm run test:site
+      - run: npm run build:site
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: website/dist
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

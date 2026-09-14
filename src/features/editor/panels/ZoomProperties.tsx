@@ -1,16 +1,12 @@
 import { useContext, useEffect, useRef, useState } from "react";
 import { Trash2 } from "lucide-react";
-import {
-  type EditOperation,
-  type Project,
-  type Zoom,
-} from "../../../../shared/types";
-import { duration, outputRanges } from "../../../../shared/timeline";
-import { Field } from "../../../components/molecules/Field";
-import { Switch } from "../../../components/atoms/Switch";
-import { Slider } from "../../../components/molecules/Slider";
-import { DraftPreviewContext } from "../../../controllers/StudioContexts";
-import { number } from "../../../lib/format";
+import { type EditOperation, type Project, type Zoom } from "@/shared/types";
+import { duration, outputRanges } from "@/shared/timeline";
+import { Field } from "@/src/components/molecules/Field";
+import { Switch } from "@/src/components/atoms/Switch";
+import { Slider } from "@/src/components/molecules/Slider";
+import { DraftPreviewContext } from "@/src/controllers/StudioContexts";
+import { number } from "@/src/lib/format";
 
 export function ZoomProperties({
   zoom,
@@ -31,13 +27,9 @@ export function ZoomProperties({
   const preview = (zoomPatch: Partial<Omit<Zoom, "id">>) =>
     draftPreview([{ type: "zoom.update", id: zoom.id, zoom: zoomPatch }]);
   const ranges = outputRanges(project.edits.segments, zoom);
-  const range = ranges.length
-    ? { startMs: ranges[0]!.startMs, endMs: ranges.at(-1)!.endMs }
-    : null;
+  const range = ranges.length ? { startMs: ranges[0]!.startMs, endMs: ranges.at(-1)!.endMs } : null;
   const [start, setStart] = useState((range?.startMs ?? 0) / 1000);
-  const [length, setLength] = useState(
-    ((range?.endMs ?? 0) - (range?.startMs ?? 0)) / 1000,
-  );
+  const [length, setLength] = useState(((range?.endMs ?? 0) - (range?.startMs ?? 0)) / 1000);
   const total = duration(project.edits.segments);
   const update = (patch: Partial<Omit<Zoom, "id">>) =>
     void apply([{ type: "zoom.update", id: zoom.id, zoom: patch }]);
@@ -113,9 +105,7 @@ export function ZoomProperties({
       <Field label="Zoom motion">
         <select
           value={zoom.motion ?? "gentle"}
-          onChange={(e) =>
-            update({ motion: e.target.value as "gentle" | "snappy" })
-          }
+          onChange={(e) => update({ motion: e.target.value as "gentle" | "snappy" })}
         >
           <option value="gentle">Gentle</option>
           <option value="snappy">Snappy</option>
@@ -123,9 +113,11 @@ export function ZoomProperties({
       </Field>
       <button
         className="button subtle full"
-        onClick={async () => {
-          await apply([{ type: "zoom.remove", id: zoom.id }]);
-          onRemove();
+        onClick={() => {
+          void (async () => {
+            await apply([{ type: "zoom.remove", id: zoom.id }]);
+            onRemove();
+          })();
         }}
       >
         <Trash2 size={14} />

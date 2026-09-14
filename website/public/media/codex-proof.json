@@ -1,0 +1,194 @@
+{
+  "recordedAt": "2026-09-13T17:59:36.358927+00:00",
+  "client": "Codex CLI",
+  "clientVersion": "0.153.1",
+  "model": "gpt-5.6-sol",
+  "appVersion": "0.1.0",
+  "source": "Actual MCP calls against a running packaged desktop app; the recorded page is a fictional demo fixture.",
+  "prompt": "This is an explicitly authorized product demo and real MCP client acceptance test on ONLY the clean fictional project c8cfa244-89ea-43e4-9b3e-cbeeda732020 named \"A better product walkthrough\". It contains a 12-second fictional Fieldnotes window recording and no personal content. Use only screen-recorder MCP tools. Do not use built-in tools, access files or other projects, record, or call preview_load/preview_play. 1. Call project_open for this exact ID to get latest revision. 2. Call timeline_apply once with that revision, requestId \"launch-codex-demo-edit-20260913\", operations: [{\"type\":\"zoom.add\",\"zoom\":{\"startMs\":2000,\"endMs\":5500,\"scale\":1.6,\"x\":0.32,\"y\":0.35,\"followCursor\":false,\"motion\":\"gentle\"}},{\"type\":\"overlay.add\",\"overlay\":{\"kind\":\"text\",\"text\":\"A little focus goes a long way.\",\"startMs\":6500,\"endMs\":11000,\"x\":0.1,\"y\":0.80,\"width\":0.8,\"fontSize\":40,\"color\":\"#d8ed96\",\"animation\":\"fade\"}}]. 3. Call preview_frame for the same project at timeMs 3500. 4. Call export_start for the same project with quality \"1080\", requestId \"launch-codex-demo-export-20260913\", path \"[new MP4 export destination]\". 5. Poll only the returned job using jobs_get until completed, failed, or cancelled. Report actual project revision, preview image result and final export status. Do not change the project further. On errors report exact error and stop; do not invent success.",
+  "exitStatus": 0,
+  "toolCalls": [
+    {
+      "tool": "project_open",
+      "arguments": {
+        "projectId": "c8cfa244-89ea-43e4-9b3e-cbeeda732020"
+      },
+      "status": "completed",
+      "result": {
+        "id": "c8cfa244-89ea-43e4-9b3e-cbeeda732020",
+        "name": "A better product walkthrough",
+        "revision": 2,
+        "status": "ready"
+      },
+      "error": null
+    },
+    {
+      "tool": "timeline_apply",
+      "arguments": {
+        "projectId": "c8cfa244-89ea-43e4-9b3e-cbeeda732020",
+        "expectedRevision": 2,
+        "requestId": "launch-codex-demo-edit-20260913",
+        "operations": [
+          {
+            "type": "zoom.add",
+            "zoom": {
+              "startMs": 2000,
+              "endMs": 5500,
+              "scale": 1.6,
+              "x": 0.32,
+              "y": 0.35,
+              "followCursor": false,
+              "motion": "gentle"
+            }
+          },
+          {
+            "type": "overlay.add",
+            "overlay": {
+              "kind": "text",
+              "text": "A little focus goes a long way.",
+              "startMs": 6500,
+              "endMs": 11000,
+              "x": 0.1,
+              "y": 0.8,
+              "width": 0.8,
+              "fontSize": 40,
+              "color": "#d8ed96",
+              "animation": "fade"
+            }
+          }
+        ]
+      },
+      "status": "completed",
+      "result": {
+        "id": "c8cfa244-89ea-43e4-9b3e-cbeeda732020",
+        "name": "A better product walkthrough",
+        "revision": 3,
+        "status": "ready",
+        "zooms": [
+          {
+            "startMs": 2000,
+            "endMs": 5500,
+            "scale": 1.6,
+            "x": 0.32,
+            "y": 0.35,
+            "motion": "gentle",
+            "followCursor": false,
+            "id": "540222d5-f1b9-468a-bf13-55ca56aaf814"
+          }
+        ],
+        "overlays": [
+          {
+            "startMs": 6500,
+            "endMs": 11000,
+            "kind": "text",
+            "text": "A little focus goes a long way.",
+            "x": 0.1,
+            "y": 0.8,
+            "width": 0.8,
+            "fontSize": 40,
+            "color": "#d8ed96",
+            "animation": "fade",
+            "id": "24459088-c76a-44f4-8b5f-71ddbbb5214a"
+          }
+        ]
+      },
+      "error": null
+    },
+    {
+      "tool": "preview_frame",
+      "arguments": {
+        "projectId": "c8cfa244-89ea-43e4-9b3e-cbeeda732020",
+        "timeMs": 3500
+      },
+      "status": "completed",
+      "result": {
+        "imageReturned": true,
+        "timeMs": 3500
+      },
+      "error": null
+    },
+    {
+      "tool": "export_start",
+      "arguments": {
+        "projectId": "c8cfa244-89ea-43e4-9b3e-cbeeda732020",
+        "quality": "1080",
+        "requestId": "launch-codex-demo-export-20260913",
+        "outputFilename": "codex-export.mp4"
+      },
+      "status": "completed",
+      "result": {
+        "id": "1ae644e1-b78a-4501-9dca-1f28ad214a09",
+        "status": "queued",
+        "kind": "export",
+        "progress": 0
+      },
+      "error": null
+    },
+    {
+      "tool": "jobs_get",
+      "arguments": {
+        "jobId": "1ae644e1-b78a-4501-9dca-1f28ad214a09"
+      },
+      "status": "completed",
+      "result": {
+        "id": "1ae644e1-b78a-4501-9dca-1f28ad214a09",
+        "status": "completed",
+        "kind": "export",
+        "progress": 1,
+        "outputFilename": "codex-export.mp4"
+      },
+      "error": null
+    }
+  ],
+  "finalResponse": [
+    "Acceptance test completed successfully.\n\n- Project: \u201cA better product walkthrough\u201d\n- Opened revision: 2\n- Final/exported revision: 3\n- Preview at 3500 ms: rendered successfully to `preview-c2db4f1c-a54a-433a-8240-8358dbcdcc95.png`\n- Export status: `completed`\n- Export job: `1ae644e1-b78a-4501-9dca-1f28ad214a09`\n- Output: `codex-export.mp4`\n\nNo further project changes were made."
+  ],
+  "limitations": [
+    "Claude Code model flow was not run: OAuth session expired.",
+    "This 12-second fixture has no camera or audio track."
+  ],
+  "exportArtifact": {
+    "filename": "codex-export.mp4",
+    "sha256": "7203d57b000431968efb49956305d873b5ecffaf0b0464b4bd9d5cfb59b758fd",
+    "bytes": 2092331,
+    "probe": {
+      "programs": [],
+      "stream_groups": [],
+      "streams": [
+        {
+          "codec_name": "h264",
+          "codec_type": "video",
+          "width": 1920,
+          "height": 1080,
+          "avg_frame_rate": "30/1"
+        }
+      ],
+      "format": {
+        "duration": "12.033333",
+        "size": "2092331"
+      }
+    }
+  },
+  "followUpLiveUiCheck": {
+    "checkedAt": "2026-09-13T18:08:07.604809+00:00",
+    "transport": "Direct local service socket using the same validated commands exposed through MCP; no model invocation during this follow-up.",
+    "observations": [
+      {
+        "action": "Rename the clean demo project with an MCP suffix",
+        "revision": 5,
+        "result": "The open app header updated without reopening; verified through the native accessibility tree."
+      },
+      {
+        "action": "Change existing zoom depth from 1.6 to 1.8",
+        "revision": 6,
+        "result": "The same open app inspector and timeline both showed 1.8; verified through the native accessibility tree."
+      }
+    ],
+    "restored": {
+      "name": "A better product walkthrough",
+      "zoomScale": 1.6,
+      "revision": 8
+    },
+    "initialObservation": "After the first Codex edit, the editor initially showed no new blocks until the project was reopened. This did not reproduce during the subsequent external rename and zoom-update checks. The intermittent observation is unresolved; no sync fix is claimed."
+  }
+}

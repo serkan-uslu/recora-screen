@@ -1,5 +1,5 @@
 import { createContext } from "react";
-import { type EditOperation } from "../../shared/types";
+import { type EditOperation } from "@/shared/types";
 
 export const ErrorContext = createContext("");
 export const DraftPreviewContext = createContext<{

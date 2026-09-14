@@ -15,11 +15,7 @@ test("React views depend on controllers, never command transports or native APIs
       ts.ScriptKind.TSX,
     );
     for (const node of source.statements) {
-      if (
-        !ts.isImportDeclaration(node) ||
-        !ts.isStringLiteral(node.moduleSpecifier)
-      )
-        continue;
+      if (!ts.isImportDeclaration(node) || !ts.isStringLiteral(node.moduleSpecifier)) continue;
       assert.doesNotMatch(
         node.moduleSpecifier.text,
         /(?:^@tauri|\/(?:api$|infrastructure\/|services\/|server\/))/,

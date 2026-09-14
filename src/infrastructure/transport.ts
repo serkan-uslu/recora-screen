@@ -1,6 +1,6 @@
 import { invoke } from "@tauri-apps/api/core";
-import { desktop } from "./platform";
-import type { RpcRequest } from "../../shared/types";
+import { desktop } from "@/src/infrastructure/platform";
+import type { RpcRequest } from "@/shared/types";
 
 export async function sendCommand(request: RpcRequest): Promise<unknown> {
   if (desktop) return invoke("command", { request });
@@ -10,8 +10,6 @@ export async function sendCommand(request: RpcRequest): Promise<unknown> {
     body: JSON.stringify(request),
   });
   if (!response.ok)
-    throw new Error(
-      (await response.text()) || `Service returned ${response.status}`,
-    );
+    throw new Error((await response.text()) || `Service returned ${response.status}`);
   return response.json();
 }

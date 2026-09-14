@@ -18,6 +18,15 @@ The app's existing decorative tints are derived with CSS `color-mix`; accent cha
 
 Use existing `--accent`, `--bg`, `--surface`, `--text`, `--muted`, `--line` aliases in new components. Typography and radius tokens are in the same file. Desktop layout styles remain in `src/styles.css`; responsive marketing styles live in `website/src/styles.css` so desktop minimum widths cannot leak into the site.
 
-Project canvas colors, overlay colors and subtitle colors are user content. They intentionally remain part of each project rather than changing when the application theme changes. The small static favicon is an SVG with its own fills; update it when changing the public brand.
+Project canvas colors, overlay colors and subtitle colors are user content. They intentionally remain part of each project rather than changing when the application theme changes. The temporary product mark is `design-system/product-icon.svg`; the app imports it and the website build copies it to `icon.svg`. Final rebranding waits for the separate name decision.
 
-Use semantic HTML, visible keyboard focus, labels for controls and the shared native `Dialog` for modal focus management. Help is available from the project sidebar and editor rail. Author links are centralized in `shared/brand.ts`.
+Use semantic HTML, visible keyboard focus, labels for controls and the shared native `Dialog` for modal focus management. Help and About are available only from the Projects sidebar. Author links are centralized in `shared/brand.ts`.
+
+The configured macOS icons are generated from the same temporary SVG, preserving the app identifier and project storage paths:
+
+```sh
+npx tauri icon design-system/product-icon.svg -o .cache/product-icons
+cp .cache/product-icons/32x32.png .cache/product-icons/128x128.png .cache/product-icons/128x128@2x.png .cache/product-icons/icon.icns src-tauri/icons/
+```
+
+Product version, platform, description and URLs come from `shared/brand.ts`; the MCP server version reads `package.json`. Compatibility marks are documented separately in `THIRD_PARTY_NOTICES.md`.

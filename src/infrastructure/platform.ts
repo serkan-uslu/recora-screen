@@ -1,7 +1,6 @@
 import { isTauri } from "@tauri-apps/api/core";
 import { open, save } from "@tauri-apps/plugin-dialog";
-export { listen } from "@tauri-apps/api/event";
-export { openPath, openUrl } from "@tauri-apps/plugin-opener";
+export { openUrl } from "@tauri-apps/plugin-opener";
 export const desktop = isTauri();
 export async function pickPath(
   kind: "project" | "image" | "export" | "srt" | "vtt",

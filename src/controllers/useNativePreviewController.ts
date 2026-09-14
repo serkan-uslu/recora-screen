@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
-import { type Project } from "../../shared/types";
-import { outputSize } from "../../shared/timeline";
-import { command, desktop, messageOf } from "../api";
+import { type Project } from "@/shared/types";
+import { outputSize } from "@/shared/timeline";
+import { command, desktop, messageOf } from "@/src/api";
 
 export function useNativePreviewController({
   project,
@@ -68,9 +68,7 @@ export function useNativePreviewController({
     return () => {
       observer.disconnect();
       window.removeEventListener("resize", bounds);
-      void command("preview.bounds", { x: 0, y: 0, width: 0, height: 0 }).catch(
-        () => {},
-      );
+      void command("preview.bounds", { x: 0, y: 0, width: 0, height: 0 }).catch(() => {});
     };
   }, [hidden, ready]);
   return {

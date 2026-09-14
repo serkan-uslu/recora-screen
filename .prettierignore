@@ -1,0 +1,11 @@
+# Generated output, vendored assets and recorded evidence retain their original bytes.
+graphify-out/
+website/public/
+marketing/product-hunt/assets/
+marketing/product-hunt/media/
+marketing/product-hunt/brand-reference/
+package-lock.json
+src-tauri/Cargo.lock
+
+# Preserve upstream license notices verbatim.
+third-party-licenses/

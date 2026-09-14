@@ -1,5 +1,5 @@
 import { Sparkles } from "lucide-react";
-import { Field } from "../../components/molecules/Field";
+import { Field } from "@/src/components/molecules/Field";
 
 export function SilenceControls({
   disabled,
@@ -23,14 +23,7 @@ export function SilenceControls({
     >
       <div className="two-columns">
         <Field label="Quiet threshold">
-          <input
-            name="threshold"
-            type="number"
-            min={-80}
-            max={-10}
-            step={1}
-            defaultValue={-40}
-          />
+          <input name="threshold" type="number" min={-80} max={-10} step={1} defaultValue={-40} />
           <small>dB</small>
         </Field>
         <Field label="Minimum pause">
@@ -46,14 +39,7 @@ export function SilenceControls({
         </Field>
       </div>
       <Field label="Speech padding (ms)">
-        <input
-          type="number"
-          name="padding"
-          min={0}
-          max={1000}
-          step={50}
-          defaultValue={150}
-        />
+        <input type="number" name="padding" min={0} max={1000} step={50} defaultValue={150} />
       </Field>
       <label className="check-row">
         <input type="checkbox" name="preserve" defaultChecked />

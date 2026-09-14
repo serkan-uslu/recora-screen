@@ -10,19 +10,19 @@ import {
   type ProjectSummary,
   type Range,
   type RecordingStatus,
-} from "../../shared/types";
-import { createPreviewPlayback } from "./previewPlayback";
-import { useStableCallback } from "./useStableCallback";
-import { duration, outputRanges } from "../../shared/timeline";
-import { command, desktop, messageOf, pickPath } from "../api";
+} from "@/shared/types";
+import { createPreviewPlayback } from "@/src/controllers/previewPlayback";
+import { useStableCallback } from "@/src/controllers/useStableCallback";
+import { duration, outputRanges } from "@/shared/timeline";
+import { command, desktop, messageOf, pickPath } from "@/src/api";
 import {
   type Modal,
   type Tab,
   type Settings,
   type McpConfig,
   type Model,
-} from "./studioTypes";
-import { idleRecording } from "../lib/format";
+} from "@/src/controllers/studioTypes";
+import { idleRecording } from "@/src/lib/format";
 
 export const reconcileProjectRefresh = (current: Project | null, next: Project) =>
   current?.id === next.id && next.revision >= current.revision ? next : current;
@@ -44,9 +44,8 @@ export function useStudioController() {
   const [selectedZoom, setSelectedZoom] = useState<string | null>(null);
   const inspectorRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
-    if (tab !== "zoom" || !selectedZoom)
-      inspectorRef.current?.scrollTo({ top: 0 });
-  }, [tab]);
+    if (tab !== "zoom" || !selectedZoom) inspectorRef.current?.scrollTo({ top: 0 });
+  }, [tab, selectedZoom]);
   const [search, setSearch] = useState("");
   const [sort, setSort] = useState("modified");
   const [error, setError] = useState("");
@@ -55,10 +54,12 @@ export function useStudioController() {
   const [busy, setBusy] = useState(false);
   const [connected, setConnected] = useState(false);
   const [loading, setLoading] = useState(true);
-  const [playback] = useState(() => createPreviewPlayback(
-    (method, params) => desktop ? command(method, params) : Promise.resolve(null),
-    error => setError(messageOf(error)),
-  ));
+  const [playback] = useState(() =>
+    createPreviewPlayback(
+      (method, params) => (desktop ? command(method, params) : Promise.resolve(null)),
+      (error) => setError(messageOf(error)),
+    ),
+  );
   const [selectedOverlay, setSelectedOverlay] = useState<string | null>(null);
   const [cameraScope, setCameraScope] = useState<"selection" | "entire">("selection");
   const [recordingBusy, setRecordingBusy] = useState(false);
@@ -77,15 +78,13 @@ export function useStudioController() {
   } | null>(null);
   const handledJobs = useRef(new Set<string>());
   const initializedJobs = useRef(false);
-  const pendingProjectChanges = useRef(
-    new Map<string, { revision?: number; deleted?: boolean }>(),
-  );
+  const pendingProjectChanges = useRef(new Map<string, { revision?: number; deleted?: boolean }>());
   const busyRef = useRef(false);
   const projectRef = useRef(project);
   projectRef.current = project;
   function acceptCurrentProject(next: Project) {
     // Resolve against the latest React state, including project switches queued in this same turn.
-    setProject(current => reconcileProjectRefresh(current, next));
+    setProject((current) => reconcileProjectRefresh(current, next));
   }
   const previewTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const pendingPreview = useRef<{
@@ -103,37 +102,34 @@ export function useStudioController() {
     pendingPreview.current = null;
   }
   function scheduleDraftPreview() {
-    if (
-      previewTimer.current ||
-      previewRunning.current ||
-      !pendingPreview.current
-    )
-      return;
-    previewTimer.current = setTimeout(async () => {
-      previewTimer.current = null;
-      const pending = pendingPreview.current;
-      pendingPreview.current = null;
-      if (
-        !pending ||
-        projectRef.current?.id !== pending.projectId ||
-        projectRef.current?.revision !== pending.revision
-      )
-        return;
-      previewRunning.current = true;
-      try {
-        await command(pending.operations === null ? "preview.reset" : "preview.draft", {
-          projectId: pending.projectId,
-          expectedRevision: pending.revision,
-          ...(pending.operations === null ? {} : { operations: pending.operations }),
-          sequence: pending.sequence,
-          inputAtMs: pending.inputAtMs,
-        });
-      } catch {
-        /* A stale preview is superseded by the next committed edit. */
-      } finally {
-        previewRunning.current = false;
-        scheduleDraftPreview();
-      }
+    if (previewTimer.current || previewRunning.current || !pendingPreview.current) return;
+    previewTimer.current = setTimeout(() => {
+      void (async () => {
+        previewTimer.current = null;
+        const pending = pendingPreview.current;
+        pendingPreview.current = null;
+        if (
+          !pending ||
+          projectRef.current?.id !== pending.projectId ||
+          projectRef.current?.revision !== pending.revision
+        )
+          return;
+        previewRunning.current = true;
+        try {
+          await command(pending.operations === null ? "preview.reset" : "preview.draft", {
+            projectId: pending.projectId,
+            expectedRevision: pending.revision,
+            ...(pending.operations === null ? {} : { operations: pending.operations }),
+            sequence: pending.sequence,
+            inputAtMs: pending.inputAtMs,
+          });
+        } catch {
+          /* A stale preview is superseded by the next committed edit. */
+        } finally {
+          previewRunning.current = false;
+          scheduleDraftPreview();
+        }
+      })();
     }, 16);
   }
   function draftPreview(operations: EditOperation[] | null) {
@@ -163,24 +159,21 @@ export function useStudioController() {
     if (projectRef.current?.id !== next.id) return;
     return { asset: next.assets.at(-1), revision: next.revision };
   }
-  const run = useCallback(
-    async <T>(action: () => Promise<T>): Promise<T | undefined> => {
-      if (busyRef.current) return;
-      busyRef.current = true;
-      setBusy(true);
-      setError("");
-      try {
-        return await action();
-      } catch (e) {
-        setError(messageOf(e));
-        return undefined;
-      } finally {
-        busyRef.current = false;
-        setBusy(false);
-      }
-    },
-    [],
-  );
+  const run = useCallback(async <T>(action: () => Promise<T>): Promise<T | undefined> => {
+    if (busyRef.current) return;
+    busyRef.current = true;
+    setBusy(true);
+    setError("");
+    try {
+      return await action();
+    } catch (e) {
+      setError(messageOf(e));
+      return undefined;
+    } finally {
+      busyRef.current = false;
+      setBusy(false);
+    }
+  }, []);
   const refreshProjects = useCallback(async () => {
     setProjects(await command<ProjectSummary[]>("project.list"));
   }, []);
@@ -205,9 +198,7 @@ export function useStudioController() {
       setCapabilities(results[1].value);
       setRecording(results[1].value.recording);
     }
-    const failure = results.find(
-      (r, index) => r.status === "rejected" && (desktop || index !== 1),
-    );
+    const failure = results.find((r, index) => r.status === "rejected" && (desktop || index !== 1));
     if (failure?.status === "rejected") setError(messageOf(failure.reason));
     setLoading(false);
   }, [refreshProjects, refreshSettings]);
@@ -240,47 +231,47 @@ export function useStudioController() {
         );
       },
     );
-    const shortcut = listen<{ message: string }>(
-      "shortcut-error",
-      ({ payload }) => setError(payload.message),
+    const shortcut = listen<{ message: string }>("shortcut-error", ({ payload }) =>
+      setError(payload.message),
     );
     let refreshing = false;
-    const timer = setInterval(async () => {
-      if (busyRef.current || refreshing || !pendingProjectChanges.current.size)
-        return;
-      refreshing = true;
-      const changes = new Map(pendingProjectChanges.current);
-      pendingProjectChanges.current.clear();
-      try {
-        await refreshProjects();
-        const current = projectRef.current;
-        if (current && changes.get(current.id)?.deleted) {
-          setProject(null);
-          setNotice("This project was moved to Trash.");
-        } else if (
-          current &&
-          changes.has(current.id) &&
-          changes.get(current.id)?.revision !== current.revision
-        ) {
-          const next = await command<Project>("project.open", {
-            projectId: current.id,
-          });
-          if (
-            !busyRef.current &&
-            projectRef.current?.id === next.id &&
-            next.revision >= projectRef.current.revision
-          )
-            setProject(next);
-          else
-            pendingProjectChanges.current.set(next.id, {
-              revision: next.revision,
+    const timer = setInterval(() => {
+      void (async () => {
+        if (busyRef.current || refreshing || !pendingProjectChanges.current.size) return;
+        refreshing = true;
+        const changes = new Map(pendingProjectChanges.current);
+        pendingProjectChanges.current.clear();
+        try {
+          await refreshProjects();
+          const current = projectRef.current;
+          if (current && changes.get(current.id)?.deleted) {
+            setProject(null);
+            setNotice("This project was moved to Trash.");
+          } else if (
+            current &&
+            changes.has(current.id) &&
+            changes.get(current.id)?.revision !== current.revision
+          ) {
+            const next = await command<Project>("project.open", {
+              projectId: current.id,
             });
+            if (
+              !busyRef.current &&
+              projectRef.current?.id === next.id &&
+              next.revision >= projectRef.current.revision
+            )
+              setProject(next);
+            else
+              pendingProjectChanges.current.set(next.id, {
+                revision: next.revision,
+              });
+          }
+        } catch (e) {
+          setError(messageOf(e));
+        } finally {
+          refreshing = false;
         }
-      } catch (e) {
-        setError(messageOf(e));
-      } finally {
-        refreshing = false;
-      }
+      })();
     }, 400);
     return () => {
       clearInterval(timer);
@@ -299,14 +290,16 @@ export function useStudioController() {
       try {
         const [nextJobs, nextRecording] = await Promise.all([
           command<Job[]>("jobs.list"),
-          desktop
-            ? command<RecordingStatus>("recording.status")
-            : Promise.resolve(idleRecording),
+          desktop ? command<RecordingStatus>("recording.status") : Promise.resolve(idleRecording),
         ]);
         if (cancelled) return;
-        setJobs(previous => JSON.stringify(previous) === JSON.stringify(nextJobs) ? previous : nextJobs);
+        setJobs((previous) =>
+          JSON.stringify(previous) === JSON.stringify(nextJobs) ? previous : nextJobs,
+        );
         if (!recordingBusyRef.current)
-          setRecording(previous => JSON.stringify(previous) === JSON.stringify(nextRecording) ? previous : nextRecording);
+          setRecording((previous) =>
+            JSON.stringify(previous) === JSON.stringify(nextRecording) ? previous : nextRecording,
+          );
         if (!initializedJobs.current) {
           for (const job of nextJobs)
             if (["completed", "failed", "cancelled"].includes(job.status))
@@ -333,15 +326,10 @@ export function useStudioController() {
           )
             setSilenceReview(job.result as NonNullable<typeof silenceReview>);
           if (job.kind === "assistant" && job.projectId) {
-            const text =
-              (job.result as { message?: string })?.message ||
-              "Your edits are ready.";
+            const text = (job.result as { message?: string })?.message || "Your edits are ready.";
             setChats((c) => ({
               ...c,
-              [job.projectId!]: [
-                ...(c[job.projectId!] || []),
-                { role: "assistant", text },
-              ],
+              [job.projectId!]: [...(c[job.projectId!] || []), { role: "assistant", text }],
             }));
           }
           if (
@@ -368,7 +356,9 @@ export function useStudioController() {
       }
     }
     void poll();
-    const id = setInterval(poll, 1400);
+    const id = setInterval(() => {
+      void poll();
+    }, 1400);
     return () => {
       cancelled = true;
       clearInterval(id);
@@ -377,31 +367,30 @@ export function useStudioController() {
   useEffect(() => {
     if (!project?.source || modal || !desktop) return;
     let cancelled = false;
-    const id = setInterval(() => { if (!cancelled) void playback.poll(); }, 100);
+    const id = setInterval(() => {
+      if (!cancelled) void playback.poll();
+    }, 100);
     return () => {
       cancelled = true;
       clearInterval(id);
     };
-  }, [project?.id, project?.source, modal]);
+  }, [project?.id, project?.source, modal, playback]);
   useEffect(() => {
-    playback.reset(total);
+    playback.reset(projectRef.current ? duration(projectRef.current.edits.segments) : 0);
     setSelection({ startMs: 0, endMs: 0 });
     setSilenceReview(null);
     setSelectedZoom(null);
     setSelectedOverlay(null);
     setCameraScope("selection");
-  }, [project?.id]);
+  }, [project?.id, playback]);
   useEffect(() => {
     playback.setDuration(total);
     setSelection((s) => ({
       startMs: Math.min(s.startMs, total),
       endMs: Math.min(s.endMs, total),
     }));
-  }, [total]);
-  async function apply(
-    operations: EditOperation[],
-    revision = project?.revision,
-  ) {
+  }, [total, playback]);
+  async function apply(operations: EditOperation[], revision = project?.revision) {
     if (!project) return;
     cancelDraftPreview();
     await run(async () => {
@@ -414,22 +403,28 @@ export function useStudioController() {
         });
       } catch (error) {
         if (desktop && projectRef.current?.id === project.id)
-          await command("preview.load", { projectId: project.id }).catch(
-            () => {},
-          );
+          await command("preview.load", { projectId: project.id }).catch(() => {});
         throw error;
       }
       if (projectRef.current?.id !== next.id) return;
       acceptCurrentProject(next);
-      const zoom = next.edits.zooms.find(item => !project.edits.zooms.some(old => old.id === item.id));
-      const overlay = next.edits.overlays.find(item => !project.edits.overlays.some(old => old.id === item.id));
-      if (zoom && operations.some(op => op.type === "zoom.add")) {
-        setSelectedZoom(zoom.id); setSelectedOverlay(null); setTab("zoom");
+      const zoom = next.edits.zooms.find(
+        (item) => !project.edits.zooms.some((old) => old.id === item.id),
+      );
+      const overlay = next.edits.overlays.find(
+        (item) => !project.edits.overlays.some((old) => old.id === item.id),
+      );
+      if (zoom && operations.some((op) => op.type === "zoom.add")) {
+        setSelectedZoom(zoom.id);
+        setSelectedOverlay(null);
+        setTab("zoom");
         const ranges = outputRanges(next.edits.segments, zoom);
         if (ranges[0]) await playback.seek((ranges[0].startMs + ranges[0].endMs) / 2);
       }
-      if (overlay && operations.some(op => op.type === "overlay.add")) {
-        setSelectedOverlay(overlay.id); setSelectedZoom(null); setTab("overlays");
+      if (overlay && operations.some((op) => op.type === "overlay.add")) {
+        setSelectedOverlay(overlay.id);
+        setSelectedZoom(null);
+        setTab("overlays");
         const ranges = outputRanges(next.edits.segments, overlay);
         if (ranges[0]) await playback.seek((ranges[0].startMs + ranges[0].endMs) / 2);
       }
@@ -439,9 +434,7 @@ export function useStudioController() {
   async function saveDraft() {
     if (!project || (recording.active && recording.projectId === project.id)) return;
     await run(async () => {
-      acceptCurrentProject(
-        await command<Project>("project.save", { projectId: project.id }),
-      );
+      acceptCurrentProject(await command<Project>("project.save", { projectId: project.id }));
       setNotice("Draft saved");
       await refreshProjects();
     });
@@ -449,14 +442,16 @@ export function useStudioController() {
   async function openProject(id: string) {
     cancelDraftPreview();
     await run(async () => {
-      if (project && !(recording.active && recording.projectId === project.id)) await command("project.save", { projectId: project.id });
+      if (project && !(recording.active && recording.projectId === project.id))
+        await command("project.save", { projectId: project.id });
       setProject(await command<Project>("project.open", { projectId: id }));
     });
   }
   async function backToLibrary() {
     cancelDraftPreview();
     await run(async () => {
-      if (project && !(recording.active && recording.projectId === project.id)) await command("project.save", { projectId: project.id });
+      if (project && !(recording.active && recording.projectId === project.id))
+        await command("project.save", { projectId: project.id });
       await command("preview.pause").catch(() => {});
       setProject(null);
       await refreshProjects();
@@ -476,17 +471,13 @@ export function useStudioController() {
   }
   const seek = playback.seek;
   const togglePlayback = playback.toggle;
-  async function startJob(
-    method: string,
-    params: Record<string, unknown> = {},
-  ) {
+  async function startJob(method: string, params: Record<string, unknown> = {}) {
     return run(async () => {
       const job = await command<Job>(method, {
         ...(method === "ai.models/download" ? {} : { projectId: project?.id }),
         ...params,
       });
-      if (job?.id)
-        setJobs((j) => [job, ...j.filter((item) => item.id !== job.id)]);
+      if (job?.id) setJobs((j) => [job, ...j.filter((item) => item.id !== job.id)]);
       return job;
     });
   }
@@ -516,8 +507,7 @@ export function useStudioController() {
       );
       if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "s") {
         e.preventDefault();
-        if (document.activeElement instanceof HTMLElement)
-          document.activeElement.blur();
+        if (document.activeElement instanceof HTMLElement) document.activeElement.blur();
         void saveDraft();
       }
       if (modal || input) return;
@@ -557,11 +547,11 @@ export function useStudioController() {
     window.addEventListener("keydown", handler);
     return () => window.removeEventListener("keydown", handler);
   });
-  const activeJobs = jobs.filter(
-    (j) => j.status === "running" || j.status === "queued",
-  );
+  const activeJobs = jobs.filter((j) => j.status === "running" || j.status === "queued");
   const projectBusy =
-    busy || (recording.active && recording.projectId === project?.id) || activeJobs.some((j) => j.projectId === project?.id);
+    busy ||
+    (recording.active && recording.projectId === project?.id) ||
+    activeJobs.some((j) => j.projectId === project?.id);
   const filtered = projects
     .filter((p) => p.name.toLowerCase().includes(search.toLowerCase()))
     .sort((a, b) =>
@@ -571,26 +561,42 @@ export function useStudioController() {
           new Date(sort === "created" ? a.createdAt : a.updatedAt).getTime(),
     );
   const projectLocked = (id: string) =>
-    (recording.active && recording.projectId === id) ||
-    activeJobs.some((j) => j.projectId === id);
+    (recording.active && recording.projectId === id) || activeJobs.some((j) => j.projectId === id);
   async function runRecording(action: () => Promise<void>) {
     if (recordingBusyRef.current) return;
-    recordingBusyRef.current = true; setRecordingBusy(true);
-    try { await action(); } catch (error) { setError(messageOf(error)); }
-    finally { recordingBusyRef.current = false; setRecordingBusy(false); }
+    recordingBusyRef.current = true;
+    setRecordingBusy(true);
+    try {
+      await action();
+    } catch (error) {
+      setError(messageOf(error));
+    } finally {
+      recordingBusyRef.current = false;
+      setRecordingBusy(false);
+    }
   }
   function toggleCameraVisibility() {
-    void runRecording(async () => setRecording(await command("recording.camera", { visible: !recording.cameraVisible })));
+    void runRecording(async () =>
+      setRecording(await command("recording.camera", { visible: !recording.cameraVisible })),
+    );
   }
   function toggleCameraDevice() {
-    void runRecording(async () => setRecording(await command("recording.camera", { enabled: !recording.cameraEnabled })));
+    void runRecording(async () =>
+      setRecording(await command("recording.camera", { enabled: !recording.cameraEnabled })),
+    );
   }
   function toggleRecordingPause() {
-    void runRecording(async () => setRecording(await command(`recording.${recording.paused ? "resume" : "pause"}`, { projectId: recording.projectId })));
+    void runRecording(async () =>
+      setRecording(
+        await command(`recording.${recording.paused ? "resume" : "pause"}`, {
+          projectId: recording.projectId,
+        }),
+      ),
+    );
   }
   function finishRecording() {
     void runRecording(async () => {
-      setRecording(current => ({ ...current, phase: "finalizing" }));
+      setRecording((current) => ({ ...current, phase: "finalizing" }));
       try {
         const next = await command<Project>("recording.stop", { projectId: recording.projectId });
         acceptCurrentProject(next);
@@ -658,9 +664,7 @@ export function useStudioController() {
   }
 
   function refreshCapabilities() {
-    return run(async () =>
-      setCapabilities(await command<AppCapabilities>("app.capabilities")),
-    );
+    return run(async () => setCapabilities(await command<AppCapabilities>("app.capabilities")));
   }
 
   function startRecording(settings: CaptureSettings) {
@@ -670,11 +674,16 @@ export function useStudioController() {
     setRecording({ ...idleRecording, active: true, projectId: id, phase: "starting" });
     void runRecording(async () => {
       try {
-        setRecording(await command<RecordingStatus>("recording.start", { projectId: id, settings }));
+        setRecording(
+          await command<RecordingStatus>("recording.start", { projectId: id, settings }),
+        );
         if (projectRef.current?.id === id)
           acceptCurrentProject(await command<Project>("project.open", { projectId: id }));
         await refreshProjects();
-      } catch (error) { setRecording(idleRecording); throw error; }
+      } catch (error) {
+        setRecording(idleRecording);
+        throw error;
+      }
     });
   }
 

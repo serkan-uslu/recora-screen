@@ -1,5 +1,5 @@
-import { sendCommand } from "../infrastructure/transport";
-import type { RpcResponse } from "../../shared/types";
+import { sendCommand } from "@/src/infrastructure/transport";
+import type { RpcResponse } from "@/shared/types";
 const retriable = new Set([
   "project.create",
   "project.rename",
@@ -36,12 +36,7 @@ export async function command<T = unknown>(
     params: { ...params, ...(retriable.has(method) ? { requestId } : {}) },
   };
   const data = await sendCommand(request);
-  if (
-    data &&
-    typeof data === "object" &&
-    "error" in data &&
-    (data as RpcResponse).error
-  ) {
+  if (data && typeof data === "object" && "error" in data && (data as RpcResponse).error) {
     throw new Error((data as RpcResponse).error!.message);
   }
   if (

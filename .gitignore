@@ -15,3 +15,9 @@ artifacts/
 website/public/downloads/
 graphify-out/.graphify_*
 graphify-out/cache/
+playwright-report/
+test-results/
+
+# Local marketing and Product Hunt launch materials
+/marketing/
+**/product-hunt/

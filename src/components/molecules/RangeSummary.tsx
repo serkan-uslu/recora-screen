@@ -1,5 +1,5 @@
-import { type Range } from "../../../shared/types";
-import { seconds } from "../../lib/format";
+import { type Range } from "@/shared/types";
+import { seconds } from "@/src/lib/format";
 
 export function RangeSummary({ selection }: { selection: Range }) {
   return (

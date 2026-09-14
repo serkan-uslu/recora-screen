@@ -1,7 +1,7 @@
 import { useState } from "react";
 import type { MouseEvent } from "react";
-import { desktop, openUrl } from "../infrastructure/platform";
-import { messageOf } from "../lib/errors";
+import { desktop, openUrl } from "@/src/infrastructure/platform";
+import { messageOf } from "@/src/lib/errors";
 
 export function useAuthorLinks() {
   const [error, setError] = useState("");

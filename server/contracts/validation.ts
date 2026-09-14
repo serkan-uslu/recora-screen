@@ -1,5 +1,5 @@
 import { z } from "zod";
-import type { Project, RpcError } from "../../shared/types.js";
+import type { Project, RpcError } from "@/shared/types.js";
 
 export class AppError extends Error {
   constructor(
@@ -16,9 +16,7 @@ export function errorOf(error: unknown): RpcError {
   if (error instanceof z.ZodError)
     return {
       code: "INVALID_INPUT",
-      message: error.issues
-        .map((i) => `${i.path.join(".")}: ${i.message}`)
-        .join("; "),
+      message: error.issues.map((i) => `${i.path.join(".")}: ${i.message}`).join("; "),
     };
   return {
     code: "FAILED",
@@ -28,19 +26,19 @@ export function errorOf(error: unknown): RpcError {
 export const id = z.string().regex(/^[a-zA-Z0-9_-]{1,100}$/);
 export const finite = z.number().finite();
 export const time = finite.min(0).max(Number.MAX_SAFE_INTEGER);
-export const unit = finite.min(0).max(1);
-export const color = z.string().regex(/^#[\da-fA-F]{6}([\da-fA-F]{2})?$/);
-export const rangeShape = { startMs: time, endMs: time };
-export const range = z
+const unit = finite.min(0).max(1);
+const color = z.string().regex(/^#[\da-fA-F]{6}([\da-fA-F]{2})?$/);
+const rangeShape = { startMs: time, endMs: time };
+const range = z
   .object(rangeShape)
   .strict()
   .refine((r) => r.endMs > r.startMs, "End must be after start");
-export const speed = finite.min(0.25).max(8);
-export const segment = z
+const speed = finite.min(0.25).max(8);
+const segment = z
   .object({ ...rangeShape, speed: speed.optional() })
   .strict()
   .refine((r) => r.endMs > r.startMs, "End must be after start");
-export const motion = z.enum(["gentle", "snappy"]);
+const motion = z.enum(["gentle", "snappy"]);
 export const cameraLayoutSettings = z
   .object({
     shape: z.enum(["circle", "square"]),
@@ -50,21 +48,25 @@ export const cameraLayoutSettings = z
     shadow: z.boolean(),
   })
   .strict();
-export const cameraLayout = cameraLayoutSettings.extend({ id, ...rangeShape })
+const cameraLayout = cameraLayoutSettings
+  .extend({ id, ...rangeShape })
   .refine((r) => r.endMs > r.startMs, "End must be after start");
-export const camera = cameraLayoutSettings
+const camera = cameraLayoutSettings
   .extend({
     visible: z.boolean(),
     hiddenRanges: z.array(range).max(10000),
-    layouts: z.array(cameraLayout).max(10000).refine(
-      (layouts) => new Set(layouts.map((layout) => layout.id)).size === layouts.length && layouts.every(
-        (layout, index) => !index || layout.startMs >= layouts[index - 1]!.endMs,
+    layouts: z
+      .array(cameraLayout)
+      .max(10000)
+      .refine(
+        (layouts) =>
+          new Set(layouts.map((layout) => layout.id)).size === layouts.length &&
+          layouts.every((layout, index) => !index || layout.startMs >= layouts[index - 1]!.endMs),
+        "Camera layouts must have unique IDs and stay in source order without overlaps",
       ),
-      "Camera layouts must have unique IDs and stay in source order without overlaps",
-    ),
   })
   .strict();
-export const zoom = z
+const zoom = z
   .object({
     ...rangeShape,
     id,
@@ -75,7 +77,7 @@ export const zoom = z
     followCursor: z.boolean().optional(),
   })
   .strict();
-export const autoZoom = z
+const autoZoom = z
   .object({
     enabled: z.boolean(),
     scale: finite.min(1).max(4),
@@ -86,7 +88,7 @@ export const autoZoom = z
     followCursor: z.boolean(),
   })
   .strict();
-export const canvas = z
+const canvas = z
   .object({
     aspectRatio: z.enum(["source", "16:9", "9:16", "1:1", "4:5"]),
     background: z.enum(["hidden", "color", "gradient", "wallpaper", "image"]),
@@ -103,7 +105,7 @@ export const canvas = z
     title: z.string().max(1000),
   })
   .strict();
-export const overlay = z
+const overlay = z
   .object({
     ...rangeShape,
     id,
@@ -118,13 +120,13 @@ export const overlay = z
     animation: z.enum(["none", "fade", "slide"]),
   })
   .strict();
-export const audio = z
+const audio = z
   .object({
     microphoneVolume: finite.min(0).max(3),
     systemVolume: finite.min(0).max(3),
   })
   .strict();
-export const cursor = z
+const cursor = z
   .object({
     visible: z.boolean(),
     highlight: z.boolean(),
@@ -132,7 +134,7 @@ export const cursor = z
     size: finite.min(0.5).max(4),
   })
   .strict();
-export const captions = z
+const captions = z
   .object({
     enabled: z.boolean(),
     fontSize: finite.min(8).max(200),
@@ -140,10 +142,10 @@ export const captions = z
     background: color,
   })
   .strict();
-export const transcript = z
+const transcript = z
   .array(z.object({ ...rangeShape, id, text: z.string().max(10000) }).strict())
   .max(100000);
-export const editState = z
+const editState = z
   .object({
     segments: z
       .array(segment)
@@ -151,8 +153,7 @@ export const editState = z
       .refine(
         (segments) =>
           segments.every(
-            (segment, index) =>
-              !index || segment.startMs >= segments[index - 1]!.endMs,
+            (segment, index) => !index || segment.startMs >= segments[index - 1]!.endMs,
           ),
         "Segments must be in source order without overlaps",
       ),
@@ -166,7 +167,7 @@ export const editState = z
     autoZoom: autoZoom.optional(),
   })
   .strict();
-export const relativeFile = z
+const relativeFile = z
   .string()
   .min(1)
   .max(500)
@@ -228,12 +229,22 @@ const legacyProjectSchema = projectSchema.extend({
 
 /** Upgrade only known formats. A newer document is not a corrupt document. */
 export function parseProject(value: unknown): Project {
-  const version = value && typeof value === "object" && "schemaVersion" in value ? value.schemaVersion : undefined;
+  const version =
+    value && typeof value === "object" && "schemaVersion" in value
+      ? value.schemaVersion
+      : undefined;
   if (typeof version === "number" && Number.isInteger(version) && version !== 1 && version !== 2)
-    throw new AppError("UNSUPPORTED_PROJECT_VERSION", `Project format v${version} is not supported by this version of Screen Recorder. Update the app to open it.`);
+    throw new AppError(
+      "UNSUPPORTED_PROJECT_VERSION",
+      `Project format v${version} is not supported by this version of Screen Recorder. Update the app to open it.`,
+    );
   if (version === 1) {
     const legacy = legacyProjectSchema.parse(value);
-    return { ...legacy, schemaVersion: 2, edits: { ...legacy.edits, camera: { ...legacy.edits.camera, layouts: [] } } };
+    return {
+      ...legacy,
+      schemaVersion: 2,
+      edits: { ...legacy.edits, camera: { ...legacy.edits.camera, layouts: [] } },
+    };
   }
   return projectSchema.parse(value);
 }
@@ -259,9 +270,17 @@ export const captureSchema = z
     fps: z.literal(30),
   })
   .strict();
-export const layoutSetOperation = z.object({ type: z.literal("camera.layout.set"), ...rangeShape, settings: cameraLayoutSettings.partial() }).strict();
-export const layoutRemoveOperation = z.object({ type: z.literal("camera.layout.remove"), ...rangeShape }).strict();
-export const operationSchema = z.discriminatedUnion("type", [
+const layoutSetOperation = z
+  .object({
+    type: z.literal("camera.layout.set"),
+    ...rangeShape,
+    settings: cameraLayoutSettings.partial(),
+  })
+  .strict();
+const layoutRemoveOperation = z
+  .object({ type: z.literal("camera.layout.remove"), ...rangeShape })
+  .strict();
+const operationSchema = z.discriminatedUnion("type", [
   z.object({ type: z.literal("cut"), ...rangeShape }).strict(),
   z.object({ type: z.literal("trim"), ...rangeShape }).strict(),
   z.object({ type: z.literal("split"), atMs: time }).strict(),
@@ -274,9 +293,7 @@ export const operationSchema = z.discriminatedUnion("type", [
       sourceEndMs: time,
     })
     .strict(),
-  z
-    .object({ type: z.literal("clip.merge"), index: finite.int().min(0) })
-    .strict(),
+  z.object({ type: z.literal("clip.merge"), index: finite.int().min(0) }).strict(),
   z.object({ type: z.literal("source.restore"), ...rangeShape }).strict(),
   z
     .object({
@@ -293,9 +310,7 @@ export const operationSchema = z.discriminatedUnion("type", [
       ...rangeShape,
     })
     .strict(),
-  z
-    .object({ type: z.literal("zoom.add"), zoom: zoom.omit({ id: true }) })
-    .strict(),
+  z.object({ type: z.literal("zoom.add"), zoom: zoom.omit({ id: true }) }).strict(),
   z
     .object({
       type: z.literal("zoom.update"),
@@ -318,21 +333,15 @@ export const operationSchema = z.discriminatedUnion("type", [
     })
     .strict(),
   z.object({ type: z.literal("overlay.remove"), id }).strict(),
-  z
-    .object({ type: z.literal("audio.update"), settings: audio.partial() })
-    .strict(),
-  z
-    .object({ type: z.literal("cursor.update"), settings: cursor.partial() })
-    .strict(),
+  z.object({ type: z.literal("audio.update"), settings: audio.partial() }).strict(),
+  z.object({ type: z.literal("cursor.update"), settings: cursor.partial() }).strict(),
   z
     .object({
       type: z.literal("captions.update"),
       settings: captions.partial(),
     })
     .strict(),
-  z
-    .object({ type: z.literal("canvas.update"), settings: canvas.partial() })
-    .strict(),
+  z.object({ type: z.literal("canvas.update"), settings: canvas.partial() }).strict(),
   z
     .object({
       type: z.literal("autoZoom.update"),
@@ -346,9 +355,7 @@ export const operationSchema = z.discriminatedUnion("type", [
       text: z.string().max(10000),
     })
     .strict(),
-  z
-    .object({ type: z.literal("transcript.update"), segments: transcript })
-    .strict(),
+  z.object({ type: z.literal("transcript.update"), segments: transcript }).strict(),
   autoZoom
     .partial()
     .extend({ type: z.literal("zooms.auto") })
@@ -361,9 +368,8 @@ export function object(value: unknown): Record<string, unknown> {
 export function checkRevision(actual: number, expected: unknown) {
   const revision = finite.int().min(0).parse(expected);
   if (actual !== revision)
-    throw new AppError(
-      "REVISION_CONFLICT",
-      "The project changed. Reload it before editing.",
-      { expectedRevision: revision, revision: actual },
-    );
+    throw new AppError("REVISION_CONFLICT", "The project changed. Reload it before editing.", {
+      expectedRevision: revision,
+      revision: actual,
+    });
 }

@@ -1,0 +1,10 @@
+WEBVTT
+
+00:00.000 --> 00:05.500
+Codex used timeline_apply to add a 1.6x zoom.
+
+00:05.500 --> 00:11.000
+The same MCP edit added this timed title.
+
+00:11.000 --> 00:15.000
+preview_frame checked the result. export_start produced this MP4.

@@ -1,24 +1,26 @@
+import { z } from "zod";
 import { promises as fs, constants } from "node:fs";
 import path from "node:path";
 import os from "node:os";
 import { randomUUID } from "node:crypto";
 import { EventEmitter } from "node:events";
-import type { Project, ProjectSummary } from "../../shared/types.js";
-import { defaultEdits } from "../../shared/types.js";
-import { duration } from "../../shared/timeline.js";
+import type { Project, ProjectSummary } from "@/shared/types.js";
+import { defaultEdits } from "@/shared/types.js";
+import { duration } from "@/shared/timeline.js";
 import {
   AppError,
+  object,
   checkRevision,
   id as idSchema,
   parseProject,
   projectSchema,
   sourceSchema,
-} from "../contracts/validation.js";
+} from "@/server/contracts/validation.js";
 
 export const appDataDir =
   process.env.SCREENREC_DATA_DIR ||
   path.join(os.homedir(), "Library", "Application Support", "Screen Recorder");
-export const projectsDir =
+const projectsDir =
   process.env.SCREENREC_PROJECTS_DIR ||
   path.join(os.homedir(), "Movies", "Screen Recorder Projects");
 export const socketPath =
@@ -45,28 +47,49 @@ export async function atomicJSON(file: string, value: unknown) {
 }
 
 type Document = { project: Project; undo: Project[]; redo: Project[] };
-function parseDocument(data: any, id: string): Document {
+function parseDocument(input: unknown, id: string): Document {
+  const data = object(input);
   const document = {
     project: parseProject(data.project ?? data),
-    undo: (data.undo ?? []).map(parseProject),
-    redo: (data.redo ?? []).map(parseProject),
+    undo: z
+      .array(z.unknown())
+      .parse(data.undo ?? [])
+      .map(parseProject),
+    redo: z
+      .array(z.unknown())
+      .parse(data.redo ?? [])
+      .map(parseProject),
   };
   if ([document.project, ...document.undo, ...document.redo].some((project) => project.id !== id))
     throw new AppError("INVALID_PROJECT", "Project identifier does not match its folder");
   return document;
 }
-function hasLegacyProject(data: any) {
-  return [data.project ?? data, ...(data.undo ?? []), ...(data.redo ?? [])].some((project) => project.schemaVersion === 1);
+function hasLegacyProject(input: unknown) {
+  const data = object(input);
+  return [
+    data.project ?? data,
+    ...z.array(z.unknown()).parse(data.undo ?? []),
+    ...z.array(z.unknown()).parse(data.redo ?? []),
+  ].some((project) => object(project).schemaVersion === 1);
 }
 async function archiveManifest(file: string, contents: string) {
-  const archive = file.replace(/\.json$/, ".pre-v2.json"), temporary = `${archive}.${randomUUID()}.tmp`;
+  const archive = file.replace(/\.json$/, ".pre-v2.json"),
+    temporary = `${archive}.${randomUUID()}.tmp`;
   const handle = await fs.open(temporary, "wx", 0o600);
-  try { await handle.writeFile(contents); await handle.sync(); } finally { await handle.close(); }
+  try {
+    await handle.writeFile(contents);
+    await handle.sync();
+  } finally {
+    await handle.close();
+  }
   try {
     // Link publishes a complete, immutable archive without replacing an earlier migration's original.
     await fs.link(temporary, archive);
-  } catch (error: any) { if (error.code !== "EEXIST") throw error; }
-  finally { await fs.rm(temporary, { force: true }); }
+  } catch (error) {
+    if (!(error instanceof Error && "code" in error && error.code === "EEXIST")) throw error;
+  } finally {
+    await fs.rm(temporary, { force: true });
+  }
 }
 export class ProjectStore extends EventEmitter {
   private locks = new Map<string, Promise<unknown>>();
@@ -102,28 +125,27 @@ export class ProjectStore extends EventEmitter {
   }
   assertIdle(id: string) {
     const reason = this.busy.get(id);
-    if (reason)
-      throw new AppError("PROJECT_BUSY", `Project is busy: ${reason}`);
+    if (reason) throw new AppError("PROJECT_BUSY", `Project is busy: ${reason}`);
   }
   async read(id: string): Promise<Document> {
     if (this.checkedFormats.has(id)) return this.readDocument(id);
     // Concurrent list/open/edit calls share migration work so an older read cannot overwrite a new edit.
     const pending = this.reads.get(id) ?? this.readDocument(id);
     this.reads.set(id, pending);
-    try { return structuredClone(await pending); }
-    finally { if (this.reads.get(id) === pending) this.reads.delete(id); }
+    try {
+      return structuredClone(await pending);
+    } finally {
+      if (this.reads.get(id) === pending) this.reads.delete(id);
+    }
   }
   private async readDocument(id: string): Promise<Document> {
     const dir = this.dir(id);
     try {
       const info = await fs.lstat(dir);
       if (!info.isDirectory() || info.isSymbolicLink())
-        throw new AppError(
-          "INVALID_PROJECT",
-          "Project folder must not be a symbolic link",
-        );
-    } catch (error: any) {
-      if (error.code === "ENOENT")
+        throw new AppError("INVALID_PROJECT", "Project folder must not be a symbolic link");
+    } catch (error) {
+      if (error instanceof Error && "code" in error && error.code === "ENOENT")
         throw new AppError("NOT_FOUND", "Project not found");
       throw error;
     }
@@ -158,19 +180,20 @@ export class ProjectStore extends EventEmitter {
       try {
         const file = path.join(dir, "project.backup.json");
         if ((await fs.stat(file)).size > 50_000_000) throw new Error("Project backup is too large");
-        const contents = originals.get("project.backup.json") ?? await fs.readFile(file, "utf8");
+        const contents = originals.get("project.backup.json") ?? (await fs.readFile(file, "utf8"));
         originals.set("project.backup.json", contents);
         const data = JSON.parse(contents);
         backup = parseDocument(data, id);
         legacy ||= hasLegacyProject(data);
-      } catch (error: any) {
+      } catch (error) {
         if (error instanceof AppError && error.code === "UNSUPPORTED_PROJECT_VERSION") throw error;
-        if (error.code && error.code !== "ENOENT") throw error;
+        if (error instanceof Error && "code" in error && error.code !== "ENOENT") throw error;
         // A corrupt backup must not prevent opening a healthy current document.
       }
       if (legacy) {
         try {
-          for (const [filename, contents] of originals) await archiveManifest(path.join(dir, filename), contents);
+          for (const [filename, contents] of originals)
+            await archiveManifest(path.join(dir, filename), contents);
           // Upgrade the automatic fallback first. An older app must never recover a v1 backup over v2 edits.
           await atomicJSON(path.join(dir, "project.backup.json"), backup ?? document);
           await atomicJSON(path.join(dir, "project.json"), document);
@@ -185,9 +208,7 @@ export class ProjectStore extends EventEmitter {
     if (document.project.status === "recording" && !this.busy.has(id)) {
       try {
         document.project.source = sourceSchema.parse(
-          JSON.parse(
-            await fs.readFile(path.join(dir, "recovered-source.json"), "utf8"),
-          ),
+          JSON.parse(await fs.readFile(path.join(dir, "recovered-source.json"), "utf8")),
         );
         document.project.edits.segments = [
           { startMs: 0, endMs: document.project.source.durationMs },
@@ -208,8 +229,7 @@ export class ProjectStore extends EventEmitter {
       await this.persistDocument(document);
       this.saveError = undefined;
     } catch (error) {
-      this.saveError =
-        error instanceof Error ? error : new Error(String(error));
+      this.saveError = error instanceof Error ? error : new Error(String(error));
       throw error;
     }
   }
@@ -233,8 +253,8 @@ export class ProjectStore extends EventEmitter {
       const existing = JSON.parse(await fs.readFile(manifest, "utf8"));
       parseDocument(existing, document.project.id);
       await atomicJSON(path.join(dir, "project.backup.json"), existing);
-    } catch (error: any) {
-      if (error.code && error.code !== "ENOENT") throw error;
+    } catch (error) {
+      if (error instanceof Error && "code" in error && error.code !== "ENOENT") throw error;
     }
     await atomicJSON(manifest, document);
     this.emit("changed", {
@@ -244,10 +264,7 @@ export class ProjectStore extends EventEmitter {
   }
   async create(name = "Untitled recording"): Promise<Project> {
     if (!name.trim() || name.length > 200)
-      throw new AppError(
-        "INVALID_INPUT",
-        "Project name must contain 1–200 characters",
-      );
+      throw new AppError("INVALID_INPUT", "Project name must contain 1–200 characters");
     const now = new Date().toISOString();
     const project: Project = {
       schemaVersion: 2,
@@ -272,9 +289,7 @@ export class ProjectStore extends EventEmitter {
     await this.initialize();
     const entries = await fs.readdir(this.root, { withFileTypes: true });
     const rows: ProjectSummary[] = [];
-    for (const e of entries.filter(
-      (e) => e.isDirectory() && idSchema.safeParse(e.name).success,
-    )) {
+    for (const e of entries.filter((e) => e.isDirectory() && idSchema.safeParse(e.name).success)) {
       try {
         const p = await this.get(e.name);
         const thumbnail = path.join(this.dir(p.id), "cache", "thumbnail.png");
@@ -325,21 +340,14 @@ export class ProjectStore extends EventEmitter {
       return structuredClone(doc.project);
     });
   }
-  async history(
-    id: string,
-    expected: unknown,
-    direction: "undo" | "redo",
-  ): Promise<Project> {
+  async history(id: string, expected: unknown, direction: "undo" | "redo"): Promise<Project> {
     return this.exclusive(id, async () => {
       this.assertIdle(id);
       const doc = await this.read(id);
       checkRevision(doc.project.revision, expected);
       const target = doc[direction].pop();
-      if (!target)
-        throw new AppError("HISTORY_EMPTY", `Nothing to ${direction}`);
-      doc[direction === "undo" ? "redo" : "undo"].push(
-        structuredClone(doc.project),
-      );
+      if (!target) throw new AppError("HISTORY_EMPTY", `Nothing to ${direction}`);
+      doc[direction === "undo" ? "redo" : "undo"].push(structuredClone(doc.project));
       target.revision = doc.project.revision + 1;
       target.updatedAt = new Date().toISOString();
       doc.project = target;
@@ -350,21 +358,11 @@ export class ProjectStore extends EventEmitter {
   async resolveMedia(projectId: string, relative: string): Promise<string> {
     const base = await fs.realpath(this.dir(projectId));
     const target = await fs.realpath(path.join(base, relative));
-    if (
-      !target.startsWith(base + path.sep) ||
-      !(await fs.stat(target)).isFile()
-    )
-      throw new AppError(
-        "INVALID_PATH",
-        "Media must be a file inside this project",
-      );
+    if (!target.startsWith(base + path.sep) || !(await fs.stat(target)).isFile())
+      throw new AppError("INVALID_PATH", "Media must be a file inside this project");
     return target;
   }
-  async copyMedia(
-    projectId: string,
-    input: string,
-    relative: string,
-  ): Promise<string> {
+  async copyMedia(projectId: string, input: string, relative: string): Promise<string> {
     if (!path.isAbsolute(input) || input.includes("\0"))
       throw new AppError("INVALID_PATH", "Select an absolute file path");
     const source = await fs.realpath(input);

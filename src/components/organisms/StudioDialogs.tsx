@@ -1,12 +1,12 @@
 import { LoaderCircle, Plus, ShieldCheck, Trash2 } from "lucide-react";
-import { Field } from "../molecules/Field";
-import { Dialog } from "./Dialog";
-import { CaptureDialog } from "../../features/recording/CaptureDialog";
-import { SettingsDialog } from "../../features/settings/SettingsDialog";
-import { ExportDialog } from "../../features/export/ExportDialog";
-import { type StudioController } from "../../controllers/useStudioController";
-import { AboutDialog } from "./AuthorFooter";
-import { HelpDialog } from "../../features/help/HelpDialog";
+import { Field } from "@/src/components/molecules/Field";
+import { Dialog } from "@/src/components/organisms/Dialog";
+import { CaptureDialog } from "@/src/features/recording/CaptureDialog";
+import { SettingsDialog } from "@/src/features/settings/SettingsDialog";
+import { ExportDialog } from "@/src/features/export/ExportDialog";
+import { type StudioController } from "@/src/controllers/useStudioController";
+import { AboutDialog } from "@/src/components/organisms/AuthorFooter";
+import { HelpDialog } from "@/src/features/help/HelpDialog";
 
 export function StudioDialogs({
   studio,
@@ -68,6 +68,7 @@ export function StudioDialogs({
           <form onSubmit={createProject}>
             <Field label="Project name">
               <input
+                // eslint-disable-next-line jsx-a11y/no-autofocus -- Focus the name field inside a newly opened modal.
                 autoFocus
                 name="name"
                 placeholder="e.g. My next great tutorial"
@@ -81,19 +82,11 @@ export function StudioDialogs({
               <span>Saved on your device. Always yours to edit.</span>
             </div>
             <div className="dialog-actions">
-              <button
-                type="button"
-                className="button subtle"
-                onClick={() => setModal(null)}
-              >
+              <button type="button" className="button subtle" onClick={() => setModal(null)}>
                 Cancel
               </button>
               <button className="button primary" disabled={busy}>
-                {busy ? (
-                  <LoaderCircle size={15} className="spin" />
-                ) : (
-                  <Plus size={15} />
-                )}
+                {busy ? <LoaderCircle size={15} className="spin" /> : <Plus size={15} />}
                 Create project
               </button>
             </div>
@@ -109,6 +102,7 @@ export function StudioDialogs({
           <form onSubmit={commitRename}>
             <Field label="Project name">
               <input
+                // eslint-disable-next-line jsx-a11y/no-autofocus -- Focus the name field inside a newly opened modal.
                 autoFocus
                 name="name"
                 defaultValue={actionProject.name}
@@ -117,11 +111,7 @@ export function StudioDialogs({
               />
             </Field>
             <div className="dialog-actions">
-              <button
-                type="button"
-                className="button subtle"
-                onClick={() => setModal(null)}
-              >
+              <button type="button" className="button subtle" onClick={() => setModal(null)}>
                 Cancel
               </button>
               <button className="button primary" disabled={busy}>
@@ -139,9 +129,7 @@ export function StudioDialogs({
         >
           <div className="dialog-note">
             <Trash2 size={16} />
-            <span>
-              You can restore the folder from the Trash and open it again.
-            </span>
+            <span>You can restore the folder from the Trash and open it again.</span>
           </div>
           <div className="dialog-actions">
             <button className="button subtle" onClick={() => setModal(null)}>

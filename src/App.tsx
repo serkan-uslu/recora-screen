@@ -1,17 +1,14 @@
 import { useEffect, useMemo } from "react";
 import { Check, X } from "lucide-react";
-import { IconButton } from "./components/atoms/IconButton";
-import {
-  ErrorContext,
-  DraftPreviewContext,
-} from "./controllers/StudioContexts";
-import { useStudioController } from "./controllers/useStudioController";
-import { StudioHeader } from "./components/organisms/StudioHeader";
-import { ProjectsScreen } from "./features/projects/ProjectsScreen";
-import { EditorScreen } from "./features/editor/EditorScreen";
-import { RecordingHud } from "./features/recording/RecordingHud";
-import { JobNotifications } from "./features/jobs/JobNotifications";
-import { StudioDialogs } from "./components/organisms/StudioDialogs";
+import { IconButton } from "@/src/components/atoms/IconButton";
+import { ErrorContext, DraftPreviewContext } from "@/src/controllers/StudioContexts";
+import { useStudioController } from "@/src/controllers/useStudioController";
+import { StudioHeader } from "@/src/components/organisms/StudioHeader";
+import { ProjectsScreen } from "@/src/features/projects/ProjectsScreen";
+import { EditorScreen } from "@/src/features/editor/EditorScreen";
+import { RecordingHud } from "@/src/features/recording/RecordingHud";
+import { JobNotifications } from "@/src/features/jobs/JobNotifications";
+import { StudioDialogs } from "@/src/components/organisms/StudioDialogs";
 
 export default function App() {
   const studio = useStudioController();
@@ -30,34 +27,40 @@ export default function App() {
     activeJobs,
     openExport,
   } = studio;
-  const draftContext = useMemo(() => ({ send: draftPreview, scope: `${project?.id ?? ""}:${project?.revision ?? ""}` }), [draftPreview, project?.id, project?.revision]);
+  const draftContext = useMemo(
+    () => ({ send: draftPreview, scope: `${project?.id ?? ""}:${project?.revision ?? ""}` }),
+    [draftPreview, project?.id, project?.revision],
+  );
   useEffect(() => {
     const close = (e: Event) => {
       const target = e.target instanceof Element ? e.target : null;
       for (const menu of document.querySelectorAll<HTMLDetailsElement>("details[open]")) {
-        if ((e instanceof KeyboardEvent && e.key === "Escape") ||
+        if (
+          (e instanceof KeyboardEvent && e.key === "Escape") ||
           (e.type === "pointerdown" && !menu.contains(target)) ||
-          (e.type === "click" && target?.closest("button") && menu.contains(target))) menu.open = false;
+          (e.type === "click" && target?.closest("button") && menu.contains(target))
+        )
+          menu.open = false;
       }
     };
-    document.addEventListener("pointerdown", close); document.addEventListener("click", close); document.addEventListener("keydown", close);
-    return () => { document.removeEventListener("pointerdown", close); document.removeEventListener("click", close); document.removeEventListener("keydown", close); };
+    document.addEventListener("pointerdown", close);
+    document.addEventListener("click", close);
+    document.addEventListener("keydown", close);
+    return () => {
+      document.removeEventListener("pointerdown", close);
+      document.removeEventListener("click", close);
+      document.removeEventListener("keydown", close);
+    };
   }, []);
   return (
     <ErrorContext.Provider value={error}>
-      <DraftPreviewContext.Provider
-        value={draftContext}
-      >
-        <div
-          className={`app ${project ? "editing" : "library"} ${desktop ? "desktop" : ""}`}
-        >
+      <DraftPreviewContext.Provider value={draftContext}>
+        <div className={`app ${project ? "editing" : "library"} ${desktop ? "desktop" : ""}`}>
           <StudioHeader studio={studio} />
           {error && (
             <div className="error-banner" role="alert">
               <span>{error}</span>
-              {!connected && (
-                <button onClick={() => void initialize()}>Reconnect</button>
-              )}
+              {!connected && <button onClick={() => void initialize()}>Reconnect</button>}
               <IconButton label="Dismiss error" onClick={() => setError("")}>
                 <X size={14} />
               </IconButton>
@@ -70,11 +73,7 @@ export default function App() {
             </div>
           )}
 
-          {!project ? (
-            <ProjectsScreen studio={studio} />
-          ) : (
-            <EditorScreen studio={studio} />
-          )}
+          {!project ? <ProjectsScreen studio={studio} /> : <EditorScreen studio={studio} />}
 
           {recording.active && <RecordingHud studio={studio} />}
           {exportPath && !activeJobs.some((j) => j.kind === "export") && (
@@ -89,10 +88,7 @@ export default function App() {
                   Open video
                 </button>
               )}
-              <IconButton
-                label="Dismiss export result"
-                onClick={() => setExportPath("")}
-              >
+              <IconButton label="Dismiss export result" onClick={() => setExportPath("")}>
                 <X size={13} />
               </IconButton>
             </div>

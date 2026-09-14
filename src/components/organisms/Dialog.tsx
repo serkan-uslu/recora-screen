@@ -1,7 +1,7 @@
 import { useContext, useEffect, useRef, type ReactNode } from "react";
 import { X } from "lucide-react";
-import { IconButton } from "../atoms/IconButton";
-import { ErrorContext } from "../../controllers/StudioContexts";
+import { IconButton } from "@/src/components/atoms/IconButton";
+import { ErrorContext } from "@/src/controllers/StudioContexts";
 
 export function Dialog({
   title,
@@ -19,10 +19,13 @@ export function Dialog({
   const dialog = useRef<HTMLDialogElement>(null);
   const error = useContext(ErrorContext);
   useEffect(() => {
-    dialog.current?.showModal();
-    return () => dialog.current?.close();
+    const element = dialog.current;
+    element?.showModal();
+    return () => element?.close();
   }, []);
   return (
+    // Native dialog handles Escape through onCancel; this handler only dismisses its backdrop.
+    // eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-noninteractive-element-interactions
     <dialog
       ref={dialog}
       className={`dialog ${wide ? "wide" : ""}`}

@@ -1,4 +1,4 @@
-import { Dialog } from "../../components/organisms/Dialog";
+import { Dialog } from "@/src/components/organisms/Dialog";
 
 const steps = [
   [
@@ -19,7 +19,7 @@ const steps = [
   ],
   [
     "5. Find your words",
-    "Download a Whisper model in Settings, then generate captions locally. Select a transcript segment to jump to it or cut it. Review silence cleanup before applying it. Optional cloud assistance requires your own API key; keys are stored in Keychain.",
+    "Download a Whisper model in Settings, then generate captions locally. Select a transcript segment to jump to it or cut it. Silence cleanup requires a microphone track; review its suggestions before applying them. Audible system audio is protected by default. Optional cloud assistance sends your message, transcript and editing context to your chosen provider. It requires your own API key, stored in Keychain; provider usage is billed separately.",
   ],
   [
     "6. Save and share",
@@ -27,7 +27,7 @@ const steps = [
   ],
   [
     "7. Connect your assistant",
-    "Open Settings & MCP for the local server command and arguments. Use these in Codex or Claude's MCP configuration. The desktop app and MCP use the same validated commands and revision checks.",
+    "Open Settings & MCP and choose Codex, Claude Code or Claude Desktop. Copy the configuration for your running installation and keep Screen Recorder open. The desktop app and MCP use the same validated commands and revision checks. MCP needs no API key in this app, but your client’s plan or usage charges may apply. Connected clients can send returned transcripts and requested preview frames to their model provider.",
   ],
 ];
 export function HelpDialog({ onClose }: { onClose: () => void }) {
@@ -48,7 +48,9 @@ export function HelpDialog({ onClose }: { onClose: () => void }) {
         <p>
           <kbd>⌘S</kbd> Save draft · <kbd>⌘Z</kbd> Undo · <kbd>⇧⌘Z</kbd> Redo
         </p>
-        <p>Questions or feedback? Open About Serkan Uslu from the Projects sidebar for contact links.</p>
+        <p>
+          Questions or feedback? Open About Serkan Uslu from the Projects sidebar for contact links.
+        </p>
       </div>
     </Dialog>
   );

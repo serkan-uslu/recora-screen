@@ -1,0 +1,23 @@
+{
+  "$schema": "https://unpkg.com/knip/schema.json",
+  "entry": [
+    "server/main.ts",
+    "server/rpc.ts",
+    "server/*.test.ts",
+    "shared/*.test.ts",
+    "scripts/*.{ts,mjs}",
+    "website/src/*.test.ts",
+    "website/src/main.ts"
+  ],
+  "project": [
+    "src/**/*.{ts,tsx}",
+    "server/**/*.ts",
+    "shared/**/*.ts",
+    "scripts/*.{ts,mjs}",
+    "website/src/**/*.ts",
+    "tests/**/*.ts",
+    "*.{ts,mjs}"
+  ],
+  "ignoreDependencies": ["@tauri-apps/cli"],
+  "ignoreBinaries": ["rustc", "cmake", "ffprobe", "ffmpeg"]
+}

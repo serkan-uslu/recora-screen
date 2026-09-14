@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { ArrowRight, ShieldCheck, Sparkles } from "lucide-react";
-import { type Settings } from "../../controllers/studioTypes";
+import { type Settings } from "@/src/controllers/studioTypes";
 
 export function AssistantPanel({
   messages,
@@ -17,9 +17,7 @@ export function AssistantPanel({
 }) {
   const [prompt, setPrompt] = useState("");
   const configured =
-    settings?.provider === "anthropic"
-      ? settings.hasAnthropicKey
-      : settings?.hasOpenaiKey;
+    settings?.provider === "anthropic" ? settings.hasAnthropicKey : settings?.hasOpenaiKey;
   return (
     <div className="assistant-panel">
       <div className="assistant-intro">
@@ -35,9 +33,7 @@ export function AssistantPanel({
       </div>
       {!configured && (
         <div className="inline-note">
-          <p>
-            Connect your own OpenAI or Anthropic API key to use the assistant.
-          </p>
+          <p>Connect your own OpenAI or Anthropic API key to use the assistant.</p>
           <button className="button secondary full" onClick={onSettings}>
             Connect an API key
           </button>
@@ -82,9 +78,7 @@ export function AssistantPanel({
           rows={3}
         />
         <div>
-          <span>
-            {settings?.provider === "anthropic" ? "Anthropic" : "OpenAI"}
-          </span>
+          <span>{settings?.provider === "anthropic" ? "Anthropic" : "OpenAI"}</span>
           <button
             aria-label="Send to assistant"
             disabled={disabled || !configured || !prompt.trim()}
@@ -95,8 +89,7 @@ export function AssistantPanel({
       </form>
       <p className="helper assistant-privacy">
         <ShieldCheck size={11} />
-        Only transcript, edit information, and your request are sent to your
-        provider.
+        Only transcript, edit information, and your request are sent to your provider.
       </p>
     </div>
   );

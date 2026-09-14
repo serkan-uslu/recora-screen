@@ -8,15 +8,12 @@ import {
   ShieldCheck,
   Square,
 } from "lucide-react";
-import {
-  type AppCapabilities,
-  type CaptureSettings,
-} from "../../../shared/types";
-import { IconButton } from "../../components/atoms/IconButton";
-import { Field } from "../../components/molecules/Field";
-import { Switch } from "../../components/atoms/Switch";
-import { Dialog } from "../../components/organisms/Dialog";
-import { useCaptureDialogController } from "../../controllers/useCaptureDialogController";
+import { type AppCapabilities, type CaptureSettings } from "@/shared/types";
+import { IconButton } from "@/src/components/atoms/IconButton";
+import { Field } from "@/src/components/molecules/Field";
+import { Switch } from "@/src/components/atoms/Switch";
+import { Dialog } from "@/src/components/organisms/Dialog";
+import { useCaptureDialogController } from "@/src/controllers/useCaptureDialogController";
 
 export function CaptureDialog({
   capabilities,
@@ -71,10 +68,7 @@ export function CaptureDialog({
         <div className="record-countdown" role="status" aria-live="assertive">
           {countdown}
         </div>
-        <button
-          className="button secondary full"
-          onClick={() => setPendingSettings(null)}
-        >
+        <button className="button secondary full" onClick={() => setPendingSettings(null)}>
           Cancel countdown
         </button>
       </Dialog>
@@ -134,11 +128,7 @@ export function CaptureDialog({
           </div>
           <Field label="Capture source">
             <div className="input-action">
-              <select
-                required
-                value={sourceId}
-                onChange={(e) => setSourceId(e.target.value)}
-              >
+              <select required value={sourceId} onChange={(e) => setSourceId(e.target.value)}>
                 <option value="" disabled>
                   {sources.length ? "Choose a source" : "No sources available"}
                 </option>
@@ -151,7 +141,9 @@ export function CaptureDialog({
               <IconButton
                 type="button"
                 label="Refresh sources"
-                onClick={onRefresh}
+                onClick={() => {
+                  void onRefresh();
+                }}
               >
                 <RefreshCw size={16} />
               </IconButton>
@@ -165,10 +157,7 @@ export function CaptureDialog({
                 { name: "width", value: 1280 },
                 { name: "height", value: 720 },
               ].map((f) => (
-                <Field
-                  key={f.name}
-                  label={f.name.charAt(0).toUpperCase() + f.name.slice(1)}
-                >
+                <Field key={f.name} label={f.name.charAt(0).toUpperCase() + f.name.slice(1)}>
                   <input
                     type="number"
                     name={f.name}
@@ -182,10 +171,7 @@ export function CaptureDialog({
           )}
           <div className="two-columns">
             <Field label="Camera">
-              <select
-                value={cameraId}
-                onChange={(e) => setCameraId(e.target.value)}
-              >
+              <select value={cameraId} onChange={(e) => setCameraId(e.target.value)}>
                 <option value="">Off</option>
                 {capabilities?.cameras.map((d) => (
                   <option key={d.id} value={d.id}>
@@ -195,10 +181,7 @@ export function CaptureDialog({
               </select>
             </Field>
             <Field label="Microphone">
-              <select
-                value={microphoneId}
-                onChange={(e) => setMicrophoneId(e.target.value)}
-              >
+              <select value={microphoneId} onChange={(e) => setMicrophoneId(e.target.value)}>
                 <option value="">Off</option>
                 {capabilities?.microphones.map((d) => (
                   <option key={d.id} value={d.id}>
@@ -212,29 +195,20 @@ export function CaptureDialog({
             <Field label="Camera shape">
               <select
                 value={shape}
-                onChange={(e) =>
-                  setShape(e.target.value as "circle" | "square")
-                }
+                onChange={(e) => setShape(e.target.value as "circle" | "square")}
               >
                 <option value="circle">Circle</option>
                 <option value="square">Square</option>
               </select>
             </Field>
             <Field label="Recording quality">
-              <select
-                value={resolution}
-                onChange={(e) => setResolution(e.target.value)}
-              >
+              <select value={resolution} onChange={(e) => setResolution(e.target.value)}>
                 <option value="4k">4K · 30 fps</option>
                 <option value="1080">1080p · 30 fps</option>
               </select>
             </Field>
           </div>
-          <Switch
-            label="Record system audio"
-            checked={systemAudio}
-            onChange={setSystemAudio}
-          />
+          <Switch label="Record system audio" checked={systemAudio} onChange={setSystemAudio} />
           <div className="permissions-box">
             <h3>
               <ShieldCheck size={15} />
@@ -255,8 +229,7 @@ export function CaptureDialog({
                 {
                   key: "microphone",
                   label: "Microphone",
-                  granted:
-                    capabilities?.permissions.microphone === "authorized",
+                  granted: capabilities?.permissions.microphone === "authorized",
                 },
                 {
                   key: "input",
@@ -276,9 +249,9 @@ export function CaptureDialog({
               ))}
             </div>
             <p>
-              Mouse movement and clicks are recorded automatically. Input
-              Monitoring adds optional typing activity; typed text is never
-              saved. Permissions refresh when you return from System Settings.
+              Mouse movement works without Input Monitoring. Enable it for precise short clicks,
+              drags and optional typing activity. Typed text is never saved. Permissions refresh
+              when you return from System Settings.
             </p>
             {permissionHelp && !capabilities?.permissions[permissionHelp] && (
               <p role="status">
@@ -286,9 +259,9 @@ export function CaptureDialog({
                 {permissionHelp === "screen"
                   ? "Screen & System Audio Recording"
                   : "Input Monitoring"}
-                , enable Screen Recorder, then quit and reopen the app. If it is
-                already enabled but still unavailable, remove the old entry and
-                use + to add this copy of Screen Recorder.
+                , enable Screen Recorder, then quit and reopen the app. If it is already enabled but
+                still unavailable, remove the old entry and use + to add this copy of Screen
+                Recorder.
               </p>
             )}
           </div>

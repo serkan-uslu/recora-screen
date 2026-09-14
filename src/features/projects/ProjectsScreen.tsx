@@ -17,11 +17,11 @@ import {
   Sparkles,
   WandSparkles,
 } from "lucide-react";
-import { formatTime } from "../../../shared/timeline";
-import { ProjectThumbnail } from "./ProjectThumbnail";
-import { date } from "../../lib/format";
-import { type StudioController } from "../../controllers/useStudioController";
-import { AuthorFooter } from "../../components/organisms/AuthorFooter";
+import { formatTime } from "@/shared/timeline";
+import { ProjectThumbnail } from "@/src/features/projects/ProjectThumbnail";
+import { date } from "@/src/lib/format";
+import { type StudioController } from "@/src/controllers/useStudioController";
+import { AuthorFooter } from "@/src/components/organisms/AuthorFooter";
 
 export function ProjectsScreen({
   studio,
@@ -156,13 +156,10 @@ export function ProjectsScreen({
             <Monitor size={36} />
             <h2>Let’s connect your workspace</h2>
             <p>
-              The local recording service is unavailable. Start the desktop app
-              or development service, then reconnect.
+              The local recording service is unavailable. Start the desktop app or development
+              service, then reconnect.
             </p>
-            <button
-              className="button primary"
-              onClick={() => void initialize()}
-            >
+            <button className="button primary" onClick={() => void initialize()}>
               <RefreshCw size={15} />
               Reconnect
             </button>
@@ -172,8 +169,7 @@ export function ProjectsScreen({
             <div className="section-label">
               {search ? `${filtered.length} matching projects` : "ALL PROJECTS"}
               <span>
-                {filtered.length}{" "}
-                {filtered.length === 1 ? "project" : "projects"}
+                {filtered.length} {filtered.length === 1 ? "project" : "projects"}
               </span>
             </div>
             <div className="project-grid">
@@ -209,16 +205,11 @@ export function ProjectsScreen({
                           : "Ready to edit"}
                     </span>
                     {p.durationMs > 0 && (
-                      <span className="duration-tag">
-                        {formatTime(p.durationMs)}
-                      </span>
+                      <span className="duration-tag">{formatTime(p.durationMs)}</span>
                     )}
                   </button>
                   <div className="project-card-body">
-                    <button
-                      className="project-card-title"
-                      onClick={() => void openProject(p.id)}
-                    >
+                    <button className="project-card-title" onClick={() => void openProject(p.id)}>
                       {p.name}
                     </button>
                     <details className="project-menu" name="studio-menu">
@@ -244,19 +235,12 @@ export function ProjectsScreen({
                     </details>
                     <p>
                       Edited {date(p.updatedAt)}
-                      <span>
-                        {p.durationMs > 0
-                          ? "Recording project"
-                          : "No recording yet"}
-                      </span>
+                      <span>{p.durationMs > 0 ? "Recording project" : "No recording yet"}</span>
                     </p>
                   </div>
                 </article>
               ))}
-              <button
-                className="new-project-card"
-                onClick={() => setModal("new")}
-              >
+              <button className="new-project-card" onClick={() => setModal("new")}>
                 <span>
                   <Plus size={24} />
                 </span>
@@ -279,21 +263,14 @@ export function ProjectsScreen({
               </span>
             </div>
             <span className="eyebrow">FROM FIRST TAKE TO FINAL CUT</span>
-            <h2>
-              {search
-                ? "No projects found"
-                : "Your next great video starts here"}
-            </h2>
+            <h2>{search ? "No projects found" : "Your next great video starts here"}</h2>
             <p>
               {search
                 ? "Try another project name."
                 : "Capture your screen and camera, polish the details, and turn your know-how into something shareable."}
             </p>
             {!search && (
-              <button
-                className="button primary large"
-                onClick={() => setModal("new")}
-              >
+              <button className="button primary large" onClick={() => setModal("new")}>
                 <Plus size={17} />
                 Create your first project
                 <ArrowRight size={16} />
@@ -318,9 +295,7 @@ export function ProjectsScreen({
         <footer className="library-footer">
           <span>
             <span className={`connection-dot ${connected ? "online" : ""}`} />
-            {connected
-              ? "Everything saved on your device"
-              : "Waiting for local service"}
+            {connected ? "Everything saved on your device" : "Waiting for local service"}
           </span>
           <span>Good ideas deserve good videos.</span>
         </footer>

@@ -882,9 +882,9 @@
     "semantic_hash": ""
   },
   "src/features/editor/Timeline.tsx": {
-    "mtime": 1789308980.7431738,
-    "seen": 1789311190.4420211,
-    "ast_hash": "e889ce0fc16e4328a1dd1bf8fe71880f",
+    "mtime": 1789314242.3128197,
+    "seen": 1789314546.351004,
+    "ast_hash": "37e733d907784226cca9d4ec9a8f888e",
     "semantic_hash": ""
   },
   "src/features/editor/panels/CameraPanel.tsx": {
@@ -948,9 +948,9 @@
     "semantic_hash": ""
   },
   "src/features/projects/ProjectsScreen.tsx": {
-    "mtime": 1789308842.8339624,
-    "seen": 1789311190.442028,
-    "ast_hash": "b46a3ae5fda0edc7c772f478bd570cff",
+    "mtime": 1789312404.7653892,
+    "seen": 1789312425.807217,
+    "ast_hash": "a580f86eb6456d899f7563e7cc3722fc",
     "semantic_hash": ""
   },
   "src/features/recording/CaptureDialog.tsx": {
@@ -1050,9 +1050,9 @@
     "semantic_hash": ""
   },
   "website/index.html": {
-    "mtime": 1789306436.6906857,
-    "seen": 1789306567.145797,
-    "ast_hash": "61520b65657605cb90ea070bbb2b6480",
+    "mtime": 1789314537.030064,
+    "seen": 1789314546.351073,
+    "ast_hash": "ce7e28e8be9d2ef3efa4d83baedca1c2",
     "semantic_hash": ""
   },
   "website/public/icon.svg": {

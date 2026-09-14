@@ -1,5 +1,5 @@
-import { CommandController } from "../controllers/CommandController.js";
-import { methodSchemas, settingsSchema } from "../contracts/commands.js";
+import { CommandController } from "@/server/controllers/CommandController.js";
+import { methodSchemas, settingsSchema } from "@/server/contracts/commands.js";
 import { promises as fs } from "node:fs";
 import path from "node:path";
 import { randomUUID } from "node:crypto";
@@ -12,13 +12,9 @@ import type {
   Project,
   RecordingStatus,
   RecordingSource,
-} from "../../shared/types.js";
-import { duration, outputSize } from "../../shared/timeline.js";
-import {
-  ProjectStore,
-  appDataDir,
-  atomicJSON,
-} from "../infrastructure/ProjectStore.js";
+} from "@/shared/types.js";
+import { duration, outputSize } from "@/shared/timeline.js";
+import { ProjectStore, appDataDir, atomicJSON } from "@/server/infrastructure/ProjectStore.js";
 import {
   AppError,
   checkRevision,
@@ -27,20 +23,16 @@ import {
   parseProject,
   sourceSchema,
   time,
-} from "../contracts/validation.js";
-import {
-  applyEdits,
-  silenceCuts,
-  subtitleText,
-  type AudioWindow,
-} from "../domain/edits.js";
-import { Jobs } from "./Jobs.js";
-import { cursorClicks } from "../domain/cursor.js";
-import { LocalAI, assistant, defaultSettings, type AISettings } from "./ai.js";
+} from "@/server/contracts/validation.js";
+import { applyEdits, silenceCuts, subtitleText, type AudioWindow } from "@/server/domain/edits.js";
+import { Jobs } from "@/server/services/Jobs.js";
+import { cursorClicks } from "@/server/domain/cursor.js";
+import { LocalAI, assistant, defaultSettings, type AISettings } from "@/server/services/ai.js";
 
 export type NativeCall = (
   method: string,
   params?: Record<string, unknown>,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Legacy heterogeneous RPC boundary; inputs are schema-validated by CommandController. Keep domain code typed.
 ) => Promise<any>;
 const emptyRecording: RecordingStatus = {
   active: false,
@@ -57,9 +49,7 @@ export class ApplicationService extends EventEmitter {
   readonly localAI: LocalAI;
   private settings: AISettings = { ...defaultSettings };
   private native: NativeCall;
-  private commands = new CommandController((method, params) =>
-    this.dispatch(method, params),
-  );
+  private commands = new CommandController((method, params) => this.dispatch(method, params));
   private recordingId?: string;
   private recordingPhase: RecordingStatus["phase"] = "idle";
   private finalization?: Promise<Project>;
@@ -79,10 +69,7 @@ export class ApplicationService extends EventEmitter {
     this.store = new ProjectStore(options.projectsDir);
     this.store.on("changed", (data) => this.emit("project-changed", data));
     this.jobs = new Jobs(this.dataDir);
-    this.localAI = new LocalAI(
-      path.join(this.dataDir, "models"),
-      options.whisper,
-    );
+    this.localAI = new LocalAI(path.join(this.dataDir, "models"), options.whisper);
     this.native =
       options.native ??
       (async () => {
@@ -98,13 +85,11 @@ export class ApplicationService extends EventEmitter {
     await fs.mkdir(this.dataDir, { recursive: true, mode: 0o700 });
     try {
       this.settings = settingsSchema.parse(
-        JSON.parse(
-          await fs.readFile(path.join(this.dataDir, "settings.json"), "utf8"),
-        ),
+        JSON.parse(await fs.readFile(path.join(this.dataDir, "settings.json"), "utf8")),
       );
-    } catch (e: any) {
-      if (e.code !== "ENOENT")
-        console.error("Using default settings:", e.message);
+    } catch (e) {
+      if (!(e instanceof Error && "code" in e && e.code === "ENOENT"))
+        console.error("Using default settings:", errorOf(e).message);
     }
     await this.jobs.initialize();
   }
@@ -112,6 +97,7 @@ export class ApplicationService extends EventEmitter {
     await this.store.flush();
     await this.jobs.flush();
   }
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Legacy heterogeneous RPC boundary; inputs are schema-validated by CommandController. Keep domain code typed.
   command(method: string, input: unknown = {}): Promise<any> {
     return this.commands.command(method, input);
   }
@@ -120,18 +106,12 @@ export class ApplicationService extends EventEmitter {
       await this.native("preview.update", {
         project,
         projectDir: this.store.dir(project.id),
-      }).catch((error) =>
-        console.error("Preview refresh failed:", errorOf(error).message),
-      );
+      }).catch((error) => console.error("Preview refresh failed:", errorOf(error).message));
     return project;
   }
   private async thumbnail(project: Project) {
     if (!project.source) return project;
-    const output = path.join(
-      this.store.dir(project.id),
-      "cache",
-      "thumbnail.png",
-    );
+    const output = path.join(this.store.dir(project.id), "cache", "thumbnail.png");
     await fs.mkdir(path.dirname(output), { recursive: true, mode: 0o700 });
     await this.native("preview.frame", {
       project,
@@ -144,8 +124,7 @@ export class ApplicationService extends EventEmitter {
   private async sourceProject(projectId: string) {
     let project = await this.store.get(projectId);
     this.store.assertIdle(projectId);
-    if (!project.source)
-      throw new AppError("NO_RECORDING", "Record or import a video first");
+    if (!project.source) throw new AppError("NO_RECORDING", "Record or import a video first");
     for (const file of [
       project.source.screen,
       project.source.camera,
@@ -153,7 +132,7 @@ export class ApplicationService extends EventEmitter {
       project.source.systemAudio,
       project.source.cursor,
       ...project.assets.map((a) => a.path),
-    ].filter((x): x is string => !!x))
+    ].filter((x): x is string => Boolean(x)))
       await this.store.resolveMedia(projectId, file);
     if (project.recovered) {
       const inspected = await this.native("media.inspect", {
@@ -167,24 +146,18 @@ export class ApplicationService extends EventEmitter {
           (current) => {
             const limit = readableMs;
             current.source!.durationMs = limit;
-            const clip = <T extends { startMs: number; endMs: number }>(
-              ranges: T[],
-            ) =>
+            const clip = <T extends { startMs: number; endMs: number }>(ranges: T[]) =>
               ranges
                 .map((r) => ({ ...r, endMs: Math.min(r.endMs, limit) }))
                 .filter((r) => r.endMs > r.startMs);
             current.edits.segments = clip(current.edits.segments);
-            current.edits.camera.hiddenRanges = clip(
-              current.edits.camera.hiddenRanges,
-            );
+            current.edits.camera.hiddenRanges = clip(current.edits.camera.hiddenRanges);
             current.edits.camera.layouts = clip(current.edits.camera.layouts);
             current.edits.zooms = clip(current.edits.zooms);
             current.edits.overlays = clip(current.edits.overlays);
             current.transcript = clip(current.transcript);
             if (current.source!.cameraActiveRanges)
-              current.source!.cameraActiveRanges = clip(
-                current.source!.cameraActiveRanges!,
-              );
+              current.source!.cameraActiveRanges = clip(current.source!.cameraActiveRanges!);
             if (!current.edits.segments.length)
               current.edits.segments = [{ startMs: 0, endMs: limit }];
           },
@@ -201,16 +174,13 @@ export class ApplicationService extends EventEmitter {
   private async settingsResult() {
     return {
       ...this.settings,
-      hasOpenaiKey: !!(await this.key("openai").catch(() => "")),
-      hasAnthropicKey: !!(await this.key("anthropic").catch(() => "")),
+      hasOpenaiKey: Boolean(await this.key("openai").catch(() => "")),
+      hasAnthropicKey: Boolean(await this.key("anthropic").catch(() => "")),
     };
   }
   private async outputPath(file: string, extensions: string[]) {
     if (!extensions.includes(path.extname(file).toLowerCase()))
-      throw new AppError(
-        "INVALID_PATH",
-        `Output must use ${extensions.join(" or ")}`,
-      );
+      throw new AppError("INVALID_PATH", `Output must use ${extensions.join(" or ")}`);
     const parent = await fs.realpath(path.dirname(file));
     const resolved = path.join(parent, path.basename(file));
     const root = await fs.realpath(this.store.root);
@@ -225,36 +195,23 @@ export class ApplicationService extends EventEmitter {
         () => false,
       )
     )
-      throw new AppError(
-        "FILE_EXISTS",
-        "The output file already exists. Choose a new filename.",
-      );
+      throw new AppError("FILE_EXISTS", "The output file already exists. Choose a new filename.");
     return resolved;
   }
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Legacy heterogeneous RPC boundary; inputs are schema-validated by CommandController. Keep domain code typed.
   private async timeline(params: Record<string, any>) {
     let events: CursorEvent[] = [];
-    if (
-      (params.operations as EditOperation[]).some(
-        (op) => op.type === "zooms.auto",
-      )
-    ) {
+    if ((params.operations as EditOperation[]).some((op) => op.type === "zooms.auto")) {
       const project = await this.store.get(params.projectId);
       if (project.source?.cursor) {
-        const file = await this.store.resolveMedia(
-          project.id,
-          project.source.cursor,
-        );
+        const file = await this.store.resolveMedia(project.id, project.source.cursor);
         events = await cursorClicks(file);
       }
     }
     return this.refreshPreview(
-      await this.store.mutate(
-        params.projectId,
-        params.expectedRevision,
-        (p) => {
-          applyEdits(p, params.operations, events);
-        },
-      ),
+      await this.store.mutate(params.projectId, params.expectedRevision, (p) => {
+        applyEdits(p, params.operations, events);
+      }),
     );
   }
   private async analyzeSilence(
@@ -265,10 +222,7 @@ export class ApplicationService extends EventEmitter {
     preserveSystemAudio = true,
   ) {
     if (!project.source?.microphone)
-      throw new AppError(
-        "NO_MICROPHONE",
-        "Silence cleanup requires a separate microphone track.",
-      );
+      throw new AppError("NO_MICROPHONE", "Silence cleanup requires a separate microphone track.");
     const result = await this.native("audio.analyze", {
       project,
       projectDir: this.store.dir(project.id),
@@ -295,9 +249,7 @@ export class ApplicationService extends EventEmitter {
         "NO_SPEECH_DETECTED",
         "The whole timeline appears silent. No cuts were applied. Check your microphone level.",
       );
-    const operations: EditOperation[] = [...ranges]
-      .reverse()
-      .map((r) => ({ type: "cut", ...r }));
+    const operations: EditOperation[] = [...ranges].reverse().map((r) => ({ type: "cut", ...r }));
     return { revision: project.revision, ranges, removedMs, operations };
   }
   private finishRecording(projectId: string, suppliedSource?: unknown): Promise<Project> {
@@ -305,7 +257,11 @@ export class ApplicationService extends EventEmitter {
     this.recordingPhase = "finalizing";
     const work = this.finalizeRecording(projectId, suppliedSource);
     this.finalization = work;
-    void work.finally(() => { if (this.finalization === work) this.finalization = undefined; }).catch(() => {});
+    void work
+      .finally(() => {
+        if (this.finalization === work) this.finalization = undefined;
+      })
+      .catch(() => {});
     return work;
   }
   private async finalizeRecording(projectId: string, suppliedSource?: unknown) {
@@ -328,14 +284,9 @@ export class ApplicationService extends EventEmitter {
       let events: CursorEvent[] = [];
       if (source?.cursor && (current.edits.autoZoom?.enabled ?? true)) {
         try {
-          events = await cursorClicks(
-            await this.store.resolveMedia(projectId, source.cursor),
-          );
+          events = await cursorClicks(await this.store.resolveMedia(projectId, source.cursor));
         } catch (error) {
-          console.error(
-            "Automatic zoom analysis skipped:",
-            errorOf(error).message,
-          );
+          console.error("Automatic zoom analysis skipped:", errorOf(error).message);
         }
       }
       const project = await this.store.mutate(
@@ -354,10 +305,7 @@ export class ApplicationService extends EventEmitter {
             try {
               applyEdits(q, [{ type: "zooms.auto" }], events);
             } catch (error) {
-              console.error(
-                "Automatic zoom generation skipped:",
-                errorOf(error).message,
-              );
+              console.error("Automatic zoom generation skipped:", errorOf(error).message);
             }
           }
         },
@@ -373,6 +321,7 @@ export class ApplicationService extends EventEmitter {
   }
   private async dispatch(
     method: string,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Legacy heterogeneous RPC boundary; inputs are schema-validated by CommandController. Keep domain code typed.
     p: Record<string, any>,
   ): Promise<unknown> {
     switch (method) {
@@ -413,8 +362,7 @@ export class ApplicationService extends EventEmitter {
       case "app.canQuit": {
         const active = this.jobs.active();
         return {
-          canQuit:
-            !this.recordingId && !active.length && !this.store.saveFailure,
+          canQuit: !this.recordingId && !active.length && !this.store.saveFailure,
           reason:
             this.store.saveFailure ??
             (this.recordingId
@@ -462,8 +410,7 @@ export class ApplicationService extends EventEmitter {
               "Cancel or finish project jobs before moving this project to Trash.",
             );
           const project = await this.store.get(p.projectId);
-          if (p.expectedRevision !== undefined)
-            checkRevision(project.revision, p.expectedRevision);
+          if (p.expectedRevision !== undefined) checkRevision(project.revision, p.expectedRevision);
           if (this.previewId === project.id) {
             await this.native("preview.pause", {}).catch(() => {});
             this.previewId = undefined;
@@ -481,10 +428,7 @@ export class ApplicationService extends EventEmitter {
         return this.importProject(p.path, p.name);
       case "recording.start": {
         if (this.recordingId)
-          throw new AppError(
-            "RECORDING_ACTIVE",
-            "Another recording is already running.",
-          );
+          throw new AppError("RECORDING_ACTIVE", "Another recording is already running.");
         const project = await this.store.get(p.projectId);
         if (project.source)
           throw new AppError(
@@ -493,9 +437,7 @@ export class ApplicationService extends EventEmitter {
           );
         if (this.jobs.active(project.id).length)
           throw new AppError("PROJECT_BUSY", "Project has running jobs.");
-        const media = await fs.readdir(
-          path.join(this.store.dir(project.id), "media"),
-        );
+        const media = await fs.readdir(path.join(this.store.dir(project.id), "media"));
         if (media.length)
           throw new AppError(
             "RECOVERABLE_MEDIA",
@@ -516,7 +458,9 @@ export class ApplicationService extends EventEmitter {
             true,
           );
           const result = await this.native(method, {
-            projectId: project.id, projectDir: this.store.dir(project.id), settings: p.settings,
+            projectId: project.id,
+            projectDir: this.store.dir(project.id),
+            settings: p.settings,
           });
           this.recordingPhase = "recording";
           return result;
@@ -539,17 +483,34 @@ export class ApplicationService extends EventEmitter {
         }
       }
       case "recording.status": {
-        const observedId = this.recordingId, observedPhase = this.recordingPhase;
+        const observedId = this.recordingId,
+          observedPhase = this.recordingPhase;
         try {
           const status = await this.native(method, {});
-          if (!status.active && observedId && observedId === this.recordingId && observedPhase === "recording" && this.recordingPhase === "recording")
-            void this.finishRecording(this.recordingId).catch(error => console.error("Recording recovery:", errorOf(error).message));
-          return this.recordingId ? { ...status, active: true, projectId: this.recordingId,
-            phase: ["starting", "finalizing"].includes(this.recordingPhase!) ? this.recordingPhase : status.phase } : status;
+          if (
+            !status.active &&
+            observedId &&
+            observedId === this.recordingId &&
+            observedPhase === "recording" &&
+            this.recordingPhase === "recording"
+          )
+            void this.finishRecording(this.recordingId).catch((error) =>
+              console.error("Recording recovery:", errorOf(error).message),
+            );
+          return this.recordingId
+            ? {
+                ...status,
+                active: true,
+                projectId: this.recordingId,
+                phase: ["starting", "finalizing"].includes(this.recordingPhase!)
+                  ? this.recordingPhase
+                  : status.phase,
+              }
+            : status;
         } catch (error) {
           return {
             ...emptyRecording,
-            active: !!this.recordingId,
+            active: Boolean(this.recordingId),
             projectId: this.recordingId,
             error: errorOf(error).message,
           };
@@ -558,32 +519,22 @@ export class ApplicationService extends EventEmitter {
       case "recording.pause":
       case "recording.resume":
       case "recording.camera": {
-        if (!this.recordingId)
-          throw new AppError("NOT_RECORDING", "There is no active recording.");
+        if (!this.recordingId) throw new AppError("NOT_RECORDING", "There is no active recording.");
         if (p.projectId && p.projectId !== this.recordingId)
-          throw new AppError(
-            "WRONG_PROJECT",
-            "The recording belongs to another project.",
-          );
+          throw new AppError("WRONG_PROJECT", "The recording belongs to another project.");
         return this.native(method, p);
       }
       case "recording.stop": {
-        if (!this.recordingId)
-          throw new AppError("NOT_RECORDING", "There is no active recording.");
+        if (!this.recordingId) throw new AppError("NOT_RECORDING", "There is no active recording.");
         const projectId = this.recordingId;
         if (p.projectId && p.projectId !== projectId)
-          throw new AppError(
-            "WRONG_PROJECT",
-            "The recording belongs to another project.",
-          );
+          throw new AppError("WRONG_PROJECT", "The recording belongs to another project.");
         try {
           this.recordingPhase = "finalizing";
           const result = await this.native(method, { projectId });
           return await this.finishRecording(projectId, result.source ?? result);
         } catch (error) {
-          const status = await this.native("recording.status", {}).catch(
-            () => null,
-          );
+          const status = await this.native("recording.status", {}).catch(() => null);
           if (status && !status.active) await this.finishRecording(projectId);
           else this.recordingPhase = "recording";
           throw error;
@@ -592,7 +543,11 @@ export class ApplicationService extends EventEmitter {
       case "camera.layout.set":
       case "camera.layout.remove": {
         const { projectId, expectedRevision, ...operation } = p;
-        return this.timeline({ projectId, expectedRevision, operations: [{ ...operation, type: method }] });
+        return this.timeline({
+          projectId,
+          expectedRevision,
+          operations: [{ ...operation, type: method }],
+        });
       }
       case "timeline.apply":
         return this.timeline(p);
@@ -608,8 +563,7 @@ export class ApplicationService extends EventEmitter {
       case "asset.import": {
         this.store.assertIdle(p.projectId);
         const project = await this.store.get(p.projectId);
-        if (p.expectedRevision !== undefined)
-          checkRevision(project.revision, p.expectedRevision);
+        if (p.expectedRevision !== undefined) checkRevision(project.revision, p.expectedRevision);
         const info = await fs.stat(p.path);
         if (!info.isFile() || info.size > 50_000_000)
           throw new AppError(
@@ -634,10 +588,7 @@ export class ApplicationService extends EventEmitter {
               ? ".webp"
               : "";
         if (!extension)
-          throw new AppError(
-            "INVALID_ASSET",
-            "Only PNG, JPEG and WebP images are supported.",
-          );
+          throw new AppError("INVALID_ASSET", "Only PNG, JPEG and WebP images are supported.");
         const assetId = randomUUID(),
           relative = `assets/${assetId}${extension}`;
         await this.store.copyMedia(project.id, p.path, relative);
@@ -664,10 +615,7 @@ export class ApplicationService extends EventEmitter {
         return this.settingsResult();
       case "settings.update":
         this.settings = settingsSchema.parse({ ...this.settings, ...p });
-        await atomicJSON(
-          path.join(this.dataDir, "settings.json"),
-          this.settings,
-        );
+        await atomicJSON(path.join(this.dataDir, "settings.json"), this.settings);
         return this.settingsResult();
       case "keychain.set":
       case "keychain.delete":
@@ -677,10 +625,7 @@ export class ApplicationService extends EventEmitter {
         return this.localAI.list();
       case "ai.models/download": {
         if (this.jobs.active().some((j) => j.kind === "model"))
-          throw new AppError(
-            "MODEL_BUSY",
-            "A model download is already running.",
-          );
+          throw new AppError("MODEL_BUSY", "A model download is already running.");
         return this.jobs.start("model", undefined, (signal, progress) =>
           this.localAI.download(p.model, signal, progress),
         );
@@ -688,64 +633,46 @@ export class ApplicationService extends EventEmitter {
       case "ai.transcribe": {
         const project = await this.sourceProject(p.projectId);
         if (!project.source?.microphone && !project.source?.systemAudio)
-          throw new AppError(
-            "NO_AUDIO",
-            "This recording has no audio track to transcribe.",
-          );
+          throw new AppError("NO_AUDIO", "This recording has no audio track to transcribe.");
         if (this.jobs.active(p.projectId).some((j) => j.kind === "transcribe"))
-          throw new AppError(
-            "PROJECT_BUSY",
-            "This project is already being transcribed.",
-          );
+          throw new AppError("PROJECT_BUSY", "This project is already being transcribed.");
         const model = p.model ?? this.settings.transcriptionModel,
           language = p.language ?? this.settings.language;
-        return this.jobs.start(
-          "transcribe",
-          project.id,
-          async (signal, progress, jobId) => {
-            const jobDir = path.join(
-              this.store.dir(project.id),
-              "cache",
-              jobId,
+        return this.jobs.start("transcribe", project.id, async (signal, progress, jobId) => {
+          const jobDir = path.join(this.store.dir(project.id), "cache", jobId);
+          await fs.mkdir(jobDir, { recursive: true, mode: 0o700 });
+          const audioPath = path.join(jobDir, "audio.wav");
+          try {
+            progress(0.02, "Preparing audio");
+            await this.native("audio.prepare", {
+              projectDir: this.store.dir(project.id),
+              source: project.source,
+              path: audioPath,
+            });
+            signal.throwIfAborted();
+            const transcript = await this.localAI.transcribe(
+              model,
+              audioPath,
+              path.join(jobDir, "transcript"),
+              language,
+              signal,
+              progress,
             );
-            await fs.mkdir(jobDir, { recursive: true, mode: 0o700 });
-            const audioPath = path.join(jobDir, "audio.wav");
-            try {
-              progress(0.02, "Preparing audio");
-              await this.native("audio.prepare", {
-                projectDir: this.store.dir(project.id),
-                source: project.source,
-                path: audioPath,
-              });
-              signal.throwIfAborted();
-              const transcript = await this.localAI.transcribe(
-                model,
-                audioPath,
-                path.join(jobDir, "transcript"),
-                language,
-                signal,
-                progress,
-              );
-              signal.throwIfAborted();
-              const result = await this.store.mutate(
-                project.id,
-                project.revision,
-                (q) => {
-                  q.transcript = transcript
-                    .map((s) => ({
-                      ...s,
-                      endMs: Math.min(s.endMs, q.source!.durationMs),
-                    }))
-                    .filter((s) => s.endMs > s.startMs);
-                  q.edits.captions.enabled = true;
-                },
-              );
-              return this.refreshPreview(result);
-            } finally {
-              await fs.rm(audioPath, { force: true });
-            }
-          },
-        );
+            signal.throwIfAborted();
+            const result = await this.store.mutate(project.id, project.revision, (q) => {
+              q.transcript = transcript
+                .map((s) => ({
+                  ...s,
+                  endMs: Math.min(s.endMs, q.source!.durationMs),
+                }))
+                .filter((s) => s.endMs > s.startMs);
+              q.edits.captions.enabled = true;
+            });
+            return this.refreshPreview(result);
+          } finally {
+            await fs.rm(audioPath, { force: true });
+          }
+        });
       }
       case "ai.cleanSilence": {
         const project = await this.sourceProject(p.projectId);
@@ -754,31 +681,26 @@ export class ApplicationService extends EventEmitter {
             "NO_MICROPHONE",
             "Silence cleanup requires a separate microphone track.",
           );
-        if (p.expectedRevision !== undefined)
-          checkRevision(project.revision, p.expectedRevision);
-        return this.jobs.start(
-          "silence",
-          project.id,
-          async (signal, progress) => {
-            progress(0.1, "Measuring microphone and system audio");
-            const result = await this.analyzeSilence(
-              project,
-              p.thresholdDb,
-              p.minSilenceMs,
-              p.paddingMs,
-              p.preserveSystemAudio,
-            );
-            signal.throwIfAborted();
-            const { operations } = result;
-            if (p.apply && operations.length)
-              return this.timeline({
-                projectId: project.id,
-                expectedRevision: project.revision,
-                operations,
-              });
-            return result;
-          },
-        );
+        if (p.expectedRevision !== undefined) checkRevision(project.revision, p.expectedRevision);
+        return this.jobs.start("silence", project.id, async (signal, progress) => {
+          progress(0.1, "Measuring microphone and system audio");
+          const result = await this.analyzeSilence(
+            project,
+            p.thresholdDb,
+            p.minSilenceMs,
+            p.paddingMs,
+            p.preserveSystemAudio,
+          );
+          signal.throwIfAborted();
+          const { operations } = result;
+          if (p.apply && operations.length)
+            return this.timeline({
+              projectId: project.id,
+              expectedRevision: project.revision,
+              operations,
+            });
+          return result;
+        });
       }
       case "ai.assistant": {
         const original = await this.sourceProject(p.projectId);
@@ -793,58 +715,44 @@ export class ApplicationService extends EventEmitter {
             "API_KEY_MISSING",
             `Add your ${settings.provider === "openai" ? "OpenAI" : "Anthropic"} API key in Settings first.`,
           );
-        return this.jobs.start(
-          "assistant",
-          p.projectId,
-          async (signal, progress) => {
-            const result = await assistant(
-              settings,
-              apiKey,
-              p.prompt,
-              async () => structuredClone(draft),
-              async (input) => {
-                const args = methodSchemas["timeline.apply"]!.parse({
-                  ...input,
-                  projectId: draft.id,
-                }) as { expectedRevision: number; operations: EditOperation[] };
-                checkRevision(draft.revision, args.expectedRevision);
-                const next = structuredClone(draft);
-                const clicks =
-                  args.operations.some((op) => op.type === "zooms.auto") &&
-                  next.source?.cursor
-                    ? await cursorClicks(
-                        await this.store.resolveMedia(
-                          next.id,
-                          next.source.cursor,
-                        ),
-                      )
-                    : [];
-                applyEdits(next, args.operations, clicks);
-                projectSchema.parse(next);
-                next.revision++;
-                Object.assign(draft, next);
-                return structuredClone(draft);
-              },
-              signal,
-              progress,
-              () => this.analyzeSilence(draft),
+        return this.jobs.start("assistant", p.projectId, async (signal, progress) => {
+          const result = await assistant(
+            settings,
+            apiKey,
+            p.prompt,
+            async () => structuredClone(draft),
+            async (input) => {
+              const args = methodSchemas["timeline.apply"]!.parse({
+                ...input,
+                projectId: draft.id,
+              }) as { expectedRevision: number; operations: EditOperation[] };
+              checkRevision(draft.revision, args.expectedRevision);
+              const next = structuredClone(draft);
+              const clicks =
+                args.operations.some((op) => op.type === "zooms.auto") && next.source?.cursor
+                  ? await cursorClicks(await this.store.resolveMedia(next.id, next.source.cursor))
+                  : [];
+              applyEdits(next, args.operations, clicks);
+              projectSchema.parse(next);
+              next.revision++;
+              Object.assign(draft, next);
+              return structuredClone(draft);
+            },
+            signal,
+            progress,
+            () => this.analyzeSilence(draft),
+          );
+          signal.throwIfAborted();
+          if (draft.revision !== original.revision)
+            result.project = await this.refreshPreview(
+              await this.store.mutate(original.id, original.revision, (project) => {
+                project.edits = draft.edits;
+                project.transcript = draft.transcript;
+              }),
             );
-            signal.throwIfAborted();
-            if (draft.revision !== original.revision)
-              result.project = await this.refreshPreview(
-                await this.store.mutate(
-                  original.id,
-                  original.revision,
-                  (project) => {
-                    project.edits = draft.edits;
-                    project.transcript = draft.transcript;
-                  },
-                ),
-              );
-            else result.project = await this.store.get(original.id);
-            return result;
-          },
-        );
+          else result.project = await this.store.get(original.id);
+          return result;
+        });
       }
       case "jobs.list":
         return this.jobs.list(p.projectId);
@@ -862,27 +770,19 @@ export class ApplicationService extends EventEmitter {
             "PREVIEW_NOT_ACTIVE",
             "Load this project in the preview before changing its draft",
           );
-        if (p.sequence !== undefined && p.sequence < this.previewSequence) return { superseded: true };
+        if (p.sequence !== undefined && p.sequence < this.previewSequence)
+          return { superseded: true };
         if (p.sequence !== undefined) this.previewSequence = p.sequence;
         const operations: EditOperation[] = method === "preview.reset" ? [] : p.operations;
         const events =
-          operations.some((op: EditOperation) => op.type === "zooms.auto") &&
-          project.source?.cursor
-            ? await cursorClicks(
-                await this.store.resolveMedia(
-                  project.id,
-                  project.source.cursor,
-                ),
-              )
+          operations.some((op: EditOperation) => op.type === "zooms.auto") && project.source?.cursor
+            ? await cursorClicks(await this.store.resolveMedia(project.id, project.source.cursor))
             : [];
         const draft = structuredClone(project);
         if (operations.length) applyEdits(draft, operations, events);
         projectSchema.parse(draft);
         if (this.previewId !== project.id)
-          throw new AppError(
-            "PREVIEW_NOT_ACTIVE",
-            "The preview switched to another project",
-          );
+          throw new AppError("PREVIEW_NOT_ACTIVE", "The preview switched to another project");
         checkRevision((await this.store.get(project.id)).revision, p.expectedRevision);
         return this.native("preview.update", {
           project: draft,
@@ -903,15 +803,8 @@ export class ApplicationService extends EventEmitter {
       case "preview.frame": {
         const project = await this.sourceProject(p.projectId);
         if (p.timeMs >= duration(project.edits.segments))
-          throw new AppError(
-            "INVALID_RANGE",
-            "Frame time is outside the output timeline.",
-          );
-        const file = path.join(
-          this.store.dir(project.id),
-          "cache",
-          `preview-${randomUUID()}.png`,
-        );
+          throw new AppError("INVALID_RANGE", "Frame time is outside the output timeline.");
+        const file = path.join(this.store.dir(project.id), "cache", `preview-${randomUUID()}.png`);
         await fs.mkdir(path.dirname(file), { recursive: true, mode: 0o700 });
         await this.native(method, {
           project,
@@ -934,59 +827,46 @@ export class ApplicationService extends EventEmitter {
         const project = await this.sourceProject(p.projectId),
           output = await this.outputPath(p.path, [".mp4"]);
         if (this.exporting.has(output))
-          throw new AppError(
-            "EXPORT_BUSY",
-            "Another export is using that filename.",
-          );
+          throw new AppError("EXPORT_BUSY", "Another export is using that filename.");
         const { width, height } =
           p.width === undefined
             ? outputSize(project, p.quality)
             : { width: p.width, height: p.height };
         if (width % 2 || height % 2)
-          throw new AppError(
-            "INVALID_INPUT",
-            "Video dimensions must be even numbers.",
-          );
+          throw new AppError("INVALID_INPUT", "Video dimensions must be even numbers.");
         this.exporting.add(output);
-        return this.jobs.start(
-          "export",
-          project.id,
-          async (signal, progress, jobId) => {
-            try {
+        return this.jobs.start("export", project.id, async (signal, progress, jobId) => {
+          try {
+            signal.throwIfAborted();
+            await this.native("export.start", {
+              project,
+              projectDir: this.store.dir(project.id),
+              path: output,
+              width,
+              height,
+              jobId,
+            });
+            while (true) {
               signal.throwIfAborted();
-              await this.native("export.start", {
-                project,
-                projectDir: this.store.dir(project.id),
-                path: output,
-                width,
-                height,
-                jobId,
-              });
-              while (true) {
-                signal.throwIfAborted();
-                const status = await this.native("export.status", { jobId });
-                progress(Number(status.progress) || 0, "Rendering video");
-                if (status.status === "completed") {
-                  await fs.stat(output);
-                  return { path: output, revision: project.revision };
-                }
-                if (status.status === "failed")
-                  throw new AppError(
-                    "EXPORT_FAILED",
-                    status.error ?? "Native export failed.",
-                  );
-                if (status.status === "cancelled")
-                  throw new AppError("CANCELLED", "Export cancelled.");
-                await delay(500, undefined, { signal });
+              const status = await this.native("export.status", { jobId });
+              progress(Number(status.progress) || 0, "Rendering video");
+              if (status.status === "completed") {
+                await fs.stat(output);
+                return { path: output, revision: project.revision };
               }
-            } catch (error) {
-              await this.native("export.cancel", { jobId }).catch(() => {});
-              throw error;
-            } finally {
-              this.exporting.delete(output);
+              if (status.status === "failed")
+                throw new AppError("EXPORT_FAILED", status.error ?? "Native export failed.");
+              if (status.status === "cancelled")
+                throw new AppError("CANCELLED", "Export cancelled.");
+              await delay(500, undefined, { signal });
             }
-          },
-        );
+          } catch (error) {
+            await this.native("export.cancel", { jobId }).catch(() => {});
+            throw error;
+          } finally {
+            this.exporting.delete(output);
+          }
+        });
       }
       default:
         throw new AppError("UNKNOWN_METHOD", method);
@@ -994,10 +874,7 @@ export class ApplicationService extends EventEmitter {
   }
   private async importProject(inputPath: string, name?: string) {
     const info = await fs.stat(inputPath);
-    if (
-      !info.isDirectory() &&
-      path.extname(inputPath).toLowerCase() !== ".json"
-    ) {
+    if (!info.isDirectory() && path.extname(inputPath).toLowerCase() !== ".json") {
       const sourceInfo = await this.native("media.inspect", {
         path: inputPath,
       });
@@ -1030,31 +907,21 @@ export class ApplicationService extends EventEmitter {
         ),
       );
     }
-    const sourceDir = await fs.realpath(
-      info.isDirectory() ? inputPath : path.dirname(inputPath),
-    );
-    const manifest = info.isDirectory()
-      ? path.join(inputPath, "project.json")
-      : inputPath;
+    const sourceDir = await fs.realpath(info.isDirectory() ? inputPath : path.dirname(inputPath));
+    const manifest = info.isDirectory() ? path.join(inputPath, "project.json") : inputPath;
     if ((await fs.stat(manifest)).size > 50_000_000)
       throw new AppError("INVALID_PROJECT", "Project manifest exceeds 50 MB.");
     const data = JSON.parse(await fs.readFile(manifest, "utf8")),
       imported = parseProject(data.project ?? data);
     if (imported.status === "recording")
-      throw new AppError(
-        "PROJECT_BUSY",
-        "Finish the recording before importing this project.",
-      );
+      throw new AppError("PROJECT_BUSY", "Finish the recording before importing this project.");
     const project = await this.store.create(name ?? `${imported.name} copy`);
     const copied = new Map<string, string>();
     const copy = async (relative: string) => {
       if (copied.has(relative)) return copied.get(relative)!;
       const full = await fs.realpath(path.join(sourceDir, relative));
       if (!full.startsWith(sourceDir + path.sep))
-        throw new AppError(
-          "INVALID_PATH",
-          "Imported media must stay inside the source project.",
-        );
+        throw new AppError("INVALID_PATH", "Imported media must stay inside the source project.");
       const destination = `media/${randomUUID()}${path.extname(relative)}`;
       await this.store.copyMedia(project.id, full, destination);
       copied.set(relative, destination);
@@ -1062,13 +929,7 @@ export class ApplicationService extends EventEmitter {
     };
     const source = imported.source ? { ...imported.source } : undefined;
     if (source)
-      for (const key of [
-        "screen",
-        "camera",
-        "microphone",
-        "systemAudio",
-        "cursor",
-      ] as const)
+      for (const key of ["screen", "camera", "microphone", "systemAudio", "cursor"] as const)
         if (source[key]) source[key] = await copy(source[key]!);
     const assets = await Promise.all(
       imported.assets.map(async (a) => ({ ...a, path: await copy(a.path) })),

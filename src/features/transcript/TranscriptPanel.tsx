@@ -1,4 +1,4 @@
-import { DraftPreviewContext } from "../../controllers/StudioContexts";
+import { DraftPreviewContext } from "@/src/controllers/StudioContexts";
 import { useContext } from "react";
 import { Download, Scissors, Sparkles } from "lucide-react";
 import {
@@ -6,13 +6,13 @@ import {
   type Project,
   type Range,
   type TranscriptSegment,
-} from "../../../shared/types";
-import { formatTime, outputRanges } from "../../../shared/timeline";
-import { Field } from "../../components/molecules/Field";
-import { Switch } from "../../components/atoms/Switch";
-import { Slider } from "../../components/molecules/Slider";
-import { PanelIntro } from "../../components/molecules/PanelIntro";
-import { type Settings } from "../../controllers/studioTypes";
+} from "@/shared/types";
+import { formatTime, outputRanges } from "@/shared/timeline";
+import { Field } from "@/src/components/molecules/Field";
+import { Switch } from "@/src/components/atoms/Switch";
+import { Slider } from "@/src/components/molecules/Slider";
+import { PanelIntro } from "@/src/components/molecules/PanelIntro";
+import { type Settings } from "@/src/controllers/studioTypes";
 
 export function TranscriptPanel({
   project,
@@ -33,9 +33,7 @@ export function TranscriptPanel({
   const captions = project.edits.captions;
   const rangeFor = (segment: TranscriptSegment) => {
     const ranges = outputRanges(project.edits.segments, segment);
-    return ranges.length
-      ? { startMs: ranges[0]!.startMs, endMs: ranges.at(-1)!.endMs }
-      : null;
+    return ranges.length ? { startMs: ranges[0]!.startMs, endMs: ranges.at(-1)!.endMs } : null;
   };
   return (
     <>
@@ -54,19 +52,13 @@ export function TranscriptPanel({
         }
       >
         <Sparkles size={15} />
-        {project.transcript.length
-          ? "Regenerate transcript"
-          : "Generate transcript"}
+        {project.transcript.length ? "Regenerate transcript" : "Generate transcript"}
       </button>
-      <p className="helper">
-        Uses a downloaded Whisper model. Your audio stays on your device.
-      </p>
+      <p className="helper">Uses a downloaded Whisper model. Your audio stays on your device.</p>
       <Switch
         label="Show subtitles in video"
         checked={captions.enabled}
-        onChange={(enabled) =>
-          void apply([{ type: "captions.update", settings: { enabled } }])
-        }
+        onChange={(enabled) => void apply([{ type: "captions.update", settings: { enabled } }])}
       />
       {captions.enabled && (
         <>
@@ -77,7 +69,9 @@ export function TranscriptPanel({
             step={1}
             suffix=" px"
             value={captions.fontSize}
-            onPreview={fontSize => draftPreview([{ type: "captions.update", settings: { fontSize } }])}
+            onPreview={(fontSize) =>
+              draftPreview([{ type: "captions.update", settings: { fontSize } }])
+            }
             onChange={(fontSize) =>
               void apply([{ type: "captions.update", settings: { fontSize } }])
             }
@@ -117,11 +111,7 @@ export function TranscriptPanel({
       {project.transcript.length > 0 && (
         <div className="button-row">
           {(["srt", "vtt"] as const).map((format) => (
-            <button
-              key={format}
-              className="button subtle"
-              onClick={() => onExport(format)}
-            >
+            <button key={format} className="button subtle" onClick={() => onExport(format)}>
               <Download size={13} />
               {format.toUpperCase()}
             </button>
@@ -174,9 +164,7 @@ export function TranscriptPanel({
           );
         })}
         {!project.transcript.length && (
-          <p className="helper">
-            Your transcript will appear here after processing.
-          </p>
+          <p className="helper">Your transcript will appear here after processing.</p>
         )}
       </div>
     </>

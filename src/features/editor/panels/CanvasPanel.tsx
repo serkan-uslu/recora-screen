@@ -5,12 +5,12 @@ import {
   type Project,
   type CanvasSettings,
   defaultCanvas,
-} from "../../../../shared/types";
-import { messageOf } from "../../../lib/errors";
-import { Field } from "../../../components/molecules/Field";
-import { Slider } from "../../../components/molecules/Slider";
-import { PanelIntro } from "../../../components/molecules/PanelIntro";
-import { DraftPreviewContext } from "../../../controllers/StudioContexts";
+} from "@/shared/types";
+import { messageOf } from "@/src/lib/errors";
+import { Field } from "@/src/components/molecules/Field";
+import { Slider } from "@/src/components/molecules/Slider";
+import { PanelIntro } from "@/src/components/molecules/PanelIntro";
+import { DraftPreviewContext } from "@/src/controllers/StudioContexts";
 
 export function CanvasPanel({
   project,
@@ -21,8 +21,7 @@ export function CanvasPanel({
   project: Project;
   apply: (ops: EditOperation[], revision?: number) => Promise<void>;
   importImage: () => Promise<
-    | { asset: Project["assets"][number] | undefined; revision: number }
-    | undefined
+    { asset: Project["assets"][number] | undefined; revision: number } | undefined
   >;
   onError: (error: string) => void;
 }) {
@@ -49,72 +48,50 @@ export function CanvasPanel({
         text="Frame your recording for the place you’ll share it."
       />
       <h3 className="panel-section">CANVAS</h3>
-      <div
-        className="aspect-options"
-        role="group"
-        aria-label="Canvas aspect ratio"
-      >
-        {(["source", "16:9", "1:1", "9:16", "4:5"] as const).map(
-          (aspectRatio) => (
-            <button
-              key={aspectRatio}
-              aria-pressed={canvas.aspectRatio === aspectRatio}
-              className={canvas.aspectRatio === aspectRatio ? "selected" : ""}
-              onClick={() => update({ aspectRatio })}
-            >
-              <span
-                style={{
-                  aspectRatio:
-                    aspectRatio === "source"
-                      ? "16/10"
-                      : aspectRatio.replace(":", "/"),
-                }}
-              />
-              {aspectRatio === "source" ? "Source" : aspectRatio}
-            </button>
-          ),
-        )}
+      <div className="aspect-options" role="group" aria-label="Canvas aspect ratio">
+        {(["source", "16:9", "1:1", "9:16", "4:5"] as const).map((aspectRatio) => (
+          <button
+            key={aspectRatio}
+            aria-pressed={canvas.aspectRatio === aspectRatio}
+            className={canvas.aspectRatio === aspectRatio ? "selected" : ""}
+            onClick={() => update({ aspectRatio })}
+          >
+            <span
+              style={{
+                aspectRatio: aspectRatio === "source" ? "16/10" : aspectRatio.replace(":", "/"),
+              }}
+            />
+            {aspectRatio === "source" ? "Source" : aspectRatio}
+          </button>
+        ))}
       </div>
       <div className="panel-divider" />
       <h3 className="panel-section">BACKGROUND</h3>
-      <div
-        className="background-options"
-        role="group"
-        aria-label="Background type"
-      >
-        {(["wallpaper", "gradient", "color", "image", "hidden"] as const).map(
-          (background) => (
-            <button
-              key={background}
-              className={canvas.background === background ? "selected" : ""}
-              aria-pressed={canvas.background === background}
-              onClick={() => {
-                if (background === "image" && !canvas.assetId) {
-                  void importImage()
-                    .then((result) => {
-                      if (result?.asset)
-                        update(
-                          { background, assetId: result.asset.id },
-                          result.revision,
-                        );
-                    })
-                    .catch((e) => onError(messageOf(e)));
-                } else update({ background });
-              }}
-            >
-              {background === "hidden"
-                ? "Hidden"
-                : background[0]!.toUpperCase() + background.slice(1)}
-            </button>
-          ),
-        )}
+      <div className="background-options" role="group" aria-label="Background type">
+        {(["wallpaper", "gradient", "color", "image", "hidden"] as const).map((background) => (
+          <button
+            key={background}
+            className={canvas.background === background ? "selected" : ""}
+            aria-pressed={canvas.background === background}
+            onClick={() => {
+              if (background === "image" && !canvas.assetId) {
+                void importImage()
+                  .then((result) => {
+                    if (result?.asset)
+                      update({ background, assetId: result.asset.id }, result.revision);
+                  })
+                  .catch((e) => onError(messageOf(e)));
+              } else update({ background });
+            }}
+          >
+            {background === "hidden"
+              ? "Hidden"
+              : background[0]!.toUpperCase() + background.slice(1)}
+          </button>
+        ))}
       </div>
       {canvas.background === "wallpaper" && (
-        <div
-          className="wallpaper-options"
-          role="group"
-          aria-label="Wallpaper preset"
-        >
+        <div className="wallpaper-options" role="group" aria-label="Wallpaper preset">
           {(["aurora", "sunset", "ocean", "dusk"] as const).map((wallpaper) => (
             <button
               className={`wallpaper-swatch ${wallpaper} ${canvas.wallpaper === wallpaper ? "selected" : ""}`}
@@ -130,9 +107,7 @@ export function CanvasPanel({
       )}
       {(canvas.background === "color" || canvas.background === "gradient") && (
         <div className="two-columns">
-          <Field
-            label={canvas.background === "gradient" ? "Start color" : "Color"}
-          >
+          <Field label={canvas.background === "gradient" ? "Start color" : "Color"}>
             <input
               type="color"
               value={canvas.color}
@@ -184,8 +159,7 @@ export function CanvasPanel({
             onClick={() =>
               void importImage()
                 .then((result) => {
-                  if (result?.asset)
-                    update({ assetId: result.asset.id }, result.revision);
+                  if (result?.asset) update({ assetId: result.asset.id }, result.revision);
                 })
                 .catch((e) => onError(messageOf(e)))
             }
@@ -208,18 +182,14 @@ export function CanvasPanel({
         />
       )}
       {canvas.background === "hidden" && (
-        <p className="helper">
-          A plain canvas without a decorative background.
-        </p>
+        <p className="helper">A plain canvas without a decorative background.</p>
       )}
       <div className="panel-divider" />
       <h3 className="panel-section">SCREEN FRAME</h3>
       <Field label="Frame style">
         <select
           value={canvas.frame}
-          onChange={(e) =>
-            update({ frame: e.target.value as CanvasSettings["frame"] })
-          }
+          onChange={(e) => update({ frame: e.target.value as CanvasSettings["frame"] })}
         >
           <option value="none">Hidden</option>
           <option value="minimal">Minimal</option>
@@ -234,8 +204,7 @@ export function CanvasPanel({
             placeholder={project.source?.title ?? project.name}
             maxLength={200}
             onBlur={(e) => {
-              if (e.target.value !== canvas.title)
-                update({ title: e.target.value });
+              if (e.target.value !== canvas.title) update({ title: e.target.value });
             }}
           />
         </Field>

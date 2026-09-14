@@ -1,6 +1,6 @@
 import { LoaderCircle, X } from "lucide-react";
-import { IconButton } from "../../components/atoms/IconButton";
-import { type StudioController } from "../../controllers/useStudioController";
+import { IconButton } from "@/src/components/atoms/IconButton";
+import { type StudioController } from "@/src/controllers/useStudioController";
 
 export function JobNotifications({
   studio,
@@ -30,10 +30,7 @@ export function JobNotifications({
               <X size={13} />
             </IconButton>
           </div>
-          <progress
-            max={1}
-            value={job.progress > 1 ? job.progress / 100 : job.progress}
-          />
+          <progress max={1} value={job.progress > 1 ? job.progress / 100 : job.progress} />
           <p>{job.message}</p>
         </div>
       ))}

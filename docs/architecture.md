@@ -12,23 +12,23 @@ UI / MCP / socket → CommandController → ApplicationService
                                            └─ native Swift recording and composition
 ```
 
-| Directory | Responsibility |
-| --- | --- |
-| `src/components/atoms` | Small visual controls: switches and icon buttons |
-| `src/components/molecules` | Labeled fields, sliders and panel summaries |
-| `src/components/organisms` | Composed header, dialogs and author footer |
-| `src/features` | Project, editor, recording, export, settings and help views |
-| `src/controllers` | React state, lifecycle, command orchestration and UI actions |
-| `src/services` | Command envelopes, retry IDs and response/error normalization |
-| `src/infrastructure` | Tauri, file dialogs, URL opening and HTTP transport |
-| `server/controllers` | Validation, command ordering and idempotency |
-| `server/contracts` | Shared command and persisted-data schemas |
-| `server/services` | Application use cases, AI and background jobs |
-| `server/domain` | Timeline edits and cursor analysis |
-| `server/infrastructure` | Atomic project storage and local socket transport |
-| `shared` | Project types, timeline mapping and author metadata |
-| `design-system` | Shared theme tokens |
-| `website` | Independent, static product website |
+| Directory                  | Responsibility                                                |
+| -------------------------- | ------------------------------------------------------------- |
+| `src/components/atoms`     | Small visual controls: switches and icon buttons              |
+| `src/components/molecules` | Labeled fields, sliders and panel summaries                   |
+| `src/components/organisms` | Composed header, dialogs and author footer                    |
+| `src/features`             | Project, editor, recording, export, settings and help views   |
+| `src/controllers`          | React state, lifecycle, command orchestration and UI actions  |
+| `src/services`             | Command envelopes, retry IDs and response/error normalization |
+| `src/infrastructure`       | Tauri, file dialogs, URL opening and HTTP transport           |
+| `server/controllers`       | Validation, command ordering and idempotency                  |
+| `server/contracts`         | Shared command and persisted-data schemas                     |
+| `server/services`          | Application use cases, AI and background jobs                 |
+| `server/domain`            | Timeline edits and cursor analysis                            |
+| `server/infrastructure`    | Atomic project storage and local socket transport             |
+| `shared`                   | Project types, timeline mapping and author metadata           |
+| `design-system`            | Shared theme tokens                                           |
+| `website`                  | Independent, static product website                           |
 
 `server/service.ts` and `server/rpc.ts` remain compatibility exports for existing integrations. Entry points remain `server/main.ts`, `server/browser.ts` and `server/mcp.ts`.
 

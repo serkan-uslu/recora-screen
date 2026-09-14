@@ -1,8 +1,6 @@
+import { useStableCallback } from "@/src/controllers/useStableCallback";
 import { useContext, useEffect, useRef, useState } from "react";
-import {
-  ErrorContext,
-  DraftPreviewContext,
-} from "../../controllers/StudioContexts";
+import { ErrorContext, DraftPreviewContext } from "@/src/controllers/StudioContexts";
 
 export function Slider({
   label,
@@ -36,30 +34,30 @@ export function Slider({
     if (captured?.target.hasPointerCapture(captured.id))
       captured.target.releasePointerCapture(captured.id);
   }
-  function resetValue() {
+  const resetValue = useStableCallback(() => {
     setDraft(value);
     draftValue.current = value;
     lastCommit.current = value;
-  }
-  function cancelGesture() {
+  });
+  const cancelGesture = useStableCallback(() => {
     if (gesture.current) gesture.current.cancelled = true;
     releasePointer();
     resetValue();
     cancelPreview(null);
-  }
+  });
   useEffect(() => {
     if (gesture.current && gesture.current.scope !== scope) cancelGesture();
     else resetValue();
-  }, [scope, value]);
+  }, [scope, value, cancelGesture, resetValue]);
   useEffect(() => {
     if (error) cancelGesture();
-  }, [error]);
+  }, [error, cancelGesture]);
   useEffect(
     () => () => {
       if (gesture.current) cancelPreview(null);
       releasePointer();
     },
-    [],
+    [cancelPreview],
   );
   const commit = () => {
     const active = gesture.current;
@@ -99,7 +97,12 @@ export function Slider({
           e.currentTarget.setPointerCapture(e.pointerId);
         }}
         onKeyDown={(e) => {
-          if (e.key === "Escape" && gesture.current) { e.preventDefault(); e.stopPropagation(); cancelGesture(); return; }
+          if (e.key === "Escape" && gesture.current) {
+            e.preventDefault();
+            e.stopPropagation();
+            cancelGesture();
+            return;
+          }
           if (
             [
               "ArrowLeft",
@@ -116,10 +119,7 @@ export function Slider({
             gesture.current = { scope, cancelled: false };
         }}
         onChange={(e) => {
-          if (
-            gesture.current &&
-            (gesture.current.cancelled || gesture.current.scope !== scope)
-          ) {
+          if (gesture.current && (gesture.current.cancelled || gesture.current.scope !== scope)) {
             resetValue();
             return;
           }

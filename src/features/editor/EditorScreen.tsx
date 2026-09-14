@@ -1,5 +1,5 @@
 import { useSyncExternalStore, useContext } from "react";
-import { DraftPreviewContext } from "../../controllers/StudioContexts";
+import { DraftPreviewContext } from "@/src/controllers/StudioContexts";
 import {
   ArrowLeft,
   ArrowRight,
@@ -11,22 +11,22 @@ import {
   Scissors,
   Video,
 } from "lucide-react";
-import { formatTime, outputRanges } from "../../../shared/timeline";
-import { IconButton } from "../../components/atoms/IconButton";
-import { Slider } from "../../components/molecules/Slider";
-import { PanelIntro } from "../../components/molecules/PanelIntro";
-import { NativePreview } from "./NativePreview";
-import { CanvasPanel } from "./panels/CanvasPanel";
-import { CameraPanel } from "./panels/CameraPanel";
-import { ZoomPanel } from "./panels/ZoomPanel";
-import { OverlaysPanel } from "./panels/OverlaysPanel";
-import { SilenceControls } from "../audio/SilenceControls";
-import { TranscriptPanel } from "../transcript/TranscriptPanel";
-import { AssistantPanel } from "../assistant/AssistantPanel";
-import { Timeline } from "./Timeline";
-import { tabItems } from "./tabs";
-import { seconds } from "../../lib/format";
-import { type StudioController } from "../../controllers/useStudioController";
+import { formatTime, outputRanges } from "@/shared/timeline";
+import { IconButton } from "@/src/components/atoms/IconButton";
+import { Slider } from "@/src/components/molecules/Slider";
+import { PanelIntro } from "@/src/components/molecules/PanelIntro";
+import { NativePreview } from "@/src/features/editor/NativePreview";
+import { CanvasPanel } from "@/src/features/editor/panels/CanvasPanel";
+import { CameraPanel } from "@/src/features/editor/panels/CameraPanel";
+import { ZoomPanel } from "@/src/features/editor/panels/ZoomPanel";
+import { OverlaysPanel } from "@/src/features/editor/panels/OverlaysPanel";
+import { SilenceControls } from "@/src/features/audio/SilenceControls";
+import { TranscriptPanel } from "@/src/features/transcript/TranscriptPanel";
+import { AssistantPanel } from "@/src/features/assistant/AssistantPanel";
+import { Timeline } from "@/src/features/editor/Timeline";
+import { tabItems } from "@/src/features/editor/tabs";
+import { seconds } from "@/src/lib/format";
+import { type StudioController } from "@/src/controllers/useStudioController";
 
 export function EditorScreen({
   studio,
@@ -105,17 +105,17 @@ export function EditorScreen({
   function revealRange(range: { startMs: number; endMs: number }) {
     const ranges = outputRanges(project!.edits.segments, range);
     const time = playback.getSnapshot().timeMs;
-    const visible = ranges.find(item => time >= item.startMs && time < item.endMs) ?? ranges[0];
-    if (visible) { setSelection(visible); void seek((visible.startMs + visible.endMs) / 2); }
+    const visible = ranges.find((item) => time >= item.startMs && time < item.endMs) ?? ranges[0];
+    if (visible) {
+      setSelection(visible);
+      void seek((visible.startMs + visible.endMs) / 2);
+    }
   }
   return (
     <>
       <div className="editor-layout">
         <nav className="tool-rail">
-          <IconButton
-            label="Back to projects"
-            onClick={() => void backToLibrary()}
-          >
+          <IconButton label="Back to projects" onClick={() => void backToLibrary()}>
             <ArrowLeft />
           </IconButton>
           <div className="rail-divider" />
@@ -168,8 +168,20 @@ export function EditorScreen({
               playback={playback}
               selection={selection}
               cameraScope={cameraScope}
-              selected={tab === "camera" ? { kind: "camera" } : tab === "overlays" && selectedOverlay ? { kind: "overlay", id: selectedOverlay } : null}
-              onSelect={item => { if (item?.kind === "camera") setTab("camera"); else if (item?.kind === "overlay") { setSelectedOverlay(item.id!); setTab("overlays"); } else setSelectedOverlay(null); }}
+              selected={
+                tab === "camera"
+                  ? { kind: "camera" }
+                  : tab === "overlays" && selectedOverlay
+                    ? { kind: "overlay", id: selectedOverlay }
+                    : null
+              }
+              onSelect={(item) => {
+                if (item?.kind === "camera") setTab("camera");
+                else if (item?.kind === "overlay") {
+                  setSelectedOverlay(item.id!);
+                  setTab("overlays");
+                } else setSelectedOverlay(null);
+              }}
               apply={apply}
               disabled={projectBusy}
             />
@@ -199,7 +211,12 @@ export function EditorScreen({
               </span>
             </div>
           )}
-          <PlaybackToolbar project={project} total={total} playback={playback} disabled={projectBusy} />
+          <PlaybackToolbar
+            project={project}
+            total={total}
+            playback={playback}
+            disabled={projectBusy}
+          />
         </main>
         <aside className="inspector">
           <div className="inspector-title">
@@ -207,10 +224,7 @@ export function EditorScreen({
             {tab === "ai" && <span className="mini-tag">BYOK</span>}
           </div>
           <div className="inspector-body" ref={inspectorRef}>
-            <fieldset
-              disabled={projectBusy}
-              className="unstyled-fieldset"
-            >
+            <fieldset disabled={projectBusy} className="unstyled-fieldset">
               {tab === "general" && (
                 <CanvasPanel
                   project={project}
@@ -234,9 +248,9 @@ export function EditorScreen({
                   selection={selection}
                   apply={apply}
                   selectedId={selectedZoom}
-                  onSelect={id => {
+                  onSelect={(id) => {
                     setSelectedZoom(id);
-                    const zoom = project.edits.zooms.find(item => item.id === id);
+                    const zoom = project.edits.zooms.find((item) => item.id === id);
                     if (zoom) revealRange(zoom);
                   }}
                 />
@@ -249,9 +263,9 @@ export function EditorScreen({
                   importImage={importImage}
                   onError={setError}
                   selected={selectedOverlay}
-                  onSelect={id => {
+                  onSelect={(id) => {
                     setSelectedOverlay(id);
-                    const overlay = project.edits.overlays.find(item => item.id === id);
+                    const overlay = project.edits.overlays.find((item) => item.id === id);
                     if (overlay) revealRange(overlay);
                   }}
                 />
@@ -267,7 +281,9 @@ export function EditorScreen({
                     label="Microphone"
                     value={project.edits.audio.microphoneVolume}
                     max={2}
-                    onPreview={v => draftPreview([{ type: "audio.update", settings: { microphoneVolume: v } }])}
+                    onPreview={(v) =>
+                      draftPreview([{ type: "audio.update", settings: { microphoneVolume: v } }])
+                    }
                     onChange={(v) =>
                       void apply([
                         {
@@ -281,7 +297,9 @@ export function EditorScreen({
                     label="System audio"
                     value={project.edits.audio.systemVolume}
                     max={2}
-                    onPreview={v => draftPreview([{ type: "audio.update", settings: { systemVolume: v } }])}
+                    onPreview={(v) =>
+                      draftPreview([{ type: "audio.update", settings: { systemVolume: v } }])
+                    }
                     onChange={(v) =>
                       void apply([
                         {
@@ -294,8 +312,8 @@ export function EditorScreen({
                   <div className="panel-divider" />
                   <h3 className="panel-section">SMART CLEANUP</h3>
                   <p className="helper">
-                    Find pauses using the recorded audio. Review every suggested
-                    cut before applying it.
+                    Find pauses using the recorded audio. Review every suggested cut before applying
+                    it.
                   </p>
                   <SilenceControls
                     disabled={!project.source}
@@ -314,9 +332,7 @@ export function EditorScreen({
                           ? `${silenceReview.ranges.length} pauses found`
                           : "No pauses found"}
                       </strong>
-                      <p>
-                        {formatTime(silenceReview.removedMs)} can be removed.
-                      </p>
+                      <p>{formatTime(silenceReview.removedMs)} can be removed.</p>
                       <div className="review-ranges">
                         {silenceReview.ranges.map((r, i) => (
                           <button
@@ -333,22 +349,18 @@ export function EditorScreen({
                       {silenceReview.ranges.length > 0 && (
                         <button
                           className="button primary full"
-                          onClick={async () => {
-                            await apply(
-                              silenceReview.operations,
-                              silenceReview.revision,
-                            );
-                            setSilenceReview(null);
+                          onClick={() => {
+                            void (async () => {
+                              await apply(silenceReview.operations, silenceReview.revision);
+                              setSilenceReview(null);
+                            })();
                           }}
                         >
                           <Scissors size={14} />
                           Apply cuts
                         </button>
                       )}
-                      <button
-                        className="button subtle full"
-                        onClick={() => setSilenceReview(null)}
-                      >
+                      <button className="button subtle full" onClick={() => setSilenceReview(null)}>
                         Dismiss
                       </button>
                     </div>
@@ -378,10 +390,7 @@ export function EditorScreen({
                 onSend={async (prompt) => {
                   setChats((c) => ({
                     ...c,
-                    [project.id]: [
-                      ...(c[project.id] || []),
-                      { role: "user", text: prompt },
-                    ],
+                    [project.id]: [...(c[project.id] || []), { role: "user", text: prompt }],
                   }));
                   await startJob("ai.assistant", {
                     prompt,
@@ -405,8 +414,14 @@ export function EditorScreen({
         selectedZoom={selectedZoom}
         beginScrub={playback.beginScrub}
         endScrub={playback.endScrub}
-        onSelectOverlay={id => { setSelectedOverlay(id); setTab("overlays"); }}
-        onCameraLayout={() => { setCameraScope("selection"); setTab("camera"); }}
+        onSelectOverlay={(id) => {
+          setSelectedOverlay(id);
+          setTab("overlays");
+        }}
+        onCameraLayout={() => {
+          setCameraScope("selection");
+          setTab("camera");
+        }}
         onSelectZoom={(id) => {
           setSelectedZoom(id);
           setTab("zoom");
@@ -419,9 +434,7 @@ export function EditorScreen({
           {project.source
             ? `${project.edits.segments.length} clip${project.edits.segments.length === 1 ? "" : "s"}`
             : "Draft"}
-          {project.recovered && (
-            <span className="recovered">Recovered after an interruption</span>
-          )}
+          {project.recovered && <span className="recovered">Recovered after an interruption</span>}
         </span>
         <span>
           <kbd>⌘ S</kbd> Save<span className="status-separator">·</span>
@@ -432,48 +445,58 @@ export function EditorScreen({
   );
 }
 
-function PlaybackToolbar({ project, total, playback, disabled }: { project: NonNullable<StudioController["project"]>; total: number; playback: StudioController["playback"]; disabled: boolean }) {
+function PlaybackToolbar({
+  project,
+  total,
+  playback,
+  disabled,
+}: {
+  project: NonNullable<StudioController["project"]>;
+  total: number;
+  playback: StudioController["playback"];
+  disabled: boolean;
+}) {
   const { timeMs, playing } = useSyncExternalStore(playback.subscribe, playback.getSnapshot);
-  const seek = playback.seek, togglePlayback = playback.toggle;
-  return (          <div className="playback-toolbar">
-            <span className="playback-time">
-              {formatTime(timeMs)}
-              <span>/ {formatTime(total)}</span>
-            </span>
-            <div>
-              <IconButton
-                label="Go to start"
-                disabled={!project.source}
-                onClick={() => void seek(0)}
-              >
-                <ArrowLeft size={16} />
-              </IconButton>
-              <button
-                className="play-button"
-                disabled={!project.source || disabled}
-                aria-label={playing ? "Pause preview" : "Play preview"}
-                onClick={() => void togglePlayback()}
-              >
-                {playing ? (
-                  <Pause size={18} fill="currentColor" />
-                ) : (
-                  <Play size={18} fill="currentColor" />
-                )}
-              </button>
-              <IconButton
-                label="Go to end"
-                disabled={!project.source}
-                onClick={() => void seek(total)}
-              >
-                <ArrowRight size={16} />
-              </IconButton>
-            </div>
-            <span className="playback-shortcut">
-              <kbd>space</kbd> to play
-            </span>
-          </div>);
+  const seek = playback.seek,
+    togglePlayback = playback.toggle;
+  return (
+    <div className="playback-toolbar">
+      <span className="playback-time">
+        {formatTime(timeMs)}
+        <span>/ {formatTime(total)}</span>
+      </span>
+      <div>
+        <IconButton label="Go to start" disabled={!project.source} onClick={() => void seek(0)}>
+          <ArrowLeft size={16} />
+        </IconButton>
+        <button
+          className="play-button"
+          disabled={!project.source || disabled}
+          aria-label={playing ? "Pause preview" : "Play preview"}
+          onClick={() => void togglePlayback()}
+        >
+          {playing ? (
+            <Pause size={18} fill="currentColor" />
+          ) : (
+            <Play size={18} fill="currentColor" />
+          )}
+        </button>
+        <IconButton label="Go to end" disabled={!project.source} onClick={() => void seek(total)}>
+          <ArrowRight size={16} />
+        </IconButton>
+      </div>
+      <span className="playback-shortcut">
+        <kbd>space</kbd> to play
+      </span>
+    </div>
+  );
 }
-function LiveTimeline({ playback, ...props }: Omit<React.ComponentProps<typeof Timeline>, "timeMs"> & { playback: StudioController["playback"] }) {
+function LiveTimeline({
+  playback,
+  ...props
+}: Omit<React.ComponentProps<typeof Timeline>, "timeMs"> & {
+  playback: StudioController["playback"];
+}) {
   const { timeMs } = useSyncExternalStore(playback.subscribe, playback.getSnapshot);
   return <Timeline {...props} timeMs={timeMs} />;
 }

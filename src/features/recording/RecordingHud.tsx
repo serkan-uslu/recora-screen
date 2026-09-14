@@ -1,7 +1,7 @@
 import { Camera, EyeOff, Mic, Pause, Play, Square, Video } from "lucide-react";
-import { formatTime } from "../../../shared/timeline";
-import { IconButton } from "../../components/atoms/IconButton";
-import { type StudioController } from "../../controllers/useStudioController";
+import { formatTime } from "@/shared/timeline";
+import { IconButton } from "@/src/components/atoms/IconButton";
+import { type StudioController } from "@/src/controllers/useStudioController";
 
 export function RecordingHud({
   studio,
@@ -30,20 +30,31 @@ export function RecordingHud({
       <div className={`record-dot ${recording.paused ? "paused" : ""}`} />
       <div className="recording-clock">
         {formatTime(recording.durationMs)}
-        <small>{recording.phase === "starting" ? "Starting…" : recording.phase === "finalizing" ? "Finalizing…" : recording.paused ? "Paused" : "Recording"}</small>
+        <small>
+          {recording.phase === "starting"
+            ? "Starting…"
+            : recording.phase === "finalizing"
+              ? "Finalizing…"
+              : recording.paused
+                ? "Paused"
+                : "Recording"}
+        </small>
       </div>
       <div className="audio-meter" title="Microphone level">
         <Mic size={14} />
-        <meter
-          min={0}
-          max={1}
-          value={recording.microphoneLevel}
-          aria-label="Microphone level"
-        />
+        <meter min={0} max={1} value={recording.microphoneLevel} aria-label="Microphone level" />
       </div>
-      {recording.monitoring && <span className="monitor-status" title={recording.monitoring.message || "Only interaction timing is stored. Typed text is never recorded."}>
-        Pointer: {recording.monitoring.pointer} · Input: {recording.monitoring.input}
-      </span>}
+      {recording.monitoring && (
+        <span
+          className="monitor-status"
+          title={
+            recording.monitoring.message ||
+            "Only interaction timing is stored. Typed text is never recorded."
+          }
+        >
+          Pointer: {recording.monitoring.pointer} · Input: {recording.monitoring.input}
+        </span>
+      )}
       <IconButton
         label={recording.cameraVisible ? "Hide camera" : "Show camera"}
         disabled={recordingBusy}
@@ -69,11 +80,7 @@ export function RecordingHud({
       >
         {recording.paused ? <Play /> : <Pause />}
       </IconButton>
-      <button
-        className="button recording-stop"
-        disabled={recordingBusy}
-        onClick={finishRecording}
-      >
+      <button className="button recording-stop" disabled={recordingBusy} onClick={finishRecording}>
         <Square size={12} fill="currentColor" />
         {recording.phase === "finalizing" ? "Finalizing…" : "Finish"}
       </button>

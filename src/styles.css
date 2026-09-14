@@ -1,11 +1,6 @@
-@import "../design-system/tokens.css";
+@import "@/design-system/tokens.css";
 :root {
-  font-family:
-    "DM Sans",
-    -apple-system,
-    BlinkMacSystemFont,
-    "Segoe UI",
-    sans-serif;
+  font-family: var(--font-sans);
   color: color-mix(in srgb, var(--color-neutral) 20%, var(--color-white));
   background: color-mix(in srgb, var(--color-neutral) 16%, var(--color-black));
   font-synthesis: none;
@@ -153,7 +148,7 @@ fieldset:disabled {
   gap: 10px;
   background: none;
   padding: 0;
-  font-family: "Manrope", sans-serif;
+  font-family: var(--font-sans);
   font-weight: 800;
   font-size: 23px;
   letter-spacing: -1.2px;
@@ -167,7 +162,12 @@ fieldset:disabled {
   background: var(--accent);
   color: color-mix(in srgb, var(--color-neutral) 28%, var(--color-black));
   border-radius: 10px;
-  box-shadow: inset 0 0 0 1px color-mix(in srgb, color-mix(in srgb, var(--color-neutral) 0%, var(--color-white)) 15%, transparent);
+  box-shadow: inset 0 0 0 1px
+    color-mix(
+      in srgb,
+      color-mix(in srgb, var(--color-neutral) 0%, var(--color-white)) 15%,
+      transparent
+    );
 }
 .brand-dot {
   color: var(--accent);
@@ -266,7 +266,13 @@ fieldset:disabled {
   background: var(--accent);
   color: color-mix(in srgb, var(--color-accent) 20%, var(--color-black));
   border-color: var(--accent);
-  box-shadow: 0 1px 0 color-mix(in srgb, color-mix(in srgb, var(--color-neutral) 0%, var(--color-white)) 13%, transparent) inset;
+  box-shadow: 0 1px 0
+    color-mix(
+      in srgb,
+      color-mix(in srgb, var(--color-neutral) 0%, var(--color-white)) 13%,
+      transparent
+    )
+    inset;
 }
 .button.primary:hover:not(:disabled) {
   background: color-mix(in srgb, var(--color-accent) 68%, var(--color-white));
@@ -360,7 +366,12 @@ fieldset:disabled {
   gap: 9px;
   background: color-mix(in srgb, var(--color-neutral) 37%, var(--color-black));
   border: 1px solid color-mix(in srgb, var(--color-accent) 44%, var(--color-black));
-  box-shadow: 0 8px 30px color-mix(in srgb, color-mix(in srgb, var(--color-neutral) 0%, var(--color-black)) 33%, transparent);
+  box-shadow: 0 8px 30px
+    color-mix(
+      in srgb,
+      color-mix(in srgb, var(--color-neutral) 0%, var(--color-black)) 33%,
+      transparent
+    );
   padding: 12px 20px;
   border-radius: 8px;
   font-size: 12px;
@@ -407,7 +418,13 @@ fieldset:disabled {
 .sidebar-link.selected {
   background: color-mix(in srgb, var(--color-neutral) 30%, var(--color-black));
   color: color-mix(in srgb, var(--color-accent) 71%, var(--color-white));
-  box-shadow: 0 0 0 1px color-mix(in srgb, color-mix(in srgb, var(--color-accent) 36%, var(--color-black)) 33%, transparent) inset;
+  box-shadow: 0 0 0 1px
+    color-mix(
+      in srgb,
+      color-mix(in srgb, var(--color-accent) 36%, var(--color-black)) 33%,
+      transparent
+    )
+    inset;
 }
 .sidebar-link.selected > svg {
   color: color-mix(in srgb, var(--color-accent) 97%, var(--color-black));
@@ -430,7 +447,15 @@ fieldset:disabled {
   padding: 12px;
   border: 1px solid color-mix(in srgb, var(--color-neutral) 38%, var(--color-black));
   border-radius: 8px;
-  background: radial-gradient(ellipse at 100% 0%, color-mix(in srgb, color-mix(in srgb, var(--color-neutral) 40%, var(--color-black)) 47%, transparent), transparent 70%);
+  background: radial-gradient(
+    ellipse at 100% 0%,
+    color-mix(
+      in srgb,
+      color-mix(in srgb, var(--color-neutral) 40%, var(--color-black)) 47%,
+      transparent
+    ),
+    transparent 70%
+  );
   display: flex;
   align-items: flex-start;
   gap: 10px;
@@ -460,7 +485,11 @@ fieldset:disabled {
   flex-direction: column;
   background: radial-gradient(
     ellipse 950px 360px at 80% -80px,
-    color-mix(in srgb, color-mix(in srgb, var(--color-neutral) 31%, var(--color-black)) 33%, transparent),
+    color-mix(
+      in srgb,
+      color-mix(in srgb, var(--color-neutral) 31%, var(--color-black)) 33%,
+      transparent
+    ),
     transparent
   );
 }
@@ -478,7 +507,7 @@ fieldset:disabled {
   color: color-mix(in srgb, var(--color-accent) 71%, var(--color-black));
 }
 .library-title-row h1 {
-  font-family: "Manrope", sans-serif;
+  font-family: var(--font-sans);
   font-size: 37px;
   font-weight: 650;
   letter-spacing: -1.6px;
@@ -601,19 +630,39 @@ fieldset:disabled {
 }
 .cover-0 {
   background:
-    radial-gradient(ellipse at 80% 20%, color-mix(in srgb, var(--color-accent) 53%, var(--color-black)), transparent 90%), color-mix(in srgb, var(--color-neutral) 36%, var(--color-black));
+    radial-gradient(
+      ellipse at 80% 20%,
+      color-mix(in srgb, var(--color-accent) 53%, var(--color-black)),
+      transparent 90%
+    ),
+    color-mix(in srgb, var(--color-neutral) 36%, var(--color-black));
 }
 .cover-1 {
   background:
-    radial-gradient(ellipse at 80% 20%, color-mix(in srgb, var(--color-danger) 61%, var(--color-black)), transparent 90%), color-mix(in srgb, var(--color-danger) 34%, var(--color-black));
+    radial-gradient(
+      ellipse at 80% 20%,
+      color-mix(in srgb, var(--color-danger) 61%, var(--color-black)),
+      transparent 90%
+    ),
+    color-mix(in srgb, var(--color-danger) 34%, var(--color-black));
 }
 .cover-2 {
   background:
-    radial-gradient(ellipse at 80% 20%, color-mix(in srgb, var(--color-camera) 71%, var(--color-black)), transparent 90%), color-mix(in srgb, var(--color-neutral) 46%, var(--color-black));
+    radial-gradient(
+      ellipse at 80% 20%,
+      color-mix(in srgb, var(--color-camera) 71%, var(--color-black)),
+      transparent 90%
+    ),
+    color-mix(in srgb, var(--color-neutral) 46%, var(--color-black));
 }
 .cover-3 {
   background:
-    radial-gradient(ellipse at 80% 20%, color-mix(in srgb, var(--color-warning) 68%, var(--color-black)), transparent 90%), color-mix(in srgb, var(--color-accent) 32%, var(--color-black));
+    radial-gradient(
+      ellipse at 80% 20%,
+      color-mix(in srgb, var(--color-warning) 68%, var(--color-black)),
+      transparent 90%
+    ),
+    color-mix(in srgb, var(--color-accent) 32%, var(--color-black));
 }
 .project-cover > img {
   width: 100%;
@@ -631,10 +680,24 @@ fieldset:disabled {
   right: 9px;
   top: 8px;
   bottom: 0;
-  background: color-mix(in srgb, color-mix(in srgb, var(--color-neutral) 23%, var(--color-black)) 80%, transparent);
-  border: 1px solid color-mix(in srgb, color-mix(in srgb, var(--color-neutral) 0%, var(--color-white)) 13%, transparent);
+  background: color-mix(
+    in srgb,
+    color-mix(in srgb, var(--color-neutral) 23%, var(--color-black)) 80%,
+    transparent
+  );
+  border: 1px solid
+    color-mix(
+      in srgb,
+      color-mix(in srgb, var(--color-neutral) 0%, var(--color-white)) 13%,
+      transparent
+    );
   border-radius: 6px;
-  box-shadow: 0 14px 20px color-mix(in srgb, color-mix(in srgb, var(--color-neutral) 0%, var(--color-black)) 20%, transparent);
+  box-shadow: 0 14px 20px
+    color-mix(
+      in srgb,
+      color-mix(in srgb, var(--color-neutral) 0%, var(--color-black)) 20%,
+      transparent
+    );
   text-align: left;
   padding: 8px;
 }
@@ -643,7 +706,11 @@ fieldset:disabled {
   width: 3px;
   height: 3px;
   border-radius: 50%;
-  background: color-mix(in srgb, color-mix(in srgb, var(--color-neutral) 0%, var(--color-white)) 33%, transparent);
+  background: color-mix(
+    in srgb,
+    color-mix(in srgb, var(--color-neutral) 0%, var(--color-white)) 33%,
+    transparent
+  );
   margin-right: 3px;
   vertical-align: top;
 }
@@ -651,7 +718,11 @@ fieldset:disabled {
   display: grid;
   place-items: center;
   height: 65px;
-  color: color-mix(in srgb, color-mix(in srgb, var(--color-accent) 94%, var(--color-white)) 42%, transparent);
+  color: color-mix(
+    in srgb,
+    color-mix(in srgb, var(--color-accent) 94%, var(--color-white)) 42%,
+    transparent
+  );
 }
 .cover-orb {
   position: absolute;
@@ -660,15 +731,33 @@ fieldset:disabled {
   width: 46px;
   height: 46px;
   border-radius: 50%;
-  background: linear-gradient(135deg, color-mix(in srgb, var(--color-accent) 63%, var(--color-white)), color-mix(in srgb, var(--color-accent) 70%, var(--color-black)));
-  border: 3px solid color-mix(in srgb, color-mix(in srgb, var(--color-neutral) 0%, var(--color-white)) 19%, transparent);
-  box-shadow: 0 5px 15px color-mix(in srgb, color-mix(in srgb, var(--color-neutral) 0%, var(--color-black)) 27%, transparent);
+  background: linear-gradient(
+    135deg,
+    color-mix(in srgb, var(--color-accent) 63%, var(--color-white)),
+    color-mix(in srgb, var(--color-accent) 70%, var(--color-black))
+  );
+  border: 3px solid
+    color-mix(
+      in srgb,
+      color-mix(in srgb, var(--color-neutral) 0%, var(--color-white)) 19%,
+      transparent
+    );
+  box-shadow: 0 5px 15px
+    color-mix(
+      in srgb,
+      color-mix(in srgb, var(--color-neutral) 0%, var(--color-black)) 27%,
+      transparent
+    );
 }
 .status-tag,
 .duration-tag {
   position: absolute;
   bottom: 11px;
-  background: color-mix(in srgb, color-mix(in srgb, var(--color-neutral) 15%, var(--color-black)) 73%, transparent);
+  background: color-mix(
+    in srgb,
+    color-mix(in srgb, var(--color-neutral) 15%, var(--color-black)) 73%,
+    transparent
+  );
   backdrop-filter: blur(6px);
   border-radius: 4px;
   padding: 4px 7px;
@@ -745,7 +834,12 @@ fieldset:disabled {
   border: 1px solid color-mix(in srgb, var(--color-neutral) 51%, var(--color-black));
   background: color-mix(in srgb, var(--color-neutral) 29%, var(--color-black));
   border-radius: 7px;
-  box-shadow: 0 9px 24px color-mix(in srgb, color-mix(in srgb, var(--color-neutral) 0%, var(--color-black)) 53%, transparent);
+  box-shadow: 0 9px 24px
+    color-mix(
+      in srgb,
+      color-mix(in srgb, var(--color-neutral) 0%, var(--color-black)) 53%,
+      transparent
+    );
   padding: 5px;
   z-index: 5;
 }
@@ -765,7 +859,15 @@ fieldset:disabled {
   border: 1px dashed color-mix(in srgb, var(--color-neutral) 41%, var(--color-black));
   border-radius: 10px;
   min-height: 248px;
-  background: linear-gradient(140deg, color-mix(in srgb, color-mix(in srgb, var(--color-neutral) 24%, var(--color-black)) 27%, transparent), transparent);
+  background: linear-gradient(
+    140deg,
+    color-mix(
+      in srgb,
+      color-mix(in srgb, var(--color-neutral) 24%, var(--color-black)) 27%,
+      transparent
+    ),
+    transparent
+  );
   display: flex;
   align-items: center;
   justify-content: center;
@@ -807,7 +909,7 @@ fieldset:disabled {
   color: color-mix(in srgb, var(--color-accent) 68%, var(--color-black));
 }
 .empty-state > h2 {
-  font-family: "Manrope", sans-serif;
+  font-family: var(--font-sans);
   font-size: 25px;
   letter-spacing: -0.8px;
   font-weight: 600;
@@ -829,7 +931,15 @@ fieldset:disabled {
   width: 178px;
   height: 140px;
   margin-bottom: 27px;
-  background: radial-gradient(ellipse, color-mix(in srgb, color-mix(in srgb, var(--color-accent) 29%, var(--color-black)) 50%, transparent), transparent 70%);
+  background: radial-gradient(
+    ellipse,
+    color-mix(
+      in srgb,
+      color-mix(in srgb, var(--color-accent) 29%, var(--color-black)) 50%,
+      transparent
+    ),
+    transparent 70%
+  );
   display: grid;
   place-items: center;
 }
@@ -839,8 +949,17 @@ fieldset:disabled {
   color: color-mix(in srgb, var(--color-accent) 76%, var(--color-black));
   border: 1px solid color-mix(in srgb, var(--color-accent) 40%, var(--color-black));
   border-radius: 15px;
-  background: linear-gradient(145deg, color-mix(in srgb, var(--color-accent) 29%, var(--color-black)), color-mix(in srgb, var(--color-neutral) 26%, var(--color-black)));
-  box-shadow: 0 14px 35px color-mix(in srgb, color-mix(in srgb, var(--color-neutral) 14%, var(--color-black)) 53%, transparent);
+  background: linear-gradient(
+    145deg,
+    color-mix(in srgb, var(--color-accent) 29%, var(--color-black)),
+    color-mix(in srgb, var(--color-neutral) 26%, var(--color-black))
+  );
+  box-shadow: 0 14px 35px
+    color-mix(
+      in srgb,
+      color-mix(in srgb, var(--color-neutral) 14%, var(--color-black)) 53%,
+      transparent
+    );
   transform: rotate(-6deg);
 }
 .empty-frame > span {
@@ -855,7 +974,12 @@ fieldset:disabled {
   border-radius: 50%;
   color: color-mix(in srgb, var(--color-accent) 33%, var(--color-black));
   border: 4px solid color-mix(in srgb, var(--color-neutral) 29%, var(--color-black));
-  box-shadow: 0 4px 15px color-mix(in srgb, color-mix(in srgb, var(--color-neutral) 0%, var(--color-black)) 33%, transparent);
+  box-shadow: 0 4px 15px
+    color-mix(
+      in srgb,
+      color-mix(in srgb, var(--color-neutral) 0%, var(--color-black)) 33%,
+      transparent
+    );
 }
 .empty-spark {
   position: absolute;
@@ -1000,14 +1124,24 @@ fieldset:disabled {
 .rail-tool.active {
   background: color-mix(in srgb, var(--color-neutral) 34%, var(--color-black));
   color: color-mix(in srgb, var(--color-accent) 88%, var(--color-white));
-  box-shadow: 0 0 0 1px color-mix(in srgb, color-mix(in srgb, var(--color-accent) 39%, var(--color-black)) 20%, transparent) inset;
+  box-shadow: 0 0 0 1px
+    color-mix(
+      in srgb,
+      color-mix(in srgb, var(--color-accent) 39%, var(--color-black)) 20%,
+      transparent
+    )
+    inset;
 }
 .editor-main {
   display: flex;
   flex-direction: column;
   flex: 1;
   min-width: 0;
-  background: radial-gradient(ellipse at center, color-mix(in srgb, var(--color-neutral) 33%, var(--color-black)) 0%, color-mix(in srgb, var(--color-neutral) 22%, var(--color-black)) 72%);
+  background: radial-gradient(
+    ellipse at center,
+    color-mix(in srgb, var(--color-neutral) 33%, var(--color-black)) 0%,
+    color-mix(in srgb, var(--color-neutral) 22%, var(--color-black)) 72%
+  );
   overflow: hidden;
 }
 .preview-toolbar {
@@ -1061,8 +1195,18 @@ fieldset:disabled {
   border-radius: 7px;
   background: color-mix(in srgb, var(--color-neutral) 9%, var(--color-black));
   box-shadow:
-    0 8px 30px color-mix(in srgb, color-mix(in srgb, var(--color-neutral) 10%, var(--color-black)) 40%, transparent),
-    0 0 0 1px color-mix(in srgb, color-mix(in srgb, var(--color-neutral) 0%, var(--color-white)) 4%, transparent);
+    0 8px 30px
+      color-mix(
+        in srgb,
+        color-mix(in srgb, var(--color-neutral) 10%, var(--color-black)) 40%,
+        transparent
+      ),
+    0 0 0 1px
+      color-mix(
+        in srgb,
+        color-mix(in srgb, var(--color-neutral) 0%, var(--color-white)) 4%,
+        transparent
+      );
   overflow: hidden;
   position: relative;
   display: flex;
@@ -1093,7 +1237,12 @@ fieldset:disabled {
   align-items: center;
   justify-content: space-between;
   padding: 0 26px;
-  border-top: 1px solid color-mix(in srgb, color-mix(in srgb, var(--color-neutral) 37%, var(--color-black)) 33%, transparent);
+  border-top: 1px solid
+    color-mix(
+      in srgb,
+      color-mix(in srgb, var(--color-neutral) 37%, var(--color-black)) 33%,
+      transparent
+    );
 }
 .playback-toolbar > div {
   display: flex;
@@ -1118,7 +1267,12 @@ fieldset:disabled {
   background: color-mix(in srgb, var(--color-accent) 28%, var(--color-black));
   display: grid;
   place-items: center;
-  border: 1px solid color-mix(in srgb, color-mix(in srgb, var(--color-accent) 44%, var(--color-black)) 33%, transparent);
+  border: 1px solid
+    color-mix(
+      in srgb,
+      color-mix(in srgb, var(--color-accent) 44%, var(--color-black)) 33%,
+      transparent
+    );
 }
 .play-button:hover:not(:disabled) {
   background: color-mix(in srgb, var(--color-accent) 38%, var(--color-black));
@@ -1152,9 +1306,31 @@ fieldset:disabled {
   place-items: center;
   border-radius: 21px;
   color: color-mix(in srgb, var(--color-accent) 87%, var(--color-black));
-  background: linear-gradient(140deg, color-mix(in srgb, color-mix(in srgb, var(--color-accent) 32%, var(--color-black)) 60%, transparent), color-mix(in srgb, color-mix(in srgb, var(--color-neutral) 32%, var(--color-black)) 60%, transparent));
-  border: 1px solid color-mix(in srgb, color-mix(in srgb, var(--color-accent) 45%, var(--color-black)) 27%, transparent);
-  box-shadow: 0 15px 25px color-mix(in srgb, color-mix(in srgb, var(--color-neutral) 17%, var(--color-black)) 27%, transparent);
+  background: linear-gradient(
+    140deg,
+    color-mix(
+      in srgb,
+      color-mix(in srgb, var(--color-accent) 32%, var(--color-black)) 60%,
+      transparent
+    ),
+    color-mix(
+      in srgb,
+      color-mix(in srgb, var(--color-neutral) 32%, var(--color-black)) 60%,
+      transparent
+    )
+  );
+  border: 1px solid
+    color-mix(
+      in srgb,
+      color-mix(in srgb, var(--color-accent) 45%, var(--color-black)) 27%,
+      transparent
+    );
+  box-shadow: 0 15px 25px
+    color-mix(
+      in srgb,
+      color-mix(in srgb, var(--color-neutral) 17%, var(--color-black)) 27%,
+      transparent
+    );
   margin-bottom: 25px;
   transform: rotate(-5deg);
 }
@@ -1163,7 +1339,7 @@ fieldset:disabled {
   color: color-mix(in srgb, var(--color-accent) 65%, var(--color-black));
 }
 .record-empty h2 {
-  font-family: "Manrope", sans-serif;
+  font-family: var(--font-sans);
   font-size: 28px;
   letter-spacing: -1px;
   font-weight: 600;
@@ -1289,9 +1465,18 @@ fieldset:disabled {
   place-items: center;
   width: 38px;
   height: 38px;
-  background: linear-gradient(130deg, color-mix(in srgb, var(--color-accent) 61%, var(--color-black)), color-mix(in srgb, var(--color-accent) 36%, var(--color-black)));
+  background: linear-gradient(
+    130deg,
+    color-mix(in srgb, var(--color-accent) 61%, var(--color-black)),
+    color-mix(in srgb, var(--color-accent) 36%, var(--color-black))
+  );
   color: color-mix(in srgb, var(--color-accent) 93%, var(--color-white));
-  border: 1px solid color-mix(in srgb, color-mix(in srgb, var(--color-accent) 93%, var(--color-black)) 20%, transparent);
+  border: 1px solid
+    color-mix(
+      in srgb,
+      color-mix(in srgb, var(--color-accent) 93%, var(--color-black)) 20%,
+      transparent
+    );
 }
 .shape-demo.circle {
   border-radius: 50%;
@@ -1342,7 +1527,12 @@ input[type="range"]::-webkit-slider-thumb {
   width: 10px;
   border-radius: 50%;
   border: 2px solid color-mix(in srgb, var(--color-accent) 100%, var(--color-white));
-  box-shadow: 0 1px 4px color-mix(in srgb, color-mix(in srgb, var(--color-neutral) 0%, var(--color-black)) 33%, transparent);
+  box-shadow: 0 1px 4px
+    color-mix(
+      in srgb,
+      color-mix(in srgb, var(--color-neutral) 0%, var(--color-black)) 33%,
+      transparent
+    );
 }
 .switch-row {
   position: relative;
@@ -1580,7 +1770,12 @@ input[type="range"]::-webkit-slider-thumb {
   background: none;
   text-align: left;
   padding: 6px 0;
-  border-bottom: 1px solid color-mix(in srgb, color-mix(in srgb, var(--color-accent) 40%, var(--color-black)) 20%, transparent);
+  border-bottom: 1px solid
+    color-mix(
+      in srgb,
+      color-mix(in srgb, var(--color-accent) 40%, var(--color-black)) 20%,
+      transparent
+    );
 }
 .transcript-list > div {
   padding: 8px 0 16px;
@@ -1636,13 +1831,17 @@ input[type="range"]::-webkit-slider-thumb {
   height: 49px;
   border: 1px solid color-mix(in srgb, var(--color-accent) 44%, var(--color-black));
   border-radius: 15px;
-  background: linear-gradient(140deg, color-mix(in srgb, var(--color-accent) 37%, var(--color-black)), color-mix(in srgb, var(--color-accent) 24%, var(--color-black)));
+  background: linear-gradient(
+    140deg,
+    color-mix(in srgb, var(--color-accent) 37%, var(--color-black)),
+    color-mix(in srgb, var(--color-accent) 24%, var(--color-black))
+  );
   color: color-mix(in srgb, var(--color-accent) 95%, var(--color-black));
   margin: 0 0 16px;
   transform: rotate(-5deg);
 }
 .assistant-intro h3 {
-  font-family: "Manrope", sans-serif;
+  font-family: var(--font-sans);
   font-size: 15px;
   letter-spacing: -0.4px;
   font-weight: 600;
@@ -1859,13 +2058,28 @@ input[type="range"]::-webkit-slider-thumb {
   position: relative;
   cursor: crosshair;
   margin-right: 1px;
-  border-bottom: 1px solid color-mix(in srgb, color-mix(in srgb, var(--color-accent) 30%, var(--color-black)) 47%, transparent);
+  border-bottom: 1px solid
+    color-mix(
+      in srgb,
+      color-mix(in srgb, var(--color-accent) 30%, var(--color-black)) 47%,
+      transparent
+    );
   background: repeating-linear-gradient(
       90deg,
       transparent 0,
       transparent calc(6.25% - 1px),
-      color-mix(in srgb, color-mix(in srgb, var(--color-accent) 33%, var(--color-black)) 50%, transparent) calc(6.25% - 1px),
-      color-mix(in srgb, color-mix(in srgb, var(--color-accent) 33%, var(--color-black)) 50%, transparent) 6.25%
+      color-mix(
+          in srgb,
+          color-mix(in srgb, var(--color-accent) 33%, var(--color-black)) 50%,
+          transparent
+        )
+        calc(6.25% - 1px),
+      color-mix(
+          in srgb,
+          color-mix(in srgb, var(--color-accent) 33%, var(--color-black)) 50%,
+          transparent
+        )
+        6.25%
     )
     0 24px/100% 7px no-repeat;
 }
@@ -1888,7 +2102,12 @@ input[type="range"]::-webkit-slider-thumb {
 .track {
   height: 38px;
   position: relative;
-  border-bottom: 1px solid color-mix(in srgb, color-mix(in srgb, var(--color-accent) 25%, var(--color-black)) 40%, transparent);
+  border-bottom: 1px solid
+    color-mix(
+      in srgb,
+      color-mix(in srgb, var(--color-accent) 25%, var(--color-black)) 40%,
+      transparent
+    );
   margin: 0 2px;
 }
 .clip {
@@ -1931,10 +2150,30 @@ input[type="range"]::-webkit-slider-thumb {
   height: 28px;
   background: repeating-linear-gradient(
     45deg,
-    color-mix(in srgb, color-mix(in srgb, var(--color-neutral) 21%, var(--color-black)) 91%, transparent) 0,
-    color-mix(in srgb, color-mix(in srgb, var(--color-neutral) 21%, var(--color-black)) 91%, transparent) 4px,
-    color-mix(in srgb, color-mix(in srgb, var(--color-neutral) 47%, var(--color-black)) 91%, transparent) 4px,
-    color-mix(in srgb, color-mix(in srgb, var(--color-neutral) 47%, var(--color-black)) 91%, transparent) 7px
+    color-mix(
+        in srgb,
+        color-mix(in srgb, var(--color-neutral) 21%, var(--color-black)) 91%,
+        transparent
+      )
+      0,
+    color-mix(
+        in srgb,
+        color-mix(in srgb, var(--color-neutral) 21%, var(--color-black)) 91%,
+        transparent
+      )
+      4px,
+    color-mix(
+        in srgb,
+        color-mix(in srgb, var(--color-neutral) 47%, var(--color-black)) 91%,
+        transparent
+      )
+      4px,
+    color-mix(
+        in srgb,
+        color-mix(in srgb, var(--color-neutral) 47%, var(--color-black)) 91%,
+        transparent
+      )
+      7px
   );
   border-radius: 4px;
   display: flex;
@@ -1953,7 +2192,11 @@ input[type="range"]::-webkit-slider-thumb {
   flex: 1;
   margin: 0 9px;
   height: 1px;
-  background: color-mix(in srgb, color-mix(in srgb, var(--color-accent) 61%, var(--color-black)) 44%, transparent);
+  background: color-mix(
+    in srgb,
+    color-mix(in srgb, var(--color-accent) 61%, var(--color-black)) 44%,
+    transparent
+  );
 }
 .zoom-clip {
   height: 14px;
@@ -1987,9 +2230,18 @@ input[type="range"]::-webkit-slider-thumb {
   position: absolute;
   top: 30px;
   bottom: 7px;
-  border: 1px solid color-mix(in srgb, color-mix(in srgb, var(--color-accent) 92%, var(--color-black)) 53%, transparent);
+  border: 1px solid
+    color-mix(
+      in srgb,
+      color-mix(in srgb, var(--color-accent) 92%, var(--color-black)) 53%,
+      transparent
+    );
   border-top: 2px solid color-mix(in srgb, var(--color-accent) 100%, var(--color-black));
-  background: color-mix(in srgb, color-mix(in srgb, var(--color-accent) 96%, var(--color-black)) 3%, transparent);
+  background: color-mix(
+    in srgb,
+    color-mix(in srgb, var(--color-accent) 96%, var(--color-black)) 3%,
+    transparent
+  );
   pointer-events: none;
   border-radius: 3px;
 }
@@ -2000,7 +2252,12 @@ input[type="range"]::-webkit-slider-thumb {
   width: 1px;
   background: color-mix(in srgb, var(--color-accent) 99%, var(--color-black));
   pointer-events: none;
-  box-shadow: 0 0 6px color-mix(in srgb, color-mix(in srgb, var(--color-accent) 99%, var(--color-black)) 13%, transparent);
+  box-shadow: 0 0 6px
+    color-mix(
+      in srgb,
+      color-mix(in srgb, var(--color-accent) 99%, var(--color-black)) 13%,
+      transparent
+    );
 }
 .playhead > span {
   position: absolute;
@@ -2056,7 +2313,12 @@ input[type="range"]::-webkit-slider-thumb {
   color: color-mix(in srgb, var(--color-neutral) 30%, var(--color-white));
   border-radius: 14px;
   padding: 27px 28px;
-  box-shadow: 0 28px 100px color-mix(in srgb, color-mix(in srgb, var(--color-neutral) 0%, var(--color-black)) 60%, transparent);
+  box-shadow: 0 28px 100px
+    color-mix(
+      in srgb,
+      color-mix(in srgb, var(--color-neutral) 0%, var(--color-black)) 60%,
+      transparent
+    );
   width: 460px;
   max-width: calc(100vw - 70px);
   max-height: calc(100vh - 80px);
@@ -2064,7 +2326,11 @@ input[type="range"]::-webkit-slider-thumb {
   font-size: 12px;
 }
 .dialog::backdrop {
-  background: color-mix(in srgb, color-mix(in srgb, var(--color-neutral) 7%, var(--color-black)) 72%, transparent);
+  background: color-mix(
+    in srgb,
+    color-mix(in srgb, var(--color-neutral) 7%, var(--color-black)) 72%,
+    transparent
+  );
   backdrop-filter: blur(5px);
 }
 .dialog.wide {
@@ -2078,7 +2344,7 @@ input[type="range"]::-webkit-slider-thumb {
   margin-bottom: 27px;
 }
 .dialog-header h2 {
-  font-family: "Manrope", sans-serif;
+  font-family: var(--font-sans);
   font-size: 23px;
   font-weight: 650;
   letter-spacing: -0.7px;
@@ -2322,7 +2588,7 @@ input[type="range"]::-webkit-slider-thumb {
   margin-bottom: 16px;
 }
 .mcp-intro h3 {
-  font-family: "Manrope", sans-serif;
+  font-family: var(--font-sans);
   font-size: 17px;
   letter-spacing: -0.3px;
   font-weight: 600;
@@ -2407,8 +2673,17 @@ input[type="range"]::-webkit-slider-thumb {
   align-items: center;
   gap: 17px;
   border: 1px solid color-mix(in srgb, var(--color-accent) 49%, var(--color-black));
-  background: color-mix(in srgb, color-mix(in srgb, var(--color-neutral) 27%, var(--color-black)) 95%, transparent);
-  box-shadow: 0 9px 35px color-mix(in srgb, color-mix(in srgb, var(--color-neutral) 0%, var(--color-black)) 47%, transparent);
+  background: color-mix(
+    in srgb,
+    color-mix(in srgb, var(--color-neutral) 27%, var(--color-black)) 95%,
+    transparent
+  );
+  box-shadow: 0 9px 35px
+    color-mix(
+      in srgb,
+      color-mix(in srgb, var(--color-neutral) 0%, var(--color-black)) 47%,
+      transparent
+    );
   border-radius: 13px;
   padding: 12px 14px;
   backdrop-filter: blur(12px);
@@ -2418,7 +2693,12 @@ input[type="range"]::-webkit-slider-thumb {
   height: 8px;
   border-radius: 50%;
   background: color-mix(in srgb, var(--color-danger) 91%, var(--color-black));
-  box-shadow: 0 0 0 4px color-mix(in srgb, color-mix(in srgb, var(--color-danger) 91%, var(--color-black)) 10%, transparent);
+  box-shadow: 0 0 0 4px
+    color-mix(
+      in srgb,
+      color-mix(in srgb, var(--color-danger) 91%, var(--color-black)) 10%,
+      transparent
+    );
   animation: pulse 1.4s infinite;
 }
 .record-dot.paused {
@@ -2477,8 +2757,17 @@ input[type="range"]::-webkit-slider-thumb {
   padding: 13px;
   border-radius: 8px;
   border: 1px solid color-mix(in srgb, var(--color-accent) 50%, var(--color-black));
-  background: color-mix(in srgb, color-mix(in srgb, var(--color-neutral) 32%, var(--color-black)) 96%, transparent);
-  box-shadow: 0 5px 25px color-mix(in srgb, color-mix(in srgb, var(--color-neutral) 0%, var(--color-black)) 40%, transparent);
+  background: color-mix(
+    in srgb,
+    color-mix(in srgb, var(--color-neutral) 32%, var(--color-black)) 96%,
+    transparent
+  );
+  box-shadow: 0 5px 25px
+    color-mix(
+      in srgb,
+      color-mix(in srgb, var(--color-neutral) 0%, var(--color-black)) 40%,
+      transparent
+    );
   backdrop-filter: blur(10px);
 }
 .job-card > div {
@@ -2706,7 +2995,12 @@ input[type="range"]::-webkit-slider-thumb {
   gap: 13px;
   background: color-mix(in srgb, var(--color-accent) 26%, var(--color-black));
   border: 1px solid color-mix(in srgb, var(--color-accent) 53%, var(--color-black));
-  box-shadow: 0 7px 30px color-mix(in srgb, color-mix(in srgb, var(--color-neutral) 0%, var(--color-black)) 40%, transparent);
+  box-shadow: 0 7px 30px
+    color-mix(
+      in srgb,
+      color-mix(in srgb, var(--color-neutral) 0%, var(--color-black)) 40%,
+      transparent
+    );
   border-radius: 9px;
   padding: 14px;
   color: color-mix(in srgb, var(--color-accent) 80%, var(--color-white));
@@ -2730,7 +3024,11 @@ input[type="range"]::-webkit-slider-thumb {
 }
 /* Keep the work surface neutral so recorded colors remain easy to judge. */
 .editor-main {
-  background: radial-gradient(ellipse at center, color-mix(in srgb, var(--color-neutral) 30%, var(--color-black)), color-mix(in srgb, var(--color-neutral) 22%, var(--color-black)) 72%);
+  background: radial-gradient(
+    ellipse at center,
+    color-mix(in srgb, var(--color-neutral) 30%, var(--color-black)),
+    color-mix(in srgb, var(--color-neutral) 22%, var(--color-black)) 72%
+  );
 }
 .tool-rail,
 .library-sidebar {
@@ -2835,23 +3133,55 @@ input[type="range"]::-webkit-slider-thumb {
 }
 .wallpaper-swatch.aurora {
   background:
-    radial-gradient(ellipse at 25% 20%, color-mix(in srgb, var(--color-info) 67%, var(--color-black)), transparent 70%),
-    linear-gradient(135deg, color-mix(in srgb, var(--color-info) 29%, var(--color-black)), color-mix(in srgb, var(--color-camera) 61%, var(--color-black)));
+    radial-gradient(
+      ellipse at 25% 20%,
+      color-mix(in srgb, var(--color-info) 67%, var(--color-black)),
+      transparent 70%
+    ),
+    linear-gradient(
+      135deg,
+      color-mix(in srgb, var(--color-info) 29%, var(--color-black)),
+      color-mix(in srgb, var(--color-camera) 61%, var(--color-black))
+    );
 }
 .wallpaper-swatch.sunset {
   background:
-    radial-gradient(ellipse at 20% 10%, color-mix(in srgb, var(--color-warning) 82%, var(--color-black)), transparent 70%),
-    linear-gradient(135deg, color-mix(in srgb, var(--color-danger) 95%, var(--color-black)), color-mix(in srgb, var(--color-camera) 84%, var(--color-black)));
+    radial-gradient(
+      ellipse at 20% 10%,
+      color-mix(in srgb, var(--color-warning) 82%, var(--color-black)),
+      transparent 70%
+    ),
+    linear-gradient(
+      135deg,
+      color-mix(in srgb, var(--color-danger) 95%, var(--color-black)),
+      color-mix(in srgb, var(--color-camera) 84%, var(--color-black))
+    );
 }
 .wallpaper-swatch.ocean {
   background:
-    radial-gradient(ellipse at 20% 10%, color-mix(in srgb, var(--color-info) 77%, var(--color-black)), transparent 65%),
-    linear-gradient(135deg, color-mix(in srgb, var(--color-info) 47%, var(--color-black)), color-mix(in srgb, var(--color-accent) 22%, var(--color-black)));
+    radial-gradient(
+      ellipse at 20% 10%,
+      color-mix(in srgb, var(--color-info) 77%, var(--color-black)),
+      transparent 65%
+    ),
+    linear-gradient(
+      135deg,
+      color-mix(in srgb, var(--color-info) 47%, var(--color-black)),
+      color-mix(in srgb, var(--color-accent) 22%, var(--color-black))
+    );
 }
 .wallpaper-swatch.dusk {
   background:
-    radial-gradient(ellipse at 20% 10%, color-mix(in srgb, var(--color-camera) 80%, var(--color-white)), transparent 65%),
-    linear-gradient(135deg, color-mix(in srgb, var(--color-info) 49%, var(--color-black)), color-mix(in srgb, var(--color-camera) 44%, var(--color-black)));
+    radial-gradient(
+      ellipse at 20% 10%,
+      color-mix(in srgb, var(--color-camera) 80%, var(--color-white)),
+      transparent 65%
+    ),
+    linear-gradient(
+      135deg,
+      color-mix(in srgb, var(--color-info) 49%, var(--color-black)),
+      color-mix(in srgb, var(--color-camera) 44%, var(--color-black))
+    );
 }
 .zoom-list {
   display: grid;
@@ -2923,7 +3253,11 @@ input[type="range"]::-webkit-slider-thumb {
   padding: 0;
   border: 0;
   border-radius: 0;
-  background: color-mix(in srgb, color-mix(in srgb, var(--color-accent) 93%, var(--color-black)) 27%, transparent);
+  background: color-mix(
+    in srgb,
+    color-mix(in srgb, var(--color-accent) 93%, var(--color-black)) 27%,
+    transparent
+  );
   cursor: ew-resize;
   touch-action: none;
   z-index: 2;
@@ -2962,7 +3296,11 @@ input[type="range"]::-webkit-slider-thumb {
 }
 .zoom-clip .trim-handle {
   width: 7px;
-  background: color-mix(in srgb, color-mix(in srgb, var(--color-warning) 85%, var(--color-white)) 33%, transparent);
+  background: color-mix(
+    in srgb,
+    color-mix(in srgb, var(--color-warning) 85%, var(--color-white)) 33%,
+    transparent
+  );
 }
 .source-gap {
   position: absolute;
@@ -2975,10 +3313,30 @@ input[type="range"]::-webkit-slider-thumb {
   border-radius: 2px;
   background: repeating-linear-gradient(
     45deg,
-    color-mix(in srgb, color-mix(in srgb, var(--color-warning) 58%, var(--color-black)) 47%, transparent) 0,
-    color-mix(in srgb, color-mix(in srgb, var(--color-warning) 58%, var(--color-black)) 47%, transparent) 3px,
-    color-mix(in srgb, color-mix(in srgb, var(--color-neutral) 30%, var(--color-black)) 47%, transparent) 3px,
-    color-mix(in srgb, color-mix(in srgb, var(--color-neutral) 30%, var(--color-black)) 47%, transparent) 6px
+    color-mix(
+        in srgb,
+        color-mix(in srgb, var(--color-warning) 58%, var(--color-black)) 47%,
+        transparent
+      )
+      0,
+    color-mix(
+        in srgb,
+        color-mix(in srgb, var(--color-warning) 58%, var(--color-black)) 47%,
+        transparent
+      )
+      3px,
+    color-mix(
+        in srgb,
+        color-mix(in srgb, var(--color-neutral) 30%, var(--color-black)) 47%,
+        transparent
+      )
+      3px,
+    color-mix(
+        in srgb,
+        color-mix(in srgb, var(--color-neutral) 30%, var(--color-black)) 47%,
+        transparent
+      )
+      6px
   );
   color: color-mix(in srgb, var(--color-warning) 63%, var(--color-white));
   display: grid;
@@ -2992,7 +3350,11 @@ input[type="range"]::-webkit-slider-thumb {
   width: max-content;
   margin: 0 auto;
   padding: 5px 9px;
-  background: color-mix(in srgb, color-mix(in srgb, var(--color-neutral) 14%, var(--color-black)) 91%, transparent);
+  background: color-mix(
+    in srgb,
+    color-mix(in srgb, var(--color-neutral) 14%, var(--color-black)) 91%,
+    transparent
+  );
   border: 1px solid color-mix(in srgb, var(--color-accent) 58%, var(--color-black));
   border-radius: 4px;
   color: color-mix(in srgb, var(--color-accent) 69%, var(--color-white));
@@ -3002,15 +3364,60 @@ input[type="range"]::-webkit-slider-thumb {
 }
 .clip-context-menu {
   position: fixed;
-  right: 22px;
-  bottom: 31px;
   z-index: 80;
-  width: 590px;
+  width: min(590px, calc(100vw - 24px));
   background: color-mix(in srgb, var(--color-neutral) 25%, var(--color-black));
   border: 1px solid color-mix(in srgb, var(--color-accent) 49%, var(--color-black));
   border-radius: 9px;
-  box-shadow: 0 10px 35px color-mix(in srgb, color-mix(in srgb, var(--color-neutral) 0%, var(--color-black)) 60%, transparent);
+  box-shadow: 0 10px 35px
+    color-mix(
+      in srgb,
+      color-mix(in srgb, var(--color-neutral) 0%, var(--color-black)) 60%,
+      transparent
+    );
   padding: 12px;
+}
+.timeline-row-menu {
+  position: fixed;
+  z-index: 81;
+  width: 218px;
+  padding: 8px;
+  border: 1px solid color-mix(in srgb, var(--color-accent) 44%, var(--color-black));
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--color-neutral) 25%, var(--color-black));
+  box-shadow: 0 12px 35px color-mix(in srgb, var(--color-black) 68%, transparent);
+}
+.timeline-row-menu strong,
+.timeline-row-menu small {
+  display: block;
+  padding: 5px 8px;
+}
+.timeline-row-menu strong {
+  color: color-mix(in srgb, var(--color-accent) 76%, var(--color-white));
+  font-size: 10px;
+}
+.timeline-row-menu small {
+  padding-top: 0;
+  color: color-mix(in srgb, var(--color-accent) 48%, var(--color-white));
+  font-size: 8px;
+}
+.timeline-row-menu button {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 8px;
+  border-radius: 5px;
+  background: transparent;
+  color: color-mix(in srgb, var(--color-neutral) 28%, var(--color-white));
+  font-size: 10px;
+  text-align: left;
+}
+.timeline-row-menu button:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--color-accent) 13%, transparent);
+}
+.timeline-row-menu button.danger {
+  color: color-mix(in srgb, var(--color-danger) 75%, var(--color-white));
 }
 .clip-context-header {
   display: flex;
@@ -3065,8 +3472,20 @@ input[type="range"]::-webkit-slider-thumb {
   font-size: 9px;
 }
 
-.author-card { padding: 12px 4px 2px; border-top: 1px solid var(--line); display: grid; gap: 9px; text-align: left; }
-.author-card > small { padding: 0 6px; font-size: 8px; font-weight: 600; letter-spacing: .18em; color: var(--muted); }
+.author-card {
+  padding: 12px 4px 2px;
+  border-top: 1px solid var(--line);
+  display: grid;
+  gap: 9px;
+  text-align: left;
+}
+.author-card > small {
+  padding: 0 6px;
+  font-size: 8px;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  color: var(--muted);
+}
 .author-profile {
   appearance: none;
   width: 100%;
@@ -3097,37 +3516,167 @@ input[type="range"]::-webkit-slider-thumb {
   border: 1px solid color-mix(in srgb, var(--color-accent) 25%, var(--line));
   font-size: 10px;
   font-weight: 700;
-  letter-spacing: .08em;
+  letter-spacing: 0.08em;
 }
-.author-identity { min-width: 0; display: grid; gap: 2px; }
-.author-identity strong { overflow: hidden; font-size: 11px; line-height: 1.2; text-overflow: ellipsis; white-space: nowrap; }
-.author-identity > span { color: var(--muted); font-size: 9px; }
-.author-profile > svg { margin-left: auto; color: var(--muted); }
-.author-profile:hover > svg { color: var(--color-accent); }
-.author-links { display: flex; flex-wrap: wrap; gap: 8px 14px; padding: 0 8px; }
-.author-card a { color: var(--muted); font-size: 10px; text-decoration: none; }
-.author-card a:hover { color: var(--accent); text-decoration: underline; }
-.author-popover { margin-top: auto; position: relative; }
-.author-popover summary { padding: 10px; cursor: pointer; color: var(--accent); list-style: none; }
-.author-popover .author-card { position: absolute; bottom: 0; left: 52px; width: 230px; background: var(--surface); border: 1px solid var(--line); padding: 18px; border-radius: var(--radius-md); z-index: 20; box-shadow: 0 12px 40px color-mix(in srgb, var(--color-black) 40%, transparent); }
-.help-content { display: grid; gap: 18px; }
-.help-content h3 { margin: 0 0 6px; }
-.help-content p { margin: 0; color: var(--muted); line-height: 1.7; }
-.library-sidebar { overflow-y: auto; }
+.author-identity {
+  min-width: 0;
+  display: grid;
+  gap: 2px;
+}
+.author-identity strong {
+  overflow: hidden;
+  font-size: 11px;
+  line-height: 1.2;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.author-identity > span {
+  color: var(--muted);
+  font-size: 9px;
+}
+.author-profile > svg {
+  margin-left: auto;
+  color: var(--muted);
+}
+.author-profile:hover > svg {
+  color: var(--color-accent);
+}
+.author-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 14px;
+  padding: 0 8px;
+}
+.author-card a {
+  color: var(--muted);
+  font-size: 10px;
+  text-decoration: none;
+}
+.author-card a:hover {
+  color: var(--accent);
+  text-decoration: underline;
+}
+.author-popover {
+  margin-top: auto;
+  position: relative;
+}
+.author-popover summary {
+  padding: 10px;
+  cursor: pointer;
+  color: var(--accent);
+  list-style: none;
+}
+.author-popover .author-card {
+  position: absolute;
+  bottom: 0;
+  left: 52px;
+  width: 230px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  padding: 18px;
+  border-radius: var(--radius-md);
+  z-index: 20;
+  box-shadow: 0 12px 40px color-mix(in srgb, var(--color-black) 40%, transparent);
+}
+.help-content {
+  display: grid;
+  gap: 18px;
+}
+.help-content h3 {
+  margin: 0 0 6px;
+}
+.help-content p {
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.7;
+}
+.library-sidebar {
+  overflow-y: auto;
+}
 
 /* Direct manipulation surfaces must keep pointer capture while the preview updates. */
-.native-preview, .timeline-tracks, .slider-field input { touch-action: none; }
-.native-preview { outline: none; cursor: default; }
-.playhead { pointer-events: auto; width: 12px; margin-left: -6px; background: transparent; cursor: ew-resize; z-index: 5; box-shadow: none; }
-.playhead::after { content: ""; position: absolute; top: 0; bottom: 0; left: 6px; width: 1px; background: var(--color-accent); }
-.playhead > span { left: 2px; }
-.timeline-tracks { user-select: none; }
-.selection-actions { min-height: 32px; padding: 4px 16px; display: flex; gap: 8px; align-items: center; border-bottom: 1px solid var(--line); font-size: 10px; flex-wrap: wrap; }
-.selection-actions > span { color: var(--color-accent); margin-right: 8px; }
-.selection-actions button { display: inline-flex; align-items: center; gap: 5px; padding: 5px 8px; border-radius: 5px; background: var(--surface); }
-.selection-actions button:hover { background: color-mix(in srgb, var(--color-accent) 14%, transparent); }
-.edit-scope { display: flex; gap: 4px; margin: 18px 0 6px; }
-.edit-scope button { flex: 1; padding: 9px 4px; border: 1px solid var(--line); border-radius: 6px; font-size: 11px; }
-.edit-scope button[aria-pressed="true"] { color: var(--color-accent); background: color-mix(in srgb, var(--color-accent) 12%, transparent); }
-.about-links { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 20px; }
-.monitor-status { max-width: 150px; font-size: 9px; color: var(--muted); }
+.native-preview,
+.timeline-tracks,
+.slider-field input {
+  touch-action: none;
+}
+.native-preview {
+  outline: none;
+  cursor: default;
+}
+.playhead {
+  pointer-events: auto;
+  width: 12px;
+  margin-left: -6px;
+  background: transparent;
+  cursor: ew-resize;
+  z-index: 5;
+  box-shadow: none;
+}
+.playhead::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 6px;
+  width: 1px;
+  background: var(--color-accent);
+}
+.playhead > span {
+  left: 2px;
+}
+.timeline-tracks {
+  user-select: none;
+}
+.selection-actions {
+  min-height: 32px;
+  padding: 4px 16px;
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  border-bottom: 1px solid var(--line);
+  font-size: 10px;
+  flex-wrap: wrap;
+}
+.selection-actions > span {
+  color: var(--color-accent);
+  margin-right: 8px;
+}
+.selection-actions button {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 8px;
+  border-radius: 5px;
+  background: var(--surface);
+}
+.selection-actions button:hover {
+  background: color-mix(in srgb, var(--color-accent) 14%, transparent);
+}
+.edit-scope {
+  display: flex;
+  gap: 4px;
+  margin: 18px 0 6px;
+}
+.edit-scope button {
+  flex: 1;
+  padding: 9px 4px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  font-size: 11px;
+}
+.edit-scope button[aria-pressed="true"] {
+  color: var(--color-accent);
+  background: color-mix(in srgb, var(--color-accent) 12%, transparent);
+}
+.about-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 20px;
+}
+.monitor-status {
+  max-width: 150px;
+  font-size: 9px;
+  color: var(--muted);
+}

@@ -1,12 +1,11 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { useStableCallback } from "@/src/controllers/useStableCallback";
 import { listen } from "@tauri-apps/api/event";
-import { type AppCapabilities, type CaptureSettings } from "../../shared/types";
-import { command, desktop, messageOf } from "../api";
+import { type AppCapabilities, type CaptureSettings } from "@/shared/types";
+import { command, desktop, messageOf } from "@/src/api";
 
 export function useCaptureDialogController({
   capabilities,
-  busy,
-  onClose,
   onRefresh,
   onStart,
 }: {
@@ -16,22 +15,18 @@ export function useCaptureDialogController({
   onRefresh: () => Promise<void>;
   onStart: (settings: CaptureSettings) => void;
 }) {
+  const start = useStableCallback(onStart);
   const [kind, setKind] = useState("display");
   const [sourceId, setSourceId] = useState("");
   const [cameraId, setCameraId] = useState(capabilities?.cameras[0]?.id || "");
-  const [microphoneId, setMicrophoneId] = useState(
-    capabilities?.microphones[0]?.id || "",
-  );
+  const [microphoneId, setMicrophoneId] = useState(capabilities?.microphones[0]?.id || "");
   const [systemAudio, setSystemAudio] = useState(true);
   const [shape, setShape] = useState<"circle" | "square">("circle");
   const [resolution, setResolution] = useState("4k");
   const [requestError, setRequestError] = useState("");
-  const [permissionHelp, setPermissionHelp] = useState<
-    "screen" | "input" | null
-  >(null);
+  const [permissionHelp, setPermissionHelp] = useState<"screen" | "input" | null>(null);
   const [requesting, setRequesting] = useState(false);
-  const [pendingSettings, setPendingSettings] =
-    useState<CaptureSettings | null>(null);
+  const [pendingSettings, setPendingSettings] = useState<CaptureSettings | null>(null);
   const [countdown, setCountdown] = useState(3);
   useEffect(() => {
     if (!pendingSettings) return;
@@ -43,19 +38,19 @@ export function useCaptureDialogController({
       else {
         window.clearInterval(timer);
         setPendingSettings(null);
-        onStart(pendingSettings);
+        start(pendingSettings);
       }
     }, 1000);
     return () => window.clearInterval(timer);
-  }, [pendingSettings]);
-  const sources =
-    capabilities?.sources.filter(
-      (s) => s.kind === (kind === "region" ? "display" : kind),
-    ) || [];
+  }, [pendingSettings, start]);
+  const sources = useMemo(
+    () =>
+      capabilities?.sources.filter((s) => s.kind === (kind === "region" ? "display" : kind)) || [],
+    [capabilities, kind],
+  );
   useEffect(() => {
-    if (!sources.find((s) => s.id === sourceId))
-      setSourceId(sources[0]?.id || "");
-  }, [capabilities, kind]);
+    if (!sources.find((s) => s.id === sourceId)) setSourceId(sources[0]?.id || "");
+  }, [sources, sourceId]);
   useEffect(() => {
     const refresh = () => void onRefresh();
     const visible = () => {
@@ -74,10 +69,9 @@ export function useCaptureDialogController({
     setRequesting(true);
     setRequestError("");
     try {
-      const permissions = await command<AppCapabilities["permissions"]>(
-        "permissions.request",
-        { kind: permissionKind },
-      );
+      const permissions = await command<AppCapabilities["permissions"]>("permissions.request", {
+        kind: permissionKind,
+      });
       if (permissionKind === "screen" || permissionKind === "input")
         setPermissionHelp(permissions[permissionKind] ? null : permissionKind);
       await onRefresh();

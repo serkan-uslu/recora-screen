@@ -7,7 +7,7 @@ import {
   operationsSchema,
   cameraLayoutSettings,
   time,
-} from "./validation.js";
+} from "@/server/contracts/validation.js";
 const none = z.object({}).strict(),
   projectId = { projectId: id },
   revision = { ...projectId, expectedRevision: finite.int().min(0) };
@@ -15,10 +15,7 @@ const absolutePath = z
   .string()
   .min(1)
   .max(4000)
-  .refine(
-    (p) => path.isAbsolute(p) && !p.includes("\0"),
-    "An absolute file path is required",
-  );
+  .refine((p) => path.isAbsolute(p) && !p.includes("\0"), "An absolute file path is required");
 const provider = z.enum(["openai", "anthropic"]);
 const model = z.enum(["base", "small"]);
 export const settingsSchema = z
@@ -39,23 +36,17 @@ export const methodSchemas: Record<string, z.ZodType> = {
     .object({ kind: z.enum(["screen", "camera", "microphone", "input"]) })
     .strict(),
   "project.list": none,
-  "project.create": z
-    .object({ name: z.string().min(1).max(200).optional() })
-    .strict(),
+  "project.create": z.object({ name: z.string().min(1).max(200).optional() }).strict(),
   "project.open": withProject,
   "project.save": withProject,
-  "project.rename": z
-    .object({ ...revision, name: z.string().min(1).max(200) })
-    .strict(),
+  "project.rename": z.object({ ...revision, name: z.string().min(1).max(200) }).strict(),
   "project.delete": z
     .object({ ...projectId, expectedRevision: finite.int().min(0).optional() })
     .strict(),
   "project.import": z
     .object({ path: absolutePath, name: z.string().min(1).max(200).optional() })
     .strict(),
-  "recording.start": z
-    .object({ ...projectId, settings: captureSchema })
-    .strict(),
+  "recording.start": z.object({ ...projectId, settings: captureSchema }).strict(),
   "recording.pause": z.object({ projectId: id.optional() }).strict(),
   "recording.resume": z.object({ projectId: id.optional() }).strict(),
   "recording.stop": z.object({ projectId: id.optional() }).strict(),
@@ -67,10 +58,10 @@ export const methodSchemas: Record<string, z.ZodType> = {
       shape: z.enum(["circle", "square"]).optional(),
     })
     .strict(),
-  "timeline.apply": z
-    .object({ ...revision, operations: operationsSchema })
+  "timeline.apply": z.object({ ...revision, operations: operationsSchema }).strict(),
+  "camera.layout.set": z
+    .object({ ...revision, startMs: time, endMs: time, settings: cameraLayoutSettings.partial() })
     .strict(),
-  "camera.layout.set": z.object({ ...revision, startMs: time, endMs: time, settings: cameraLayoutSettings.partial() }).strict(),
   "camera.layout.remove": z.object({ ...revision, startMs: time, endMs: time }).strict(),
   "history.undo": z.object(revision).strict(),
   "history.redo": z.object(revision).strict(),
@@ -135,10 +126,23 @@ export const methodSchemas: Record<string, z.ZodType> = {
   "jobs.get": z.object({ jobId: id }).strict(),
   "jobs.cancel": z.object({ jobId: id }).strict(),
   "preview.load": withProject,
-  "preview.reset": z.object({ ...revision, sequence: finite.int().min(0), inputAtMs: finite.min(0).optional() }).strict(),
+  "preview.reset": z
+    .object({ ...revision, sequence: finite.int().min(0), inputAtMs: finite.min(0).optional() })
+    .strict(),
   "preview.metrics": z.object({ reset: z.boolean().optional() }).strict(),
   "preview.geometry": z.object({ timeMs: time.optional() }).strict(),
-  "preview.selection": z.object({ selection: z.object({ kind: z.enum(["camera", "overlay"]), id: id.optional() }).strict().nullable(), color: z.string().regex(/^#[0-9a-fA-F]{6}([0-9a-fA-F]{2})?$/).optional() }).strict(),
+  "preview.selection": z
+    .object({
+      selection: z
+        .object({ kind: z.enum(["camera", "overlay"]), id: id.optional() })
+        .strict()
+        .nullable(),
+      color: z
+        .string()
+        .regex(/^#[0-9a-fA-F]{6}([0-9a-fA-F]{2})?$/)
+        .optional(),
+    })
+    .strict(),
   "preview.bounds": z
     .object({
       x: finite,
@@ -148,7 +152,12 @@ export const methodSchemas: Record<string, z.ZodType> = {
     })
     .strict(),
   "preview.draft": z
-    .object({ ...revision, operations: operationsSchema, sequence: finite.int().min(0).optional(), inputAtMs: finite.min(0).optional() })
+    .object({
+      ...revision,
+      operations: operationsSchema,
+      sequence: finite.int().min(0).optional(),
+      inputAtMs: finite.min(0).optional(),
+    })
     .strict(),
   "preview.seek": z.object({ timeMs: time, inputAtMs: finite.min(0).optional() }).strict(),
   "preview.play": none,

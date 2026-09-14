@@ -1,20 +1,15 @@
 import { useContext } from "react";
-import { DraftPreviewContext } from "../../../controllers/StudioContexts";
+import { DraftPreviewContext } from "@/src/controllers/StudioContexts";
 import { Plus, WandSparkles, ZoomIn } from "lucide-react";
-import {
-  type EditOperation,
-  type Project,
-  type Range,
-  defaultAutoZoom,
-} from "../../../../shared/types";
-import { outputRanges } from "../../../../shared/timeline";
-import { Field } from "../../../components/molecules/Field";
-import { Switch } from "../../../components/atoms/Switch";
-import { Slider } from "../../../components/molecules/Slider";
-import { PanelIntro } from "../../../components/molecules/PanelIntro";
-import { RangeSummary } from "../../../components/molecules/RangeSummary";
-import { ZoomProperties } from "./ZoomProperties";
-import { number, seconds } from "../../../lib/format";
+import { type EditOperation, type Project, type Range, defaultAutoZoom } from "@/shared/types";
+import { outputRanges } from "@/shared/timeline";
+import { Field } from "@/src/components/molecules/Field";
+import { Switch } from "@/src/components/atoms/Switch";
+import { Slider } from "@/src/components/molecules/Slider";
+import { PanelIntro } from "@/src/components/molecules/PanelIntro";
+import { RangeSummary } from "@/src/components/molecules/RangeSummary";
+import { ZoomProperties } from "@/src/features/editor/panels/ZoomProperties";
+import { number, seconds } from "@/src/lib/format";
 
 export function ZoomPanel({
   project,
@@ -59,9 +54,7 @@ export function ZoomPanel({
         <Field label="Motion">
           <select
             value={automatic.motion}
-            onChange={(e) =>
-              changeAutomatic({ motion: e.target.value as "gentle" | "snappy" })
-            }
+            onChange={(e) => changeAutomatic({ motion: e.target.value as "gentle" | "snappy" })}
           >
             <option value="gentle">Gentle</option>
             <option value="snappy">Snappy</option>
@@ -96,13 +89,10 @@ export function ZoomPanel({
         }}
       >
         <WandSparkles size={15} />
-        {project.edits.zooms.length
-          ? "Redetect automatic zooms"
-          : "Generate automatic zooms"}
+        {project.edits.zooms.length ? "Redetect automatic zooms" : "Generate automatic zooms"}
       </button>
       <p className="helper">
-        Uses recorded interactions. Redetect replaces the current zooms and can
-        be undone.
+        Uses recorded interactions. Redetect replaces the current zooms and can be undone.
       </p>
       <div className="panel-divider" />
       <h3 className="panel-section">
@@ -169,23 +159,17 @@ export function ZoomPanel({
       <Switch
         label="Show cursor"
         checked={cursor.visible}
-        onChange={(visible) =>
-          void apply([{ type: "cursor.update", settings: { visible } }])
-        }
+        onChange={(visible) => void apply([{ type: "cursor.update", settings: { visible } }])}
       />
       <Switch
         label="Click highlight"
         checked={cursor.highlight}
-        onChange={(highlight) =>
-          void apply([{ type: "cursor.update", settings: { highlight } }])
-        }
+        onChange={(highlight) => void apply([{ type: "cursor.update", settings: { highlight } }])}
       />
       <Switch
         label="Smooth movement"
         checked={cursor.smooth}
-        onChange={(smooth) =>
-          void apply([{ type: "cursor.update", settings: { smooth } }])
-        }
+        onChange={(smooth) => void apply([{ type: "cursor.update", settings: { smooth } }])}
       />
       <Slider
         label="Cursor size"
@@ -194,10 +178,8 @@ export function ZoomPanel({
         step={0.1}
         suffix="×"
         value={cursor.size}
-        onPreview={size => draftPreview([{ type: "cursor.update", settings: { size } }])}
-        onChange={(size) =>
-          void apply([{ type: "cursor.update", settings: { size } }])
-        }
+        onPreview={(size) => draftPreview([{ type: "cursor.update", settings: { size } }])}
+        onChange={(size) => void apply([{ type: "cursor.update", settings: { size } }])}
       />
     </>
   );

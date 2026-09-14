@@ -8,7 +8,7 @@ import {
   type Project,
   type Range,
   type TimelineSegment,
-} from "../../shared/types.js";
+} from "@/shared/types.js";
 import {
   duration,
   outputRanges,
@@ -17,19 +17,16 @@ import {
   sourceTime,
   subtractRanges,
   timelineTime,
-} from "../../shared/timeline.js";
-import { cameraLayoutSettings, sameCameraLayout } from "../../shared/camera.js";
-import { AppError, operationsSchema } from "../contracts/validation.js";
-export { outputRanges } from "../../shared/timeline.js";
+} from "@/shared/timeline.js";
+import { cameraLayoutSettings, sameCameraLayout } from "@/shared/camera.js";
+import { AppError, operationsSchema } from "@/server/contracts/validation.js";
+export { outputRanges } from "@/shared/timeline.js";
 
-export function mergeRanges(ranges: Range[]): Range[] {
+function mergeRanges(ranges: Range[]): Range[] {
   const merged: Range[] = [];
-  for (const r of ranges
-    .filter((r) => r.endMs > r.startMs)
-    .sort((a, b) => a.startMs - b.startMs)) {
+  for (const r of ranges.filter((r) => r.endMs > r.startMs).sort((a, b) => a.startMs - b.startMs)) {
     const last = merged.at(-1);
-    if (last && r.startMs <= last.endMs + 0.01)
-      last.endMs = Math.max(last.endMs, r.endMs);
+    if (last && r.startMs <= last.endMs + 0.01) last.endMs = Math.max(last.endMs, r.endMs);
     else merged.push({ ...r });
   }
   return merged;
@@ -40,10 +37,7 @@ function checkedRange(project: Project, value: Range) {
     value.startMs < 0 ||
     value.endMs > duration(project.edits.segments) + 0.01
   )
-    throw new AppError(
-      "INVALID_RANGE",
-      "Choose a nonempty range inside the output timeline",
-    );
+    throw new AppError("INVALID_RANGE", "Choose a nonempty range inside the output timeline");
   return sourceRanges(project.edits.segments, value.startMs, value.endMs);
 }
 function sourceSpan(project: Project, value: Range): Range {
@@ -52,8 +46,7 @@ function sourceSpan(project: Project, value: Range): Range {
 }
 function found<T extends { id: string }>(items: T[], id: string): T {
   const item = items.find((x) => x.id === id);
-  if (!item)
-    throw new AppError("NOT_FOUND", `Timeline item ${id} no longer exists`);
+  if (!item) throw new AppError("NOT_FOUND", `Timeline item ${id} no longer exists`);
   return item;
 }
 function temporalPatch<T extends Range>(
@@ -63,14 +56,8 @@ function temporalPatch<T extends Range>(
 ): Partial<T> {
   if (patch.startMs !== undefined || patch.endMs !== undefined) {
     const current = outputRanges(project.edits.segments, target);
-    if (
-      !current.length &&
-      (patch.startMs === undefined || patch.endMs === undefined)
-    )
-      throw new AppError(
-        "INVALID_RANGE",
-        "Supply both output times to move a hidden item",
-      );
+    if (!current.length && (patch.startMs === undefined || patch.endMs === undefined))
+      throw new AppError("INVALID_RANGE", "Supply both output times to move a hidden item");
     Object.assign(
       patch,
       sourceSpan(project, {
@@ -85,21 +72,13 @@ function coalesceSegments(segments: TimelineSegment[]) {
   const result: TimelineSegment[] = [];
   for (const segment of segments) {
     const last = result.at(-1);
-    if (
-      last &&
-      last.endMs === segment.startMs &&
-      (last.speed ?? 1) === (segment.speed ?? 1)
-    )
+    if (last && last.endMs === segment.startMs && (last.speed ?? 1) === (segment.speed ?? 1))
       last.endMs = segment.endMs;
     else result.push({ ...segment });
   }
   return result;
 }
-export function applyEdits(
-  project: Project,
-  input: unknown,
-  cursorEvents: CursorEvent[] = [],
-) {
+export function applyEdits(project: Project, input: unknown, cursorEvents: CursorEvent[] = []) {
   const operations = operationsSchema.parse(input) as EditOperation[];
   for (const op of operations) {
     const edits = project.edits;
@@ -107,10 +86,7 @@ export function applyEdits(
       case "cut": {
         const kept = subtractRanges(edits.segments, checkedRange(project, op));
         if (duration(kept) < 1)
-          throw new AppError(
-            "EMPTY_TIMELINE",
-            "Keep at least one millisecond of video",
-          );
+          throw new AppError("EMPTY_TIMELINE", "Keep at least one millisecond of video");
         edits.segments = kept;
         break;
       }
@@ -121,23 +97,17 @@ export function applyEdits(
       case "speed": {
         checkedRange(project, op);
         const before = sliceSegments(edits.segments, 0, op.startMs);
-        const changed = sliceSegments(edits.segments, op.startMs, op.endMs).map(
-          (r) => ({ ...r, speed: op.speed }),
-        );
-        const after = sliceSegments(
-          edits.segments,
-          op.endMs,
-          duration(edits.segments),
-        );
+        const changed = sliceSegments(edits.segments, op.startMs, op.endMs).map((r) => ({
+          ...r,
+          speed: op.speed,
+        }));
+        const after = sliceSegments(edits.segments, op.endMs, duration(edits.segments));
         edits.segments = [...before, ...changed, ...after];
         break;
       }
       case "split": {
         if (op.atMs <= 0 || op.atMs >= duration(edits.segments))
-          throw new AppError(
-            "INVALID_RANGE",
-            "Split point must be inside the output timeline",
-          );
+          throw new AppError("INVALID_RANGE", "Split point must be inside the output timeline");
         const at = sourceTime(edits.segments, op.atMs);
         edits.segments = edits.segments.flatMap((r) =>
           at > r.startMs && at < r.endMs
@@ -153,10 +123,7 @@ export function applyEdits(
         const segment = edits.segments[op.index];
         if (!segment) throw new AppError("NOT_FOUND", "Clip no longer exists");
         const lower = edits.segments[op.index - 1]?.endMs ?? 0,
-          upper =
-            edits.segments[op.index + 1]?.startMs ??
-            project.source?.durationMs ??
-            0;
+          upper = edits.segments[op.index + 1]?.startMs ?? project.source?.durationMs ?? 0;
         if (
           op.sourceStartMs < lower ||
           op.sourceEndMs > upper ||
@@ -176,15 +143,8 @@ export function applyEdits(
       case "clip.merge": {
         const left = edits.segments[op.index],
           right = edits.segments[op.index + 1];
-        if (!left || !right)
-          throw new AppError(
-            "NOT_FOUND",
-            "Choose a clip with a following clip",
-          );
-        if (
-          left.endMs !== right.startMs ||
-          (left.speed ?? 1) !== (right.speed ?? 1)
-        )
+        if (!left || !right) throw new AppError("NOT_FOUND", "Choose a clip with a following clip");
+        if (left.endMs !== right.startMs || (left.speed ?? 1) !== (right.speed ?? 1))
           throw new AppError(
             "INCOMPATIBLE_CLIPS",
             "Only source-contiguous clips with the same speed can be merged",
@@ -193,22 +153,14 @@ export function applyEdits(
         break;
       }
       case "source.restore": {
-        if (
-          op.endMs <= op.startMs ||
-          op.endMs > (project.source?.durationMs ?? 0)
-        )
+        if (op.endMs <= op.startMs || op.endMs > (project.source?.durationMs ?? 0))
           throw new AppError(
             "INVALID_RANGE",
             "Restore a nonempty range inside the source recording",
           );
-        const restored = subtractRanges(
-          [{ startMs: op.startMs, endMs: op.endMs }],
-          edits.segments,
-        );
+        const restored = subtractRanges([{ startMs: op.startMs, endMs: op.endMs }], edits.segments);
         edits.segments = coalesceSegments(
-          [...edits.segments, ...restored].sort(
-            (a, b) => a.startMs - b.startMs,
-          ),
+          [...edits.segments, ...restored].sort((a, b) => a.startMs - b.startMs),
         );
         break;
       }
@@ -227,23 +179,44 @@ export function applyEdits(
         const ranges = checkedRange(project, op);
         const original = edits.camera.layouts;
         const layouts = subtractRanges(original, ranges);
-        if (op.type === "camera.layout.set") for (const range of ranges) {
-          const boundaries = [...new Set([range.startMs, range.endMs, ...original.flatMap((layout) =>
-            [layout.startMs, layout.endMs].filter((time) => time > range.startMs && time < range.endMs),
-          )])].sort((a, b) => a - b);
-          for (let i = 1; i < boundaries.length; i++) {
-            const startMs = boundaries[i - 1]!, endMs = boundaries[i]!;
-            const target = original.find((layout) => layout.startMs <= startMs && layout.endMs > startMs) ?? edits.camera;
-            layouts.push({ ...cameraLayoutSettings(target), ...op.settings, id: randomUUID(), startMs, endMs });
+        if (op.type === "camera.layout.set")
+          for (const range of ranges) {
+            const boundaries = [
+              ...new Set([
+                range.startMs,
+                range.endMs,
+                ...original.flatMap((layout) =>
+                  [layout.startMs, layout.endMs].filter(
+                    (time) => time > range.startMs && time < range.endMs,
+                  ),
+                ),
+              ]),
+            ].sort((a, b) => a - b);
+            for (let i = 1; i < boundaries.length; i++) {
+              const startMs = boundaries[i - 1]!,
+                endMs = boundaries[i]!;
+              const target =
+                original.find((layout) => layout.startMs <= startMs && layout.endMs > startMs) ??
+                edits.camera;
+              layouts.push({
+                ...cameraLayoutSettings(target),
+                ...op.settings,
+                id: randomUUID(),
+                startMs,
+                endMs,
+              });
+            }
           }
-        }
-        const merged: CameraLayout[] = [], ids = new Set<string>();
+        const merged: CameraLayout[] = [],
+          ids = new Set<string>();
         for (const layout of layouts.sort((a, b) => a.startMs - b.startMs)) {
           const last = merged.at(-1);
-          if (last && last.endMs === layout.startMs && sameCameraLayout(last, layout)) last.endMs = layout.endMs;
+          if (last && last.endMs === layout.startMs && sameCameraLayout(last, layout))
+            last.endMs = layout.endMs;
           else {
             const id = ids.has(layout.id) ? randomUUID() : layout.id;
-            merged.push({ ...layout, id }); ids.add(id);
+            merged.push({ ...layout, id });
+            ids.add(id);
           }
         }
         edits.camera.layouts = merged;
@@ -266,14 +239,8 @@ export function applyEdits(
         edits.zooms = edits.zooms.filter((x) => x.id !== op.id);
         break;
       case "overlay.add": {
-        if (
-          op.overlay.kind === "image" &&
-          !project.assets.some((a) => a.id === op.overlay.assetId)
-        )
-          throw new AppError(
-            "INVALID_ASSET",
-            "Import an image before adding it to the video",
-          );
+        if (op.overlay.kind === "image" && !project.assets.some((a) => a.id === op.overlay.assetId))
+          throw new AppError("INVALID_ASSET", "Import an image before adding it to the video");
         if (op.overlay.kind === "text" && !op.overlay.text?.trim())
           throw new AppError("INVALID_INPUT", "Text overlay must contain text");
         edits.overlays.push({
@@ -287,10 +254,7 @@ export function applyEdits(
         const target = found(edits.overlays, op.id);
         const patch = temporalPatch(project, target, { ...op.overlay });
         const next = { ...target, ...patch };
-        if (
-          next.kind === "image" &&
-          !project.assets.some((a) => a.id === next.assetId)
-        )
+        if (next.kind === "image" && !project.assets.some((a) => a.id === next.assetId))
           throw new AppError("INVALID_ASSET", "Image asset does not exist");
         if (next.kind === "text" && !next.text?.trim())
           throw new AppError("INVALID_INPUT", "Text overlay must contain text");
@@ -323,14 +287,10 @@ export function applyEdits(
           ...op.settings,
         };
         if (
-          (settings.background === "image" ||
-            op.settings.assetId !== undefined) &&
+          (settings.background === "image" || op.settings.assetId !== undefined) &&
           !project.assets.some((asset) => asset.id === settings.assetId)
         )
-          throw new AppError(
-            "INVALID_ASSET",
-            "Import an image before using it as a background",
-          );
+          throw new AppError("INVALID_ASSET", "Import an image before using it as a background");
         edits.canvas = settings;
         break;
       }
@@ -371,10 +331,7 @@ export function applyEdits(
           .sort((a, b) => a.tMs - b.tMs)) {
           const output = timelineTime(edits.segments, event.tMs);
           if (output === null || output < until) continue;
-          const endMs = Math.min(
-            duration(edits.segments),
-            output + settings.holdMs,
-          );
+          const endMs = Math.min(duration(edits.segments), output + settings.holdMs);
           if (endMs - output < 200) continue;
           edits.zooms.push({
             id: randomUUID(),
@@ -442,10 +399,7 @@ export function subtitleText(project: Project, format: "srt" | "vtt") {
       .toString()
       .padStart(2, "0")}:${Math.floor((ms / 1000) % 60)
       .toString()
-      .padStart(
-        2,
-        "0",
-      )}${format === "srt" ? "," : "."}${(ms % 1000).toString().padStart(3, "0")}`;
+      .padStart(2, "0")}${format === "srt" ? "," : "."}${(ms % 1000).toString().padStart(3, "0")}`;
   };
   const cues = project.transcript
     .flatMap((segment) =>

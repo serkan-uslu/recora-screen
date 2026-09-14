@@ -1,11 +1,7 @@
 {
   "compilerOptions": {
     "target": "ES2022",
-    "lib": [
-      "ES2023",
-      "DOM",
-      "DOM.Iterable"
-    ],
+    "lib": ["ES2023", "DOM", "DOM.Iterable"],
     "module": "ESNext",
     "moduleResolution": "Bundler",
     "jsx": "react-jsx",
@@ -15,10 +11,11 @@
     "resolveJsonModule": true,
     "allowImportingTsExtensions": true,
     "noEmit": true,
-    "types": [
-      "node",
-      "vite/client"
-    ]
+    "types": ["node", "vite/client"],
+    "noFallthroughCasesInSwitch": true,
+    "paths": {
+      "@/*": ["./*"]
+    }
   },
   "include": [
     "src",
@@ -27,6 +24,8 @@
     "scripts/*.ts",
     "vite.config.ts",
     "website/src",
-    "website/vite.config.ts"
+    "website/vite.config.ts",
+    "tests",
+    "playwright.config.ts"
   ]
 }

@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { track } from "./analytics";
+import { track } from "@/website/src/analytics";
 
 test("analytics records intentional clicks, rejects unknown events and cannot break downloads", () => {
   const received: unknown[] = [];

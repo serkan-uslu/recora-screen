@@ -7,10 +7,11 @@ import {
   Save,
   Settings2,
   Undo2,
-  Video,
 } from "lucide-react";
-import { IconButton } from "../atoms/IconButton";
-import { type StudioController } from "../../controllers/useStudioController";
+import { IconButton } from "@/src/components/atoms/IconButton";
+import { product } from "@/shared/brand";
+import productIcon from "@/design-system/product-icon.svg";
+import { type StudioController } from "@/src/controllers/useStudioController";
 
 export function StudioHeader({
   studio,
@@ -27,47 +28,33 @@ export function StudioHeader({
     | "projectBusy"
   >;
 }) {
-  const {
-    project,
-    setModal,
-    busy,
-    saveDraft,
-    backToLibrary,
-    history,
-    renameProject,
-    projectBusy,
-  } = studio;
+  const { project, setModal, busy, saveDraft, backToLibrary, history, renameProject, projectBusy } =
+    studio;
   if (!project) return null;
   return (
     <header className="app-header" data-tauri-drag-region>
       <button
         className="brand"
         onClick={() => project && void backToLibrary()}
-        aria-label="Screen Recorder projects"
+        aria-label={`${product.name} projects`}
       >
         <span className="brand-mark">
-          <Video size={20} strokeWidth={2.5} />
+          <img src={productIcon} width="32" height="32" alt="" />
         </span>
         <span>
-          Screen Recorder<span className="brand-dot">.</span>
+          {product.name}
+          <span className="brand-dot">.</span>
         </span>
       </button>
       {project ? (
         <div className="project-heading">
           <span className="header-divider" />
-          <button
-            className="project-title"
-            onClick={() => void renameProject(project)}
-          >
+          <button className="project-title" onClick={() => void renameProject(project)}>
             {project.name}
             <ChevronDown size={13} />
           </button>
           <span className="save-indicator">
-            {busy ? (
-              <LoaderCircle className="spin" size={12} />
-            ) : (
-              <Check size={12} />
-            )}
+            {busy ? <LoaderCircle className="spin" size={12} /> : <Check size={12} />}
             {busy ? "Saving…" : "All changes saved"}
           </span>
         </div>

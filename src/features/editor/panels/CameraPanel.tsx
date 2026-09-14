@@ -5,16 +5,16 @@ import {
   type CameraLayoutSettings,
   type Project,
   type Range,
-} from "../../../../shared/types";
-import { cameraAt } from "../../../../shared/camera";
-import { cameraEdit } from "../../../controllers/cameraEdit";
-import { outputSize } from "../../../../shared/timeline";
-import { Switch } from "../../../components/atoms/Switch";
-import { Slider } from "../../../components/molecules/Slider";
-import { PanelIntro } from "../../../components/molecules/PanelIntro";
-import { RangeSummary } from "../../../components/molecules/RangeSummary";
-import { DraftPreviewContext } from "../../../controllers/StudioContexts";
-import { seconds } from "../../../lib/format";
+} from "@/shared/types";
+import { cameraAt } from "@/shared/camera";
+import { cameraEdit } from "@/src/controllers/cameraEdit";
+import { outputSize } from "@/shared/timeline";
+import { Switch } from "@/src/components/atoms/Switch";
+import { Slider } from "@/src/components/molecules/Slider";
+import { PanelIntro } from "@/src/components/molecules/PanelIntro";
+import { RangeSummary } from "@/src/components/molecules/RangeSummary";
+import { DraftPreviewContext } from "@/src/controllers/StudioContexts";
+import { seconds } from "@/src/lib/format";
 
 export function CameraPanel({
   project,
@@ -31,7 +31,9 @@ export function CameraPanel({
 }) {
   const { send: draftPreview } = useContext(DraftPreviewContext);
   const ranged = cameraScope === "selection" && selection.endMs > selection.startMs;
-  const camera = ranged ? cameraAt(project, (selection.startMs + selection.endMs) / 2) : project.edits.camera;
+  const camera = ranged
+    ? cameraAt(project, (selection.startMs + selection.endMs) / 2)
+    : project.edits.camera;
   const preview = (settings: Partial<CameraLayoutSettings>) =>
     draftPreview([cameraEdit(selection, cameraScope, settings)]);
   const output = outputSize(project);
@@ -53,10 +55,22 @@ export function CameraPanel({
         onChange={(visible) => void apply([{ type: "camera.update", settings: { visible } }])}
       />
       <div className="edit-scope" role="group" aria-label="Camera layout applies to">
-        <button aria-pressed={ranged} disabled={selection.endMs <= selection.startMs} onClick={() => onScopeChange("selection")}>Selected range</button>
-        <button aria-pressed={!ranged} onClick={() => onScopeChange("entire")}>Entire video</button>
+        <button
+          aria-pressed={ranged}
+          disabled={selection.endMs <= selection.startMs}
+          onClick={() => onScopeChange("selection")}
+        >
+          Selected range
+        </button>
+        <button aria-pressed={!ranged} onClick={() => onScopeChange("entire")}>
+          Entire video
+        </button>
       </div>
-      <p className="helper">{ranged ? `Layout for ${seconds(selection.startMs)}–${seconds(selection.endMs)}s. Drag or resize your camera in the preview.` : "Default layout for the video. Saved range layouts keep their own settings."}</p>
+      <p className="helper">
+        {ranged
+          ? `Layout for ${seconds(selection.startMs)}–${seconds(selection.endMs)}s. Drag or resize your camera in the preview.`
+          : "Default layout for the video. Saved range layouts keep their own settings."}
+      </p>
       <h3 className="panel-section">APPEARANCE</h3>
       <div className="shape-options">
         <button
@@ -114,12 +128,15 @@ export function CameraPanel({
         onPreview={(y) => preview({ y })}
         onChange={(v) => update({ y: v })}
       />
-      <Switch
-        label="Soft shadow"
-        checked={camera.shadow}
-        onChange={(v) => update({ shadow: v })}
-      />
-      {ranged && <button className="button subtle full" onClick={() => void apply([{ type: "camera.layout.remove", ...selection }])}>Reset selected layout</button>}
+      <Switch label="Soft shadow" checked={camera.shadow} onChange={(v) => update({ shadow: v })} />
+      {ranged && (
+        <button
+          className="button subtle full"
+          onClick={() => void apply([{ type: "camera.layout.remove", ...selection }])}
+        >
+          Reset selected layout
+        </button>
+      )}
       <div className="panel-divider" />
       <h3 className="panel-section">VISIBILITY</h3>
       <RangeSummary selection={selection} />
@@ -127,9 +144,7 @@ export function CameraPanel({
         <button
           className="button secondary"
           disabled={selection.endMs <= selection.startMs}
-          onClick={() =>
-            void apply([{ type: "camera.hide", ...selection, hidden: true }])
-          }
+          onClick={() => void apply([{ type: "camera.hide", ...selection, hidden: true }])}
         >
           <EyeOff size={14} />
           Hide here
@@ -137,17 +152,13 @@ export function CameraPanel({
         <button
           className="button secondary"
           disabled={selection.endMs <= selection.startMs}
-          onClick={() =>
-            void apply([{ type: "camera.hide", ...selection, hidden: false }])
-          }
+          onClick={() => void apply([{ type: "camera.hide", ...selection, hidden: false }])}
         >
           <Eye size={14} />
           Show here
         </button>
       </div>
-      <p className="helper">
-        Select an interval in the timeline to hide or restore your camera.
-      </p>
+      <p className="helper">Select an interval in the timeline to hide or restore your camera.</p>
       {project.edits.camera.hiddenRanges.length > 0 && (
         <div className="interval-list">
           {project.edits.camera.hiddenRanges.map((r, i) => (

@@ -1,17 +1,12 @@
-import {
-  createServer,
-  createConnection,
-  type Server,
-  type Socket,
-} from "node:net";
+import { createServer, createConnection, type Server, type Socket } from "node:net";
 import { promises as fs } from "node:fs";
 import path from "node:path";
 import { randomUUID } from "node:crypto";
 import { spawn } from "node:child_process";
 import { setTimeout as delay } from "node:timers/promises";
-import { AppError, errorOf } from "../contracts/validation.js";
-import { socketPath } from "./ProjectStore.js";
-import type { ApplicationService } from "../service.js";
+import { AppError, errorOf } from "@/server/contracts/validation.js";
+import { socketPath } from "@/server/infrastructure/ProjectStore.js";
+import type { ApplicationService } from "@/server/service.js";
 
 export function readLines(
   socket: NodeJS.ReadableStream,
@@ -35,21 +30,12 @@ export function readLines(
     }
   });
 }
-export async function serveSocket(
-  service: ApplicationService,
-  file = socketPath,
-): Promise<Server> {
+export async function serveSocket(service: ApplicationService, file = socketPath): Promise<Server> {
   if (process.platform !== "win32") {
     await fs.mkdir(path.dirname(file), { recursive: true, mode: 0o700 });
     const parent = await fs.lstat(path.dirname(file));
-    if (
-      parent.isSymbolicLink() ||
-      (process.getuid && parent.uid !== process.getuid())
-    )
-      throw new AppError(
-        "INVALID_SOCKET",
-        "Service directory must belong to the current user",
-      );
+    if (parent.isSymbolicLink() || (process.getuid && parent.uid !== process.getuid()))
+      throw new AppError("INVALID_SOCKET", "Service directory must belong to the current user");
     await fs.chmod(path.dirname(file), 0o700);
     if (
       await fs.lstat(file).then(
@@ -66,10 +52,7 @@ export async function serveSocket(
         s.once("error", () => resolve(false));
       });
       if (alive)
-        throw new AppError(
-          "ALREADY_RUNNING",
-          "The desktop app already owns the project service",
-        );
+        throw new AppError("ALREADY_RUNNING", "The desktop app already owns the project service");
       await fs.unlink(file);
     }
   }
@@ -82,28 +65,18 @@ export async function serveSocket(
     readLines(
       socket,
       (line) => {
-        let request: any;
+        let request: { id: string; method: string; params?: unknown };
         try {
           request = JSON.parse(line);
-          if (
-            typeof request.id !== "string" ||
-            typeof request.method !== "string"
-          )
-            throw new AppError(
-              "INVALID_REQUEST",
-              "RPC id and method are required",
-            );
+          if (typeof request.id !== "string" || typeof request.method !== "string")
+            throw new AppError("INVALID_REQUEST", "RPC id and method are required");
         } catch (error) {
           socket.write(JSON.stringify({ error: errorOf(error) }) + "\n");
           return;
         }
         service.command(request.method, request.params).then(
-          (result) =>
-            socket.write(JSON.stringify({ id: request.id, result }) + "\n"),
-          (error) =>
-            socket.write(
-              JSON.stringify({ id: request.id, error: errorOf(error) }) + "\n",
-            ),
+          (result) => socket.write(JSON.stringify({ id: request.id, result }) + "\n"),
+          (error) => socket.write(JSON.stringify({ id: request.id, error: errorOf(error) }) + "\n"),
         );
       },
       (error) => socket.destroy(error),
@@ -125,7 +98,7 @@ export class AppClient {
   private pending = new Map<
     string,
     {
-      resolve: (value: any) => void;
+      resolve: (value: unknown) => void;
       reject: (error: unknown) => void;
       timer: NodeJS.Timeout;
     }
@@ -202,15 +175,17 @@ export class AppClient {
           if (!pending) return;
           clearTimeout(pending.timer);
           this.pending.delete(response.id);
-          response.error
-            ? pending.reject(
-                new AppError(
-                  response.error.code ?? "FAILED",
-                  response.error.message,
-                  response.error.details,
-                ),
-              )
-            : pending.resolve(response.result);
+          if (response.error) {
+            pending.reject(
+              new AppError(
+                response.error.code ?? "FAILED",
+                response.error.message,
+                response.error.details,
+              ),
+            );
+          } else {
+            pending.resolve(response.result);
+          }
         } catch (error) {
           socket.destroy(error instanceof Error ? error : undefined);
         }
@@ -236,6 +211,7 @@ export class AppClient {
   async call(method: string, params: Record<string, unknown> = {}) {
     if (!this.socket || this.socket.destroyed) await this.connect();
     const id = randomUUID();
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Legacy heterogeneous RPC boundary; inputs are schema-validated by CommandController. Keep domain code typed.
     return new Promise<any>((resolve, reject) => {
       const timer = setTimeout(() => {
         this.pending.delete(id);

@@ -13,12 +13,16 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: '22'
+          node-version: "22"
           cache: npm
       - uses: dtolnay/rust-toolchain@stable
       - run: npm ci
-      - run: npm test
       - run: npm run build
+      - run: npx playwright install chromium
+      - run: npm run test:e2e
+      - run: npm run build:site
+        env:
+          VITE_DOWNLOAD_URL: https://github.com/serkan-uslu/screen-recorder/releases/latest/download/Screen-Recorder_0.1.0_macOS-arm64.dmg
       - run: npm run test:native
       - run: npm run prepare:runtime
       - run: npm run desktop:check

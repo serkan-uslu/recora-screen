@@ -1,4 +1,4 @@
-import { type RecordingStatus } from "../../shared/types";
+import { type RecordingStatus } from "@/shared/types";
 
 export const idleRecording: RecordingStatus = {
   active: false,
@@ -9,8 +9,7 @@ export const idleRecording: RecordingStatus = {
   cameraVisible: true,
   cameraEnabled: true,
 };
-export const number = (value: string) =>
-  Number.isFinite(Number(value)) ? Number(value) : 0;
+export const number = (value: string) => (Number.isFinite(Number(value)) ? Number(value) : 0);
 export const seconds = (ms: number) => (ms / 1000).toFixed(2);
 export const date = (value: string) =>
   new Date(value).toLocaleDateString("en-US", {

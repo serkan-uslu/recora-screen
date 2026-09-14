@@ -1,19 +1,14 @@
 import { useContext, useState } from "react";
 import { ImagePlus, Trash2, Type } from "lucide-react";
-import {
-  type EditOperation,
-  type Overlay,
-  type Project,
-  type Range,
-} from "../../../../shared/types";
-import { DraftPreviewContext } from "../../../controllers/StudioContexts";
-import { messageOf } from "../../../lib/errors";
-import { IconButton } from "../../../components/atoms/IconButton";
-import { Field } from "../../../components/molecules/Field";
-import { Slider } from "../../../components/molecules/Slider";
-import { PanelIntro } from "../../../components/molecules/PanelIntro";
-import { RangeSummary } from "../../../components/molecules/RangeSummary";
-import { number, seconds } from "../../../lib/format";
+import { type EditOperation, type Overlay, type Project, type Range } from "@/shared/types";
+import { DraftPreviewContext } from "@/src/controllers/StudioContexts";
+import { messageOf } from "@/src/lib/errors";
+import { IconButton } from "@/src/components/atoms/IconButton";
+import { Field } from "@/src/components/molecules/Field";
+import { Slider } from "@/src/components/molecules/Slider";
+import { PanelIntro } from "@/src/components/molecules/PanelIntro";
+import { RangeSummary } from "@/src/components/molecules/RangeSummary";
+import { number, seconds } from "@/src/lib/format";
 
 export function OverlaysPanel({
   project,
@@ -36,10 +31,11 @@ export function OverlaysPanel({
   const [text, setText] = useState("");
   const overlay = project.edits.overlays.find((o) => o.id === selected);
   const update = (value: Partial<Overlay>) => {
-    if (overlay)
-      void apply([{ type: "overlay.update", id: overlay.id, overlay: value }]);
+    if (overlay) void apply([{ type: "overlay.update", id: overlay.id, overlay: value }]);
   };
-  const preview = (value: Partial<Overlay>) => { if (overlay) draftPreview([{ type: "overlay.update", id: overlay.id, overlay: value }]); };
+  const preview = (value: Partial<Overlay>) => {
+    if (overlay) draftPreview([{ type: "overlay.update", id: overlay.id, overlay: value }]);
+  };
   const defaults = {
     ...selection,
     x: 0.1,
@@ -67,14 +63,16 @@ export function OverlaysPanel({
       <button
         className="button secondary full"
         disabled={!text.trim() || selection.endMs <= selection.startMs}
-        onClick={async () => {
-          await apply([
-            {
-              type: "overlay.add",
-              overlay: { ...defaults, kind: "text", text: text.trim() },
-            },
-          ]);
-          setText("");
+        onClick={() => {
+          void (async () => {
+            await apply([
+              {
+                type: "overlay.add",
+                overlay: { ...defaults, kind: "text", text: text.trim() },
+              },
+            ]);
+            setText("");
+          })();
         }}
       >
         <Type size={15} />
@@ -83,31 +81,33 @@ export function OverlaysPanel({
       <button
         className="button subtle full"
         disabled={selection.endMs <= selection.startMs}
-        onClick={async () => {
-          try {
-            const result = await importImage();
-            if (!result) return;
-            const asset =
-              (result as { asset?: { id: string }; id?: string }).asset ||
-              (result as { id: string });
-            if (asset.id)
-              await apply(
-                [
-                  {
-                    type: "overlay.add",
-                    overlay: {
-                      ...defaults,
-                      kind: "image",
-                      assetId: asset.id,
-                      width: 0.35,
+        onClick={() => {
+          void (async () => {
+            try {
+              const result = await importImage();
+              if (!result) return;
+              const asset =
+                (result as { asset?: { id: string }; id?: string }).asset ||
+                (result as { id: string });
+              if (asset.id)
+                await apply(
+                  [
+                    {
+                      type: "overlay.add",
+                      overlay: {
+                        ...defaults,
+                        kind: "image",
+                        assetId: asset.id,
+                        width: 0.35,
+                      },
                     },
-                  },
-                ],
-                (result as { revision: number }).revision,
-              );
-          } catch (e) {
-            onError(messageOf(e));
-          }
+                  ],
+                  (result as { revision: number }).revision,
+                );
+            } catch (e) {
+              onError(messageOf(e));
+            }
+          })();
         }}
       >
         <ImagePlus size={15} />
@@ -149,8 +149,7 @@ export function OverlaysPanel({
       </h3>
       {!project.edits.overlays.length && (
         <p className="helper">
-          Your text and images will appear here. Select a timeline range to add
-          your first layer.
+          Your text and images will appear here. Select a timeline range to add your first layer.
         </p>
       )}
       <div className="layers-list">
@@ -161,8 +160,7 @@ export function OverlaysPanel({
               <span>
                 {o.kind === "text"
                   ? o.text
-                  : project.assets.find((a) => a.id === o.assetId)?.name ||
-                    "Image"}
+                  : project.assets.find((a) => a.id === o.assetId)?.name || "Image"}
                 <small>
                   {seconds(o.startMs)} – {seconds(o.endMs)}s · source
                 </small>
@@ -186,8 +184,7 @@ export function OverlaysPanel({
                 <textarea
                   defaultValue={overlay.text}
                   onBlur={(e) => {
-                    if (e.target.value !== overlay.text)
-                      update({ text: e.target.value });
+                    if (e.target.value !== overlay.text) update({ text: e.target.value });
                   }}
                 />
               </Field>
@@ -214,13 +211,13 @@ export function OverlaysPanel({
           <Slider
             label="Horizontal position"
             value={overlay.x}
-            onPreview={x => preview({ x })}
+            onPreview={(x) => preview({ x })}
             onChange={(x) => update({ x })}
           />
           <Slider
             label="Vertical position"
             value={overlay.y}
-            onPreview={y => preview({ y })}
+            onPreview={(y) => preview({ y })}
             onChange={(y) => update({ y })}
           />
           <Slider
@@ -228,15 +225,13 @@ export function OverlaysPanel({
             min={0.05}
             max={1}
             value={overlay.width}
-            onPreview={width => preview({ width })}
+            onPreview={(width) => preview({ width })}
             onChange={(width) => update({ width })}
           />
           <Field label="Animation">
             <select
               value={overlay.animation}
-              onChange={(e) =>
-                update({ animation: e.target.value as Overlay["animation"] })
-              }
+              onChange={(e) => update({ animation: e.target.value as Overlay["animation"] })}
             >
               <option value="none">None</option>
               <option value="fade">Fade</option>

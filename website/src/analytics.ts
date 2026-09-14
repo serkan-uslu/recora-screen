@@ -1,31 +1,30 @@
-export const events = [
+import { product } from "@/shared/brand";
+
+const events = [
   "Download Click",
   "Source Click",
   "Contact Click",
   "Author Link Click",
   "Navigation Click",
-  "Feature Preview",
   "FAQ Open",
+  "Demo Play",
+  "MCP Setup Click",
 ] as const;
-export type AnalyticsEvent = (typeof events)[number];
+type AnalyticsEvent = (typeof events)[number];
 export type AnalyticsSink = (
   event: AnalyticsEvent,
   options: { props: Record<string, string> },
 ) => void;
 
 /** Only explicit, non-personal properties cross the analytics boundary. */
-export function track(
-  sink: AnalyticsSink | undefined,
-  event: string,
-  placement: string,
-) {
+export function track(sink: AnalyticsSink | undefined, event: string, placement: string) {
   if (!events.includes(event as AnalyticsEvent)) return;
   try {
     sink?.(event as AnalyticsEvent, {
       props: {
         placement: placement.slice(0, 80),
-        version: "0.1.0",
-        platform: "macOS-arm64",
+        version: product.version,
+        platform: product.platform,
       },
     });
   } catch {
@@ -48,8 +47,7 @@ export function initializeAnalytics(scriptUrl: string | undefined) {
   if (
     !scriptUrl ||
     navigator.doNotTrack === "1" ||
-    (navigator as Navigator & { globalPrivacyControl?: boolean })
-      .globalPrivacyControl
+    (navigator as Navigator & { globalPrivacyControl?: boolean }).globalPrivacyControl
   )
     return;
   const url = new URL(scriptUrl);
