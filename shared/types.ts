@@ -200,6 +200,8 @@ export type RecordingStatus = {
   cameraVisible: boolean;
   cameraEnabled: boolean;
   cameraRunning?: boolean;
+  droppedFrames?: number;
+  screenFrames?: number;
   phase?: "idle" | "starting" | "recording" | "paused" | "finalizing";
   monitoring?: {
     pointer: "active" | "inactive";

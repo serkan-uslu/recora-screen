@@ -19,6 +19,7 @@ final class CaptureEngine: NSObject, SCStreamOutput, SCStreamDelegate, AVCapture
     private var lastTypingMs = -1000.0
     private var inputState = "inactive", inputMessage: String?
     private var pointerSamples = 0, clickCount = 0, dragCount = 0, typingCount = 0; private var firstPointerMs: Double?
+    private var droppedFrames = 0
     private let statusLock = NSLock()
     private var cachedStatus: [String: Any] = ["active": false, "paused": false, "durationMs": 0, "phase": "idle", "cameraEnabled": false, "cameraVisible": false, "cameraRunning": false, "microphoneLevel": 0, "systemLevel": 0, "monitoring": ["pointer": "inactive", "input": "inactive", "pointerSamples": 0, "clicks": 0, "drags": 0, "typingEvents": 0]]
     private let inputLock = NSLock(); private var pendingInput: [CaptureInputMonitor.Sample] = []; private var drainingInput = false; private var inputOverflowed = false
@@ -35,7 +36,7 @@ final class CaptureEngine: NSObject, SCStreamOutput, SCStreamDelegate, AVCapture
         var monitor: [String: Any] = ["pointer": inputMonitor != nil && active && !stopping ? "active" : "inactive", "input": inputState, "pointerSamples": pointerSamples, "clicks": clickCount, "drags": dragCount, "typingEvents": typingCount]
         if let inputMessage { monitor["message"] = inputMessage }; if let firstPointerMs { monitor["firstPointerMs"] = firstPointerMs }
         let phase = finalizing ? "finalizing" : startupInProgress ? "starting" : active ? (pausedAt == nil ? "recording" : "paused") : "idle"
-        var result: [String: Any] = ["active": active || startupInProgress || finalizing, "paused": pausedAt != nil, "durationMs": active && !stopping ? elapsedMs() : finalDuration, "phase": phase, "monitoring": monitor, "microphoneLevel": micLevel, "systemLevel": systemLevel, "cameraVisible": cameraVisible, "cameraEnabled": cameraEnabled, "cameraRunning": cameraEnabled]
+        var result: [String: Any] = ["active": active || startupInProgress || finalizing, "paused": pausedAt != nil, "durationMs": active && !stopping ? elapsedMs() : finalDuration, "phase": phase, "monitoring": monitor, "microphoneLevel": micLevel, "systemLevel": systemLevel, "cameraVisible": cameraVisible, "cameraEnabled": cameraEnabled, "cameraRunning": cameraEnabled, "droppedFrames": droppedFrames, "screenFrames": writers["screen"]?.samples ?? 0]
         if let projectID { result["projectId"] = projectID }; if let errorMessage { result["error"] = errorMessage }
         statusLock.lock(); cachedStatus = result; statusLock.unlock()
     }
@@ -43,7 +44,7 @@ final class CaptureEngine: NSObject, SCStreamOutput, SCStreamDelegate, AVCapture
     func start(projectID: String, directory: String, settings: CaptureSettings) async throws -> [String: Any] {
         try queue.sync {
             guard !startupInProgress, !finalizing, !active else { throw NativeFailure("A recording is already active.", code: "recording_active") }
-            startupInProgress = true; self.projectID = projectID; finalDuration = 0; errorMessage = nil; inputState = "inactive"; inputMessage = nil; pointerSamples = 0; clickCount = 0; dragCount = 0; typingCount = 0; firstPointerMs = nil; publishStatus()
+            startupInProgress = true; self.projectID = projectID; finalDuration = 0; errorMessage = nil; inputState = "inactive"; inputMessage = nil; pointerSamples = 0; clickCount = 0; dragCount = 0; typingCount = 0; firstPointerMs = nil; droppedFrames = 0; publishStatus()
         }
         defer { queue.sync { startupInProgress = false; publishStatus() } }
         guard CGPreflightScreenCaptureAccess() else { throw NativeFailure("Screen recording permission is required.", code: "permission_required") }
@@ -291,7 +292,7 @@ final class CaptureEngine: NSObject, SCStreamOutput, SCStreamDelegate, AVCapture
         guard sampleBuffer.isValid, active, pausedAt == nil else { return }
         if type == .screen {
             if let info = (CMSampleBufferGetSampleAttachmentsArray(sampleBuffer, createIfNecessary: false) as? [[SCStreamFrameInfo: Any]])?.first {
-                if let raw = info[.status] as? Int, raw != SCFrameStatus.complete.rawValue { return }
+                if let raw = info[.status] as? Int, raw != SCFrameStatus.complete.rawValue { droppedFrames += 1; return }
                 // SCK preserves aspect ratio and may align content to an edge rather than center it.
                 // contentRect is already scaled, in surface points; scaleFactor converts it to pixels.
                 if let value = info[.contentRect] as? [String: Any], let rect = CGRect(dictionaryRepresentation: value as CFDictionary), let factor = info[.scaleFactor] as? CGFloat, let buffer = sampleBuffer.imageBuffer, rect.width > 0, rect.height > 0, rect.minX.isFinite, rect.minY.isFinite {
@@ -326,7 +327,8 @@ final class CaptureEngine: NSObject, SCStreamOutput, SCStreamDelegate, AVCapture
         var retimed: CMSampleBuffer?
         guard CMSampleBufferCreateCopyWithNewTiming(allocator: kCFAllocatorDefault, sampleBuffer: sample, sampleTimingEntryCount: count, sampleTimingArray: &timing, sampleBufferOut: &retimed) == noErr, let retimed else { return }
         do {
-            let before = writer.samples; try writer.append(retimed)
+            let before = writer.samples; let appended = try writer.append(retimed)
+            if kind == "screen", !appended { droppedFrames += 1 }
             if kind == "camera", cameraRangeStart == nil, writer.samples > before { cameraRangeStart = milliseconds(timing[0].presentationTimeStamp) }
         } catch { failRecording(error) }
         if kind == "microphone" || kind == "systemAudio" {

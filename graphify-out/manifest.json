@@ -12,9 +12,9 @@
     "semantic_hash": ""
   },
   "native/Capture.swift": {
-    "mtime": 1789372225.112967,
-    "seen": 1789372575.182991,
-    "ast_hash": "a07ce31c6a8cdaf92282c7aa8074122a",
+    "mtime": 1789373629.7084541,
+    "seen": 1789373971.6541362,
+    "ast_hash": "34c6fd808513415a8d05b1c7d533100b",
     "semantic_hash": ""
   },
   "native/Check.swift": {
@@ -126,9 +126,9 @@
     "semantic_hash": ""
   },
   "server/service.test.ts": {
-    "mtime": 1789373372.1352437,
-    "seen": 1789373484.486172,
-    "ast_hash": "7bcf4a676655a5076c3ef2559b1645a7",
+    "mtime": 1789373915.6602798,
+    "seen": 1789373971.654171,
+    "ast_hash": "220aec8e4281a7f3ef852d00a703de03",
     "semantic_hash": ""
   },
   "server/service.ts": {
@@ -150,9 +150,9 @@
     "semantic_hash": ""
   },
   "shared/types.ts": {
-    "mtime": 1789372841.537385,
-    "seen": 1789372991.670429,
-    "ast_hash": "f0cee53192a8fce49cd15bbacfd7c53c",
+    "mtime": 1789373629.7092092,
+    "seen": 1789373971.654183,
+    "ast_hash": "efa5ba48ed33a33aebe2cfc51ce75831",
     "semantic_hash": ""
   },
   "src-tauri/Cargo.toml": {
@@ -1086,9 +1086,9 @@
     "semantic_hash": ""
   },
   "scripts/check-interactions.ts": {
-    "mtime": 1789365311.9095619,
-    "seen": 1789365355.1959832,
-    "ast_hash": "d7953d39aa737dc2c084121cdcf11866",
+    "mtime": 1789373848.8292563,
+    "seen": 1789373971.6541529,
+    "ast_hash": "a64cf9c7f440a90694d6d83f63de6c79",
     "semantic_hash": ""
   },
   "server/camera-layout.test.ts": {
@@ -1140,9 +1140,9 @@
     "semantic_hash": ""
   },
   "docs/editor-validation.md": {
-    "mtime": 1789364939.38592,
-    "seen": 1789365081.584896,
-    "ast_hash": "c15450d4d35c146f3c73f0735e193279",
+    "mtime": 1789373744.7393112,
+    "seen": 1789373971.6542609,
+    "ast_hash": "87432cda0c61ddb0da5c69f7f95a3e88",
     "semantic_hash": ""
   },
   "docs/releases/0.1.0.json": {
@@ -1440,9 +1440,9 @@
     "semantic_hash": ""
   },
   "native/CaptureWriter.swift": {
-    "mtime": 1789372156.467819,
-    "seen": 1789372575.182993,
-    "ast_hash": "f17bfb895db8e1fc0a19dfece1e80f64",
+    "mtime": 1789373629.708117,
+    "seen": 1789373971.6541388,
+    "ast_hash": "5db3f2fa69240c98bbafdb9ac5e8d0c1",
     "semantic_hash": ""
   },
   "native/CompositionGeometry.swift": {

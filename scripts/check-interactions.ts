@@ -11,10 +11,40 @@ import { AppClient } from "@/server/rpc.js";
 import type {
   AppCapabilities,
   CursorEvent,
+  Job,
   Project,
   ProjectSummary,
   RecordingStatus,
 } from "@/shared/types.js";
+
+type ProcessSample = { wallMs: number; rssBytes: number; cpuPercent: number };
+
+function parseProcessSample(output: string) {
+  const [rss, cpu] = output.trim().split(/\s+/).map(Number);
+  assert(Number.isFinite(rss) && rss! > 0, "ps did not report process memory.");
+  assert(Number.isFinite(cpu) && cpu! >= 0, "ps did not report process CPU.");
+  return { rssBytes: rss! * 1024, cpuPercent: cpu! };
+}
+
+async function readProcessSample(pid: number) {
+  const { stdout } = await promisify(execFile)("/bin/ps", ["-o", "rss=,%cpu=", "-p", String(pid)]);
+  return parseProcessSample(stdout);
+}
+
+function processReport(samples: ProcessSample[]) {
+  if (!samples.length) return undefined;
+  const rss = samples.map((sample) => sample.rssBytes);
+  const cpu = samples.map((sample) => sample.cpuPercent);
+  return {
+    samples: samples.length,
+    firstRssBytes: rss[0],
+    lastRssBytes: rss.at(-1),
+    peakRssBytes: Math.max(...rss),
+    growthBytes: rss.at(-1)! - rss[0]!,
+    averageCpuPercent: cpu.reduce((sum, value) => sum + value, 0) / cpu.length,
+    peakCpuPercent: Math.max(...cpu),
+  };
+}
 
 function cursorReport(events: CursorEvent[], durationMs: number) {
   assert(events.length > 0, "No pointer metadata was recorded.");
@@ -107,6 +137,11 @@ const { values } = parseArgs({
     capture: { type: "boolean" },
     "self-check": { type: "boolean" },
     seconds: { type: "string", default: "10" },
+    pid: { type: "string" },
+    "sample-ms": { type: "string", default: "200" },
+    width: { type: "string", default: "1920" },
+    height: { type: "string", default: "1080" },
+    export: { type: "boolean" },
     source: { type: "string" },
     camera: { type: "string" },
     microphone: { type: "string" },
@@ -145,16 +180,55 @@ if (values["self-check"]) {
     20053.333,
   );
   assert.throws(() => audioInspection("Not an audio track"));
+  assert.deepEqual(parseProcessSample(" 1234  12.5\n"), {
+    rssBytes: 1_263_616,
+    cpuPercent: 12.5,
+  });
+  assert.deepEqual(
+    processReport([
+      { wallMs: 0, rssBytes: 100, cpuPercent: 10 },
+      { wallMs: 1000, rssBytes: 140, cpuPercent: 20 },
+    ]),
+    {
+      samples: 2,
+      firstRssBytes: 100,
+      lastRssBytes: 140,
+      peakRssBytes: 140,
+      growthBytes: 40,
+      averageCpuPercent: 15,
+      peakCpuPercent: 20,
+    },
+  );
   console.log("Interaction report self-check passed. No app connection or recording.");
 } else if (!values.capture) {
   console.log(
-    "Usage: npx tsx scripts/check-interactions.ts --capture [--seconds 10] [--source ID] [--pause-resume] [--require-input] [--system-audio] [--camera ID] [--microphone ID]\nOpen the signed desktop app first. Default: available display, 1080p/30, no camera/microphone/system audio. Existing permission is required; none is requested. Two clearly named QA projects and a JSON report are preserved. Use --self-check for a non-recording check.",
+    "Usage: npx tsx scripts/check-interactions.ts --capture [--seconds 10] [--pid APP_PID] [--sample-ms 200] [--width 1920 --height 1080] [--export] [--source ID] [--pause-resume] [--require-input] [--system-audio] [--camera ID] [--microphone ID]\nOpen the signed desktop app first. Existing permission is required; none is requested. Pass the exact app PID to measure RSS/CPU. Two clearly named QA projects and a JSON report are preserved. Use --self-check for a non-recording check.",
   );
 } else {
   const seconds = Number(values.seconds);
+  const sampleMs = Number(values["sample-ms"]);
+  const processId = values.pid === undefined ? undefined : Number(values.pid);
+  const width = Number(values.width);
+  const height = Number(values.height);
   assert(
-    Number.isFinite(seconds) && seconds >= 2 && seconds <= 60,
-    "--seconds must be between 2 and 60.",
+    Number.isFinite(seconds) && seconds >= 2 && seconds <= 7200,
+    "--seconds must be between 2 and 7200.",
+  );
+  assert(
+    Number.isFinite(sampleMs) && sampleMs >= 200 && sampleMs <= 60_000,
+    "--sample-ms must be between 200 and 60000.",
+  );
+  assert(
+    processId === undefined || (Number.isInteger(processId) && processId > 0),
+    "--pid must be a positive process ID.",
+  );
+  assert(
+    Number.isInteger(width) && width >= 64 && width <= 3840 && width % 2 === 0,
+    "--width must be an even number from 64 to 3840.",
+  );
+  assert(
+    Number.isInteger(height) && height >= 64 && height <= 2160 && height % 2 === 0,
+    "--height must be an even number from 64 to 2160.",
   );
   const client = new AppClient(
     process.env.SCREENREC_DATA_DIR
@@ -164,6 +238,7 @@ if (values["self-check"]) {
   const artifactDir = path.resolve(".cache/acceptance", `interactions-${randomUUID()}`);
   let project: Project | undefined, other: Project | undefined;
   const snapshots: { wallMs: number; roundTripMs: number; status: RecordingStatus }[] = [];
+  const processSamples: ProcessSample[] = [];
   const journalPath = path.join(artifactDir, "journal.jsonl");
   async function journal(event: Record<string, unknown>) {
     await fs.mkdir(artifactDir, { recursive: true });
@@ -228,8 +303,8 @@ if (values["self-check"]) {
       microphoneId: values.microphone,
       systemAudio: Boolean(values["system-audio"]),
       cameraShape: "circle",
-      width: 1920,
-      height: 1080,
+      width,
+      height,
       fps: 30,
     };
     await journal({
@@ -263,6 +338,11 @@ if (values["self-check"]) {
         status,
       };
       snapshots.push(snapshot);
+      if (processId !== undefined)
+        processSamples.push({
+          wallMs: snapshot.wallMs,
+          ...(await readProcessSample(processId)),
+        });
       await journal({ action: "recording.status", ...snapshot });
       assert.equal(status.projectId, recordingProject.id, "Active recording changed unexpectedly.");
       assert(
@@ -317,7 +397,7 @@ if (values["self-check"]) {
         paused = true;
         await journal({ action: "recording.resume.completed", status: resumed });
       }
-      await delay(200, undefined, { signal: abort.signal });
+      await delay(sampleMs, undefined, { signal: abort.signal });
     }
     const stopStart = performance.now();
     await journal({ action: "recording.stop.requested" });
@@ -372,6 +452,41 @@ if (values["self-check"]) {
           );
       }
     }
+    const trackDurations = Object.values(trackInspection)
+      .flatMap((inspection) =>
+        typeof inspection === "object" && inspection !== null && "durationMs" in inspection
+          ? [Number(inspection.durationMs)]
+          : [],
+      )
+      .filter(Number.isFinite);
+    const trackDurationSpreadMs = trackDurations.length
+      ? Math.max(...trackDurations) - Math.min(...trackDurations)
+      : undefined;
+    let exportResult:
+      { elapsedMs: number; status: Job["status"]; path: string; error?: string } | undefined;
+    if (values.export) {
+      const output = path.join(artifactDir, "long-recording-export.mp4");
+      const exportStarted = performance.now();
+      let job: Job = await client.call("export.start", {
+        projectId: finalProject.id,
+        path: output,
+        width,
+        height,
+      });
+      while (job.status === "queued" || job.status === "running") {
+        abort.signal.throwIfAborted();
+        await delay(1000, undefined, { signal: abort.signal });
+        job = await client.call("jobs.get", { jobId: job.id });
+      }
+      exportResult = {
+        elapsedMs: performance.now() - exportStarted,
+        status: job.status,
+        path: output,
+        ...(job.error ? { error: job.error } : {}),
+      };
+      assert.equal(job.status, "completed", job.error);
+      await fs.stat(output);
+    }
     const report = {
       date: new Date().toISOString(),
       host: {
@@ -387,11 +502,16 @@ if (values["self-check"]) {
       startupMs: recordingStarted - started,
       stopMs,
       durationMs: media.durationMs,
+      droppedFrames: Math.max(0, ...snapshots.map((item) => item.status.droppedFrames ?? 0)),
+      screenFrames: Math.max(0, ...snapshots.map((item) => item.status.screenFrames ?? 0)),
+      process: processReport(processSamples),
       concurrentSaveMs,
       cursor,
       checks,
       snapshots,
       trackInspection,
+      trackDurationSpreadMs,
+      export: exportResult,
       limits: [
         "RPC round trips are not input-to-render latency.",
         "Track durations do not prove A/V lip-sync accuracy.",
@@ -408,6 +528,10 @@ if (values["self-check"]) {
           projectDir,
           cursor,
           checks,
+          droppedFrames: Math.max(0, ...snapshots.map((item) => item.status.droppedFrames ?? 0)),
+          process: processReport(processSamples),
+          trackDurationSpreadMs,
+          export: exportResult,
           concurrentSaveMs,
           report: path.join(artifactDir, "result.json"),
         },

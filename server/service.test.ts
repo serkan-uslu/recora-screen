@@ -1410,6 +1410,7 @@ test("AI provider failure leaves staged changes uncommitted and API keys out of 
       await fs.readFile(path.join(service.store.dir(original.id), "project.json"), "utf8")
     ).includes("test-key-not-real"),
   );
+  await service.jobs.flush();
   assert(
     !(await fs.readFile(path.join(root, "data", "jobs.json"), "utf8")).includes(
       "test-key-not-real",

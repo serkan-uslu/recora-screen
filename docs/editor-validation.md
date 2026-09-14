@@ -69,3 +69,13 @@ For the camera run, the source duration was 20,069.2584 ms; AVFoundation inspect
 An earlier intended 30-second QA capture ended cleanly at 17,851.66 ms, with no native error and a final mouse release 8.17 ms before stopping; evidence is consistent with an external Finish action. Its 546 metadata events were monotonic with a 34.33 ms maximum gap. It is not counted as a completed 30-second test.
 
 Run `npx tsx scripts/check-interactions.ts --self-check` without connecting to the app. Use `--capture --seconds 10 --pause-resume` only when a bounded real display recording is intended; camera, microphone and system audio require explicit flags. The diagnostic never launches a replacement app or changes permission settings.
+
+For a release candidate, run the signed app from an isolated data/project directory and pass its exact process ID. These opt-in commands record at 4K/30, sample process RSS/CPU every five seconds, count incomplete/backpressured screen frames, inspect finalized track durations, time finalization and export the captured snapshot:
+
+```sh
+npm run test:interactions -- --capture --seconds 1800 --sample-ms 5000 --pid APP_PID --width 3840 --height 2160 --camera CAMERA_ID --microphone MICROPHONE_ID --system-audio --export
+npm run test:interactions -- --capture --seconds 3600 --sample-ms 5000 --pid APP_PID --width 3840 --height 2160 --camera CAMERA_ID --microphone MICROPHONE_ID --system-audio --export
+npm run test:interactions -- --capture --seconds 7200 --sample-ms 5000 --pid APP_PID --width 3840 --height 2160 --camera CAMERA_ID --microphone MICROPHONE_ID --system-audio --export
+```
+
+The generated `result.json` is measurement evidence, not an automatic sync pass. Track-duration spread cannot prove presentation alignment; use visible and audible synchronization markers at the start and end to verify the ≤80 ms criterion.

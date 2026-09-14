@@ -20,11 +20,11 @@ final class TrackWriter {
         guard writer.startWriting() else { throw writer.error ?? NativeFailure("Encoder failed to start.") }
         writer.startSession(atSourceTime: .zero)
     }
-    func append(_ sample: CMSampleBuffer) throws {
+    @discardableResult func append(_ sample: CMSampleBuffer) throws -> Bool {
         if writer.status == .failed { throw writer.error ?? NativeFailure("Recording writer failed.") }
-        guard input.isReadyForMoreMediaData else { if !video { throw NativeFailure("Audio encoder cannot keep up; recording stopped to preserve synchronization.") }; return }
+        guard input.isReadyForMoreMediaData else { if !video { throw NativeFailure("Audio encoder cannot keep up; recording stopped to preserve synchronization.") }; return false }
         guard input.append(sample) else { throw writer.error ?? NativeFailure("Could not append media sample.") }
-        samples += 1; if video { lastVideo = sample }
+        samples += 1; if video { lastVideo = sample }; return true
     }
     func finish(at time: CMTime) async throws {
         if video, let last = lastVideo, time > last.presentationTimeStamp, input.isReadyForMoreMediaData {
