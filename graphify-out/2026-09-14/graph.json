@@ -225,13 +225,52 @@
       "source_location": "L31"
     },
     {
+      "id": "server_contracts_validation_apperror",
+      "label": "AppError",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 12,
+      "community_name": "AppError",
+      "file_type": "code",
+      "norm_label": "apperror",
+      "source_file": "server/contracts/validation.ts",
+      "source_location": "L4"
+    },
+    {
+      "id": "server_controllers_commandcontroller_commandcontroller",
+      "label": "CommandController",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 12,
+      "community_name": "AppError",
+      "file_type": "code",
+      "norm_label": "commandcontroller",
+      "source_file": "server/controllers/CommandController.ts",
+      "source_location": "L5"
+    },
+    {
+      "id": "server_infrastructure_projectstore_document",
+      "label": "Document",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 12,
+      "community_name": "AppError",
+      "file_type": "code",
+      "norm_label": "document",
+      "source_file": "server/infrastructure/ProjectStore.ts",
+      "source_location": "L49"
+    },
+    {
       "id": "server_infrastructure_projectstore_projectstore",
       "label": "ProjectStore",
       "_callable": true,
       "_callable_class": true,
       "_origin": "ast",
       "community": 12,
-      "community_name": "ProjectStore",
+      "community_name": "AppError",
       "file_type": "code",
       "norm_label": "projectstore",
       "source_file": "server/infrastructure/ProjectStore.ts",
@@ -244,7 +283,7 @@
       "_callable_class": true,
       "_origin": "ast",
       "community": 12,
-      "community_name": "ProjectStore",
+      "community_name": "AppError",
       "file_type": "code",
       "norm_label": "projectsummary",
       "source_file": "shared/types.ts",
@@ -277,17 +316,30 @@
       "source_location": "L114"
     },
     {
-      "id": "server_contracts_validation_apperror",
-      "label": "AppError",
+      "id": "server_domain_edits_audiowindow",
+      "label": "AudioWindow",
       "_callable": true,
       "_callable_class": true,
       "_origin": "ast",
       "community": 15,
-      "community_name": "AppError",
+      "community_name": "ApplicationService.ts",
       "file_type": "code",
-      "norm_label": "apperror",
-      "source_file": "server/contracts/validation.ts",
-      "source_location": "L4"
+      "norm_label": "audiowindow",
+      "source_file": "server/domain/edits.ts",
+      "source_location": "L356"
+    },
+    {
+      "id": "server_services_ai_aisettings",
+      "label": "AISettings",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 15,
+      "community_name": "ApplicationService.ts",
+      "file_type": "code",
+      "norm_label": "aisettings",
+      "source_file": "server/services/ai.ts",
+      "source_location": "L207"
     },
     {
       "id": "shared_types_timelinesegment",
@@ -296,11 +348,24 @@
       "_callable_class": true,
       "_origin": "ast",
       "community": 15,
-      "community_name": "AppError",
+      "community_name": "ApplicationService.ts",
       "file_type": "code",
       "norm_label": "timelinesegment",
       "source_file": "shared/types.ts",
       "source_location": "L2"
+    },
+    {
+      "id": "shared_types_appcapabilities",
+      "label": "AppCapabilities",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 18,
+      "community_name": "check-interactions.ts",
+      "file_type": "code",
+      "norm_label": "appcapabilities",
+      "source_file": "shared/types.ts",
+      "source_location": "L198"
     },
     {
       "id": "shared_types_recordingstatus",
@@ -511,32 +576,6 @@
       "source_location": "L101"
     },
     {
-      "id": "server_domain_edits_audiowindow",
-      "label": "AudioWindow",
-      "_callable": true,
-      "_callable_class": true,
-      "_origin": "ast",
-      "community": 5,
-      "community_name": "validation.ts",
-      "file_type": "code",
-      "norm_label": "audiowindow",
-      "source_file": "server/domain/edits.ts",
-      "source_location": "L356"
-    },
-    {
-      "id": "server_services_ai_aisettings",
-      "label": "AISettings",
-      "_callable": true,
-      "_callable_class": true,
-      "_origin": "ast",
-      "community": 5,
-      "community_name": "validation.ts",
-      "file_type": "code",
-      "norm_label": "aisettings",
-      "source_file": "server/services/ai.ts",
-      "source_location": "L207"
-    },
-    {
       "id": "shared_types_cursorevent",
       "label": "CursorEvent",
       "_callable": true,
@@ -587,19 +626,6 @@
       "norm_label": "nativecall",
       "source_file": "server/services/ApplicationService.ts",
       "source_location": "L32"
-    },
-    {
-      "id": "shared_types_appcapabilities",
-      "label": "AppCapabilities",
-      "_callable": true,
-      "_callable_class": true,
-      "_origin": "ast",
-      "community": 52,
-      "community_name": "service.test.ts",
-      "file_type": "code",
-      "norm_label": "appcapabilities",
-      "source_file": "shared/types.ts",
-      "source_location": "L198"
     },
     {
       "id": "native_bridge_exportjob",
@@ -755,7 +781,7 @@
       "file_type": "code",
       "norm_label": "gesture",
       "source_file": "src/controllers/usePreviewEditingController.ts",
-      "source_location": "L22"
+      "source_location": "L26"
     },
     {
       "id": "src_controllers_useprevieweditingcontroller_previeweditingprops",
@@ -768,7 +794,7 @@
       "file_type": "code",
       "norm_label": "previeweditingprops",
       "source_file": "src/controllers/usePreviewEditingController.ts",
-      "source_location": "L11"
+      "source_location": "L15"
     },
     {
       "id": "src_controllers_useprevieweditingcontroller_previewselection",
@@ -781,7 +807,7 @@
       "file_type": "code",
       "norm_label": "previewselection",
       "source_file": "src/controllers/usePreviewEditingController.ts",
-      "source_location": "L10"
+      "source_location": "L14"
     },
     {
       "id": "server_services_jobs_jobs",
@@ -888,45 +914,6 @@
       "source_location": "L41"
     },
     {
-      "id": "shared_types_capturesettings",
-      "label": "CaptureSettings",
-      "_callable": true,
-      "_callable_class": true,
-      "_origin": "ast",
-      "community": 64,
-      "community_name": "messageOf",
-      "file_type": "code",
-      "norm_label": "capturesettings",
-      "source_file": "shared/types.ts",
-      "source_location": "L11"
-    },
-    {
-      "id": "server_controllers_commandcontroller_commandcontroller",
-      "label": "CommandController",
-      "_callable": true,
-      "_callable_class": true,
-      "_origin": "ast",
-      "community": 69,
-      "community_name": "ProjectStore.ts",
-      "file_type": "code",
-      "norm_label": "commandcontroller",
-      "source_file": "server/controllers/CommandController.ts",
-      "source_location": "L5"
-    },
-    {
-      "id": "server_infrastructure_projectstore_document",
-      "label": "Document",
-      "_callable": true,
-      "_callable_class": true,
-      "_origin": "ast",
-      "community": 69,
-      "community_name": "ProjectStore.ts",
-      "file_type": "code",
-      "norm_label": "document",
-      "source_file": "server/infrastructure/ProjectStore.ts",
-      "source_location": "L49"
-    },
-    {
       "id": "src_controllers_usestudiocontroller_studiocontroller",
       "label": "StudioController",
       "_callable": true,
@@ -937,7 +924,7 @@
       "file_type": "code",
       "norm_label": "studiocontroller",
       "source_file": "src/controllers/useStudioController.ts",
-      "source_location": "L802"
+      "source_location": "L808"
     },
     {
       "id": "shared_types_asset",
@@ -1003,6 +990,19 @@
       "norm_label": "canvassettings",
       "source_file": "shared/types.ts",
       "source_location": "L74"
+    },
+    {
+      "id": "shared_types_capturesettings",
+      "label": "CaptureSettings",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 76,
+      "community_name": "types.ts",
+      "file_type": "code",
+      "norm_label": "capturesettings",
+      "source_file": "shared/types.ts",
+      "source_location": "L11"
     },
     {
       "id": "shared_types_capturesource",
@@ -1249,7 +1249,7 @@
       "file_type": "code",
       "norm_label": "timelinedrag",
       "source_file": "src/features/editor/Timeline.tsx",
-      "source_location": "L1313"
+      "source_location": "L1308"
     },
     {
       "id": "src_features_editor_timeline_timelinemenu",
@@ -1262,7 +1262,19 @@
       "file_type": "code",
       "norm_label": "timelinemenu",
       "source_file": "src/features/editor/Timeline.tsx",
-      "source_location": "L1304"
+      "source_location": "L1299"
+    },
+    {
+      "id": "native_models_color",
+      "label": "color()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 0,
+      "community_name": "Models.swift",
+      "file_type": "code",
+      "norm_label": "color()",
+      "source_file": "native/Models.swift",
+      "source_location": "L93"
     },
     {
       "id": "native_models_mediarange_contains",
@@ -1301,30 +1313,6 @@
       "source_location": "L75"
     },
     {
-      "id": "native_models_sourcetime",
-      "label": "sourceTime()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 0,
-      "community_name": "Models.swift",
-      "file_type": "code",
-      "norm_label": "sourcetime()",
-      "source_file": "native/Models.swift",
-      "source_location": "L69"
-    },
-    {
-      "id": "native_models_timelineduration",
-      "label": "timelineDuration()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 0,
-      "community_name": "Models.swift",
-      "file_type": "code",
-      "norm_label": "timelineduration()",
-      "source_file": "native/Models.swift",
-      "source_location": "L74"
-    },
-    {
       "id": "src_components_organisms_studiodialogs_studiodialogs",
       "label": "StudioDialogs()",
       "_callable": true,
@@ -1358,7 +1346,7 @@
       "file_type": "code",
       "norm_label": "usestudiocontroller()",
       "source_file": "src/controllers/useStudioController.ts",
-      "source_location": "L24"
+      "source_location": "L30"
     },
     {
       "id": "src_controllers_usestudiocontroller_usestudiocontroller_acceptcurrentproject",
@@ -1370,7 +1358,7 @@
       "file_type": "code",
       "norm_label": "acceptcurrentproject()",
       "source_file": "src/controllers/useStudioController.ts",
-      "source_location": "L79"
+      "source_location": "L85"
     },
     {
       "id": "src_controllers_usestudiocontroller_usestudiocontroller_apply",
@@ -1382,7 +1370,7 @@
       "file_type": "code",
       "norm_label": "apply()",
       "source_file": "src/controllers/useStudioController.ts",
-      "source_location": "L387"
+      "source_location": "L393"
     },
     {
       "id": "src_controllers_usestudiocontroller_usestudiocontroller_backtolibrary",
@@ -1394,7 +1382,7 @@
       "file_type": "code",
       "norm_label": "backtolibrary()",
       "source_file": "src/controllers/useStudioController.ts",
-      "source_location": "L444"
+      "source_location": "L450"
     },
     {
       "id": "src_controllers_usestudiocontroller_usestudiocontroller_canceldraftpreview",
@@ -1406,7 +1394,7 @@
       "file_type": "code",
       "norm_label": "canceldraftpreview()",
       "source_file": "src/controllers/useStudioController.ts",
-      "source_location": "L93"
+      "source_location": "L99"
     },
     {
       "id": "src_controllers_usestudiocontroller_usestudiocontroller_canceljob",
@@ -1418,7 +1406,7 @@
       "file_type": "code",
       "norm_label": "canceljob()",
       "source_file": "src/controllers/useStudioController.ts",
-      "source_location": "L610"
+      "source_location": "L616"
     },
     {
       "id": "src_controllers_usestudiocontroller_usestudiocontroller_commitrename",
@@ -1430,7 +1418,7 @@
       "file_type": "code",
       "norm_label": "commitrename()",
       "source_file": "src/controllers/useStudioController.ts",
-      "source_location": "L630"
+      "source_location": "L636"
     },
     {
       "id": "src_controllers_usestudiocontroller_usestudiocontroller_confirmdelete",
@@ -1442,7 +1430,7 @@
       "file_type": "code",
       "norm_label": "confirmdelete()",
       "source_file": "src/controllers/useStudioController.ts",
-      "source_location": "L647"
+      "source_location": "L653"
     },
     {
       "id": "src_controllers_usestudiocontroller_usestudiocontroller_createproject",
@@ -1454,7 +1442,7 @@
       "file_type": "code",
       "norm_label": "createproject()",
       "source_file": "src/controllers/useStudioController.ts",
-      "source_location": "L616"
+      "source_location": "L622"
     },
     {
       "id": "src_controllers_usestudiocontroller_usestudiocontroller_draftpreview",
@@ -1466,7 +1454,7 @@
       "file_type": "code",
       "norm_label": "draftpreview()",
       "source_file": "src/controllers/useStudioController.ts",
-      "source_location": "L129"
+      "source_location": "L135"
     },
     {
       "id": "src_controllers_usestudiocontroller_usestudiocontroller_exporttranscript",
@@ -1478,7 +1466,7 @@
       "file_type": "code",
       "norm_label": "exporttranscript()",
       "source_file": "src/controllers/useStudioController.ts",
-      "source_location": "L714"
+      "source_location": "L720"
     },
     {
       "id": "src_controllers_usestudiocontroller_usestudiocontroller_exportvideo",
@@ -1490,7 +1478,7 @@
       "file_type": "code",
       "norm_label": "exportvideo()",
       "source_file": "src/controllers/useStudioController.ts",
-      "source_location": "L703"
+      "source_location": "L709"
     },
     {
       "id": "src_controllers_usestudiocontroller_usestudiocontroller_finishrecording",
@@ -1502,7 +1490,7 @@
       "file_type": "code",
       "norm_label": "finishrecording()",
       "source_file": "src/controllers/useStudioController.ts",
-      "source_location": "L591"
+      "source_location": "L597"
     },
     {
       "id": "src_controllers_usestudiocontroller_usestudiocontroller_history",
@@ -1514,7 +1502,7 @@
       "file_type": "code",
       "norm_label": "history()",
       "source_file": "src/controllers/useStudioController.ts",
-      "source_location": "L454"
+      "source_location": "L460"
     },
     {
       "id": "src_controllers_usestudiocontroller_usestudiocontroller_importimage",
@@ -1526,7 +1514,31 @@
       "file_type": "code",
       "norm_label": "importimage()",
       "source_file": "src/controllers/useStudioController.ts",
-      "source_location": "L143"
+      "source_location": "L149"
+    },
+    {
+      "id": "src_controllers_usestudiocontroller_usestudiocontroller_importproject",
+      "label": "importProject()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 1,
+      "community_name": "useStudioController",
+      "file_type": "code",
+      "norm_label": "importproject()",
+      "source_file": "src/controllers/useStudioController.ts",
+      "source_location": "L484"
+    },
+    {
+      "id": "src_controllers_usestudiocontroller_usestudiocontroller_openexport",
+      "label": "openExport()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 1,
+      "community_name": "useStudioController",
+      "file_type": "code",
+      "norm_label": "openexport()",
+      "source_file": "src/controllers/useStudioController.ts",
+      "source_location": "L612"
     },
     {
       "id": "src_controllers_usestudiocontroller_usestudiocontroller_openproject",
@@ -1538,7 +1550,7 @@
       "file_type": "code",
       "norm_label": "openproject()",
       "source_file": "src/controllers/useStudioController.ts",
-      "source_location": "L436"
+      "source_location": "L442"
     },
     {
       "id": "src_controllers_usestudiocontroller_usestudiocontroller_poll",
@@ -1550,7 +1562,7 @@
       "file_type": "code",
       "norm_label": "poll()",
       "source_file": "src/controllers/useStudioController.ts",
-      "source_location": "L281"
+      "source_location": "L287"
     },
     {
       "id": "src_controllers_usestudiocontroller_usestudiocontroller_refreshcapabilities",
@@ -1562,7 +1574,7 @@
       "file_type": "code",
       "norm_label": "refreshcapabilities()",
       "source_file": "src/controllers/useStudioController.ts",
-      "source_location": "L660"
+      "source_location": "L666"
     },
     {
       "id": "src_controllers_usestudiocontroller_usestudiocontroller_renameproject",
@@ -1574,7 +1586,7 @@
       "file_type": "code",
       "norm_label": "renameproject()",
       "source_file": "src/controllers/useStudioController.ts",
-      "source_location": "L487"
+      "source_location": "L493"
     },
     {
       "id": "src_controllers_usestudiocontroller_usestudiocontroller_runrecording",
@@ -1586,7 +1598,7 @@
       "file_type": "code",
       "norm_label": "runrecording()",
       "source_file": "src/controllers/useStudioController.ts",
-      "source_location": "L559"
+      "source_location": "L565"
     },
     {
       "id": "src_controllers_usestudiocontroller_usestudiocontroller_savedraft",
@@ -1598,7 +1610,7 @@
       "file_type": "code",
       "norm_label": "savedraft()",
       "source_file": "src/controllers/useStudioController.ts",
-      "source_location": "L428"
+      "source_location": "L434"
     },
     {
       "id": "src_controllers_usestudiocontroller_usestudiocontroller_savekey",
@@ -1610,7 +1622,7 @@
       "file_type": "code",
       "norm_label": "savekey()",
       "source_file": "src/controllers/useStudioController.ts",
-      "source_location": "L692"
+      "source_location": "L698"
     },
     {
       "id": "src_controllers_usestudiocontroller_usestudiocontroller_savesettings",
@@ -1622,7 +1634,7 @@
       "file_type": "code",
       "norm_label": "savesettings()",
       "source_file": "src/controllers/useStudioController.ts",
-      "source_location": "L684"
+      "source_location": "L690"
     },
     {
       "id": "src_controllers_usestudiocontroller_usestudiocontroller_scheduledraftpreview",
@@ -1634,7 +1646,7 @@
       "file_type": "code",
       "norm_label": "scheduledraftpreview()",
       "source_file": "src/controllers/useStudioController.ts",
-      "source_location": "L98"
+      "source_location": "L104"
     },
     {
       "id": "src_controllers_usestudiocontroller_usestudiocontroller_startjob",
@@ -1646,7 +1658,7 @@
       "file_type": "code",
       "norm_label": "startjob()",
       "source_file": "src/controllers/useStudioController.ts",
-      "source_location": "L468"
+      "source_location": "L474"
     },
     {
       "id": "src_controllers_usestudiocontroller_usestudiocontroller_startrecording",
@@ -1658,7 +1670,7 @@
       "file_type": "code",
       "norm_label": "startrecording()",
       "source_file": "src/controllers/useStudioController.ts",
-      "source_location": "L664"
+      "source_location": "L670"
     },
     {
       "id": "src_controllers_usestudiocontroller_usestudiocontroller_togglecameradevice",
@@ -1670,7 +1682,7 @@
       "file_type": "code",
       "norm_label": "togglecameradevice()",
       "source_file": "src/controllers/useStudioController.ts",
-      "source_location": "L577"
+      "source_location": "L583"
     },
     {
       "id": "src_controllers_usestudiocontroller_usestudiocontroller_togglecameravisibility",
@@ -1682,7 +1694,7 @@
       "file_type": "code",
       "norm_label": "togglecameravisibility()",
       "source_file": "src/controllers/useStudioController.ts",
-      "source_location": "L572"
+      "source_location": "L578"
     },
     {
       "id": "src_controllers_usestudiocontroller_usestudiocontroller_togglerecordingpause",
@@ -1694,7 +1706,7 @@
       "file_type": "code",
       "norm_label": "togglerecordingpause()",
       "source_file": "src/controllers/useStudioController.ts",
-      "source_location": "L582"
+      "source_location": "L588"
     },
     {
       "id": "src_features_editor_editorscreen_editorscreen",
@@ -1721,6 +1733,18 @@
       "source_location": "L105"
     },
     {
+      "id": "src_infrastructure_platform_pickpath",
+      "label": "pickPath()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 1,
+      "community_name": "useStudioController",
+      "file_type": "code",
+      "norm_label": "pickpath()",
+      "source_file": "src/infrastructure/platform.ts",
+      "source_location": "L5"
+    },
+    {
       "id": "src_services_commands_command",
       "label": "command()",
       "_callable": true,
@@ -1733,16 +1757,52 @@
       "source_location": "L28"
     },
     {
+      "id": "server_camera_layout_test_legacy",
+      "label": "legacy()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 12,
+      "community_name": "AppError",
+      "file_type": "code",
+      "norm_label": "legacy()",
+      "source_file": "server/camera-layout.test.ts",
+      "source_location": "L146"
+    },
+    {
       "id": "server_camera_layout_test_setup",
       "label": "setup()",
       "_callable": true,
       "_origin": "ast",
       "community": 12,
-      "community_name": "ProjectStore",
+      "community_name": "AppError",
       "file_type": "code",
       "norm_label": "setup()",
       "source_file": "server/camera-layout.test.ts",
       "source_location": "L12"
+    },
+    {
+      "id": "server_camera_layout_test_times",
+      "label": "times()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 12,
+      "community_name": "AppError",
+      "file_type": "code",
+      "norm_label": "times()",
+      "source_file": "server/camera-layout.test.ts",
+      "source_location": "L35"
+    },
+    {
+      "id": "server_contracts_validation_apperror_constructor",
+      "label": ".constructor()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 12,
+      "community_name": "AppError",
+      "file_type": "code",
+      "norm_label": ".constructor()",
+      "source_file": "server/contracts/validation.ts",
+      "source_location": "L5"
     },
     {
       "id": "server_contracts_validation_checkrevision",
@@ -1750,11 +1810,71 @@
       "_callable": true,
       "_origin": "ast",
       "community": 12,
-      "community_name": "ProjectStore",
+      "community_name": "AppError",
       "file_type": "code",
       "norm_label": "checkrevision()",
       "source_file": "server/contracts/validation.ts",
       "source_location": "L368"
+    },
+    {
+      "id": "server_contracts_validation_object",
+      "label": "object()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 12,
+      "community_name": "AppError",
+      "file_type": "code",
+      "norm_label": "object()",
+      "source_file": "server/contracts/validation.ts",
+      "source_location": "L365"
+    },
+    {
+      "id": "server_contracts_validation_parseproject",
+      "label": "parseProject()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 12,
+      "community_name": "AppError",
+      "file_type": "code",
+      "norm_label": "parseproject()",
+      "source_file": "server/contracts/validation.ts",
+      "source_location": "L231"
+    },
+    {
+      "id": "server_controllers_commandcontroller_commandcontroller_command",
+      "label": ".command()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 12,
+      "community_name": "AppError",
+      "file_type": "code",
+      "norm_label": ".command()",
+      "source_file": "server/controllers/CommandController.ts",
+      "source_location": "L17"
+    },
+    {
+      "id": "server_controllers_commandcontroller_commandcontroller_constructor",
+      "label": ".constructor()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 12,
+      "community_name": "AppError",
+      "file_type": "code",
+      "norm_label": ".constructor()",
+      "source_file": "server/controllers/CommandController.ts",
+      "source_location": "L9"
+    },
+    {
+      "id": "server_controllers_commandcontroller_commandcontroller_serialize",
+      "label": ".serialize()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 12,
+      "community_name": "AppError",
+      "file_type": "code",
+      "norm_label": ".serialize()",
+      "source_file": "server/controllers/CommandController.ts",
+      "source_location": "L57"
     },
     {
       "id": "server_infrastructure_projectstore_archivemanifest",
@@ -1762,11 +1882,35 @@
       "_callable": true,
       "_origin": "ast",
       "community": 12,
-      "community_name": "ProjectStore",
+      "community_name": "AppError",
       "file_type": "code",
       "norm_label": "archivemanifest()",
       "source_file": "server/infrastructure/ProjectStore.ts",
       "source_location": "L75"
+    },
+    {
+      "id": "server_infrastructure_projectstore_haslegacyproject",
+      "label": "hasLegacyProject()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 12,
+      "community_name": "AppError",
+      "file_type": "code",
+      "norm_label": "haslegacyproject()",
+      "source_file": "server/infrastructure/ProjectStore.ts",
+      "source_location": "L67"
+    },
+    {
+      "id": "server_infrastructure_projectstore_parsedocument",
+      "label": "parseDocument()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 12,
+      "community_name": "AppError",
+      "file_type": "code",
+      "norm_label": "parsedocument()",
+      "source_file": "server/infrastructure/ProjectStore.ts",
+      "source_location": "L50"
     },
     {
       "id": "server_infrastructure_projectstore_projectstore_assertidle",
@@ -1774,7 +1918,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 12,
-      "community_name": "ProjectStore",
+      "community_name": "AppError",
       "file_type": "code",
       "norm_label": ".assertidle()",
       "source_file": "server/infrastructure/ProjectStore.ts",
@@ -1786,7 +1930,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 12,
-      "community_name": "ProjectStore",
+      "community_name": "AppError",
       "file_type": "code",
       "norm_label": ".constructor()",
       "source_file": "server/infrastructure/ProjectStore.ts",
@@ -1798,7 +1942,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 12,
-      "community_name": "ProjectStore",
+      "community_name": "AppError",
       "file_type": "code",
       "norm_label": ".copymedia()",
       "source_file": "server/infrastructure/ProjectStore.ts",
@@ -1810,7 +1954,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 12,
-      "community_name": "ProjectStore",
+      "community_name": "AppError",
       "file_type": "code",
       "norm_label": ".create()",
       "source_file": "server/infrastructure/ProjectStore.ts",
@@ -1822,7 +1966,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 12,
-      "community_name": "ProjectStore",
+      "community_name": "AppError",
       "file_type": "code",
       "norm_label": ".dir()",
       "source_file": "server/infrastructure/ProjectStore.ts",
@@ -1834,7 +1978,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 12,
-      "community_name": "ProjectStore",
+      "community_name": "AppError",
       "file_type": "code",
       "norm_label": ".exclusive()",
       "source_file": "server/infrastructure/ProjectStore.ts",
@@ -1846,7 +1990,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 12,
-      "community_name": "ProjectStore",
+      "community_name": "AppError",
       "file_type": "code",
       "norm_label": ".flush()",
       "source_file": "server/infrastructure/ProjectStore.ts",
@@ -1858,7 +2002,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 12,
-      "community_name": "ProjectStore",
+      "community_name": "AppError",
       "file_type": "code",
       "norm_label": ".get()",
       "source_file": "server/infrastructure/ProjectStore.ts",
@@ -1870,7 +2014,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 12,
-      "community_name": "ProjectStore",
+      "community_name": "AppError",
       "file_type": "code",
       "norm_label": ".history()",
       "source_file": "server/infrastructure/ProjectStore.ts",
@@ -1882,7 +2026,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 12,
-      "community_name": "ProjectStore",
+      "community_name": "AppError",
       "file_type": "code",
       "norm_label": ".initialize()",
       "source_file": "server/infrastructure/ProjectStore.ts",
@@ -1894,7 +2038,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 12,
-      "community_name": "ProjectStore",
+      "community_name": "AppError",
       "file_type": "code",
       "norm_label": ".list()",
       "source_file": "server/infrastructure/ProjectStore.ts",
@@ -1906,7 +2050,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 12,
-      "community_name": "ProjectStore",
+      "community_name": "AppError",
       "file_type": "code",
       "norm_label": ".mutate()",
       "source_file": "server/infrastructure/ProjectStore.ts",
@@ -1918,11 +2062,23 @@
       "_callable": true,
       "_origin": "ast",
       "community": 12,
-      "community_name": "ProjectStore",
+      "community_name": "AppError",
       "file_type": "code",
       "norm_label": ".persist()",
       "source_file": "server/infrastructure/ProjectStore.ts",
       "source_location": "L227"
+    },
+    {
+      "id": "server_infrastructure_projectstore_projectstore_persistdocument",
+      "label": ".persistDocument()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 12,
+      "community_name": "AppError",
+      "file_type": "code",
+      "norm_label": ".persistdocument()",
+      "source_file": "server/infrastructure/ProjectStore.ts",
+      "source_location": "L236"
     },
     {
       "id": "server_infrastructure_projectstore_projectstore_read",
@@ -1930,7 +2086,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 12,
-      "community_name": "ProjectStore",
+      "community_name": "AppError",
       "file_type": "code",
       "norm_label": ".read()",
       "source_file": "server/infrastructure/ProjectStore.ts",
@@ -1942,7 +2098,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 12,
-      "community_name": "ProjectStore",
+      "community_name": "AppError",
       "file_type": "code",
       "norm_label": ".readdocument()",
       "source_file": "server/infrastructure/ProjectStore.ts",
@@ -1954,7 +2110,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 12,
-      "community_name": "ProjectStore",
+      "community_name": "AppError",
       "file_type": "code",
       "norm_label": ".resolvemedia()",
       "source_file": "server/infrastructure/ProjectStore.ts",
@@ -1966,11 +2122,35 @@
       "_callable": true,
       "_origin": "ast",
       "community": 12,
-      "community_name": "ProjectStore",
+      "community_name": "AppError",
       "file_type": "code",
       "norm_label": ".savefailure()",
       "source_file": "server/infrastructure/ProjectStore.ts",
       "source_location": "L123"
+    },
+    {
+      "id": "server_services_jobs_jobs_cancel",
+      "label": ".cancel()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 12,
+      "community_name": "AppError",
+      "file_type": "code",
+      "norm_label": ".cancel()",
+      "source_file": "server/services/Jobs.ts",
+      "source_location": "L113"
+    },
+    {
+      "id": "server_services_jobs_jobs_get",
+      "label": ".get()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 12,
+      "community_name": "AppError",
+      "file_type": "code",
+      "norm_label": ".get()",
+      "source_file": "server/services/Jobs.ts",
+      "source_location": "L42"
     },
     {
       "id": "shared_types_defaultedits",
@@ -1978,11 +2158,35 @@
       "_callable": true,
       "_origin": "ast",
       "community": 12,
-      "community_name": "ProjectStore",
+      "community_name": "AppError",
       "file_type": "code",
       "norm_label": "defaultedits()",
       "source_file": "shared/types.ts",
       "source_location": "L238"
+    },
+    {
+      "id": "server_domain_cursor_cursorclicks",
+      "label": "cursorClicks()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 14,
+      "community_name": "Project",
+      "file_type": "code",
+      "norm_label": "cursorclicks()",
+      "source_file": "server/domain/cursor.ts",
+      "source_location": "L17"
+    },
+    {
+      "id": "server_domain_cursor_cursorclicks_retain",
+      "label": "retain()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 14,
+      "community_name": "Project",
+      "file_type": "code",
+      "norm_label": "retain()",
+      "source_file": "server/domain/cursor.ts",
+      "source_location": "L27"
     },
     {
       "id": "server_service_test_setup",
@@ -2165,24 +2369,12 @@
       "source_location": "L202"
     },
     {
-      "id": "server_contracts_validation_apperror_constructor",
-      "label": ".constructor()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 15,
-      "community_name": "AppError",
-      "file_type": "code",
-      "norm_label": ".constructor()",
-      "source_file": "server/contracts/validation.ts",
-      "source_location": "L5"
-    },
-    {
       "id": "server_domain_edits_applyedits",
       "label": "applyEdits()",
       "_callable": true,
       "_origin": "ast",
       "community": 15,
-      "community_name": "AppError",
+      "community_name": "ApplicationService.ts",
       "file_type": "code",
       "norm_label": "applyedits()",
       "source_file": "server/domain/edits.ts",
@@ -2194,7 +2386,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 15,
-      "community_name": "AppError",
+      "community_name": "ApplicationService.ts",
       "file_type": "code",
       "norm_label": "checkedrange()",
       "source_file": "server/domain/edits.ts",
@@ -2206,7 +2398,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 15,
-      "community_name": "AppError",
+      "community_name": "ApplicationService.ts",
       "file_type": "code",
       "norm_label": "coalescesegments()",
       "source_file": "server/domain/edits.ts",
@@ -2218,7 +2410,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 15,
-      "community_name": "AppError",
+      "community_name": "ApplicationService.ts",
       "file_type": "code",
       "norm_label": "found()",
       "source_file": "server/domain/edits.ts",
@@ -2230,7 +2422,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 15,
-      "community_name": "AppError",
+      "community_name": "ApplicationService.ts",
       "file_type": "code",
       "norm_label": "mergeranges()",
       "source_file": "server/domain/edits.ts",
@@ -2242,7 +2434,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 15,
-      "community_name": "AppError",
+      "community_name": "ApplicationService.ts",
       "file_type": "code",
       "norm_label": "silencecuts()",
       "source_file": "server/domain/edits.ts",
@@ -2254,11 +2446,23 @@
       "_callable": true,
       "_origin": "ast",
       "community": 15,
-      "community_name": "AppError",
+      "community_name": "ApplicationService.ts",
       "file_type": "code",
       "norm_label": "sourcespan()",
       "source_file": "server/domain/edits.ts",
       "source_location": "L43"
+    },
+    {
+      "id": "server_domain_edits_subtitletext",
+      "label": "subtitleText()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 15,
+      "community_name": "ApplicationService.ts",
+      "file_type": "code",
+      "norm_label": "subtitletext()",
+      "source_file": "server/domain/edits.ts",
+      "source_location": "L393"
     },
     {
       "id": "server_domain_edits_temporalpatch",
@@ -2266,11 +2470,23 @@
       "_callable": true,
       "_origin": "ast",
       "community": 15,
-      "community_name": "AppError",
+      "community_name": "ApplicationService.ts",
       "file_type": "code",
       "norm_label": "temporalpatch()",
       "source_file": "server/domain/edits.ts",
       "source_location": "L52"
+    },
+    {
+      "id": "server_services_ai_assistant",
+      "label": "assistant()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 15,
+      "community_name": "ApplicationService.ts",
+      "file_type": "code",
+      "norm_label": "assistant()",
+      "source_file": "server/services/ai.ts",
+      "source_location": "L232"
     },
     {
       "id": "shared_timeline_duration",
@@ -2278,11 +2494,23 @@
       "_callable": true,
       "_origin": "ast",
       "community": 15,
-      "community_name": "AppError",
+      "community_name": "ApplicationService.ts",
       "file_type": "code",
       "norm_label": "duration()",
       "source_file": "shared/timeline.ts",
       "source_location": "L5"
+    },
+    {
+      "id": "shared_timeline_outputranges",
+      "label": "outputRanges()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 15,
+      "community_name": "ApplicationService.ts",
+      "file_type": "code",
+      "norm_label": "outputranges()",
+      "source_file": "shared/timeline.ts",
+      "source_location": "L61"
     },
     {
       "id": "shared_timeline_outputsize",
@@ -2290,7 +2518,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 15,
-      "community_name": "AppError",
+      "community_name": "ApplicationService.ts",
       "file_type": "code",
       "norm_label": "outputsize()",
       "source_file": "shared/timeline.ts",
@@ -2302,7 +2530,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 15,
-      "community_name": "AppError",
+      "community_name": "ApplicationService.ts",
       "file_type": "code",
       "norm_label": "segmentduration()",
       "source_file": "shared/timeline.ts",
@@ -2314,7 +2542,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 15,
-      "community_name": "AppError",
+      "community_name": "ApplicationService.ts",
       "file_type": "code",
       "norm_label": "slicesegments()",
       "source_file": "shared/timeline.ts",
@@ -2326,7 +2554,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 15,
-      "community_name": "AppError",
+      "community_name": "ApplicationService.ts",
       "file_type": "code",
       "norm_label": "sourceranges()",
       "source_file": "shared/timeline.ts",
@@ -2338,7 +2566,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 15,
-      "community_name": "AppError",
+      "community_name": "ApplicationService.ts",
       "file_type": "code",
       "norm_label": "sourcetime()",
       "source_file": "shared/timeline.ts",
@@ -2350,7 +2578,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 15,
-      "community_name": "AppError",
+      "community_name": "ApplicationService.ts",
       "file_type": "code",
       "norm_label": "subtractranges()",
       "source_file": "shared/timeline.ts",
@@ -2362,7 +2590,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 15,
-      "community_name": "AppError",
+      "community_name": "ApplicationService.ts",
       "file_type": "code",
       "norm_label": "timelinetime()",
       "source_file": "shared/timeline.ts",
@@ -2374,23 +2602,11 @@
       "_callable": true,
       "_origin": "ast",
       "community": 15,
-      "community_name": "AppError",
+      "community_name": "ApplicationService.ts",
       "file_type": "code",
       "norm_label": "defaultcanvas()",
       "source_file": "shared/types.ts",
       "source_location": "L211"
-    },
-    {
-      "id": "src_features_export_exportdialog_exportdialog",
-      "label": "ExportDialog()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 15,
-      "community_name": "AppError",
-      "file_type": "code",
-      "norm_label": "exportdialog()",
-      "source_file": "src/features/export/ExportDialog.tsx",
-      "source_location": "L9"
     },
     {
       "id": "scripts_verify_bundle_binariesin",
@@ -2511,6 +2727,30 @@
       "norm_label": "resolves()",
       "source_file": "scripts/verify-bundle.mjs",
       "source_location": "L137"
+    },
+    {
+      "id": "scripts_check_camera_finish",
+      "label": "finish()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 18,
+      "community_name": "check-interactions.ts",
+      "file_type": "code",
+      "norm_label": "finish()",
+      "source_file": "scripts/check-camera.ts",
+      "source_location": "L27"
+    },
+    {
+      "id": "scripts_check_camera_inspect",
+      "label": "inspect()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 18,
+      "community_name": "check-interactions.ts",
+      "file_type": "code",
+      "norm_label": "inspect()",
+      "source_file": "scripts/check-camera.ts",
+      "source_location": "L19"
     },
     {
       "id": "scripts_check_interactions_audioinspection",
@@ -2945,18 +3185,6 @@
       "source_location": "L100"
     },
     {
-      "id": "native_models_color",
-      "label": "color()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 2,
-      "community_name": "Composition.swift",
-      "file_type": "code",
-      "norm_label": "color()",
-      "source_file": "native/Models.swift",
-      "source_location": "L93"
-    },
-    {
       "id": "native_bridge_screenrec_attach_window",
       "label": "screenrec_attach_window()",
       "_callable": true,
@@ -2979,6 +3207,18 @@
       "norm_label": "screenrec_command()",
       "source_file": "native/Bridge.swift",
       "source_location": "L8"
+    },
+    {
+      "id": "native_bridge_previewview_hittest",
+      "label": ".hitTest()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 3,
+      "community_name": "CaptureEngine",
+      "file_type": "code",
+      "norm_label": ".hittest()",
+      "source_file": "native/Bridge.swift",
+      "source_location": "L64"
     },
     {
       "id": "native_capture_camerabubbleview_init",
@@ -3449,6 +3689,18 @@
       "source_location": "L5"
     },
     {
+      "id": "scripts_make_icon_render",
+      "label": "render()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 3,
+      "community_name": "CaptureEngine",
+      "file_type": "code",
+      "norm_label": "render()",
+      "source_file": "scripts/make-icon.swift",
+      "source_location": "L5"
+    },
+    {
       "id": "scripts_bundle_notices_json",
       "label": "json()",
       "_callable": true,
@@ -3677,54 +3929,6 @@
       "source_location": "L108"
     },
     {
-      "id": "server_domain_cursor_cursorclicks",
-      "label": "cursorClicks()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 5,
-      "community_name": "validation.ts",
-      "file_type": "code",
-      "norm_label": "cursorclicks()",
-      "source_file": "server/domain/cursor.ts",
-      "source_location": "L17"
-    },
-    {
-      "id": "server_domain_cursor_cursorclicks_retain",
-      "label": "retain()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 5,
-      "community_name": "validation.ts",
-      "file_type": "code",
-      "norm_label": "retain()",
-      "source_file": "server/domain/cursor.ts",
-      "source_location": "L27"
-    },
-    {
-      "id": "scripts_check_camera_finish",
-      "label": "finish()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 52,
-      "community_name": "service.test.ts",
-      "file_type": "code",
-      "norm_label": "finish()",
-      "source_file": "scripts/check-camera.ts",
-      "source_location": "L27"
-    },
-    {
-      "id": "scripts_check_camera_inspect",
-      "label": "inspect()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 52,
-      "community_name": "service.test.ts",
-      "file_type": "code",
-      "norm_label": "inspect()",
-      "source_file": "scripts/check-camera.ts",
-      "source_location": "L19"
-    },
-    {
       "id": "server_contracts_commands_isreadonly",
       "label": "isReadOnly()",
       "_callable": true,
@@ -3747,18 +3951,6 @@
       "norm_label": "errorof()",
       "source_file": "server/contracts/validation.ts",
       "source_location": "L13"
-    },
-    {
-      "id": "server_domain_edits_subtitletext",
-      "label": "subtitleText()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 52,
-      "community_name": "service.test.ts",
-      "file_type": "code",
-      "norm_label": "subtitletext()",
-      "source_file": "server/domain/edits.ts",
-      "source_location": "L393"
     },
     {
       "id": "server_infrastructure_rpc_appclient_call",
@@ -4061,18 +4253,6 @@
       "source_location": "L274"
     },
     {
-      "id": "native_bridge_nativeapp_seek",
-      "label": ".seek()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 53,
-      "community_name": ".command",
-      "file_type": "code",
-      "norm_label": ".seek()",
-      "source_file": "native/Bridge.swift",
-      "source_location": "L216"
-    },
-    {
       "id": "native_bridge_nativeapp_startexport",
       "label": ".startExport()",
       "_callable": true,
@@ -4227,6 +4407,18 @@
       "norm_label": ".attach()",
       "source_file": "native/Bridge.swift",
       "source_location": "L84"
+    },
+    {
+      "id": "native_bridge_nativeapp_seek",
+      "label": ".seek()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 56,
+      "community_name": ".main",
+      "file_type": "code",
+      "norm_label": ".seek()",
+      "source_file": "native/Bridge.swift",
+      "source_location": "L216"
     },
     {
       "id": "native_check_nativecheck_brightpixels",
@@ -4385,16 +4577,28 @@
       "source_location": "L67"
     },
     {
-      "id": "shared_types_defaultautozoom",
-      "label": "defaultAutoZoom()",
+      "id": "native_models_sourcetime",
+      "label": "sourceTime()",
       "_callable": true,
       "_origin": "ast",
-      "community": 57,
-      "community_name": "Timeline",
+      "community": 56,
+      "community_name": ".main",
       "file_type": "code",
-      "norm_label": "defaultautozoom()",
-      "source_file": "shared/types.ts",
-      "source_location": "L227"
+      "norm_label": "sourcetime()",
+      "source_file": "native/Models.swift",
+      "source_location": "L69"
+    },
+    {
+      "id": "native_models_timelineduration",
+      "label": "timelineDuration()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 56,
+      "community_name": ".main",
+      "file_type": "code",
+      "norm_label": "timelineduration()",
+      "source_file": "native/Models.swift",
+      "source_location": "L74"
     },
     {
       "id": "src_features_editor_timeline_timeline",
@@ -4406,7 +4610,7 @@
       "file_type": "code",
       "norm_label": "timeline()",
       "source_file": "src/features/editor/Timeline.tsx",
-      "source_location": "L30"
+      "source_location": "L25"
     },
     {
       "id": "src_features_editor_timeline_timeline_clipaction",
@@ -4418,7 +4622,7 @@
       "file_type": "code",
       "norm_label": "clipaction()",
       "source_file": "src/features/editor/Timeline.tsx",
-      "source_location": "L387"
+      "source_location": "L382"
     },
     {
       "id": "src_features_editor_timeline_timeline_closeand",
@@ -4430,7 +4634,7 @@
       "file_type": "code",
       "norm_label": "closeand()",
       "source_file": "src/features/editor/Timeline.tsx",
-      "source_location": "L414"
+      "source_location": "L409"
     },
     {
       "id": "src_features_editor_timeline_timeline_finishdrag",
@@ -4442,7 +4646,7 @@
       "file_type": "code",
       "norm_label": "finishdrag()",
       "source_file": "src/features/editor/Timeline.tsx",
-      "source_location": "L331"
+      "source_location": "L326"
     },
     {
       "id": "src_features_editor_timeline_timeline_menuposition",
@@ -4454,7 +4658,7 @@
       "file_type": "code",
       "norm_label": "menuposition()",
       "source_file": "src/features/editor/Timeline.tsx",
-      "source_location": "L391"
+      "source_location": "L386"
     },
     {
       "id": "src_features_editor_timeline_timeline_movedrag",
@@ -4466,7 +4670,7 @@
       "file_type": "code",
       "norm_label": "movedrag()",
       "source_file": "src/features/editor/Timeline.tsx",
-      "source_location": "L268"
+      "source_location": "L263"
     },
     {
       "id": "src_features_editor_timeline_timeline_moverange",
@@ -4478,7 +4682,7 @@
       "file_type": "code",
       "norm_label": "moverange()",
       "source_file": "src/features/editor/Timeline.tsx",
-      "source_location": "L197"
+      "source_location": "L192"
     },
     {
       "id": "src_features_editor_timeline_timeline_openclipmenu",
@@ -4490,7 +4694,7 @@
       "file_type": "code",
       "norm_label": "openclipmenu()",
       "source_file": "src/features/editor/Timeline.tsx",
-      "source_location": "L398"
+      "source_location": "L393"
     },
     {
       "id": "src_features_editor_timeline_timeline_opentrackmenu",
@@ -4502,7 +4706,7 @@
       "file_type": "code",
       "norm_label": "opentrackmenu()",
       "source_file": "src/features/editor/Timeline.tsx",
-      "source_location": "L405"
+      "source_location": "L400"
     },
     {
       "id": "src_features_editor_timeline_timeline_releasedragpointer",
@@ -4514,7 +4718,7 @@
       "file_type": "code",
       "norm_label": "releasedragpointer()",
       "source_file": "src/features/editor/Timeline.tsx",
-      "source_location": "L231"
+      "source_location": "L226"
     },
     {
       "id": "src_features_editor_timeline_timeline_startdrag",
@@ -4526,7 +4730,7 @@
       "file_type": "code",
       "norm_label": "startdrag()",
       "source_file": "src/features/editor/Timeline.tsx",
-      "source_location": "L238"
+      "source_location": "L233"
     },
     {
       "id": "src_features_editor_timeline_timeline_startrange",
@@ -4538,7 +4742,7 @@
       "file_type": "code",
       "norm_label": "startrange()",
       "source_file": "src/features/editor/Timeline.tsx",
-      "source_location": "L175"
+      "source_location": "L170"
     },
     {
       "id": "src_features_editor_timeline_timeline_timeat",
@@ -4550,7 +4754,7 @@
       "file_type": "code",
       "norm_label": "timeat()",
       "source_file": "src/features/editor/Timeline.tsx",
-      "source_location": "L171"
+      "source_location": "L166"
     },
     {
       "id": "server_preview_transform_test_camera",
@@ -4646,7 +4850,7 @@
       "file_type": "code",
       "norm_label": "accent()",
       "source_file": "src/controllers/usePreviewEditingController.ts",
-      "source_location": "L40"
+      "source_location": "L44"
     },
     {
       "id": "src_controllers_useprevieweditingcontroller_clamp",
@@ -4658,7 +4862,7 @@
       "file_type": "code",
       "norm_label": "clamp()",
       "source_file": "src/controllers/usePreviewEditingController.ts",
-      "source_location": "L42"
+      "source_location": "L46"
     },
     {
       "id": "src_controllers_useprevieweditingcontroller_previewtransform",
@@ -4670,7 +4874,7 @@
       "file_type": "code",
       "norm_label": "previewtransform()",
       "source_file": "src/controllers/usePreviewEditingController.ts",
-      "source_location": "L44"
+      "source_location": "L48"
     },
     {
       "id": "src_controllers_useprevieweditingcontroller_replaypreviewgesture",
@@ -4682,7 +4886,7 @@
       "file_type": "code",
       "norm_label": "replaypreviewgesture()",
       "source_file": "src/controllers/usePreviewEditingController.ts",
-      "source_location": "L101"
+      "source_location": "L105"
     },
     {
       "id": "src_controllers_useprevieweditingcontroller_useprevieweditingcontroller",
@@ -4694,7 +4898,7 @@
       "file_type": "code",
       "norm_label": "useprevieweditingcontroller()",
       "source_file": "src/controllers/usePreviewEditingController.ts",
-      "source_location": "L117"
+      "source_location": "L121"
     },
     {
       "id": "src_controllers_useprevieweditingcontroller_useprevieweditingcontroller_move",
@@ -4706,7 +4910,7 @@
       "file_type": "code",
       "norm_label": "move()",
       "source_file": "src/controllers/usePreviewEditingController.ts",
-      "source_location": "L195"
+      "source_location": "L199"
     },
     {
       "id": "src_controllers_useprevieweditingcontroller_useprevieweditingcontroller_release",
@@ -4718,7 +4922,7 @@
       "file_type": "code",
       "norm_label": "release()",
       "source_file": "src/controllers/usePreviewEditingController.ts",
-      "source_location": "L152"
+      "source_location": "L156"
     },
     {
       "id": "src_features_editor_nativepreview_nativepreview",
@@ -4781,18 +4985,6 @@
       "source_location": "L31"
     },
     {
-      "id": "server_infrastructure_projectstore_projectstore_persistdocument",
-      "label": ".persistDocument()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 59,
-      "community_name": "check-desktop.ts",
-      "file_type": "code",
-      "norm_label": ".persistdocument()",
-      "source_file": "server/infrastructure/ProjectStore.ts",
-      "source_location": "L236"
-    },
-    {
       "id": "server_services_applicationservice_applicationservice_constructor",
       "label": ".constructor()",
       "_callable": true,
@@ -4817,18 +5009,6 @@
       "source_location": "L47"
     },
     {
-      "id": "server_services_jobs_jobs_cancel",
-      "label": ".cancel()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 59,
-      "community_name": "check-desktop.ts",
-      "file_type": "code",
-      "norm_label": ".cancel()",
-      "source_file": "server/services/Jobs.ts",
-      "source_location": "L113"
-    },
-    {
       "id": "server_services_jobs_jobs_constructor",
       "label": ".constructor()",
       "_callable": true,
@@ -4851,18 +5031,6 @@
       "norm_label": ".flush()",
       "source_file": "server/services/Jobs.ts",
       "source_location": "L118"
-    },
-    {
-      "id": "server_services_jobs_jobs_get",
-      "label": ".get()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 59,
-      "community_name": "check-desktop.ts",
-      "file_type": "code",
-      "norm_label": ".get()",
-      "source_file": "server/services/Jobs.ts",
-      "source_location": "L42"
     },
     {
       "id": "server_services_jobs_jobs_initialize",
@@ -5030,7 +5198,7 @@
       "file_type": "code",
       "norm_label": "generatebundle()",
       "source_file": "website/vite.config.ts",
-      "source_location": "L25"
+      "source_location": "L26"
     },
     {
       "id": "website_vite_config_transformindexhtml",
@@ -5042,7 +5210,7 @@
       "file_type": "code",
       "norm_label": "transformindexhtml()",
       "source_file": "website/vite.config.ts",
-      "source_location": "L22"
+      "source_location": "L23"
     },
     {
       "id": "src_components_organisms_authorfooter_aboutdialog",
@@ -5129,40 +5297,28 @@
       "source_location": "L68"
     },
     {
-      "id": "src_controllers_usestablecallback_usestablecallback",
-      "label": "useStableCallback()",
+      "id": "src_features_editor_panels_canvaspanel_canvaspanel",
+      "label": "CanvasPanel()",
       "_callable": true,
       "_origin": "ast",
       "community": 64,
       "community_name": "messageOf",
       "file_type": "code",
-      "norm_label": "usestablecallback()",
-      "source_file": "src/controllers/useStableCallback.ts",
-      "source_location": "L4"
+      "norm_label": "canvaspanel()",
+      "source_file": "src/features/editor/panels/CanvasPanel.tsx",
+      "source_location": "L15"
     },
     {
-      "id": "src_controllers_usestudiocontroller_usestudiocontroller_importproject",
-      "label": "importProject()",
+      "id": "src_features_export_exportdialog_exportdialog",
+      "label": "ExportDialog()",
       "_callable": true,
       "_origin": "ast",
       "community": 64,
       "community_name": "messageOf",
       "file_type": "code",
-      "norm_label": "importproject()",
-      "source_file": "src/controllers/useStudioController.ts",
-      "source_location": "L478"
-    },
-    {
-      "id": "src_controllers_usestudiocontroller_usestudiocontroller_openexport",
-      "label": "openExport()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 64,
-      "community_name": "messageOf",
-      "file_type": "code",
-      "norm_label": "openexport()",
-      "source_file": "src/controllers/useStudioController.ts",
-      "source_location": "L606"
+      "norm_label": "exportdialog()",
+      "source_file": "src/features/export/ExportDialog.tsx",
+      "source_location": "L9"
     },
     {
       "id": "src_features_help_helpdialog_helpdialog",
@@ -5189,18 +5345,6 @@
       "source_location": "L18"
     },
     {
-      "id": "src_infrastructure_platform_pickpath",
-      "label": "pickPath()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 64,
-      "community_name": "messageOf",
-      "file_type": "code",
-      "norm_label": "pickpath()",
-      "source_file": "src/infrastructure/platform.ts",
-      "source_location": "L5"
-    },
-    {
       "id": "src_lib_errors_messageof",
       "label": "messageOf()",
       "_callable": true,
@@ -5211,30 +5355,6 @@
       "norm_label": "messageof()",
       "source_file": "src/lib/errors.ts",
       "source_location": "L1"
-    },
-    {
-      "id": "native_bridge_previewview_hittest",
-      "label": ".hitTest()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 66,
-      "community_name": "render",
-      "file_type": "code",
-      "norm_label": ".hittest()",
-      "source_file": "native/Bridge.swift",
-      "source_location": "L64"
-    },
-    {
-      "id": "scripts_make_icon_render",
-      "label": "render()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 66,
-      "community_name": "render",
-      "file_type": "code",
-      "norm_label": "render()",
-      "source_file": "scripts/make-icon.swift",
-      "source_location": "L5"
     },
     {
       "id": "marketing_product_hunt_render_assets_banner",
@@ -5393,126 +5513,6 @@
       "source_location": "L17"
     },
     {
-      "id": "server_camera_layout_test_legacy",
-      "label": "legacy()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 69,
-      "community_name": "ProjectStore.ts",
-      "file_type": "code",
-      "norm_label": "legacy()",
-      "source_file": "server/camera-layout.test.ts",
-      "source_location": "L146"
-    },
-    {
-      "id": "server_camera_layout_test_times",
-      "label": "times()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 69,
-      "community_name": "ProjectStore.ts",
-      "file_type": "code",
-      "norm_label": "times()",
-      "source_file": "server/camera-layout.test.ts",
-      "source_location": "L35"
-    },
-    {
-      "id": "server_contracts_validation_object",
-      "label": "object()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 69,
-      "community_name": "ProjectStore.ts",
-      "file_type": "code",
-      "norm_label": "object()",
-      "source_file": "server/contracts/validation.ts",
-      "source_location": "L365"
-    },
-    {
-      "id": "server_contracts_validation_parseproject",
-      "label": "parseProject()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 69,
-      "community_name": "ProjectStore.ts",
-      "file_type": "code",
-      "norm_label": "parseproject()",
-      "source_file": "server/contracts/validation.ts",
-      "source_location": "L231"
-    },
-    {
-      "id": "server_controllers_commandcontroller_commandcontroller_command",
-      "label": ".command()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 69,
-      "community_name": "ProjectStore.ts",
-      "file_type": "code",
-      "norm_label": ".command()",
-      "source_file": "server/controllers/CommandController.ts",
-      "source_location": "L17"
-    },
-    {
-      "id": "server_controllers_commandcontroller_commandcontroller_constructor",
-      "label": ".constructor()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 69,
-      "community_name": "ProjectStore.ts",
-      "file_type": "code",
-      "norm_label": ".constructor()",
-      "source_file": "server/controllers/CommandController.ts",
-      "source_location": "L9"
-    },
-    {
-      "id": "server_controllers_commandcontroller_commandcontroller_serialize",
-      "label": ".serialize()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 69,
-      "community_name": "ProjectStore.ts",
-      "file_type": "code",
-      "norm_label": ".serialize()",
-      "source_file": "server/controllers/CommandController.ts",
-      "source_location": "L57"
-    },
-    {
-      "id": "server_infrastructure_projectstore_haslegacyproject",
-      "label": "hasLegacyProject()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 69,
-      "community_name": "ProjectStore.ts",
-      "file_type": "code",
-      "norm_label": "haslegacyproject()",
-      "source_file": "server/infrastructure/ProjectStore.ts",
-      "source_location": "L67"
-    },
-    {
-      "id": "server_infrastructure_projectstore_parsedocument",
-      "label": "parseDocument()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 69,
-      "community_name": "ProjectStore.ts",
-      "file_type": "code",
-      "norm_label": "parsedocument()",
-      "source_file": "server/infrastructure/ProjectStore.ts",
-      "source_location": "L50"
-    },
-    {
-      "id": "server_services_ai_assistant",
-      "label": "assistant()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 69,
-      "community_name": "ProjectStore.ts",
-      "file_type": "code",
-      "norm_label": "assistant()",
-      "source_file": "server/services/ai.ts",
-      "source_location": "L232"
-    },
-    {
       "id": "shared_timeline_formattime",
       "label": "formatTime()",
       "_callable": true,
@@ -5570,7 +5570,7 @@
       "file_type": "code",
       "norm_label": "deleteproject()",
       "source_file": "src/controllers/useStudioController.ts",
-      "source_location": "L491"
+      "source_location": "L497"
     },
     {
       "id": "src_features_editor_editorscreen_playbacktoolbar",
@@ -5633,6 +5633,18 @@
       "source_location": "L6"
     },
     {
+      "id": "src_features_transcript_transcriptpanel_transcriptpanel",
+      "label": "TranscriptPanel()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 71,
+      "community_name": "App.tsx",
+      "file_type": "code",
+      "norm_label": "transcriptpanel()",
+      "source_file": "src/features/transcript/TranscriptPanel.tsx",
+      "source_location": "L17"
+    },
+    {
       "id": "src_lib_format_date",
       "label": "date()",
       "_callable": true,
@@ -5643,6 +5655,18 @@
       "norm_label": "date()",
       "source_file": "src/lib/format.ts",
       "source_location": "L14"
+    },
+    {
+      "id": "src_controllers_usestablecallback_usestablecallback",
+      "label": "useStableCallback()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 76,
+      "community_name": "types.ts",
+      "file_type": "code",
+      "norm_label": "usestablecallback()",
+      "source_file": "src/controllers/useStableCallback.ts",
+      "source_location": "L4"
     },
     {
       "id": "src_infrastructure_transport_sendcommand",
@@ -5714,7 +5738,7 @@
       "file_type": "code",
       "norm_label": "reconcileprojectrefresh()",
       "source_file": "src/controllers/useStudioController.ts",
-      "source_location": "L21"
+      "source_location": "L27"
     },
     {
       "id": "src_features_assistant_assistantpanel_assistantpanel",
@@ -5777,16 +5801,16 @@
       "source_location": "L102"
     },
     {
-      "id": "shared_timeline_outputranges",
-      "label": "outputRanges()",
+      "id": "shared_types_defaultautozoom",
+      "label": "defaultAutoZoom()",
       "_callable": true,
       "_origin": "ast",
       "community": 9,
       "community_name": "EditorScreen.tsx",
       "file_type": "code",
-      "norm_label": "outputranges()",
-      "source_file": "shared/timeline.ts",
-      "source_location": "L61"
+      "norm_label": "defaultautozoom()",
+      "source_file": "shared/types.ts",
+      "source_location": "L227"
     },
     {
       "id": "src_components_atoms_switch_switch",
@@ -5909,18 +5933,6 @@
       "source_location": "L19"
     },
     {
-      "id": "src_features_editor_panels_canvaspanel_canvaspanel",
-      "label": "CanvasPanel()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 9,
-      "community_name": "EditorScreen.tsx",
-      "file_type": "code",
-      "norm_label": "canvaspanel()",
-      "source_file": "src/features/editor/panels/CanvasPanel.tsx",
-      "source_location": "L15"
-    },
-    {
       "id": "src_features_editor_panels_overlayspanel_overlayspanel",
       "label": "OverlaysPanel()",
       "_callable": true,
@@ -5930,7 +5942,7 @@
       "file_type": "code",
       "norm_label": "overlayspanel()",
       "source_file": "src/features/editor/panels/OverlaysPanel.tsx",
-      "source_location": "L18"
+      "source_location": "L13"
     },
     {
       "id": "src_features_editor_panels_zoompanel_zoompanel",
@@ -5942,7 +5954,7 @@
       "file_type": "code",
       "norm_label": "zoompanel()",
       "source_file": "src/features/editor/panels/ZoomPanel.tsx",
-      "source_location": "L19"
+      "source_location": "L14"
     },
     {
       "id": "src_features_editor_panels_zoomproperties_zoomproperties",
@@ -5955,18 +5967,6 @@
       "norm_label": "zoomproperties()",
       "source_file": "src/features/editor/panels/ZoomProperties.tsx",
       "source_location": "L11"
-    },
-    {
-      "id": "src_features_transcript_transcriptpanel_transcriptpanel",
-      "label": "TranscriptPanel()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 9,
-      "community_name": "EditorScreen.tsx",
-      "file_type": "code",
-      "norm_label": "transcriptpanel()",
-      "source_file": "src/features/transcript/TranscriptPanel.tsx",
-      "source_location": "L17"
     },
     {
       "id": "src_lib_format_number",
@@ -6044,6 +6044,17 @@
       "community_name": "Models.swift",
       "file_type": "code",
       "norm_label": "bool",
+      "source_file": "",
+      "source_location": ""
+    },
+    {
+      "id": "native_models_swift_cgfloat",
+      "label": "CGFloat",
+      "_origin": "ast",
+      "community": 0,
+      "community_name": "Models.swift",
+      "file_type": "code",
+      "norm_label": "cgfloat",
       "source_file": "",
       "source_location": ""
     },
@@ -6543,6 +6554,17 @@
       "source_location": "L15"
     },
     {
+      "id": "tsconfig_compileroptions_paths",
+      "label": "paths",
+      "_origin": "ast",
+      "community": 11,
+      "community_name": "compilerOptions",
+      "file_type": "code",
+      "norm_label": "paths",
+      "source_file": "tsconfig.json",
+      "source_location": "L16"
+    },
+    {
       "id": "tsconfig_compileroptions_resolvejsonmodule",
       "label": "resolveJsonModule",
       "_origin": "ast",
@@ -6606,7 +6628,7 @@
       "file_type": "code",
       "norm_label": "include",
       "source_file": "tsconfig.json",
-      "source_location": "L17"
+      "source_location": "L20"
     },
     {
       "id": "ref_dom",
@@ -6661,7 +6683,7 @@
       "file_type": "concept",
       "norm_label": "playwright.config.ts",
       "source_file": "tsconfig.json",
-      "source_location": "L17"
+      "source_location": "L20"
     },
     {
       "id": "ref_scripts_ts",
@@ -6672,7 +6694,7 @@
       "file_type": "concept",
       "norm_label": "scripts/*.ts",
       "source_file": "tsconfig.json",
-      "source_location": "L17"
+      "source_location": "L20"
     },
     {
       "id": "ref_server",
@@ -6683,7 +6705,7 @@
       "file_type": "concept",
       "norm_label": "server",
       "source_file": "tsconfig.json",
-      "source_location": "L17"
+      "source_location": "L20"
     },
     {
       "id": "ref_shared",
@@ -6694,7 +6716,7 @@
       "file_type": "concept",
       "norm_label": "shared",
       "source_file": "tsconfig.json",
-      "source_location": "L17"
+      "source_location": "L20"
     },
     {
       "id": "ref_src",
@@ -6705,7 +6727,7 @@
       "file_type": "concept",
       "norm_label": "src",
       "source_file": "tsconfig.json",
-      "source_location": "L17"
+      "source_location": "L20"
     },
     {
       "id": "ref_tests",
@@ -6716,7 +6738,7 @@
       "file_type": "concept",
       "norm_label": "tests",
       "source_file": "tsconfig.json",
-      "source_location": "L17"
+      "source_location": "L20"
     },
     {
       "id": "ref_vite_client",
@@ -6738,7 +6760,7 @@
       "file_type": "concept",
       "norm_label": "vite.config.ts",
       "source_file": "tsconfig.json",
-      "source_location": "L17"
+      "source_location": "L20"
     },
     {
       "id": "ref_website_src",
@@ -6749,7 +6771,7 @@
       "file_type": "concept",
       "norm_label": "website/src",
       "source_file": "tsconfig.json",
-      "source_location": "L17"
+      "source_location": "L20"
     },
     {
       "id": "ref_website_vite_config_ts",
@@ -6760,7 +6782,95 @@
       "file_type": "concept",
       "norm_label": "website/vite.config.ts",
       "source_file": "tsconfig.json",
-      "source_location": "L17"
+      "source_location": "L20"
+    },
+    {
+      "id": "server_camera_layout_test",
+      "label": "camera-layout.test.ts",
+      "_origin": "ast",
+      "community": 12,
+      "community_name": "AppError",
+      "file_type": "code",
+      "norm_label": "camera-layout.test.ts",
+      "source_file": "server/camera-layout.test.ts",
+      "source_location": "L1"
+    },
+    {
+      "id": "server_contracts_validation_id",
+      "label": "id",
+      "_origin": "ast",
+      "community": 12,
+      "community_name": "AppError",
+      "file_type": "code",
+      "norm_label": "id",
+      "source_file": "server/contracts/validation.ts",
+      "source_location": "L26"
+    },
+    {
+      "id": "server_contracts_validation_projectschema",
+      "label": "projectSchema",
+      "_origin": "ast",
+      "community": 12,
+      "community_name": "AppError",
+      "file_type": "code",
+      "norm_label": "projectschema",
+      "source_file": "server/contracts/validation.ts",
+      "source_location": "L198"
+    },
+    {
+      "id": "server_contracts_validation_sourceschema",
+      "label": "sourceSchema",
+      "_origin": "ast",
+      "community": 12,
+      "community_name": "AppError",
+      "file_type": "code",
+      "norm_label": "sourceschema",
+      "source_file": "server/contracts/validation.ts",
+      "source_location": "L183"
+    },
+    {
+      "id": "server_controllers_commandcontroller",
+      "label": "CommandController.ts",
+      "_origin": "ast",
+      "community": 12,
+      "community_name": "AppError",
+      "file_type": "code",
+      "norm_label": "commandcontroller.ts",
+      "source_file": "server/controllers/CommandController.ts",
+      "source_location": "L1"
+    },
+    {
+      "id": "server_infrastructure_projectstore",
+      "label": "ProjectStore.ts",
+      "_origin": "ast",
+      "community": 12,
+      "community_name": "AppError",
+      "file_type": "code",
+      "norm_label": "projectstore.ts",
+      "source_file": "server/infrastructure/ProjectStore.ts",
+      "source_location": "L1"
+    },
+    {
+      "id": "server_infrastructure_projectstore_appdatadir",
+      "label": "appDataDir",
+      "_origin": "ast",
+      "community": 12,
+      "community_name": "AppError",
+      "file_type": "code",
+      "norm_label": "appdatadir",
+      "source_file": "server/infrastructure/ProjectStore.ts",
+      "source_location": "L20"
+    },
+    {
+      "id": "server_infrastructure_projectstore_socketpath",
+      "label": "socketPath",
+      "_origin": "ast",
+      "community": 12,
+      "community_name": "AppError",
+      "file_type": "code",
+      "norm_label": "socketpath",
+      "source_file": "server/infrastructure/ProjectStore.ts",
+      "source_location": "L26"
     },
     {
       "id": "package_devdependencies",
@@ -7251,18 +7361,73 @@
       "label": "edits.ts",
       "_origin": "ast",
       "community": 15,
-      "community_name": "AppError",
+      "community_name": "ApplicationService.ts",
       "file_type": "code",
       "norm_label": "edits.ts",
       "source_file": "server/domain/edits.ts",
       "source_location": "L1"
     },
     {
+      "id": "server_services_ai",
+      "label": "ai.ts",
+      "_origin": "ast",
+      "community": 15,
+      "community_name": "ApplicationService.ts",
+      "file_type": "code",
+      "norm_label": "ai.ts",
+      "source_file": "server/services/ai.ts",
+      "source_location": "L1"
+    },
+    {
+      "id": "server_services_ai_defaultsettings",
+      "label": "defaultSettings",
+      "_origin": "ast",
+      "community": 15,
+      "community_name": "ApplicationService.ts",
+      "file_type": "code",
+      "norm_label": "defaultsettings",
+      "source_file": "server/services/ai.ts",
+      "source_location": "L214"
+    },
+    {
+      "id": "server_services_ai_schema_editschemadialect_editschema",
+      "label": "{ $schema: _editSchemaDialect, ...editSchema }",
+      "_origin": "ast",
+      "community": 15,
+      "community_name": "ApplicationService.ts",
+      "file_type": "code",
+      "norm_label": "{ $schema: _editschemadialect, ...editschema }",
+      "source_file": "server/services/ai.ts",
+      "source_location": "L223"
+    },
+    {
+      "id": "server_services_applicationservice",
+      "label": "ApplicationService.ts",
+      "_origin": "ast",
+      "community": 15,
+      "community_name": "ApplicationService.ts",
+      "file_type": "code",
+      "norm_label": "applicationservice.ts",
+      "source_file": "server/services/ApplicationService.ts",
+      "source_location": "L1"
+    },
+    {
+      "id": "server_services_applicationservice_emptyrecording",
+      "label": "emptyRecording",
+      "_origin": "ast",
+      "community": 15,
+      "community_name": "ApplicationService.ts",
+      "file_type": "code",
+      "norm_label": "emptyrecording",
+      "source_file": "server/services/ApplicationService.ts",
+      "source_location": "L37"
+    },
+    {
       "id": "shared_timeline",
       "label": "timeline.ts",
       "_origin": "ast",
       "community": 15,
-      "community_name": "AppError",
+      "community_name": "ApplicationService.ts",
       "file_type": "code",
       "norm_label": "timeline.ts",
       "source_file": "shared/timeline.ts",
@@ -7273,21 +7438,10 @@
       "label": "timeline.test.ts",
       "_origin": "ast",
       "community": 15,
-      "community_name": "AppError",
+      "community_name": "ApplicationService.ts",
       "file_type": "code",
       "norm_label": "timeline.test.ts",
       "source_file": "shared/timeline.test.ts",
-      "source_location": "L1"
-    },
-    {
-      "id": "src_features_export_exportdialog",
-      "label": "ExportDialog.tsx",
-      "_origin": "ast",
-      "community": 15,
-      "community_name": "AppError",
-      "file_type": "code",
-      "norm_label": "exportdialog.tsx",
-      "source_file": "src/features/export/ExportDialog.tsx",
       "source_location": "L1"
     },
     {
@@ -7432,6 +7586,61 @@
       "norm_label": "verify-bundle.mjs",
       "source_file": "scripts/verify-bundle.mjs",
       "source_location": "L1"
+    },
+    {
+      "id": "scripts_check_camera",
+      "label": "check-camera.ts",
+      "_origin": "ast",
+      "community": 18,
+      "community_name": "check-interactions.ts",
+      "file_type": "code",
+      "norm_label": "check-camera.ts",
+      "source_file": "scripts/check-camera.ts",
+      "source_location": "L1"
+    },
+    {
+      "id": "scripts_check_camera_artifacts",
+      "label": "artifacts",
+      "_origin": "ast",
+      "community": 18,
+      "community_name": "check-interactions.ts",
+      "file_type": "code",
+      "norm_label": "artifacts",
+      "source_file": "scripts/check-camera.ts",
+      "source_location": "L14"
+    },
+    {
+      "id": "scripts_check_camera_client",
+      "label": "client",
+      "_origin": "ast",
+      "community": 18,
+      "community_name": "check-interactions.ts",
+      "file_type": "code",
+      "norm_label": "client",
+      "source_file": "scripts/check-camera.ts",
+      "source_location": "L12"
+    },
+    {
+      "id": "scripts_check_camera_native",
+      "label": "native",
+      "_origin": "ast",
+      "community": 18,
+      "community_name": "check-interactions.ts",
+      "file_type": "code",
+      "norm_label": "native",
+      "source_file": "scripts/check-camera.ts",
+      "source_location": "L13"
+    },
+    {
+      "id": "scripts_check_camera_pattern",
+      "label": "pattern",
+      "_origin": "ast",
+      "community": 18,
+      "community_name": "check-interactions.ts",
+      "file_type": "code",
+      "norm_label": "pattern",
+      "source_file": "scripts/check-camera.ts",
+      "source_location": "L16"
     },
     {
       "id": "scripts_check_interactions",
@@ -7698,18 +7907,6 @@
       "source_location": ""
     },
     {
-      "id": "coreimage",
-      "label": "CoreImage",
-      "_origin": "ast",
-      "community": 2,
-      "community_name": "Composition.swift",
-      "file_type": "code",
-      "norm_label": "coreimage",
-      "source_file": "native/Composition.swift",
-      "source_location": "L3",
-      "type": "module"
-    },
-    {
       "id": "coretext",
       "label": "CoreText",
       "_origin": "ast",
@@ -7927,17 +8124,6 @@
       "community_name": "Composition.swift",
       "file_type": "code",
       "norm_label": "string",
-      "source_file": "",
-      "source_location": ""
-    },
-    {
-      "id": "native_models_swift_cgfloat",
-      "label": "CGFloat",
-      "_origin": "ast",
-      "community": 2,
-      "community_name": "Composition.swift",
-      "file_type": "code",
-      "norm_label": "cgfloat",
       "source_file": "",
       "source_location": ""
     },
@@ -8238,18 +8424,6 @@
       "source_location": "L1"
     },
     {
-      "id": "appkit",
-      "label": "AppKit",
-      "_origin": "ast",
-      "community": 29,
-      "community_name": "Bridge.swift",
-      "file_type": "code",
-      "norm_label": "appkit",
-      "source_file": "scripts/make-icon.swift",
-      "source_location": "L1",
-      "type": "module"
-    },
-    {
       "id": "avfoundation",
       "label": "AVFoundation",
       "_origin": "ast",
@@ -8271,6 +8445,18 @@
       "norm_label": "cchar",
       "source_file": "",
       "source_location": ""
+    },
+    {
+      "id": "coreimage",
+      "label": "CoreImage",
+      "_origin": "ast",
+      "community": 29,
+      "community_name": "Bridge.swift",
+      "file_type": "code",
+      "norm_label": "coreimage",
+      "source_file": "native/Composition.swift",
+      "source_location": "L3",
+      "type": "module"
     },
     {
       "id": "native_bridge",
@@ -8330,6 +8516,17 @@
       "type": "module"
     },
     {
+      "id": "task",
+      "label": "Task",
+      "_origin": "ast",
+      "community": 29,
+      "community_name": "Bridge.swift",
+      "file_type": "code",
+      "norm_label": "task",
+      "source_file": "",
+      "source_location": ""
+    },
+    {
       "id": "unsafemutablerawpointer",
       "label": "UnsafeMutableRawPointer",
       "_origin": "ast",
@@ -8350,6 +8547,18 @@
       "norm_label": "unsafepointer",
       "source_file": "",
       "source_location": ""
+    },
+    {
+      "id": "appkit",
+      "label": "AppKit",
+      "_origin": "ast",
+      "community": 3,
+      "community_name": "CaptureEngine",
+      "file_type": "code",
+      "norm_label": "appkit",
+      "source_file": "scripts/make-icon.swift",
+      "source_location": "L1",
+      "type": "module"
     },
     {
       "id": "avassetwriter",
@@ -8505,17 +8714,6 @@
       "source_file": "native/CaptureCheck.swift",
       "source_location": "L2",
       "type": "module"
-    },
-    {
-      "id": "filehandle",
-      "label": "FileHandle",
-      "_origin": "ast",
-      "community": 3,
-      "community_name": "CaptureEngine",
-      "file_type": "code",
-      "norm_label": "filehandle",
-      "source_file": "",
-      "source_location": ""
     },
     {
       "id": "native_capture",
@@ -8749,6 +8947,17 @@
       "source_location": "L1"
     },
     {
+      "id": "nscolor",
+      "label": "NSColor",
+      "_origin": "ast",
+      "community": 3,
+      "community_name": "CaptureEngine",
+      "file_type": "code",
+      "norm_label": "nscolor",
+      "source_file": "",
+      "source_location": ""
+    },
+    {
       "id": "nsevent",
       "label": "NSEvent",
       "_origin": "ast",
@@ -8767,6 +8976,61 @@
       "community_name": "CaptureEngine",
       "file_type": "code",
       "norm_label": "nspanel",
+      "source_file": "",
+      "source_location": ""
+    },
+    {
+      "id": "nspoint",
+      "label": "NSPoint",
+      "_origin": "ast",
+      "community": 3,
+      "community_name": "CaptureEngine",
+      "file_type": "code",
+      "norm_label": "nspoint",
+      "source_file": "",
+      "source_location": ""
+    },
+    {
+      "id": "nsview",
+      "label": "NSView",
+      "_origin": "ast",
+      "community": 3,
+      "community_name": "CaptureEngine",
+      "file_type": "code",
+      "norm_label": "nsview",
+      "source_file": "",
+      "source_location": ""
+    },
+    {
+      "id": "scripts_make_icon",
+      "label": "make-icon.swift",
+      "_origin": "ast",
+      "community": 3,
+      "community_name": "CaptureEngine",
+      "file_type": "code",
+      "norm_label": "make-icon.swift",
+      "source_file": "scripts/make-icon.swift",
+      "source_location": "L1"
+    },
+    {
+      "id": "scripts_make_icon_swift_int",
+      "label": "Int",
+      "_origin": "ast",
+      "community": 3,
+      "community_name": "CaptureEngine",
+      "file_type": "code",
+      "norm_label": "int",
+      "source_file": "",
+      "source_location": ""
+    },
+    {
+      "id": "scripts_make_icon_swift_string",
+      "label": "String",
+      "_origin": "ast",
+      "community": 3,
+      "community_name": "CaptureEngine",
+      "file_type": "code",
+      "norm_label": "string",
       "source_file": "",
       "source_location": ""
     },
@@ -10666,17 +10930,6 @@
       "source_location": "L27"
     },
     {
-      "id": "server_contracts_validation_id",
-      "label": "id",
-      "_origin": "ast",
-      "community": 5,
-      "community_name": "validation.ts",
-      "file_type": "code",
-      "norm_label": "id",
-      "source_file": "server/contracts/validation.ts",
-      "source_location": "L26"
-    },
-    {
       "id": "server_contracts_validation_layoutremoveoperation",
       "label": "layoutRemoveOperation",
       "_origin": "ast",
@@ -10853,17 +11106,6 @@
       "source_location": "L69"
     },
     {
-      "id": "server_controllers_commandcontroller",
-      "label": "CommandController.ts",
-      "_origin": "ast",
-      "community": 5,
-      "community_name": "validation.ts",
-      "file_type": "code",
-      "norm_label": "commandcontroller.ts",
-      "source_file": "server/controllers/CommandController.ts",
-      "source_location": "L1"
-    },
-    {
       "id": "server_domain_cursor",
       "label": "cursor.ts",
       "_origin": "ast",
@@ -10884,61 +11126,6 @@
       "norm_label": "eventschema",
       "source_file": "server/domain/cursor.ts",
       "source_location": "L6"
-    },
-    {
-      "id": "server_services_ai",
-      "label": "ai.ts",
-      "_origin": "ast",
-      "community": 5,
-      "community_name": "validation.ts",
-      "file_type": "code",
-      "norm_label": "ai.ts",
-      "source_file": "server/services/ai.ts",
-      "source_location": "L1"
-    },
-    {
-      "id": "server_services_ai_defaultsettings",
-      "label": "defaultSettings",
-      "_origin": "ast",
-      "community": 5,
-      "community_name": "validation.ts",
-      "file_type": "code",
-      "norm_label": "defaultsettings",
-      "source_file": "server/services/ai.ts",
-      "source_location": "L214"
-    },
-    {
-      "id": "server_services_ai_schema_editschemadialect_editschema",
-      "label": "{ $schema: _editSchemaDialect, ...editSchema }",
-      "_origin": "ast",
-      "community": 5,
-      "community_name": "validation.ts",
-      "file_type": "code",
-      "norm_label": "{ $schema: _editschemadialect, ...editschema }",
-      "source_file": "server/services/ai.ts",
-      "source_location": "L223"
-    },
-    {
-      "id": "server_services_applicationservice",
-      "label": "ApplicationService.ts",
-      "_origin": "ast",
-      "community": 5,
-      "community_name": "validation.ts",
-      "file_type": "code",
-      "norm_label": "applicationservice.ts",
-      "source_file": "server/services/ApplicationService.ts",
-      "source_location": "L1"
-    },
-    {
-      "id": "server_services_applicationservice_emptyrecording",
-      "label": "emptyRecording",
-      "_origin": "ast",
-      "community": 5,
-      "community_name": "validation.ts",
-      "file_type": "code",
-      "norm_label": "emptyrecording",
-      "source_file": "server/services/ApplicationService.ts",
-      "source_location": "L37"
     },
     {
       "id": "third_party_licenses_rust_unic_ucd_version_0_9_0_copyright",
@@ -11052,61 +11239,6 @@
       "source_location": "L3"
     },
     {
-      "id": "scripts_check_camera",
-      "label": "check-camera.ts",
-      "_origin": "ast",
-      "community": 52,
-      "community_name": "service.test.ts",
-      "file_type": "code",
-      "norm_label": "check-camera.ts",
-      "source_file": "scripts/check-camera.ts",
-      "source_location": "L1"
-    },
-    {
-      "id": "scripts_check_camera_artifacts",
-      "label": "artifacts",
-      "_origin": "ast",
-      "community": 52,
-      "community_name": "service.test.ts",
-      "file_type": "code",
-      "norm_label": "artifacts",
-      "source_file": "scripts/check-camera.ts",
-      "source_location": "L14"
-    },
-    {
-      "id": "scripts_check_camera_client",
-      "label": "client",
-      "_origin": "ast",
-      "community": 52,
-      "community_name": "service.test.ts",
-      "file_type": "code",
-      "norm_label": "client",
-      "source_file": "scripts/check-camera.ts",
-      "source_location": "L12"
-    },
-    {
-      "id": "scripts_check_camera_native",
-      "label": "native",
-      "_origin": "ast",
-      "community": 52,
-      "community_name": "service.test.ts",
-      "file_type": "code",
-      "norm_label": "native",
-      "source_file": "scripts/check-camera.ts",
-      "source_location": "L13"
-    },
-    {
-      "id": "scripts_check_camera_pattern",
-      "label": "pattern",
-      "_origin": "ast",
-      "community": 52,
-      "community_name": "service.test.ts",
-      "file_type": "code",
-      "norm_label": "pattern",
-      "source_file": "scripts/check-camera.ts",
-      "source_location": "L16"
-    },
-    {
       "id": "server_browser",
       "label": "browser.ts",
       "_origin": "ast",
@@ -11171,17 +11303,6 @@
       "norm_label": "methodschemas",
       "source_file": "server/contracts/commands.ts",
       "source_location": "L31"
-    },
-    {
-      "id": "server_contracts_validation_sourceschema",
-      "label": "sourceSchema",
-      "_origin": "ast",
-      "community": 52,
-      "community_name": "service.test.ts",
-      "file_type": "code",
-      "norm_label": "sourceschema",
-      "source_file": "server/contracts/validation.ts",
-      "source_location": "L183"
     },
     {
       "id": "server_infrastructure_rpc",
@@ -11492,17 +11613,6 @@
       "source_location": ""
     },
     {
-      "id": "task",
-      "label": "Task",
-      "_origin": "ast",
-      "community": 53,
-      "community_name": ".command",
-      "file_type": "code",
-      "norm_label": "task",
-      "source_file": "",
-      "source_location": ""
-    },
-    {
       "id": "scripts_prepare_site_download",
       "label": "prepare-site-download.mjs",
       "_origin": "ast",
@@ -11565,6 +11675,17 @@
       "community_name": "NativeFailure",
       "file_type": "code",
       "norm_label": "error",
+      "source_file": "",
+      "source_location": ""
+    },
+    {
+      "id": "filehandle",
+      "label": "FileHandle",
+      "_origin": "ast",
+      "community": 55,
+      "community_name": "NativeFailure",
+      "file_type": "code",
+      "norm_label": "filehandle",
       "source_file": "",
       "source_location": ""
     },
@@ -12411,17 +12532,6 @@
       "source_location": "L55"
     },
     {
-      "id": "src_api",
-      "label": "api.ts",
-      "_origin": "ast",
-      "community": 64,
-      "community_name": "messageOf",
-      "file_type": "code",
-      "norm_label": "api.ts",
-      "source_file": "src/api.ts",
-      "source_location": "L1"
-    },
-    {
       "id": "src_components_organisms_authorfooter",
       "label": "AuthorFooter.tsx",
       "_origin": "ast",
@@ -12466,25 +12576,14 @@
       "source_location": "L1"
     },
     {
-      "id": "src_controllers_usecapturedialogcontroller",
-      "label": "useCaptureDialogController.ts",
+      "id": "src_features_export_exportdialog",
+      "label": "ExportDialog.tsx",
       "_origin": "ast",
       "community": 64,
       "community_name": "messageOf",
       "file_type": "code",
-      "norm_label": "usecapturedialogcontroller.ts",
-      "source_file": "src/controllers/useCaptureDialogController.ts",
-      "source_location": "L1"
-    },
-    {
-      "id": "src_controllers_usestablecallback",
-      "label": "useStableCallback.ts",
-      "_origin": "ast",
-      "community": 64,
-      "community_name": "messageOf",
-      "file_type": "code",
-      "norm_label": "usestablecallback.ts",
-      "source_file": "src/controllers/useStableCallback.ts",
+      "norm_label": "exportdialog.tsx",
+      "source_file": "src/features/export/ExportDialog.tsx",
       "source_location": "L1"
     },
     {
@@ -12519,28 +12618,6 @@
       "norm_label": "capturedialog.tsx",
       "source_file": "src/features/recording/CaptureDialog.tsx",
       "source_location": "L1"
-    },
-    {
-      "id": "src_infrastructure_platform",
-      "label": "platform.ts",
-      "_origin": "ast",
-      "community": 64,
-      "community_name": "messageOf",
-      "file_type": "code",
-      "norm_label": "platform.ts",
-      "source_file": "src/infrastructure/platform.ts",
-      "source_location": "L1"
-    },
-    {
-      "id": "src_infrastructure_platform_desktop",
-      "label": "desktop",
-      "_origin": "ast",
-      "community": 64,
-      "community_name": "messageOf",
-      "file_type": "code",
-      "norm_label": "desktop",
-      "source_file": "src/infrastructure/platform.ts",
-      "source_location": "L4"
     },
     {
       "id": "src_lib_errors",
@@ -12807,72 +12884,6 @@
       "source_location": "L11"
     },
     {
-      "id": "nscolor",
-      "label": "NSColor",
-      "_origin": "ast",
-      "community": 66,
-      "community_name": "render",
-      "file_type": "code",
-      "norm_label": "nscolor",
-      "source_file": "",
-      "source_location": ""
-    },
-    {
-      "id": "nspoint",
-      "label": "NSPoint",
-      "_origin": "ast",
-      "community": 66,
-      "community_name": "render",
-      "file_type": "code",
-      "norm_label": "nspoint",
-      "source_file": "",
-      "source_location": ""
-    },
-    {
-      "id": "nsview",
-      "label": "NSView",
-      "_origin": "ast",
-      "community": 66,
-      "community_name": "render",
-      "file_type": "code",
-      "norm_label": "nsview",
-      "source_file": "",
-      "source_location": ""
-    },
-    {
-      "id": "scripts_make_icon",
-      "label": "make-icon.swift",
-      "_origin": "ast",
-      "community": 66,
-      "community_name": "render",
-      "file_type": "code",
-      "norm_label": "make-icon.swift",
-      "source_file": "scripts/make-icon.swift",
-      "source_location": "L1"
-    },
-    {
-      "id": "scripts_make_icon_swift_int",
-      "label": "Int",
-      "_origin": "ast",
-      "community": 66,
-      "community_name": "render",
-      "file_type": "code",
-      "norm_label": "int",
-      "source_file": "",
-      "source_location": ""
-    },
-    {
-      "id": "scripts_make_icon_swift_string",
-      "label": "String",
-      "_origin": "ast",
-      "community": 66,
-      "community_name": "render",
-      "file_type": "code",
-      "norm_label": "string",
-      "source_file": "",
-      "source_location": ""
-    },
-    {
       "id": "readme_connect_claude_or_codex",
       "label": "Connect Claude or Codex",
       "_origin": "ast",
@@ -12978,61 +12989,6 @@
       "norm_label": "render-assets.py",
       "source_file": "marketing/product-hunt/render-assets.py",
       "source_location": "L1"
-    },
-    {
-      "id": "server_camera_layout_test",
-      "label": "camera-layout.test.ts",
-      "_origin": "ast",
-      "community": 69,
-      "community_name": "ProjectStore.ts",
-      "file_type": "code",
-      "norm_label": "camera-layout.test.ts",
-      "source_file": "server/camera-layout.test.ts",
-      "source_location": "L1"
-    },
-    {
-      "id": "server_contracts_validation_projectschema",
-      "label": "projectSchema",
-      "_origin": "ast",
-      "community": 69,
-      "community_name": "ProjectStore.ts",
-      "file_type": "code",
-      "norm_label": "projectschema",
-      "source_file": "server/contracts/validation.ts",
-      "source_location": "L198"
-    },
-    {
-      "id": "server_infrastructure_projectstore",
-      "label": "ProjectStore.ts",
-      "_origin": "ast",
-      "community": 69,
-      "community_name": "ProjectStore.ts",
-      "file_type": "code",
-      "norm_label": "projectstore.ts",
-      "source_file": "server/infrastructure/ProjectStore.ts",
-      "source_location": "L1"
-    },
-    {
-      "id": "server_infrastructure_projectstore_appdatadir",
-      "label": "appDataDir",
-      "_origin": "ast",
-      "community": 69,
-      "community_name": "ProjectStore.ts",
-      "file_type": "code",
-      "norm_label": "appdatadir",
-      "source_file": "server/infrastructure/ProjectStore.ts",
-      "source_location": "L20"
-    },
-    {
-      "id": "server_infrastructure_projectstore_socketpath",
-      "label": "socketPath",
-      "_origin": "ast",
-      "community": 69,
-      "community_name": "ProjectStore.ts",
-      "file_type": "code",
-      "norm_label": "socketpath",
-      "source_file": "server/infrastructure/ProjectStore.ts",
-      "source_location": "L26"
     },
     {
       "id": "src_tauri_tauri_conf",
@@ -13947,6 +13903,61 @@
       "source_location": "L1"
     },
     {
+      "id": "src_api",
+      "label": "api.ts",
+      "_origin": "ast",
+      "community": 76,
+      "community_name": "types.ts",
+      "file_type": "code",
+      "norm_label": "api.ts",
+      "source_file": "src/api.ts",
+      "source_location": "L1"
+    },
+    {
+      "id": "src_controllers_usecapturedialogcontroller",
+      "label": "useCaptureDialogController.ts",
+      "_origin": "ast",
+      "community": 76,
+      "community_name": "types.ts",
+      "file_type": "code",
+      "norm_label": "usecapturedialogcontroller.ts",
+      "source_file": "src/controllers/useCaptureDialogController.ts",
+      "source_location": "L1"
+    },
+    {
+      "id": "src_controllers_usestablecallback",
+      "label": "useStableCallback.ts",
+      "_origin": "ast",
+      "community": 76,
+      "community_name": "types.ts",
+      "file_type": "code",
+      "norm_label": "usestablecallback.ts",
+      "source_file": "src/controllers/useStableCallback.ts",
+      "source_location": "L1"
+    },
+    {
+      "id": "src_infrastructure_platform",
+      "label": "platform.ts",
+      "_origin": "ast",
+      "community": 76,
+      "community_name": "types.ts",
+      "file_type": "code",
+      "norm_label": "platform.ts",
+      "source_file": "src/infrastructure/platform.ts",
+      "source_location": "L1"
+    },
+    {
+      "id": "src_infrastructure_platform_desktop",
+      "label": "desktop",
+      "_origin": "ast",
+      "community": 76,
+      "community_name": "types.ts",
+      "file_type": "code",
+      "norm_label": "desktop",
+      "source_file": "src/infrastructure/platform.ts",
+      "source_location": "L4"
+    },
+    {
       "id": "src_infrastructure_transport",
       "label": "transport.ts",
       "_origin": "ast",
@@ -14501,7 +14512,7 @@
       "node_kind": "heading",
       "norm_label": "architecture and tests",
       "source_file": "AGENTS.md",
-      "source_location": "L16"
+      "source_location": "L17"
     },
     {
       "id": "agents_development_standards",
@@ -14525,7 +14536,7 @@
       "node_kind": "heading",
       "norm_label": "repository knowledge graph",
       "source_file": "AGENTS.md",
-      "source_location": "L24"
+      "source_location": "L25"
     },
     {
       "id": "agents_required_checks",
@@ -14618,13 +14629,13 @@
       "source_location": "L85"
     },
     {
-      "id": "ref_eslint_fix_max_warnings_0",
-      "label": "eslint --fix --max-warnings 0",
+      "id": "ref_eslint_fix_max_warnings_0_no_warn_ignored",
+      "label": "eslint --fix --max-warnings 0 --no-warn-ignored",
       "_origin": "ast",
       "community": 88,
       "community_name": "lint-staged",
       "file_type": "concept",
-      "norm_label": "eslint --fix --max-warnings 0",
+      "norm_label": "eslint --fix --max-warnings 0 --no-warn-ignored",
       "source_file": "package.json",
       "source_location": "L81"
     },
@@ -14662,6 +14673,18 @@
       "norm_label": "code quality",
       "source_file": "docs/development-standards.md",
       "source_location": "L1"
+    },
+    {
+      "id": "docs_development_standards_imports",
+      "label": "Imports",
+      "_origin": "ast",
+      "community": 89,
+      "community_name": "development-standards.md",
+      "file_type": "document",
+      "node_kind": "heading",
+      "norm_label": "imports",
+      "source_file": "docs/development-standards.md",
+      "source_location": "L31"
     },
     {
       "id": "src_components_atoms_switch",
@@ -20842,7 +20865,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/controllers/usePreviewEditingController.ts",
-      "source_location": "L60",
+      "source_location": "L64",
       "weight": 1.0
     },
     {
@@ -20854,7 +20877,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/controllers/usePreviewEditingController.ts",
-      "source_location": "L113",
+      "source_location": "L117",
       "weight": 1.0
     },
     {
@@ -20866,7 +20889,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/controllers/usePreviewEditingController.ts",
-      "source_location": "L131",
+      "source_location": "L135",
       "weight": 1.0
     },
     {
@@ -20878,7 +20901,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/controllers/usePreviewEditingController.ts",
-      "source_location": "L148",
+      "source_location": "L152",
       "weight": 1.0
     },
     {
@@ -20890,7 +20913,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/controllers/usePreviewEditingController.ts",
-      "source_location": "L148",
+      "source_location": "L152",
       "weight": 1.0
     },
     {
@@ -20902,7 +20925,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/controllers/usePreviewEditingController.ts",
-      "source_location": "L323",
+      "source_location": "L327",
       "weight": 1.0
     },
     {
@@ -20914,7 +20937,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/controllers/usePreviewEditingController.ts",
-      "source_location": "L360",
+      "source_location": "L364",
       "weight": 1.0
     },
     {
@@ -20926,7 +20949,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/controllers/usePreviewEditingController.ts",
-      "source_location": "L198",
+      "source_location": "L202",
       "weight": 1.0
     },
     {
@@ -20938,7 +20961,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/controllers/usePreviewEditingController.ts",
-      "source_location": "L202",
+      "source_location": "L206",
       "weight": 1.0
     },
     {
@@ -20950,7 +20973,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/controllers/usePreviewEditingController.ts",
-      "source_location": "L203",
+      "source_location": "L207",
       "weight": 1.0
     },
     {
@@ -20962,7 +20985,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/controllers/usePreviewEditingController.ts",
-      "source_location": "L216",
+      "source_location": "L220",
       "weight": 1.0
     },
     {
@@ -20974,7 +20997,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/controllers/useStudioController.ts",
-      "source_location": "L142",
+      "source_location": "L148",
       "weight": 1.0
     },
     {
@@ -20986,7 +21009,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/controllers/useStudioController.ts",
-      "source_location": "L52",
+      "source_location": "L58",
       "weight": 1.0
     },
     {
@@ -20998,7 +21021,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/controllers/useStudioController.ts",
-      "source_location": "L53",
+      "source_location": "L59",
       "weight": 1.0
     },
     {
@@ -21010,7 +21033,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/controllers/useStudioController.ts",
-      "source_location": "L54",
+      "source_location": "L60",
       "weight": 1.0
     },
     {
@@ -21022,7 +21045,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/controllers/useStudioController.ts",
-      "source_location": "L737",
+      "source_location": "L743",
       "weight": 1.0
     },
     {
@@ -21034,7 +21057,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/controllers/useStudioController.ts",
-      "source_location": "L81",
+      "source_location": "L87",
       "weight": 1.0
     },
     {
@@ -21046,7 +21069,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/controllers/useStudioController.ts",
-      "source_location": "L389",
+      "source_location": "L395",
       "weight": 1.0
     },
     {
@@ -21058,7 +21081,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/controllers/useStudioController.ts",
-      "source_location": "L400",
+      "source_location": "L406",
       "weight": 1.0
     },
     {
@@ -21070,7 +21093,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/controllers/useStudioController.ts",
-      "source_location": "L404",
+      "source_location": "L410",
       "weight": 1.0
     },
     {
@@ -21082,7 +21105,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/controllers/useStudioController.ts",
-      "source_location": "L415",
+      "source_location": "L421",
       "weight": 1.0
     },
     {
@@ -21094,7 +21117,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/controllers/useStudioController.ts",
-      "source_location": "L445",
+      "source_location": "L451",
       "weight": 1.0
     },
     {
@@ -21106,7 +21129,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/controllers/useStudioController.ts",
-      "source_location": "L448",
+      "source_location": "L454",
       "weight": 1.0
     },
     {
@@ -21118,7 +21141,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/controllers/useStudioController.ts",
-      "source_location": "L612",
+      "source_location": "L618",
       "weight": 1.0
     },
     {
@@ -21130,7 +21153,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/controllers/useStudioController.ts",
-      "source_location": "L641",
+      "source_location": "L647",
       "weight": 1.0
     },
     {
@@ -21142,7 +21165,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/controllers/useStudioController.ts",
-      "source_location": "L650",
+      "source_location": "L656",
       "weight": 1.0
     },
     {
@@ -21154,7 +21177,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/controllers/useStudioController.ts",
-      "source_location": "L139",
+      "source_location": "L145",
       "weight": 1.0
     },
     {
@@ -21166,7 +21189,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/controllers/useStudioController.ts",
-      "source_location": "L717",
+      "source_location": "L723",
       "weight": 1.0
     },
     {
@@ -21178,7 +21201,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/controllers/useStudioController.ts",
-      "source_location": "L719",
+      "source_location": "L725",
       "weight": 1.0
     },
     {
@@ -21190,7 +21213,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/controllers/useStudioController.ts",
-      "source_location": "L705",
+      "source_location": "L711",
       "weight": 1.0
     },
     {
@@ -21202,7 +21225,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/controllers/useStudioController.ts",
-      "source_location": "L707",
+      "source_location": "L713",
       "weight": 1.0
     },
     {
@@ -21214,7 +21237,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/controllers/useStudioController.ts",
-      "source_location": "L592",
+      "source_location": "L598",
       "weight": 1.0
     },
     {
@@ -21226,7 +21249,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/controllers/useStudioController.ts",
-      "source_location": "L596",
+      "source_location": "L602",
       "weight": 1.0
     },
     {
@@ -21238,7 +21261,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/controllers/useStudioController.ts",
-      "source_location": "L455",
+      "source_location": "L461",
       "weight": 1.0
     },
     {
@@ -21250,7 +21273,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/controllers/useStudioController.ts",
-      "source_location": "L458",
+      "source_location": "L464",
       "weight": 1.0
     },
     {
@@ -21262,7 +21285,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/controllers/useStudioController.ts",
-      "source_location": "L145",
+      "source_location": "L151",
       "weight": 1.0
     },
     {
@@ -21274,7 +21297,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/controllers/useStudioController.ts",
-      "source_location": "L152",
+      "source_location": "L158",
       "weight": 1.0
     },
     {
@@ -21286,7 +21309,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/controllers/useStudioController.ts",
-      "source_location": "L480",
+      "source_location": "L486",
       "weight": 1.0
     },
     {
@@ -21298,7 +21321,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/controllers/useStudioController.ts",
-      "source_location": "L607",
+      "source_location": "L613",
       "weight": 1.0
     },
     {
@@ -21310,7 +21333,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/controllers/useStudioController.ts",
-      "source_location": "L437",
+      "source_location": "L443",
       "weight": 1.0
     },
     {
@@ -21322,7 +21345,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/controllers/useStudioController.ts",
-      "source_location": "L440",
+      "source_location": "L446",
       "weight": 1.0
     },
     {
@@ -21334,7 +21357,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/controllers/useStudioController.ts",
-      "source_location": "L286",
+      "source_location": "L292",
       "weight": 1.0
     },
     {
@@ -21346,7 +21369,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/controllers/useStudioController.ts",
-      "source_location": "L334",
+      "source_location": "L340",
       "weight": 1.0
     },
     {
@@ -21358,7 +21381,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/controllers/useStudioController.ts",
-      "source_location": "L347",
+      "source_location": "L353",
       "weight": 1.0
     },
     {
@@ -21370,7 +21393,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/controllers/useStudioController.ts",
-      "source_location": "L566",
+      "source_location": "L572",
       "weight": 1.0
     },
     {
@@ -21382,7 +21405,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/controllers/useStudioController.ts",
-      "source_location": "L431",
+      "source_location": "L437",
       "weight": 1.0
     },
     {
@@ -21394,7 +21417,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/controllers/useStudioController.ts",
-      "source_location": "L694",
+      "source_location": "L700",
       "weight": 1.0
     },
     {
@@ -21406,7 +21429,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/controllers/useStudioController.ts",
-      "source_location": "L686",
+      "source_location": "L692",
       "weight": 1.0
     },
     {
@@ -21418,7 +21441,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/controllers/useStudioController.ts",
-      "source_location": "L113",
+      "source_location": "L119",
       "weight": 1.0
     },
     {
@@ -21430,7 +21453,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/controllers/useStudioController.ts",
-      "source_location": "L669",
+      "source_location": "L675",
       "weight": 1.0
     },
     {
@@ -21442,7 +21465,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/controllers/useStudioController.ts",
-      "source_location": "L675",
+      "source_location": "L681",
       "weight": 1.0
     },
     {
@@ -21454,12 +21477,24 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/controllers/useStudioController.ts",
-      "source_location": "L578",
+      "source_location": "L584",
       "weight": 1.0
     },
     {
       "source": "src_controllers_usestudiocontroller_usestudiocontroller_togglecameradevice",
       "target": "src_services_commands_command",
+      "relation": "calls",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "source_file": "src/controllers/useStudioController.ts",
+      "source_location": "L585",
+      "weight": 1.0
+    },
+    {
+      "source": "src_controllers_usestudiocontroller_usestudiocontroller_togglecameravisibility",
+      "target": "src_controllers_usestudiocontroller_usestudiocontroller_runrecording",
       "relation": "calls",
       "_origin": "ast",
       "confidence": "EXTRACTED",
@@ -21471,18 +21506,6 @@
     },
     {
       "source": "src_controllers_usestudiocontroller_usestudiocontroller_togglecameravisibility",
-      "target": "src_controllers_usestudiocontroller_usestudiocontroller_runrecording",
-      "relation": "calls",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "call",
-      "source_file": "src/controllers/useStudioController.ts",
-      "source_location": "L573",
-      "weight": 1.0
-    },
-    {
-      "source": "src_controllers_usestudiocontroller_usestudiocontroller_togglecameravisibility",
       "target": "src_services_commands_command",
       "relation": "calls",
       "_origin": "ast",
@@ -21490,7 +21513,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/controllers/useStudioController.ts",
-      "source_location": "L574",
+      "source_location": "L580",
       "weight": 1.0
     },
     {
@@ -21502,7 +21525,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/controllers/useStudioController.ts",
-      "source_location": "L583",
+      "source_location": "L589",
       "weight": 1.0
     },
     {
@@ -21514,7 +21537,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/controllers/useStudioController.ts",
-      "source_location": "L585",
+      "source_location": "L591",
       "weight": 1.0
     },
     {
@@ -21718,7 +21741,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/features/editor/panels/OverlaysPanel.tsx",
-      "source_location": "L113",
+      "source_location": "L108",
       "weight": 1.0
     },
     {
@@ -21730,7 +21753,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/features/editor/panels/OverlaysPanel.tsx",
-      "source_location": "L170",
+      "source_location": "L165",
       "weight": 1.0
     },
     {
@@ -21742,7 +21765,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/features/editor/panels/OverlaysPanel.tsx",
-      "source_location": "L203",
+      "source_location": "L198",
       "weight": 1.0
     },
     {
@@ -21754,7 +21777,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/features/editor/panels/ZoomPanel.tsx",
-      "source_location": "L131",
+      "source_location": "L126",
       "weight": 1.0
     },
     {
@@ -21766,7 +21789,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/features/editor/panels/ZoomPanel.tsx",
-      "source_location": "L144",
+      "source_location": "L139",
       "weight": 1.0
     },
     {
@@ -21778,7 +21801,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/features/editor/panels/ZoomPanel.tsx",
-      "source_location": "L33",
+      "source_location": "L28",
       "weight": 1.0
     },
     {
@@ -21790,7 +21813,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/features/editor/panels/ZoomPanel.tsx",
-      "source_location": "L77",
+      "source_location": "L72",
       "weight": 1.0
     },
     {
@@ -21838,7 +21861,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/features/editor/Timeline.tsx",
-      "source_location": "L114",
+      "source_location": "L109",
       "weight": 1.0
     },
     {
@@ -21850,7 +21873,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/features/editor/Timeline.tsx",
-      "source_location": "L497",
+      "source_location": "L492",
       "weight": 1.0
     },
     {
@@ -21862,7 +21885,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/features/editor/Timeline.tsx",
-      "source_location": "L514",
+      "source_location": "L509",
       "weight": 1.0
     },
     {
@@ -21874,7 +21897,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/features/editor/Timeline.tsx",
-      "source_location": "L571",
+      "source_location": "L566",
       "weight": 1.0
     },
     {
@@ -21886,7 +21909,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/features/editor/Timeline.tsx",
-      "source_location": "L696",
+      "source_location": "L691",
       "weight": 1.0
     },
     {
@@ -21898,7 +21921,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/features/editor/Timeline.tsx",
-      "source_location": "L822",
+      "source_location": "L817",
       "weight": 1.0
     },
     {
@@ -21910,7 +21933,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/features/editor/Timeline.tsx",
-      "source_location": "L88",
+      "source_location": "L83",
       "weight": 1.0
     },
     {
@@ -21922,7 +21945,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/features/editor/Timeline.tsx",
-      "source_location": "L339",
+      "source_location": "L334",
       "weight": 1.0
     },
     {
@@ -21934,7 +21957,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/features/editor/Timeline.tsx",
-      "source_location": "L201",
+      "source_location": "L196",
       "weight": 1.0
     },
     {
@@ -21946,7 +21969,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/features/editor/Timeline.tsx",
-      "source_location": "L403",
+      "source_location": "L398",
       "weight": 1.0
     },
     {
@@ -21958,7 +21981,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/features/editor/Timeline.tsx",
-      "source_location": "L412",
+      "source_location": "L407",
       "weight": 1.0
     },
     {
@@ -21970,7 +21993,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/features/editor/Timeline.tsx",
-      "source_location": "L249",
+      "source_location": "L244",
       "weight": 1.0
     },
     {
@@ -21982,7 +22005,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/features/editor/Timeline.tsx",
-      "source_location": "L180",
+      "source_location": "L175",
       "weight": 1.0
     },
     {
@@ -22342,7 +22365,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "website/vite.config.ts",
-      "source_location": "L23",
+      "source_location": "L24",
       "weight": 1.0
     },
     {
@@ -22426,7 +22449,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/controllers/usePreviewEditingController.ts",
-      "source_location": "L152",
+      "source_location": "L156",
       "weight": 1.0
     },
     {
@@ -22438,7 +22461,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/controllers/useStudioController.ts",
-      "source_location": "L281",
+      "source_location": "L287",
       "weight": 1.0
     },
     {
@@ -22450,7 +22473,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/controllers/useStudioController.ts",
-      "source_location": "L387",
+      "source_location": "L393",
       "weight": 1.0
     },
     {
@@ -22462,7 +22485,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/controllers/useStudioController.ts",
-      "source_location": "L428",
+      "source_location": "L434",
       "weight": 1.0
     },
     {
@@ -22474,7 +22497,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/controllers/useStudioController.ts",
-      "source_location": "L454",
+      "source_location": "L460",
       "weight": 1.0
     },
     {
@@ -22486,7 +22509,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/controllers/useStudioController.ts",
-      "source_location": "L93",
+      "source_location": "L99",
       "weight": 1.0
     },
     {
@@ -22510,7 +22533,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/features/editor/Timeline.tsx",
-      "source_location": "L171",
+      "source_location": "L166",
       "weight": 1.0
     },
     {
@@ -22522,7 +22545,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/features/editor/Timeline.tsx",
-      "source_location": "L175",
+      "source_location": "L170",
       "weight": 1.0
     },
     {
@@ -22534,7 +22557,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/features/editor/Timeline.tsx",
-      "source_location": "L231",
+      "source_location": "L226",
       "weight": 1.0
     },
     {
@@ -22546,7 +22569,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/features/editor/Timeline.tsx",
-      "source_location": "L238",
+      "source_location": "L233",
       "weight": 1.0
     },
     {
@@ -22558,7 +22581,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/features/editor/Timeline.tsx",
-      "source_location": "L387",
+      "source_location": "L382",
       "weight": 1.0
     },
     {
@@ -22570,7 +22593,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/features/editor/Timeline.tsx",
-      "source_location": "L398",
+      "source_location": "L393",
       "weight": 1.0
     },
     {
@@ -22582,7 +22605,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/features/editor/Timeline.tsx",
-      "source_location": "L405",
+      "source_location": "L400",
       "weight": 1.0
     },
     {
@@ -22594,7 +22617,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/features/editor/Timeline.tsx",
-      "source_location": "L414",
+      "source_location": "L409",
       "weight": 1.0
     },
     {
@@ -24747,7 +24770,7 @@
     },
     {
       "source": "package_lint_staged_js_mjs_ts_tsx",
-      "target": "ref_eslint_fix_max_warnings_0",
+      "target": "ref_eslint_fix_max_warnings_0_no_warn_ignored",
       "relation": "extends",
       "_origin": "ast",
       "confidence": "EXTRACTED",
@@ -24982,7 +25005,7 @@
       "confidence_score": 1.0,
       "context": "import",
       "source_file": "tsconfig.json",
-      "source_location": "L17",
+      "source_location": "L20",
       "weight": 1.0
     },
     {
@@ -24994,7 +25017,7 @@
       "confidence_score": 1.0,
       "context": "import",
       "source_file": "tsconfig.json",
-      "source_location": "L17",
+      "source_location": "L20",
       "weight": 1.0
     },
     {
@@ -25006,7 +25029,7 @@
       "confidence_score": 1.0,
       "context": "import",
       "source_file": "tsconfig.json",
-      "source_location": "L17",
+      "source_location": "L20",
       "weight": 1.0
     },
     {
@@ -25018,7 +25041,7 @@
       "confidence_score": 1.0,
       "context": "import",
       "source_file": "tsconfig.json",
-      "source_location": "L17",
+      "source_location": "L20",
       "weight": 1.0
     },
     {
@@ -25030,7 +25053,7 @@
       "confidence_score": 1.0,
       "context": "import",
       "source_file": "tsconfig.json",
-      "source_location": "L17",
+      "source_location": "L20",
       "weight": 1.0
     },
     {
@@ -25042,7 +25065,7 @@
       "confidence_score": 1.0,
       "context": "import",
       "source_file": "tsconfig.json",
-      "source_location": "L17",
+      "source_location": "L20",
       "weight": 1.0
     },
     {
@@ -25054,7 +25077,7 @@
       "confidence_score": 1.0,
       "context": "import",
       "source_file": "tsconfig.json",
-      "source_location": "L17",
+      "source_location": "L20",
       "weight": 1.0
     },
     {
@@ -25066,7 +25089,7 @@
       "confidence_score": 1.0,
       "context": "import",
       "source_file": "tsconfig.json",
-      "source_location": "L17",
+      "source_location": "L20",
       "weight": 1.0
     },
     {
@@ -25078,7 +25101,7 @@
       "confidence_score": 1.0,
       "context": "import",
       "source_file": "tsconfig.json",
-      "source_location": "L17",
+      "source_location": "L20",
       "weight": 1.0
     },
     {
@@ -28714,7 +28737,7 @@
       "confidence_score": 1.0,
       "context": "import",
       "source_file": "src/controllers/useStudioController.ts",
-      "source_location": "L19",
+      "source_location": "L25",
       "weight": 1.0
     },
     {
@@ -29355,7 +29378,7 @@
     },
     {
       "source": "src_features_editor_panels_overlayspanel",
-      "target": "src_lib_errors_messageof",
+      "target": "src_components_molecules_rangesummary_rangesummary",
       "relation": "imports",
       "_origin": "ast",
       "confidence": "EXTRACTED",
@@ -29367,7 +29390,7 @@
     },
     {
       "source": "src_features_editor_panels_overlayspanel",
-      "target": "src_components_atoms_iconbutton_iconbutton",
+      "target": "src_lib_format_number",
       "relation": "imports",
       "_origin": "ast",
       "confidence": "EXTRACTED",
@@ -29379,66 +29402,6 @@
     },
     {
       "source": "src_features_editor_panels_overlayspanel",
-      "target": "src_components_molecules_field_field",
-      "relation": "imports",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "import",
-      "source_file": "src/features/editor/panels/OverlaysPanel.tsx",
-      "source_location": "L12",
-      "weight": 1.0
-    },
-    {
-      "source": "src_features_editor_panels_overlayspanel",
-      "target": "src_components_molecules_slider_slider",
-      "relation": "imports",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "import",
-      "source_file": "src/features/editor/panels/OverlaysPanel.tsx",
-      "source_location": "L13",
-      "weight": 1.0
-    },
-    {
-      "source": "src_features_editor_panels_overlayspanel",
-      "target": "src_components_molecules_panelintro_panelintro",
-      "relation": "imports",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "import",
-      "source_file": "src/features/editor/panels/OverlaysPanel.tsx",
-      "source_location": "L14",
-      "weight": 1.0
-    },
-    {
-      "source": "src_features_editor_panels_overlayspanel",
-      "target": "src_components_molecules_rangesummary_rangesummary",
-      "relation": "imports",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "import",
-      "source_file": "src/features/editor/panels/OverlaysPanel.tsx",
-      "source_location": "L15",
-      "weight": 1.0
-    },
-    {
-      "source": "src_features_editor_panels_overlayspanel",
-      "target": "src_lib_format_number",
-      "relation": "imports",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "import",
-      "source_file": "src/features/editor/panels/OverlaysPanel.tsx",
-      "source_location": "L16",
-      "weight": 1.0
-    },
-    {
-      "source": "src_features_editor_panels_overlayspanel",
       "target": "src_lib_format_seconds",
       "relation": "imports",
       "_origin": "ast",
@@ -29446,7 +29409,7 @@
       "confidence_score": 1.0,
       "context": "import",
       "source_file": "src/features/editor/panels/OverlaysPanel.tsx",
-      "source_location": "L16",
+      "source_location": "L11",
       "weight": 1.0
     },
     {
@@ -29506,67 +29469,67 @@
       "confidence_score": 1.0,
       "context": "import",
       "source_file": "src/features/editor/panels/OverlaysPanel.tsx",
-      "source_location": "L9",
+      "source_location": "L4",
       "weight": 1.0
     },
     {
-      "source": "src_features_editor_panels_zoompanel",
-      "target": "shared_timeline_outputranges",
+      "source": "src_features_editor_panels_overlayspanel",
+      "target": "src_lib_errors_messageof",
       "relation": "imports",
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "context": "import",
-      "source_file": "src/features/editor/panels/ZoomPanel.tsx",
-      "source_location": "L10",
+      "source_file": "src/features/editor/panels/OverlaysPanel.tsx",
+      "source_location": "L5",
       "weight": 1.0
     },
     {
-      "source": "src_features_editor_panels_zoompanel",
+      "source": "src_features_editor_panels_overlayspanel",
+      "target": "src_components_atoms_iconbutton_iconbutton",
+      "relation": "imports",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "src/features/editor/panels/OverlaysPanel.tsx",
+      "source_location": "L6",
+      "weight": 1.0
+    },
+    {
+      "source": "src_features_editor_panels_overlayspanel",
       "target": "src_components_molecules_field_field",
       "relation": "imports",
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "context": "import",
-      "source_file": "src/features/editor/panels/ZoomPanel.tsx",
-      "source_location": "L11",
+      "source_file": "src/features/editor/panels/OverlaysPanel.tsx",
+      "source_location": "L7",
       "weight": 1.0
     },
     {
-      "source": "src_features_editor_panels_zoompanel",
-      "target": "src_components_atoms_switch_switch",
-      "relation": "imports",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "import",
-      "source_file": "src/features/editor/panels/ZoomPanel.tsx",
-      "source_location": "L12",
-      "weight": 1.0
-    },
-    {
-      "source": "src_features_editor_panels_zoompanel",
+      "source": "src_features_editor_panels_overlayspanel",
       "target": "src_components_molecules_slider_slider",
       "relation": "imports",
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "context": "import",
-      "source_file": "src/features/editor/panels/ZoomPanel.tsx",
-      "source_location": "L13",
+      "source_file": "src/features/editor/panels/OverlaysPanel.tsx",
+      "source_location": "L8",
       "weight": 1.0
     },
     {
-      "source": "src_features_editor_panels_zoompanel",
+      "source": "src_features_editor_panels_overlayspanel",
       "target": "src_components_molecules_panelintro_panelintro",
       "relation": "imports",
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "context": "import",
-      "source_file": "src/features/editor/panels/ZoomPanel.tsx",
-      "source_location": "L14",
+      "source_file": "src/features/editor/panels/OverlaysPanel.tsx",
+      "source_location": "L9",
       "weight": 1.0
     },
     {
@@ -29578,7 +29541,7 @@
       "confidence_score": 1.0,
       "context": "import",
       "source_file": "src/features/editor/panels/ZoomPanel.tsx",
-      "source_location": "L15",
+      "source_location": "L10",
       "weight": 1.0
     },
     {
@@ -29590,7 +29553,7 @@
       "confidence_score": 1.0,
       "context": "import",
       "source_file": "src/features/editor/panels/ZoomPanel.tsx",
-      "source_location": "L16",
+      "source_location": "L11",
       "weight": 1.0
     },
     {
@@ -29602,7 +29565,7 @@
       "confidence_score": 1.0,
       "context": "import",
       "source_file": "src/features/editor/panels/ZoomPanel.tsx",
-      "source_location": "L17",
+      "source_location": "L12",
       "weight": 1.0
     },
     {
@@ -29614,7 +29577,7 @@
       "confidence_score": 1.0,
       "context": "import",
       "source_file": "src/features/editor/panels/ZoomPanel.tsx",
-      "source_location": "L17",
+      "source_location": "L12",
       "weight": 1.0
     },
     {
@@ -29675,6 +29638,66 @@
       "context": "import",
       "source_file": "src/features/editor/panels/ZoomPanel.tsx",
       "source_location": "L4",
+      "weight": 1.0
+    },
+    {
+      "source": "src_features_editor_panels_zoompanel",
+      "target": "shared_timeline_outputranges",
+      "relation": "imports",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "src/features/editor/panels/ZoomPanel.tsx",
+      "source_location": "L5",
+      "weight": 1.0
+    },
+    {
+      "source": "src_features_editor_panels_zoompanel",
+      "target": "src_components_molecules_field_field",
+      "relation": "imports",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "src/features/editor/panels/ZoomPanel.tsx",
+      "source_location": "L6",
+      "weight": 1.0
+    },
+    {
+      "source": "src_features_editor_panels_zoompanel",
+      "target": "src_components_atoms_switch_switch",
+      "relation": "imports",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "src/features/editor/panels/ZoomPanel.tsx",
+      "source_location": "L7",
+      "weight": 1.0
+    },
+    {
+      "source": "src_features_editor_panels_zoompanel",
+      "target": "src_components_molecules_slider_slider",
+      "relation": "imports",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "src/features/editor/panels/ZoomPanel.tsx",
+      "source_location": "L8",
+      "weight": 1.0
+    },
+    {
+      "source": "src_features_editor_panels_zoompanel",
+      "target": "src_components_molecules_panelintro_panelintro",
+      "relation": "imports",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "src/features/editor/panels/ZoomPanel.tsx",
+      "source_location": "L9",
       "weight": 1.0
     },
     {
@@ -29866,7 +29889,7 @@
       "confidence_score": 1.0,
       "context": "import",
       "source_file": "src/features/editor/Timeline.tsx",
-      "source_location": "L24",
+      "source_location": "L19",
       "weight": 1.0
     },
     {
@@ -29878,7 +29901,7 @@
       "confidence_score": 1.0,
       "context": "import",
       "source_file": "src/features/editor/Timeline.tsx",
-      "source_location": "L24",
+      "source_location": "L19",
       "weight": 1.0
     },
     {
@@ -29890,7 +29913,7 @@
       "confidence_score": 1.0,
       "context": "import",
       "source_file": "src/features/editor/Timeline.tsx",
-      "source_location": "L24",
+      "source_location": "L19",
       "weight": 1.0
     },
     {
@@ -29902,7 +29925,7 @@
       "confidence_score": 1.0,
       "context": "import",
       "source_file": "src/features/editor/Timeline.tsx",
-      "source_location": "L25",
+      "source_location": "L20",
       "weight": 1.0
     },
     {
@@ -29914,7 +29937,7 @@
       "confidence_score": 1.0,
       "context": "import",
       "source_file": "src/features/editor/Timeline.tsx",
-      "source_location": "L26",
+      "source_location": "L21",
       "weight": 1.0
     },
     {
@@ -29926,7 +29949,7 @@
       "confidence_score": 1.0,
       "context": "import",
       "source_file": "src/features/editor/Timeline.tsx",
-      "source_location": "L27",
+      "source_location": "L22",
       "weight": 1.0
     },
     {
@@ -29938,7 +29961,7 @@
       "confidence_score": 1.0,
       "context": "import",
       "source_file": "src/features/editor/Timeline.tsx",
-      "source_location": "L28",
+      "source_location": "L23",
       "weight": 1.0
     },
     {
@@ -29950,7 +29973,7 @@
       "confidence_score": 1.0,
       "context": "import",
       "source_file": "src/features/editor/Timeline.tsx",
-      "source_location": "L28",
+      "source_location": "L23",
       "weight": 1.0
     },
     {
@@ -32321,7 +32344,7 @@
       "confidence_score": 1.0,
       "context": "import",
       "source_file": "src/controllers/useStudioController.ts",
-      "source_location": "L19",
+      "source_location": "L25",
       "weight": 1.0
     },
     {
@@ -32782,7 +32805,7 @@
     },
     {
       "source": "src_features_editor_panels_overlayspanel",
-      "target": "src_lib_errors",
+      "target": "src_components_molecules_rangesummary",
       "relation": "imports_from",
       "_origin": "ast",
       "confidence": "EXTRACTED",
@@ -32794,66 +32817,6 @@
     },
     {
       "source": "src_features_editor_panels_overlayspanel",
-      "target": "src_components_atoms_iconbutton",
-      "relation": "imports_from",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "import",
-      "source_file": "src/features/editor/panels/OverlaysPanel.tsx",
-      "source_location": "L11",
-      "weight": 1.0
-    },
-    {
-      "source": "src_features_editor_panels_overlayspanel",
-      "target": "src_components_molecules_field",
-      "relation": "imports_from",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "import",
-      "source_file": "src/features/editor/panels/OverlaysPanel.tsx",
-      "source_location": "L12",
-      "weight": 1.0
-    },
-    {
-      "source": "src_features_editor_panels_overlayspanel",
-      "target": "src_components_molecules_slider",
-      "relation": "imports_from",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "import",
-      "source_file": "src/features/editor/panels/OverlaysPanel.tsx",
-      "source_location": "L13",
-      "weight": 1.0
-    },
-    {
-      "source": "src_features_editor_panels_overlayspanel",
-      "target": "src_components_molecules_panelintro",
-      "relation": "imports_from",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "import",
-      "source_file": "src/features/editor/panels/OverlaysPanel.tsx",
-      "source_location": "L14",
-      "weight": 1.0
-    },
-    {
-      "source": "src_features_editor_panels_overlayspanel",
-      "target": "src_components_molecules_rangesummary",
-      "relation": "imports_from",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "import",
-      "source_file": "src/features/editor/panels/OverlaysPanel.tsx",
-      "source_location": "L15",
-      "weight": 1.0
-    },
-    {
-      "source": "src_features_editor_panels_overlayspanel",
       "target": "src_lib_format",
       "relation": "imports_from",
       "_origin": "ast",
@@ -32861,7 +32824,7 @@
       "confidence_score": 1.0,
       "context": "import",
       "source_file": "src/features/editor/panels/OverlaysPanel.tsx",
-      "source_location": "L16",
+      "source_location": "L11",
       "weight": 1.0
     },
     {
@@ -32885,67 +32848,67 @@
       "confidence_score": 1.0,
       "context": "import",
       "source_file": "src/features/editor/panels/OverlaysPanel.tsx",
-      "source_location": "L9",
+      "source_location": "L4",
       "weight": 1.0
     },
     {
-      "source": "src_features_editor_panels_zoompanel",
-      "target": "shared_timeline",
+      "source": "src_features_editor_panels_overlayspanel",
+      "target": "src_lib_errors",
       "relation": "imports_from",
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "context": "import",
-      "source_file": "src/features/editor/panels/ZoomPanel.tsx",
-      "source_location": "L10",
+      "source_file": "src/features/editor/panels/OverlaysPanel.tsx",
+      "source_location": "L5",
       "weight": 1.0
     },
     {
-      "source": "src_features_editor_panels_zoompanel",
+      "source": "src_features_editor_panels_overlayspanel",
+      "target": "src_components_atoms_iconbutton",
+      "relation": "imports_from",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "src/features/editor/panels/OverlaysPanel.tsx",
+      "source_location": "L6",
+      "weight": 1.0
+    },
+    {
+      "source": "src_features_editor_panels_overlayspanel",
       "target": "src_components_molecules_field",
       "relation": "imports_from",
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "context": "import",
-      "source_file": "src/features/editor/panels/ZoomPanel.tsx",
-      "source_location": "L11",
+      "source_file": "src/features/editor/panels/OverlaysPanel.tsx",
+      "source_location": "L7",
       "weight": 1.0
     },
     {
-      "source": "src_features_editor_panels_zoompanel",
-      "target": "src_components_atoms_switch",
-      "relation": "imports_from",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "import",
-      "source_file": "src/features/editor/panels/ZoomPanel.tsx",
-      "source_location": "L12",
-      "weight": 1.0
-    },
-    {
-      "source": "src_features_editor_panels_zoompanel",
+      "source": "src_features_editor_panels_overlayspanel",
       "target": "src_components_molecules_slider",
       "relation": "imports_from",
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "context": "import",
-      "source_file": "src/features/editor/panels/ZoomPanel.tsx",
-      "source_location": "L13",
+      "source_file": "src/features/editor/panels/OverlaysPanel.tsx",
+      "source_location": "L8",
       "weight": 1.0
     },
     {
-      "source": "src_features_editor_panels_zoompanel",
+      "source": "src_features_editor_panels_overlayspanel",
       "target": "src_components_molecules_panelintro",
       "relation": "imports_from",
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "context": "import",
-      "source_file": "src/features/editor/panels/ZoomPanel.tsx",
-      "source_location": "L14",
+      "source_file": "src/features/editor/panels/OverlaysPanel.tsx",
+      "source_location": "L9",
       "weight": 1.0
     },
     {
@@ -32957,7 +32920,7 @@
       "confidence_score": 1.0,
       "context": "import",
       "source_file": "src/features/editor/panels/ZoomPanel.tsx",
-      "source_location": "L15",
+      "source_location": "L10",
       "weight": 1.0
     },
     {
@@ -32969,7 +32932,7 @@
       "confidence_score": 1.0,
       "context": "import",
       "source_file": "src/features/editor/panels/ZoomPanel.tsx",
-      "source_location": "L16",
+      "source_location": "L11",
       "weight": 1.0
     },
     {
@@ -32981,7 +32944,7 @@
       "confidence_score": 1.0,
       "context": "import",
       "source_file": "src/features/editor/panels/ZoomPanel.tsx",
-      "source_location": "L17",
+      "source_location": "L12",
       "weight": 1.0
     },
     {
@@ -33006,6 +32969,66 @@
       "context": "import",
       "source_file": "src/features/editor/panels/ZoomPanel.tsx",
       "source_location": "L4",
+      "weight": 1.0
+    },
+    {
+      "source": "src_features_editor_panels_zoompanel",
+      "target": "shared_timeline",
+      "relation": "imports_from",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "src/features/editor/panels/ZoomPanel.tsx",
+      "source_location": "L5",
+      "weight": 1.0
+    },
+    {
+      "source": "src_features_editor_panels_zoompanel",
+      "target": "src_components_molecules_field",
+      "relation": "imports_from",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "src/features/editor/panels/ZoomPanel.tsx",
+      "source_location": "L6",
+      "weight": 1.0
+    },
+    {
+      "source": "src_features_editor_panels_zoompanel",
+      "target": "src_components_atoms_switch",
+      "relation": "imports_from",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "src/features/editor/panels/ZoomPanel.tsx",
+      "source_location": "L7",
+      "weight": 1.0
+    },
+    {
+      "source": "src_features_editor_panels_zoompanel",
+      "target": "src_components_molecules_slider",
+      "relation": "imports_from",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "src/features/editor/panels/ZoomPanel.tsx",
+      "source_location": "L8",
+      "weight": 1.0
+    },
+    {
+      "source": "src_features_editor_panels_zoompanel",
+      "target": "src_components_molecules_panelintro",
+      "relation": "imports_from",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "src/features/editor/panels/ZoomPanel.tsx",
+      "source_location": "L9",
       "weight": 1.0
     },
     {
@@ -33125,7 +33148,7 @@
       "confidence_score": 1.0,
       "context": "import",
       "source_file": "src/features/editor/Timeline.tsx",
-      "source_location": "L24",
+      "source_location": "L19",
       "weight": 1.0
     },
     {
@@ -33137,7 +33160,7 @@
       "confidence_score": 1.0,
       "context": "import",
       "source_file": "src/features/editor/Timeline.tsx",
-      "source_location": "L25",
+      "source_location": "L20",
       "weight": 1.0
     },
     {
@@ -33149,7 +33172,7 @@
       "confidence_score": 1.0,
       "context": "import",
       "source_file": "src/features/editor/Timeline.tsx",
-      "source_location": "L26",
+      "source_location": "L21",
       "weight": 1.0
     },
     {
@@ -33161,7 +33184,7 @@
       "confidence_score": 1.0,
       "context": "import",
       "source_file": "src/features/editor/Timeline.tsx",
-      "source_location": "L27",
+      "source_location": "L22",
       "weight": 1.0
     },
     {
@@ -33173,7 +33196,7 @@
       "confidence_score": 1.0,
       "context": "import",
       "source_file": "src/features/editor/Timeline.tsx",
-      "source_location": "L28",
+      "source_location": "L23",
       "weight": 1.0
     },
     {
@@ -36692,7 +36715,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "AGENTS.md",
-      "source_location": "L16",
+      "source_location": "L17",
       "weight": 1.0
     },
     {
@@ -36703,7 +36726,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "AGENTS.md",
-      "source_location": "L24",
+      "source_location": "L25",
       "weight": 1.0
     },
     {
@@ -36803,6 +36826,17 @@
       "confidence_score": 1.0,
       "source_file": "docs/development-standards.md",
       "source_location": "L1",
+      "weight": 1.0
+    },
+    {
+      "source": "docs_development_standards_code_quality",
+      "target": "docs_development_standards_imports",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/development-standards.md",
+      "source_location": "L31",
       "weight": 1.0
     },
     {
@@ -42604,35 +42638,13 @@
     },
     {
       "source": "src_controllers_useprevieweditingcontroller",
-      "target": "src_controllers_useprevieweditingcontroller_previewselection",
-      "relation": "contains",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "src/controllers/usePreviewEditingController.ts",
-      "source_location": "L10",
-      "weight": 1.0
-    },
-    {
-      "source": "src_controllers_useprevieweditingcontroller",
       "target": "src_controllers_useprevieweditingcontroller_replaypreviewgesture",
       "relation": "contains",
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/controllers/usePreviewEditingController.ts",
-      "source_location": "L101",
-      "weight": 1.0
-    },
-    {
-      "source": "src_controllers_useprevieweditingcontroller",
-      "target": "src_controllers_useprevieweditingcontroller_previeweditingprops",
-      "relation": "contains",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "src/controllers/usePreviewEditingController.ts",
-      "source_location": "L11",
+      "source_location": "L105",
       "weight": 1.0
     },
     {
@@ -42643,7 +42655,29 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/controllers/usePreviewEditingController.ts",
-      "source_location": "L117",
+      "source_location": "L121",
+      "weight": 1.0
+    },
+    {
+      "source": "src_controllers_useprevieweditingcontroller",
+      "target": "src_controllers_useprevieweditingcontroller_previewselection",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "src/controllers/usePreviewEditingController.ts",
+      "source_location": "L14",
+      "weight": 1.0
+    },
+    {
+      "source": "src_controllers_useprevieweditingcontroller",
+      "target": "src_controllers_useprevieweditingcontroller_previeweditingprops",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "src/controllers/usePreviewEditingController.ts",
+      "source_location": "L15",
       "weight": 1.0
     },
     {
@@ -42654,7 +42688,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/controllers/usePreviewEditingController.ts",
-      "source_location": "L22",
+      "source_location": "L26",
       "weight": 1.0
     },
     {
@@ -42665,7 +42699,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/controllers/usePreviewEditingController.ts",
-      "source_location": "L40",
+      "source_location": "L44",
       "weight": 1.0
     },
     {
@@ -42676,7 +42710,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/controllers/usePreviewEditingController.ts",
-      "source_location": "L42",
+      "source_location": "L46",
       "weight": 1.0
     },
     {
@@ -42687,7 +42721,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/controllers/usePreviewEditingController.ts",
-      "source_location": "L44",
+      "source_location": "L48",
       "weight": 1.0
     },
     {
@@ -42720,7 +42754,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/controllers/useStudioController.ts",
-      "source_location": "L21",
+      "source_location": "L27",
       "weight": 1.0
     },
     {
@@ -42731,7 +42765,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/controllers/useStudioController.ts",
-      "source_location": "L24",
+      "source_location": "L30",
       "weight": 1.0
     },
     {
@@ -42742,29 +42776,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/controllers/useStudioController.ts",
-      "source_location": "L802",
-      "weight": 1.0
-    },
-    {
-      "source": "src_controllers_usestudiocontroller_usestudiocontroller",
-      "target": "src_controllers_usestudiocontroller_usestudiocontroller_runrecording",
-      "relation": "contains",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "src/controllers/useStudioController.ts",
-      "source_location": "L559",
-      "weight": 1.0
-    },
-    {
-      "source": "src_controllers_usestudiocontroller_usestudiocontroller",
-      "target": "src_controllers_usestudiocontroller_usestudiocontroller_acceptcurrentproject",
-      "relation": "contains",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "src/controllers/useStudioController.ts",
-      "source_location": "L79",
+      "source_location": "L808",
       "weight": 1.0
     },
     {
@@ -42775,7 +42787,29 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/controllers/useStudioController.ts",
-      "source_location": "L98",
+      "source_location": "L104",
+      "weight": 1.0
+    },
+    {
+      "source": "src_controllers_usestudiocontroller_usestudiocontroller",
+      "target": "src_controllers_usestudiocontroller_usestudiocontroller_runrecording",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "src/controllers/useStudioController.ts",
+      "source_location": "L565",
+      "weight": 1.0
+    },
+    {
+      "source": "src_controllers_usestudiocontroller_usestudiocontroller",
+      "target": "src_controllers_usestudiocontroller_usestudiocontroller_acceptcurrentproject",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "src/controllers/useStudioController.ts",
+      "source_location": "L85",
       "weight": 1.0
     },
     {
@@ -42874,7 +42908,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/features/editor/panels/OverlaysPanel.tsx",
-      "source_location": "L18",
+      "source_location": "L13",
       "weight": 1.0
     },
     {
@@ -42885,7 +42919,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/features/editor/panels/ZoomPanel.tsx",
-      "source_location": "L19",
+      "source_location": "L14",
       "weight": 1.0
     },
     {
@@ -42918,7 +42952,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/features/editor/Timeline.tsx",
-      "source_location": "L1304",
+      "source_location": "L1299",
       "weight": 1.0
     },
     {
@@ -42929,7 +42963,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/features/editor/Timeline.tsx",
-      "source_location": "L1313",
+      "source_location": "L1308",
       "weight": 1.0
     },
     {
@@ -42940,7 +42974,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/features/editor/Timeline.tsx",
-      "source_location": "L30",
+      "source_location": "L25",
       "weight": 1.0
     },
     {
@@ -42951,7 +42985,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/features/editor/Timeline.tsx",
-      "source_location": "L197",
+      "source_location": "L192",
       "weight": 1.0
     },
     {
@@ -42962,7 +42996,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/features/editor/Timeline.tsx",
-      "source_location": "L391",
+      "source_location": "L386",
       "weight": 1.0
     },
     {
@@ -43979,17 +44013,6 @@
     },
     {
       "source": "tsconfig",
-      "target": "tsconfig_include",
-      "relation": "contains",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "tsconfig.json",
-      "source_location": "L17",
-      "weight": 1.0
-    },
-    {
-      "source": "tsconfig",
       "target": "tsconfig_compileroptions",
       "relation": "contains",
       "_origin": "ast",
@@ -43997,6 +44020,17 @@
       "confidence_score": 1.0,
       "source_file": "tsconfig.json",
       "source_location": "L2",
+      "weight": 1.0
+    },
+    {
+      "source": "tsconfig",
+      "target": "tsconfig_include",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "tsconfig.json",
+      "source_location": "L20",
       "weight": 1.0
     },
     {
@@ -44063,6 +44097,17 @@
       "confidence_score": 1.0,
       "source_file": "tsconfig.json",
       "source_location": "L15",
+      "weight": 1.0
+    },
+    {
+      "source": "tsconfig_compileroptions",
+      "target": "tsconfig_compileroptions_paths",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "tsconfig.json",
+      "source_location": "L16",
       "weight": 1.0
     },
     {
@@ -44260,7 +44305,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "website/vite.config.ts",
-      "source_location": "L22",
+      "source_location": "L23",
       "weight": 1.0
     },
     {
@@ -44271,7 +44316,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "website/vite.config.ts",
-      "source_location": "L25",
+      "source_location": "L26",
       "weight": 1.0
     },
     {
@@ -46476,6 +46521,17 @@
     },
     {
       "source": "readme",
+      "target": "docs_development_standards",
+      "relation": "references",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "README.md",
+      "source_location": "L103",
+      "weight": 1.0
+    },
+    {
+      "source": "readme",
       "target": "docs_release",
       "relation": "references",
       "_origin": "ast",
@@ -46953,7 +47009,7 @@
       "confidence_score": 0.85,
       "context": "argument",
       "source_file": "src/controllers/useStudioController.ts",
-      "source_location": "L737",
+      "source_location": "L743",
       "weight": 1.0
     },
     {
@@ -46965,7 +47021,7 @@
       "confidence_score": 0.85,
       "context": "argument",
       "source_file": "src/controllers/useStudioController.ts",
-      "source_location": "L781",
+      "source_location": "L787",
       "weight": 1.0
     },
     {
@@ -48825,7 +48881,7 @@
       "confidence_score": 0.85,
       "context": "collection",
       "source_file": "src/controllers/usePreviewEditingController.ts",
-      "source_location": "L354",
+      "source_location": "L358",
       "weight": 1.0
     },
     {
@@ -48837,7 +48893,7 @@
       "confidence_score": 0.85,
       "context": "collection",
       "source_file": "src/controllers/useStudioController.ts",
-      "source_location": "L727",
+      "source_location": "L733",
       "weight": 1.0
     },
     {
@@ -48849,7 +48905,7 @@
       "confidence_score": 0.85,
       "context": "collection",
       "source_file": "src/controllers/useStudioController.ts",
-      "source_location": "L740",
+      "source_location": "L746",
       "weight": 1.0
     },
     {
@@ -48861,7 +48917,7 @@
       "confidence_score": 0.85,
       "context": "collection",
       "source_file": "src/controllers/useStudioController.ts",
-      "source_location": "L748",
+      "source_location": "L754",
       "weight": 1.0
     },
     {
@@ -48873,7 +48929,7 @@
       "confidence_score": 0.85,
       "context": "collection",
       "source_file": "src/controllers/useStudioController.ts",
-      "source_location": "L750",
+      "source_location": "L756",
       "weight": 1.0
     },
     {
@@ -48885,7 +48941,7 @@
       "confidence_score": 0.85,
       "context": "collection",
       "source_file": "src/controllers/useStudioController.ts",
-      "source_location": "L751",
+      "source_location": "L757",
       "weight": 1.0
     },
     {
@@ -48897,7 +48953,7 @@
       "confidence_score": 0.85,
       "context": "collection",
       "source_file": "src/controllers/useStudioController.ts",
-      "source_location": "L752",
+      "source_location": "L758",
       "weight": 1.0
     },
     {
@@ -48909,7 +48965,7 @@
       "confidence_score": 0.85,
       "context": "collection",
       "source_file": "src/controllers/useStudioController.ts",
-      "source_location": "L753",
+      "source_location": "L759",
       "weight": 1.0
     },
     {
@@ -48921,7 +48977,7 @@
       "confidence_score": 0.85,
       "context": "collection",
       "source_file": "src/controllers/useStudioController.ts",
-      "source_location": "L754",
+      "source_location": "L760",
       "weight": 1.0
     },
     {
@@ -48933,7 +48989,7 @@
       "confidence_score": 0.85,
       "context": "collection",
       "source_file": "src/controllers/useStudioController.ts",
-      "source_location": "L755",
+      "source_location": "L761",
       "weight": 1.0
     },
     {
@@ -48945,7 +49001,7 @@
       "confidence_score": 0.85,
       "context": "collection",
       "source_file": "src/controllers/useStudioController.ts",
-      "source_location": "L756",
+      "source_location": "L762",
       "weight": 1.0
     },
     {
@@ -48957,7 +49013,7 @@
       "confidence_score": 0.85,
       "context": "collection",
       "source_file": "src/controllers/useStudioController.ts",
-      "source_location": "L757",
+      "source_location": "L763",
       "weight": 1.0
     },
     {
@@ -48969,7 +49025,7 @@
       "confidence_score": 0.85,
       "context": "collection",
       "source_file": "src/controllers/useStudioController.ts",
-      "source_location": "L759",
+      "source_location": "L765",
       "weight": 1.0
     },
     {
@@ -48981,7 +49037,7 @@
       "confidence_score": 0.85,
       "context": "collection",
       "source_file": "src/controllers/useStudioController.ts",
-      "source_location": "L761",
+      "source_location": "L767",
       "weight": 1.0
     },
     {
@@ -48993,7 +49049,7 @@
       "confidence_score": 0.85,
       "context": "collection",
       "source_file": "src/controllers/useStudioController.ts",
-      "source_location": "L785",
+      "source_location": "L791",
       "weight": 1.0
     },
     {
@@ -49005,7 +49061,7 @@
       "confidence_score": 0.85,
       "context": "collection",
       "source_file": "src/controllers/useStudioController.ts",
-      "source_location": "L792",
+      "source_location": "L798",
       "weight": 1.0
     },
     {
@@ -49017,7 +49073,7 @@
       "confidence_score": 0.85,
       "context": "collection",
       "source_file": "src/controllers/useStudioController.ts",
-      "source_location": "L793",
+      "source_location": "L799",
       "weight": 1.0
     },
     {
@@ -49029,7 +49085,7 @@
       "confidence_score": 0.85,
       "context": "collection",
       "source_file": "src/controllers/useStudioController.ts",
-      "source_location": "L794",
+      "source_location": "L800",
       "weight": 1.0
     },
     {
@@ -49041,7 +49097,7 @@
       "confidence_score": 0.85,
       "context": "collection",
       "source_file": "src/controllers/useStudioController.ts",
-      "source_location": "L796",
+      "source_location": "L802",
       "weight": 1.0
     },
     {
@@ -49053,7 +49109,7 @@
       "confidence_score": 0.85,
       "context": "collection",
       "source_file": "src/controllers/useStudioController.ts",
-      "source_location": "L797",
+      "source_location": "L803",
       "weight": 1.0
     },
     {
@@ -49065,7 +49121,7 @@
       "confidence_score": 0.85,
       "context": "collection",
       "source_file": "src/controllers/useStudioController.ts",
-      "source_location": "L798",
+      "source_location": "L804",
       "weight": 1.0
     },
     {
@@ -49077,7 +49133,7 @@
       "confidence_score": 0.85,
       "context": "collection",
       "source_file": "src/controllers/useStudioController.ts",
-      "source_location": "L799",
+      "source_location": "L805",
       "weight": 1.0
     },
     {
@@ -49089,7 +49145,7 @@
       "confidence_score": 0.85,
       "context": "collection",
       "source_file": "src/features/editor/Timeline.tsx",
-      "source_location": "L369",
+      "source_location": "L364",
       "weight": 1.0
     },
     {
@@ -49101,7 +49157,7 @@
       "confidence_score": 0.85,
       "context": "collection",
       "source_file": "src/features/editor/Timeline.tsx",
-      "source_location": "L370",
+      "source_location": "L365",
       "weight": 1.0
     }
   ],
