@@ -1,0 +1,931 @@
+/* Editor */
+.editing .app-header {
+  height: 65px;
+  min-height: 65px;
+  padding: 0 20px;
+  gap: 24px;
+}
+.editing .brand {
+  font-size: 20px;
+}
+.editing .brand-mark {
+  width: 30px;
+  height: 30px;
+  border-radius: 8px;
+}
+.project-heading {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  min-width: 0;
+}
+.header-divider {
+  height: 19px;
+  width: 1px;
+  background: color-mix(in srgb, var(--color-neutral) 39%, var(--color-black));
+}
+.project-title {
+  max-width: 280px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: none;
+  padding: 0;
+  font-size: 12px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.project-title > svg {
+  color: color-mix(in srgb, var(--color-neutral) 86%, var(--color-black));
+}
+.save-indicator {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  white-space: nowrap;
+  font-size: 9px;
+  color: color-mix(in srgb, var(--color-accent) 65%, var(--color-black));
+}
+.save-indicator > svg {
+  color: color-mix(in srgb, var(--color-accent) 79%, var(--color-black));
+}
+.history-actions {
+  display: flex;
+  gap: 2px;
+  border-right: 1px solid var(--line);
+  padding-right: 9px;
+}
+.editing .header-actions {
+  gap: 7px;
+}
+.editor-layout {
+  display: flex;
+  flex: 1;
+  min-height: 0;
+}
+.tool-rail {
+  width: 65px;
+  min-width: 65px;
+  background: color-mix(in srgb, var(--color-neutral) 19%, var(--color-black));
+  border-right: 1px solid color-mix(in srgb, var(--color-neutral) 33%, var(--color-black));
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+  gap: 8px;
+  padding: 13px 6px;
+}
+.rail-divider {
+  height: 1px;
+  width: 31px;
+  background: color-mix(in srgb, var(--color-neutral) 35%, var(--color-black));
+  margin: 4px 0 8px;
+}
+.rail-tool {
+  width: 50px;
+  height: 56px;
+  border-radius: 7px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 6px;
+  background: none;
+  color: color-mix(in srgb, var(--color-neutral) 86%, var(--color-black));
+}
+.rail-tool > span {
+  font-size: 8px;
+}
+.rail-tool:hover {
+  background: color-mix(in srgb, var(--color-neutral) 30%, var(--color-black));
+  color: color-mix(in srgb, var(--color-accent) 96%, var(--color-black));
+}
+.rail-tool.active {
+  background: color-mix(in srgb, var(--color-neutral) 34%, var(--color-black));
+  color: color-mix(in srgb, var(--color-accent) 88%, var(--color-white));
+  box-shadow: 0 0 0 1px
+    color-mix(
+      in srgb,
+      color-mix(in srgb, var(--color-accent) 39%, var(--color-black)) 20%,
+      transparent
+    )
+    inset;
+}
+.editor-main {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-width: 0;
+  background: radial-gradient(
+    ellipse at center,
+    color-mix(in srgb, var(--color-neutral) 33%, var(--color-black)) 0%,
+    color-mix(in srgb, var(--color-neutral) 22%, var(--color-black)) 72%
+  );
+  overflow: hidden;
+}
+.preview-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 13px 22px;
+  font-size: 10px;
+  color: color-mix(in srgb, var(--color-accent) 70%, var(--color-black));
+  min-height: 42px;
+}
+.preview-toolbar > span {
+  display: flex;
+  gap: 7px;
+  align-items: center;
+}
+.preview-toolbar > div {
+  display: flex;
+  align-items: center;
+  gap: 17px;
+}
+.resolution-tag {
+  font-size: 9px;
+  color: color-mix(in srgb, var(--color-accent) 58%, var(--color-black));
+  display: flex;
+  gap: 7px;
+  align-items: center;
+}
+.resolution-tag > span {
+  color: color-mix(in srgb, var(--color-accent) 41%, var(--color-black));
+}
+.preview-fit {
+  display: flex;
+  gap: 5px;
+  align-items: center;
+  color: color-mix(in srgb, var(--color-accent) 70%, var(--color-black));
+  font-size: 10px;
+}
+.preview-stage {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 10px 35px 17px;
+  overflow: hidden;
+}
+.native-preview {
+  width: 100%;
+  max-height: 100%;
+  border-radius: 7px;
+  background: color-mix(in srgb, var(--color-neutral) 9%, var(--color-black));
+  box-shadow:
+    0 8px 30px
+      color-mix(
+        in srgb,
+        color-mix(in srgb, var(--color-neutral) 10%, var(--color-black)) 40%,
+        transparent
+      ),
+    0 0 0 1px
+      color-mix(
+        in srgb,
+        color-mix(in srgb, var(--color-neutral) 0%, var(--color-white)) 4%,
+        transparent
+      );
+  overflow: hidden;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.preview-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 30px;
+  color: color-mix(in srgb, var(--color-accent) 65%, var(--color-black));
+  font-size: 12px;
+  text-align: center;
+  min-height: 170px;
+}
+.preview-placeholder p {
+  font-size: 10px;
+  line-height: 1.7;
+  color: color-mix(in srgb, var(--color-accent) 45%, var(--color-black));
+}
+.playback-toolbar {
+  height: 52px;
+  min-height: 52px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 26px;
+  border-top: 1px solid
+    color-mix(
+      in srgb,
+      color-mix(in srgb, var(--color-neutral) 37%, var(--color-black)) 33%,
+      transparent
+    );
+}
+.playback-toolbar > div {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+}
+.playback-time {
+  font-variant-numeric: tabular-nums;
+  font-size: 11px;
+  color: color-mix(in srgb, var(--color-accent) 98%, var(--color-white));
+  min-width: 95px;
+}
+.playback-time > span {
+  color: color-mix(in srgb, var(--color-accent) 57%, var(--color-black));
+  margin-left: 7px;
+}
+.play-button {
+  border-radius: 50%;
+  width: 34px;
+  height: 34px;
+  color: color-mix(in srgb, var(--color-accent) 80%, var(--color-white));
+  background: color-mix(in srgb, var(--color-accent) 28%, var(--color-black));
+  display: grid;
+  place-items: center;
+  border: 1px solid
+    color-mix(
+      in srgb,
+      color-mix(in srgb, var(--color-accent) 44%, var(--color-black)) 33%,
+      transparent
+    );
+}
+.play-button:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--color-accent) 38%, var(--color-black));
+}
+.playback-shortcut {
+  font-size: 9px;
+  color: color-mix(in srgb, var(--color-accent) 55%, var(--color-black));
+  min-width: 95px;
+  text-align: right;
+}
+.playback-shortcut > kbd {
+  font-size: 8px;
+  color: color-mix(in srgb, var(--color-accent) 70%, var(--color-black));
+  background: color-mix(in srgb, var(--color-neutral) 32%, var(--color-black));
+  border-color: color-mix(in srgb, var(--color-accent) 32%, var(--color-black));
+}
+.record-empty {
+  flex: 1;
+  min-height: 270px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  padding: 20px;
+  text-align: center;
+}
+.record-empty-icon {
+  width: 76px;
+  height: 76px;
+  display: grid;
+  place-items: center;
+  border-radius: 21px;
+  color: color-mix(in srgb, var(--color-accent) 87%, var(--color-black));
+  background: linear-gradient(
+    140deg,
+    color-mix(
+      in srgb,
+      color-mix(in srgb, var(--color-accent) 32%, var(--color-black)) 60%,
+      transparent
+    ),
+    color-mix(
+      in srgb,
+      color-mix(in srgb, var(--color-neutral) 32%, var(--color-black)) 60%,
+      transparent
+    )
+  );
+  border: 1px solid
+    color-mix(
+      in srgb,
+      color-mix(in srgb, var(--color-accent) 45%, var(--color-black)) 27%,
+      transparent
+    );
+  box-shadow: 0 15px 25px
+    color-mix(
+      in srgb,
+      color-mix(in srgb, var(--color-neutral) 17%, var(--color-black)) 27%,
+      transparent
+    );
+  margin-bottom: 25px;
+  transform: rotate(-5deg);
+}
+.record-empty .eyebrow {
+  font-size: 8px;
+  color: color-mix(in srgb, var(--color-accent) 65%, var(--color-black));
+}
+.record-empty h2 {
+  font-family: var(--font-sans);
+  font-size: 28px;
+  letter-spacing: -1px;
+  font-weight: 600;
+  color: color-mix(in srgb, var(--color-accent) 63%, var(--color-white));
+  margin: 10px 0;
+}
+.record-empty p {
+  color: color-mix(in srgb, var(--color-accent) 67%, var(--color-black));
+  font-size: 12px;
+  line-height: 1.8;
+}
+.record-empty .button {
+  margin-top: 21px;
+}
+.record-empty-note {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 9px;
+  color: color-mix(in srgb, var(--color-accent) 52%, var(--color-black));
+  margin-top: 16px;
+}
+.inspector {
+  width: 284px;
+  min-width: 284px;
+  display: flex;
+  flex-direction: column;
+  background: color-mix(in srgb, var(--color-neutral) 21%, var(--color-black));
+  border-left: 1px solid color-mix(in srgb, var(--color-neutral) 37%, var(--color-black));
+}
+.inspector-title {
+  min-height: 48px;
+  padding: 18px 19px 12px;
+  font-size: 12px;
+  font-weight: 600;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid color-mix(in srgb, var(--color-neutral) 36%, var(--color-black));
+  color: color-mix(in srgb, var(--color-accent) 80%, var(--color-white));
+}
+.mini-tag {
+  font-size: 8px;
+  padding: 3px 5px;
+  background: color-mix(in srgb, var(--color-accent) 29%, var(--color-black));
+  color: color-mix(in srgb, var(--color-accent) 92%, var(--color-black));
+  border-radius: 3px;
+  font-weight: 500;
+  letter-spacing: 0.5px;
+}
+.inspector-body {
+  padding: 21px 18px;
+  overflow: auto;
+  min-height: 0;
+  flex: 1;
+}
+.panel-intro {
+  margin-bottom: 22px;
+}
+.panel-intro h3 {
+  font-size: 12px;
+  font-weight: 500;
+  color: color-mix(in srgb, var(--color-accent) 98%, var(--color-white));
+  line-height: 1.6;
+}
+.panel-intro p,
+.helper {
+  font-size: 10px;
+  line-height: 1.7;
+  color: color-mix(in srgb, var(--color-accent) 62%, var(--color-black));
+}
+.panel-intro p {
+  margin-top: 7px;
+}
+.helper {
+  margin: 8px 0 12px;
+}
+.panel-section {
+  font-size: 8px;
+  letter-spacing: 1.3px;
+  color: color-mix(in srgb, var(--color-accent) 75%, var(--color-black));
+  font-weight: 600;
+  display: flex;
+  justify-content: space-between;
+  margin: 21px 0 13px;
+}
+.panel-section > span {
+  font-weight: 400;
+  font-size: 9px;
+  letter-spacing: 0;
+  color: color-mix(in srgb, var(--color-accent) 53%, var(--color-black));
+}
+.panel-divider {
+  height: 1px;
+  background: color-mix(in srgb, var(--color-neutral) 37%, var(--color-black));
+  margin: 23px 0;
+}
+.shape-options {
+  display: flex;
+  gap: 9px;
+  margin-bottom: 21px;
+}
+.shape-options > button {
+  border: 1px solid color-mix(in srgb, var(--color-accent) 29%, var(--color-black));
+  background: color-mix(in srgb, var(--color-neutral) 25%, var(--color-black));
+  color: color-mix(in srgb, var(--color-accent) 67%, var(--color-black));
+  border-radius: 7px;
+  flex: 1;
+  padding: 14px 0 10px;
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+  gap: 10px;
+  font-size: 10px;
+}
+.shape-options > button.selected {
+  background: color-mix(in srgb, var(--color-accent) 29%, var(--color-black));
+  border-color: color-mix(in srgb, var(--color-accent) 63%, var(--color-black));
+  color: color-mix(in srgb, var(--color-accent) 81%, var(--color-white));
+}
+.shape-demo {
+  display: grid;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  background: linear-gradient(
+    130deg,
+    color-mix(in srgb, var(--color-accent) 61%, var(--color-black)),
+    color-mix(in srgb, var(--color-accent) 36%, var(--color-black))
+  );
+  color: color-mix(in srgb, var(--color-accent) 93%, var(--color-white));
+  border: 1px solid
+    color-mix(
+      in srgb,
+      color-mix(in srgb, var(--color-accent) 93%, var(--color-black)) 20%,
+      transparent
+    );
+}
+.shape-demo.circle {
+  border-radius: 50%;
+}
+.shape-demo.square {
+  border-radius: 6px;
+}
+.slider-field {
+  display: block;
+  margin: 17px 0;
+}
+.slider-field > span {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 10px;
+  color: color-mix(in srgb, var(--color-accent) 86%, var(--color-black));
+  margin-bottom: 9px;
+}
+.slider-field b {
+  font-weight: 400;
+  font-size: 9px;
+  color: color-mix(in srgb, var(--color-accent) 88%, var(--color-black));
+  background: color-mix(in srgb, var(--color-neutral) 34%, var(--color-black));
+  padding: 3px 6px;
+  border: 1px solid color-mix(in srgb, var(--color-accent) 33%, var(--color-black));
+  border-radius: 4px;
+  font-variant-numeric: tabular-nums;
+}
+input[type="range"] {
+  -webkit-appearance: none;
+  appearance: none;
+  padding: 0;
+  width: 100%;
+  height: 4px;
+  border-radius: 3px;
+  background: color-mix(in srgb, var(--color-accent) 33%, var(--color-black));
+  border: none;
+  display: block;
+  accent-color: var(--accent);
+  cursor: pointer;
+}
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  background: var(--accent);
+  height: 10px;
+  width: 10px;
+  border-radius: 50%;
+  border: 2px solid color-mix(in srgb, var(--color-accent) 100%, var(--color-white));
+  box-shadow: 0 1px 4px
+    color-mix(
+      in srgb,
+      color-mix(in srgb, var(--color-neutral) 0%, var(--color-black)) 33%,
+      transparent
+    );
+}
+.switch-row {
+  position: relative;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 10px;
+  color: color-mix(in srgb, var(--color-accent) 92%, var(--color-black));
+  min-height: 36px;
+  cursor: pointer;
+  gap: 12px;
+}
+.switch-row > input {
+  position: absolute;
+  right: 0;
+  width: 29px;
+  height: 17px;
+  opacity: 0;
+  cursor: pointer;
+}
+.switch-track {
+  width: 28px;
+  height: 16px;
+  background: color-mix(in srgb, var(--color-accent) 32%, var(--color-black));
+  border-radius: 12px;
+  position: relative;
+  border: 1px solid color-mix(in srgb, var(--color-accent) 41%, var(--color-black));
+  flex: none;
+  pointer-events: none;
+}
+.switch-track:after {
+  content: "";
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  left: 2px;
+  top: 2px;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--color-accent) 74%, var(--color-black));
+  transition: transform 0.15s;
+}
+.switch-row > input:checked + .switch-track {
+  background: color-mix(in srgb, var(--color-accent) 98%, var(--color-black));
+  border-color: color-mix(in srgb, var(--color-accent) 98%, var(--color-black));
+}
+.switch-row > input:checked + .switch-track:after {
+  transform: translateX(11px);
+  background: color-mix(in srgb, var(--color-accent) 33%, var(--color-black));
+}
+.switch-row > input:focus-visible + .switch-track {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}
+.range-summary {
+  background: color-mix(in srgb, var(--color-neutral) 27%, var(--color-black));
+  border: 1px solid color-mix(in srgb, var(--color-accent) 31%, var(--color-black));
+  padding: 11px;
+  border-radius: 6px;
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  align-items: center;
+  margin: 12px 0;
+  color: color-mix(in srgb, var(--color-accent) 69%, var(--color-black));
+  font-size: 9px;
+}
+.range-summary > code {
+  font-family: inherit;
+  font-size: 9px;
+  color: color-mix(in srgb, var(--color-accent) 95%, var(--color-black));
+  font-variant-numeric: tabular-nums;
+}
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  margin: 0 0 16px;
+  font-size: 11px;
+  color: color-mix(in srgb, var(--color-accent) 92%, var(--color-black));
+}
+.field > span {
+  font-weight: 500;
+}
+.field > input,
+.field > select,
+.field > textarea {
+  width: 100%;
+  font-size: 11px;
+  background: color-mix(in srgb, var(--color-neutral) 18%, var(--color-black));
+  border-color: color-mix(in srgb, var(--color-accent) 29%, var(--color-black));
+  color: color-mix(in srgb, var(--color-accent) 96%, var(--color-white));
+}
+.field small {
+  font-size: 9px;
+  color: color-mix(in srgb, var(--color-accent) 60%, var(--color-black));
+  line-height: 1.6;
+  font-weight: 400;
+}
+.field input::placeholder,
+.field textarea::placeholder {
+  color: color-mix(in srgb, var(--color-accent) 54%, var(--color-black));
+}
+.two-columns {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+.four-columns {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 9px;
+}
+.inline-note {
+  padding: 12px;
+  background: color-mix(in srgb, var(--color-neutral) 31%, var(--color-black));
+  border: 1px solid color-mix(in srgb, var(--color-accent) 35%, var(--color-black));
+  border-radius: 6px;
+  color: color-mix(in srgb, var(--color-accent) 83%, var(--color-black));
+  font-size: 10px;
+  line-height: 1.8;
+  margin: 13px 0;
+}
+.inline-note p {
+  margin-bottom: 9px;
+}
+.inline-error {
+  font-size: 11px;
+  color: color-mix(in srgb, var(--color-danger) 87%, var(--color-white));
+  background: color-mix(in srgb, var(--color-danger) 32%, var(--color-black));
+  padding: 10px;
+  border-radius: 5px;
+  line-height: 1.6;
+}
+.interval-list {
+  margin-top: 14px;
+}
+.interval-list > div {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 9px 0;
+  border-bottom: 1px solid color-mix(in srgb, var(--color-accent) 26%, var(--color-black));
+  font-size: 9px;
+  color: color-mix(in srgb, var(--color-accent) 76%, var(--color-black));
+}
+.interval-list > div > span {
+  flex: 1;
+}
+.interval-list small {
+  font-size: 8px;
+  color: color-mix(in srgb, var(--color-accent) 51%, var(--color-black));
+}
+.interval-list .icon-button {
+  width: 24px;
+  height: 24px;
+}
+.layers-list > div {
+  display: flex;
+  align-items: center;
+  border: 1px solid color-mix(in srgb, var(--color-accent) 29%, var(--color-black));
+  border-radius: 6px;
+  margin: 8px 0;
+  padding: 3px;
+  background: color-mix(in srgb, var(--color-neutral) 28%, var(--color-black));
+}
+.layers-list > div.selected {
+  border-color: color-mix(in srgb, var(--color-accent) 63%, var(--color-black));
+  background: color-mix(in srgb, var(--color-accent) 27%, var(--color-black));
+}
+.layers-list > div > button:first-child {
+  display: flex;
+  align-items: center;
+  text-align: left;
+  gap: 8px;
+  background: none;
+  color: color-mix(in srgb, var(--color-accent) 94%, var(--color-black));
+  flex: 1;
+  min-width: 0;
+  padding: 8px;
+}
+.layers-list > div > button:first-child > span {
+  font-size: 10px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.layers-list small {
+  font-size: 8px;
+  color: color-mix(in srgb, var(--color-accent) 65%, var(--color-black));
+  display: block;
+  margin-top: 5px;
+}
+.layer-properties {
+  margin-top: 20px;
+}
+.check-row {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 10px;
+  color: color-mix(in srgb, var(--color-accent) 83%, var(--color-black));
+  margin: 12px 0 16px;
+}
+.check-row input {
+  width: 13px;
+  height: 13px;
+  margin: 0;
+}
+.review-card {
+  padding: 13px;
+  background: color-mix(in srgb, var(--color-accent) 26%, var(--color-black));
+  border: 1px solid color-mix(in srgb, var(--color-accent) 42%, var(--color-black));
+  border-radius: 7px;
+  margin-top: 17px;
+}
+.review-card > strong {
+  font-size: 11px;
+  color: color-mix(in srgb, var(--color-accent) 99%, var(--color-white));
+}
+.review-card > p {
+  font-size: 10px;
+  color: color-mix(in srgb, var(--color-accent) 78%, var(--color-black));
+  margin-top: 6px;
+}
+.review-ranges {
+  max-height: 130px;
+  overflow: auto;
+  margin: 10px 0;
+}
+.review-ranges > button {
+  display: block;
+  width: 100%;
+  font-size: 9px;
+  color: color-mix(in srgb, var(--color-accent) 97%, var(--color-black));
+  background: none;
+  text-align: left;
+  padding: 6px 0;
+  border-bottom: 1px solid
+    color-mix(
+      in srgb,
+      color-mix(in srgb, var(--color-accent) 40%, var(--color-black)) 20%,
+      transparent
+    );
+}
+.transcript-list > div {
+  padding: 8px 0 16px;
+  border-bottom: 1px solid color-mix(in srgb, var(--color-accent) 29%, var(--color-black));
+  margin: 6px 0;
+}
+.transcript-list > div.removed {
+  opacity: 0.4;
+}
+.transcript-time {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+  font-size: 9px;
+  color: color-mix(in srgb, var(--color-accent) 90%, var(--color-black));
+  background: none;
+  padding: 0;
+  margin: 0 0 9px;
+}
+.transcript-time > span {
+  color: color-mix(in srgb, var(--color-accent) 60%, var(--color-black));
+}
+.transcript-list textarea {
+  background: transparent;
+  border: 1px solid transparent;
+  padding: 0;
+  color: color-mix(in srgb, var(--color-accent) 98%, var(--color-black));
+  font-size: 11px;
+  width: 100%;
+  resize: vertical;
+}
+.transcript-list textarea:focus {
+  border-color: color-mix(in srgb, var(--color-accent) 42%, var(--color-black));
+  padding: 4px;
+}
+.transcript-cut {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+  background: none;
+  color: color-mix(in srgb, var(--color-accent) 56%, var(--color-black));
+  padding: 5px 0;
+  font-size: 8px;
+}
+.assistant-intro {
+  text-align: center;
+  padding: 9px 0 18px;
+}
+.assistant-intro > span {
+  display: inline-grid;
+  place-items: center;
+  width: 49px;
+  height: 49px;
+  border: 1px solid color-mix(in srgb, var(--color-accent) 44%, var(--color-black));
+  border-radius: 15px;
+  background: linear-gradient(
+    140deg,
+    color-mix(in srgb, var(--color-accent) 37%, var(--color-black)),
+    color-mix(in srgb, var(--color-accent) 24%, var(--color-black))
+  );
+  color: color-mix(in srgb, var(--color-accent) 95%, var(--color-black));
+  margin: 0 0 16px;
+  transform: rotate(-5deg);
+}
+.assistant-intro h3 {
+  font-family: var(--font-sans);
+  font-size: 15px;
+  letter-spacing: -0.4px;
+  font-weight: 600;
+  color: color-mix(in srgb, var(--color-accent) 89%, var(--color-white));
+}
+.assistant-intro p {
+  font-size: 10px;
+  line-height: 1.8;
+  color: color-mix(in srgb, var(--color-accent) 66%, var(--color-black));
+  margin-top: 9px;
+}
+.assistant-examples > span {
+  font-size: 8px;
+  letter-spacing: 1.3px;
+  color: color-mix(in srgb, var(--color-accent) 56%, var(--color-black));
+  display: block;
+  margin: 20px 0 9px;
+}
+.assistant-examples > button {
+  width: 100%;
+  background: color-mix(in srgb, var(--color-accent) 20%, var(--color-black));
+  border: 1px solid color-mix(in srgb, var(--color-accent) 34%, var(--color-black));
+  text-align: left;
+  border-radius: 6px;
+  padding: 11px;
+  font-size: 10px;
+  color: color-mix(in srgb, var(--color-accent) 79%, var(--color-black));
+  line-height: 1.6;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 9px;
+  margin: 8px 0;
+}
+.assistant-examples > button:hover {
+  background: color-mix(in srgb, var(--color-accent) 29%, var(--color-black));
+}
+.assistant-composer {
+  border: 1px solid color-mix(in srgb, var(--color-accent) 46%, var(--color-black));
+  border-radius: 8px;
+  overflow: hidden;
+  background: color-mix(in srgb, var(--color-accent) 16%, var(--color-black));
+  margin-top: 23px;
+}
+.assistant-composer textarea {
+  width: 100%;
+  border: none;
+  outline: none;
+  background: none;
+  font-size: 10px;
+  padding: 13px;
+  color: color-mix(in srgb, var(--color-accent) 99%, var(--color-black));
+  resize: vertical;
+  line-height: 1.7;
+  min-height: 85px;
+}
+.assistant-composer > div {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 8px 8px 13px;
+  font-size: 8px;
+  color: color-mix(in srgb, var(--color-accent) 61%, var(--color-black));
+}
+.assistant-composer button {
+  width: 27px;
+  height: 27px;
+  display: grid;
+  place-items: center;
+  background: var(--accent);
+  color: color-mix(in srgb, var(--color-accent) 30%, var(--color-black));
+  border-radius: 6px;
+}
+.assistant-privacy {
+  font-size: 8px !important;
+  color: color-mix(in srgb, var(--color-accent) 55%, var(--color-black)) !important;
+  display: flex;
+  align-items: flex-start;
+  gap: 5px;
+  margin-top: 12px;
+}
+.assistant-privacy > svg {
+  margin-top: 3px;
+  flex: none;
+}
+.chat-message {
+  padding: 12px;
+  margin-top: 13px;
+  background: color-mix(in srgb, var(--color-accent) 24%, var(--color-black));
+  border: 1px solid color-mix(in srgb, var(--color-accent) 37%, var(--color-black));
+  border-radius: 7px;
+  overflow-wrap: anywhere;
+}
+.chat-message.user {
+  background: color-mix(in srgb, var(--color-accent) 29%, var(--color-black));
+}
+.chat-message > span {
+  font-size: 8px;
+  letter-spacing: 1px;
+  color: color-mix(in srgb, var(--color-accent) 76%, var(--color-black));
+}
+.chat-message p {
+  white-space: pre-wrap;
+  line-height: 1.8;
+  font-size: 10px;
+  color: color-mix(in srgb, var(--color-accent) 99%, var(--color-black));
+  margin-top: 7px;
+}

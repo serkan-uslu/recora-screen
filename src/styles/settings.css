@@ -1,0 +1,134 @@
+.settings-tabs {
+  display: flex;
+  gap: 7px;
+  padding: 4px;
+  background: color-mix(in srgb, var(--color-neutral) 19%, var(--color-black));
+  border: 1px solid color-mix(in srgb, var(--color-accent) 27%, var(--color-black));
+  border-radius: 7px;
+  margin-bottom: 23px;
+}
+.settings-tabs > button {
+  flex: 1;
+  padding: 10px;
+  border-radius: 4px;
+  background: none;
+  color: color-mix(in srgb, var(--color-accent) 64%, var(--color-black));
+  font-size: 11px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+.settings-tabs > button.active {
+  color: color-mix(in srgb, var(--color-accent) 92%, var(--color-white));
+  background: color-mix(in srgb, var(--color-accent) 29%, var(--color-black));
+}
+.model-list {
+  margin: 17px 0;
+}
+.model-list > div {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  padding: 13px 0;
+  border-bottom: 1px solid color-mix(in srgb, var(--color-accent) 28%, var(--color-black));
+}
+.model-icon {
+  width: 37px;
+  height: 37px;
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--color-accent) 28%, var(--color-black));
+  color: color-mix(in srgb, var(--color-accent) 82%, var(--color-black));
+  display: grid;
+  place-items: center;
+}
+.model-list > div > div {
+  flex: 1;
+}
+.model-list strong {
+  font-size: 12px;
+  text-transform: capitalize;
+  color: color-mix(in srgb, var(--color-accent) 93%, var(--color-white));
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+.model-list strong > span {
+  font-size: 7px;
+  font-weight: 500;
+  letter-spacing: 0.5px;
+  background: color-mix(in srgb, var(--color-accent) 32%, var(--color-black));
+  color: color-mix(in srgb, var(--color-accent) 80%, var(--color-black));
+  padding: 3px 5px;
+  border-radius: 3px;
+}
+.model-list p {
+  font-size: 9px;
+  margin-top: 6px;
+  color: color-mix(in srgb, var(--color-accent) 59%, var(--color-black));
+}
+.model-list .button {
+  font-size: 10px;
+  min-height: 31px;
+  padding: 7px 9px;
+}
+.model-installed {
+  font-size: 10px;
+  color: color-mix(in srgb, var(--color-accent) 87%, var(--color-black));
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+.mcp-intro {
+  padding: 7px 0 21px;
+}
+.mcp-badge {
+  background: color-mix(in srgb, var(--color-accent) 34%, var(--color-black));
+  border: 1px solid color-mix(in srgb, var(--color-accent) 51%, var(--color-black));
+  color: color-mix(in srgb, var(--color-accent) 93%, var(--color-black));
+  border-radius: 7px;
+  padding: 7px 9px;
+  display: inline-block;
+  font-size: 12px;
+  letter-spacing: 2px;
+  margin-bottom: 16px;
+}
+.mcp-intro h3 {
+  font-family: var(--font-sans);
+  font-size: 17px;
+  letter-spacing: -0.3px;
+  font-weight: 600;
+  color: color-mix(in srgb, var(--color-accent) 93%, var(--color-white));
+}
+.mcp-intro p {
+  font-size: 11px;
+  color: color-mix(in srgb, var(--color-accent) 68%, var(--color-black));
+  line-height: 1.8;
+  margin-top: 10px;
+}
+.config-example {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  background: color-mix(in srgb, var(--color-neutral) 16%, var(--color-black));
+  border: 1px solid color-mix(in srgb, var(--color-accent) 28%, var(--color-black));
+  padding: 17px;
+  font-size: 10px;
+  color: color-mix(in srgb, var(--color-accent) 87%, var(--color-black));
+  border-radius: 7px;
+  line-height: 1.8;
+}
+.shortcut-list > span {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 11px;
+  padding: 10px 0;
+  color: color-mix(in srgb, var(--color-accent) 82%, var(--color-black));
+  border-bottom: 1px solid color-mix(in srgb, var(--color-accent) 28%, var(--color-black));
+}
+.shortcut-list kbd {
+  color: color-mix(in srgb, var(--color-accent) 91%, var(--color-black));
+  background: color-mix(in srgb, var(--color-accent) 24%, var(--color-black));
+  border-color: color-mix(in srgb, var(--color-accent) 40%, var(--color-black));
+  font-size: 10px;
+}

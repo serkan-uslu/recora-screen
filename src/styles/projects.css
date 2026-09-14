@@ -1,0 +1,642 @@
+.library-layout {
+  display: flex;
+  flex: 1;
+  min-height: 0;
+}
+.library-sidebar {
+  width: 214px;
+  min-width: 214px;
+  border-right: 1px solid var(--line);
+  padding: 32px 18px 17px;
+  display: flex;
+  flex-direction: column;
+  background: color-mix(in srgb, var(--color-neutral) 18%, var(--color-black));
+}
+.workspace-label {
+  font-size: 9px;
+  letter-spacing: 1.8px;
+  color: color-mix(in srgb, var(--color-neutral) 75%, var(--color-black));
+  font-weight: 600;
+  margin: 0 13px 15px;
+}
+.sidebar-navigation {
+  display: grid;
+  gap: 4px;
+}
+.sidebar-link {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 13px;
+  text-align: left;
+  width: 100%;
+  border-radius: 7px;
+  background: none;
+  color: color-mix(in srgb, var(--color-neutral) 87%, var(--color-white));
+  font-size: 12px;
+  font-weight: 500;
+}
+.sidebar-link.selected {
+  background: color-mix(in srgb, var(--color-neutral) 30%, var(--color-black));
+  color: color-mix(in srgb, var(--color-accent) 71%, var(--color-white));
+  box-shadow: 0 0 0 1px
+    color-mix(
+      in srgb,
+      color-mix(in srgb, var(--color-accent) 36%, var(--color-black)) 33%,
+      transparent
+    )
+    inset;
+}
+.sidebar-link.selected > svg {
+  color: color-mix(in srgb, var(--color-accent) 97%, var(--color-black));
+}
+.sidebar-link > span {
+  margin-left: auto;
+  font-size: 10px;
+  background: color-mix(in srgb, var(--color-neutral) 44%, var(--color-black));
+  padding: 2px 6px;
+  border-radius: 4px;
+  color: color-mix(in srgb, var(--color-accent) 98%, var(--color-black));
+}
+.sidebar-bottom {
+  margin-top: auto;
+  display: grid;
+  gap: 12px;
+}
+.privacy-card {
+  margin: 0 4px;
+  padding: 12px;
+  border: 1px solid color-mix(in srgb, var(--color-neutral) 38%, var(--color-black));
+  border-radius: 8px;
+  background: radial-gradient(
+    ellipse at 100% 0%,
+    color-mix(
+      in srgb,
+      color-mix(in srgb, var(--color-neutral) 40%, var(--color-black)) 47%,
+      transparent
+    ),
+    transparent 70%
+  );
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+}
+.privacy-card > svg {
+  color: color-mix(in srgb, var(--color-accent) 91%, var(--color-black));
+  flex: none;
+}
+.privacy-card strong {
+  display: block;
+  font-size: 10px;
+  color: color-mix(in srgb, var(--color-neutral) 39%, var(--color-white));
+}
+.privacy-card p {
+  font-size: 9px;
+  color: color-mix(in srgb, var(--color-neutral) 99%, var(--color-black));
+  line-height: 1.45;
+  margin: 3px 0 0;
+}
+.library-main {
+  max-width: 1530px;
+  flex: 1;
+  min-width: 0;
+  padding: 51px 54px 0;
+  overflow: auto;
+  display: flex;
+  flex-direction: column;
+  background: radial-gradient(
+    ellipse 950px 360px at 80% -80px,
+    color-mix(
+      in srgb,
+      color-mix(in srgb, var(--color-neutral) 31%, var(--color-black)) 33%,
+      transparent
+    ),
+    transparent
+  );
+}
+.library-title-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 38px;
+  gap: 20px;
+}
+.eyebrow {
+  font-size: 8px;
+  font-weight: 700;
+  letter-spacing: 2.1px;
+  color: color-mix(in srgb, var(--color-accent) 71%, var(--color-black));
+}
+.library-title-row h1 {
+  font-family: var(--font-sans);
+  font-size: 37px;
+  font-weight: 650;
+  letter-spacing: -1.6px;
+  margin-top: 11px;
+  line-height: 1.4;
+}
+.accent-dot {
+  color: var(--accent);
+}
+.library-title-row p {
+  font-size: 12px;
+  color: color-mix(in srgb, var(--color-neutral) 100%, var(--color-white));
+  margin-top: 6px;
+}
+.library-title-row > .button {
+  margin-top: 17px;
+}
+.library-toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 27px;
+}
+.search-box {
+  max-width: 330px;
+  width: 42%;
+  border: 1px solid color-mix(in srgb, var(--color-neutral) 38%, var(--color-black));
+  background: color-mix(in srgb, var(--color-neutral) 22%, var(--color-black));
+  height: 39px;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 0 12px;
+  border-radius: 7px;
+  color: color-mix(in srgb, var(--color-neutral) 89%, var(--color-black));
+}
+.search-box input {
+  background: none;
+  border: 0;
+  padding: 0;
+  flex: 1;
+  width: 100%;
+  font-size: 11px;
+  outline: none;
+}
+.search-box kbd {
+  font-size: 11px;
+  border-color: color-mix(in srgb, var(--color-neutral) 41%, var(--color-black));
+  color: color-mix(in srgb, var(--color-neutral) 76%, var(--color-black));
+}
+.library-toolbar-actions {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+.sort-control {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  border: 1px solid color-mix(in srgb, var(--color-neutral) 38%, var(--color-black));
+  background: color-mix(in srgb, var(--color-neutral) 21%, var(--color-black));
+  border-radius: 7px;
+  padding: 0 8px;
+  color: color-mix(in srgb, var(--color-accent) 76%, var(--color-black));
+}
+.sort-control > select {
+  background: transparent;
+  border: none;
+  padding: 10px 3px;
+  font-size: 11px;
+  color: color-mix(in srgb, var(--color-neutral) 73%, var(--color-white));
+  width: 106px;
+}
+.section-label {
+  font-size: 9px;
+  letter-spacing: 1.4px;
+  font-weight: 600;
+  color: color-mix(in srgb, var(--color-neutral) 91%, var(--color-black));
+  display: flex;
+  justify-content: space-between;
+  margin: 4px 0 16px;
+}
+.section-label > span {
+  font-size: 10px;
+  letter-spacing: 0;
+  font-weight: 400;
+  color: color-mix(in srgb, var(--color-neutral) 78%, var(--color-black));
+}
+.project-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(255px, 1fr));
+  gap: 22px 20px;
+  padding-bottom: 30px;
+}
+.project-card {
+  background: color-mix(in srgb, var(--color-neutral) 25%, var(--color-black));
+  border: 1px solid color-mix(in srgb, var(--color-neutral) 37%, var(--color-black));
+  border-radius: 10px;
+  overflow: visible;
+  transition:
+    transform 0.15s,
+    border-color 0.15s;
+}
+.project-card:hover {
+  transform: translateY(-2px);
+  border-color: color-mix(in srgb, var(--color-accent) 45%, var(--color-black));
+}
+.project-cover {
+  width: 100%;
+  height: 171px;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  border-radius: 9px 9px 0 0;
+  padding: 0;
+  background: color-mix(in srgb, var(--color-neutral) 41%, var(--color-black));
+}
+.cover-0 {
+  background:
+    radial-gradient(
+      ellipse at 80% 20%,
+      color-mix(in srgb, var(--color-accent) 53%, var(--color-black)),
+      transparent 90%
+    ),
+    color-mix(in srgb, var(--color-neutral) 36%, var(--color-black));
+}
+.cover-1 {
+  background:
+    radial-gradient(
+      ellipse at 80% 20%,
+      color-mix(in srgb, var(--color-danger) 61%, var(--color-black)),
+      transparent 90%
+    ),
+    color-mix(in srgb, var(--color-danger) 34%, var(--color-black));
+}
+.cover-2 {
+  background:
+    radial-gradient(
+      ellipse at 80% 20%,
+      color-mix(in srgb, var(--color-camera) 71%, var(--color-black)),
+      transparent 90%
+    ),
+    color-mix(in srgb, var(--color-neutral) 46%, var(--color-black));
+}
+.cover-3 {
+  background:
+    radial-gradient(
+      ellipse at 80% 20%,
+      color-mix(in srgb, var(--color-warning) 68%, var(--color-black)),
+      transparent 90%
+    ),
+    color-mix(in srgb, var(--color-accent) 32%, var(--color-black));
+}
+.project-cover > img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.cover-art {
+  width: 76%;
+  height: 108px;
+  position: relative;
+}
+.cover-window {
+  position: absolute;
+  left: 0;
+  right: 9px;
+  top: 8px;
+  bottom: 0;
+  background: color-mix(
+    in srgb,
+    color-mix(in srgb, var(--color-neutral) 23%, var(--color-black)) 80%,
+    transparent
+  );
+  border: 1px solid
+    color-mix(
+      in srgb,
+      color-mix(in srgb, var(--color-neutral) 0%, var(--color-white)) 13%,
+      transparent
+    );
+  border-radius: 6px;
+  box-shadow: 0 14px 20px
+    color-mix(
+      in srgb,
+      color-mix(in srgb, var(--color-neutral) 0%, var(--color-black)) 20%,
+      transparent
+    );
+  text-align: left;
+  padding: 8px;
+}
+.cover-window > span {
+  display: inline-block;
+  width: 3px;
+  height: 3px;
+  border-radius: 50%;
+  background: color-mix(
+    in srgb,
+    color-mix(in srgb, var(--color-neutral) 0%, var(--color-white)) 33%,
+    transparent
+  );
+  margin-right: 3px;
+  vertical-align: top;
+}
+.cover-window > div {
+  display: grid;
+  place-items: center;
+  height: 65px;
+  color: color-mix(
+    in srgb,
+    color-mix(in srgb, var(--color-accent) 94%, var(--color-white)) 42%,
+    transparent
+  );
+}
+.cover-orb {
+  position: absolute;
+  bottom: -5px;
+  right: -7px;
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  background: linear-gradient(
+    135deg,
+    color-mix(in srgb, var(--color-accent) 63%, var(--color-white)),
+    color-mix(in srgb, var(--color-accent) 70%, var(--color-black))
+  );
+  border: 3px solid
+    color-mix(
+      in srgb,
+      color-mix(in srgb, var(--color-neutral) 0%, var(--color-white)) 19%,
+      transparent
+    );
+  box-shadow: 0 5px 15px
+    color-mix(
+      in srgb,
+      color-mix(in srgb, var(--color-neutral) 0%, var(--color-black)) 27%,
+      transparent
+    );
+}
+.status-tag,
+.duration-tag {
+  position: absolute;
+  bottom: 11px;
+  background: color-mix(
+    in srgb,
+    color-mix(in srgb, var(--color-neutral) 15%, var(--color-black)) 73%,
+    transparent
+  );
+  backdrop-filter: blur(6px);
+  border-radius: 4px;
+  padding: 4px 7px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 9px;
+  color: color-mix(in srgb, var(--color-neutral) 28%, var(--color-white));
+  font-weight: 500;
+}
+.status-tag {
+  left: 11px;
+}
+.status-tag > span {
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--color-accent) 98%, var(--color-white));
+}
+.status-tag.recording > span {
+  background: color-mix(in srgb, var(--color-danger) 92%, var(--color-black));
+}
+.duration-tag {
+  right: 11px;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.4px;
+}
+.project-card-body {
+  position: relative;
+  padding: 16px 14px 15px;
+}
+.project-card-title {
+  font-size: 13px;
+  font-weight: 600;
+  background: none;
+  text-align: left;
+  padding: 0 26px 0 0;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  width: 100%;
+  color: color-mix(in srgb, var(--color-neutral) 28%, var(--color-white));
+}
+.project-card-body p {
+  font-size: 9px;
+  color: color-mix(in srgb, var(--color-neutral) 90%, var(--color-black));
+  margin-top: 9px;
+  display: flex;
+  gap: 12px;
+  justify-content: space-between;
+}
+.project-card-body p > span {
+  color: color-mix(in srgb, var(--color-neutral) 74%, var(--color-black));
+}
+.project-menu {
+  position: absolute;
+  right: 10px;
+  top: 10px;
+}
+.project-menu > summary {
+  cursor: pointer;
+  list-style: none;
+  color: color-mix(in srgb, var(--color-neutral) 99%, var(--color-black));
+  padding: 5px;
+}
+.project-menu > summary::-webkit-details-marker {
+  display: none;
+}
+.project-menu > div {
+  position: absolute;
+  right: 0;
+  top: 30px;
+  min-width: 138px;
+  border: 1px solid color-mix(in srgb, var(--color-neutral) 51%, var(--color-black));
+  background: color-mix(in srgb, var(--color-neutral) 29%, var(--color-black));
+  border-radius: 7px;
+  box-shadow: 0 9px 24px
+    color-mix(
+      in srgb,
+      color-mix(in srgb, var(--color-neutral) 0%, var(--color-black)) 53%,
+      transparent
+    );
+  padding: 5px;
+  z-index: 5;
+}
+.project-menu button {
+  display: block;
+  background: none;
+  width: 100%;
+  text-align: left;
+  padding: 9px;
+  border-radius: 4px;
+  font-size: 11px;
+}
+.project-menu button:hover {
+  background: color-mix(in srgb, var(--color-neutral) 45%, var(--color-black));
+}
+.new-project-card {
+  border: 1px dashed color-mix(in srgb, var(--color-neutral) 41%, var(--color-black));
+  border-radius: 10px;
+  min-height: 248px;
+  background: linear-gradient(
+    140deg,
+    color-mix(
+      in srgb,
+      color-mix(in srgb, var(--color-neutral) 24%, var(--color-black)) 27%,
+      transparent
+    ),
+    transparent
+  );
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  color: color-mix(in srgb, var(--color-accent) 84%, var(--color-black));
+}
+.new-project-card > span {
+  display: grid;
+  place-items: center;
+  width: 42px;
+  height: 42px;
+  border: 1px solid color-mix(in srgb, var(--color-accent) 32%, var(--color-black));
+  background: color-mix(in srgb, var(--color-neutral) 27%, var(--color-black));
+  border-radius: 12px;
+  margin-bottom: 17px;
+  color: color-mix(in srgb, var(--color-accent) 97%, var(--color-black));
+}
+.new-project-card strong {
+  font-size: 12px;
+}
+.new-project-card p {
+  font-size: 10px;
+  color: color-mix(in srgb, var(--color-accent) 56%, var(--color-black));
+  margin-top: 7px;
+}
+.new-project-card:hover {
+  border-color: color-mix(in srgb, var(--color-accent) 70%, var(--color-black));
+  background: color-mix(in srgb, var(--color-neutral) 29%, var(--color-black));
+}
+.empty-state {
+  flex: 1;
+  min-height: 400px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  padding: 35px 0 60px;
+  text-align: center;
+  color: color-mix(in srgb, var(--color-accent) 68%, var(--color-black));
+}
+.empty-state > h2 {
+  font-family: var(--font-sans);
+  font-size: 25px;
+  letter-spacing: -0.8px;
+  font-weight: 600;
+  margin-top: 15px;
+  color: color-mix(in srgb, var(--color-neutral) 28%, var(--color-white));
+}
+.empty-state > p {
+  font-size: 12px;
+  line-height: 1.8;
+  max-width: 390px;
+  margin-top: 12px;
+  color: color-mix(in srgb, var(--color-neutral) 94%, var(--color-black));
+}
+.empty-state > .button {
+  margin-top: 24px;
+}
+.empty-illustration {
+  position: relative;
+  width: 178px;
+  height: 140px;
+  margin-bottom: 27px;
+  background: radial-gradient(
+    ellipse,
+    color-mix(
+      in srgb,
+      color-mix(in srgb, var(--color-accent) 29%, var(--color-black)) 50%,
+      transparent
+    ),
+    transparent 70%
+  );
+  display: grid;
+  place-items: center;
+}
+.empty-frame {
+  position: relative;
+  padding: 23px 32px;
+  color: color-mix(in srgb, var(--color-accent) 76%, var(--color-black));
+  border: 1px solid color-mix(in srgb, var(--color-accent) 40%, var(--color-black));
+  border-radius: 15px;
+  background: linear-gradient(
+    145deg,
+    color-mix(in srgb, var(--color-accent) 29%, var(--color-black)),
+    color-mix(in srgb, var(--color-neutral) 26%, var(--color-black))
+  );
+  box-shadow: 0 14px 35px
+    color-mix(
+      in srgb,
+      color-mix(in srgb, var(--color-neutral) 14%, var(--color-black)) 53%,
+      transparent
+    );
+  transform: rotate(-6deg);
+}
+.empty-frame > span {
+  position: absolute;
+  right: -11px;
+  bottom: -9px;
+  width: 44px;
+  height: 44px;
+  display: grid;
+  place-items: center;
+  background: color-mix(in srgb, var(--color-accent) 98%, var(--color-white));
+  border-radius: 50%;
+  color: color-mix(in srgb, var(--color-accent) 33%, var(--color-black));
+  border: 4px solid color-mix(in srgb, var(--color-neutral) 29%, var(--color-black));
+  box-shadow: 0 4px 15px
+    color-mix(
+      in srgb,
+      color-mix(in srgb, var(--color-neutral) 0%, var(--color-black)) 33%,
+      transparent
+    );
+}
+.empty-spark {
+  position: absolute;
+  right: 7px;
+  top: 7px;
+  transform: rotate(12deg);
+  color: color-mix(in srgb, var(--color-accent) 94%, var(--color-black));
+}
+.empty-features {
+  display: flex;
+  gap: 22px;
+  margin-top: 33px;
+  color: color-mix(in srgb, var(--color-accent) 56%, var(--color-black));
+  font-size: 10px;
+}
+.empty-features > span {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.library-footer {
+  margin-top: auto;
+  padding: 24px 0;
+  border-top: 1px solid color-mix(in srgb, var(--color-neutral) 34%, var(--color-black));
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  font-size: 9px;
+  color: color-mix(in srgb, var(--color-accent) 49%, var(--color-black));
+}
+.library-footer > span:first-child {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+.library-footer .connection-dot {
+  width: 4px;
+  height: 4px;
+}

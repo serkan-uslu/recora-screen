@@ -1,0 +1,378 @@
+:root {
+  font-family: var(--font-sans);
+  color: color-mix(in srgb, var(--color-neutral) 20%, var(--color-white));
+  background: color-mix(in srgb, var(--color-neutral) 16%, var(--color-black));
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+}
+* {
+  box-sizing: border-box;
+}
+body {
+  margin: 0;
+  min-width: 960px;
+}
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
+button {
+  cursor: pointer;
+}
+button:disabled {
+  cursor: not-allowed;
+  opacity: 0.36;
+}
+button,
+summary,
+a,
+input,
+select,
+textarea {
+  outline-offset: 4px;
+}
+button:focus-visible,
+summary:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  outline: 2px solid var(--accent);
+}
+button {
+  color: inherit;
+}
+button svg {
+  flex: none;
+}
+button,
+select {
+  user-select: none;
+}
+input,
+select,
+textarea {
+  border: 1px solid color-mix(in srgb, var(--color-neutral) 41%, var(--color-black));
+  color: var(--text);
+  background: color-mix(in srgb, var(--color-neutral) 18%, var(--color-black));
+  border-radius: 7px;
+  padding: 10px 11px;
+  min-width: 0;
+  outline-offset: 2px;
+}
+input::placeholder,
+textarea::placeholder {
+  color: color-mix(in srgb, var(--color-neutral) 78%, var(--color-black));
+}
+input[type="color"] {
+  padding: 4px;
+  width: 100%;
+  height: 39px;
+}
+input[type="checkbox"] {
+  accent-color: var(--accent);
+}
+textarea {
+  resize: vertical;
+  line-height: 1.6;
+}
+select {
+  cursor: pointer;
+  color-scheme: dark;
+}
+input[type="number"] {
+  color-scheme: dark;
+}
+svg {
+  vertical-align: middle;
+}
+h1,
+h2,
+h3,
+p {
+  margin: 0;
+}
+button {
+  border: none;
+}
+strong,
+b {
+  font-weight: 600;
+}
+a {
+  color: var(--accent);
+}
+kbd {
+  font:
+    10px "DM Sans",
+    sans-serif;
+  color: color-mix(in srgb, var(--color-neutral) 92%, var(--color-white));
+  background: color-mix(in srgb, var(--color-neutral) 27%, var(--color-black));
+  border: 1px solid color-mix(in srgb, var(--color-neutral) 40%, var(--color-black));
+  border-radius: 4px;
+  padding: 2px 5px;
+}
+fieldset:disabled {
+  opacity: 0.6;
+}
+.unstyled-fieldset {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  min-width: 0;
+}
+.app {
+  height: 100vh;
+  min-height: 640px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+.app-header {
+  height: 76px;
+  min-height: 76px;
+  display: flex;
+  align-items: center;
+  padding: 0 28px;
+  border-bottom: 1px solid var(--line);
+  gap: 28px;
+  background: color-mix(in srgb, var(--color-neutral) 18%, var(--color-black));
+  -webkit-app-region: drag;
+}
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: none;
+  padding: 0;
+  font-family: var(--font-sans);
+  font-weight: 800;
+  font-size: 23px;
+  letter-spacing: -1.2px;
+  -webkit-app-region: no-drag;
+}
+.brand-mark {
+  width: 34px;
+  height: 34px;
+  display: grid;
+  place-items: center;
+  background: var(--accent);
+  color: color-mix(in srgb, var(--color-neutral) 28%, var(--color-black));
+  border-radius: 10px;
+  box-shadow: inset 0 0 0 1px
+    color-mix(
+      in srgb,
+      color-mix(in srgb, var(--color-neutral) 0%, var(--color-white)) 15%,
+      transparent
+    );
+}
+.brand-dot {
+  color: var(--accent);
+}
+.top-navigation {
+  display: flex;
+  align-items: center;
+  gap: 26px;
+  font-size: 12px;
+  color: var(--muted);
+  height: 100%;
+  margin-left: 31px;
+}
+.top-navigation > .active {
+  height: 100%;
+  display: flex;
+  align-items: center;
+  position: relative;
+  font-weight: 600;
+  color: color-mix(in srgb, var(--color-neutral) 26%, var(--color-white));
+}
+.top-navigation > .active:after {
+  position: absolute;
+  content: "";
+  height: 2px;
+  background: var(--accent);
+  bottom: -1px;
+  left: 0;
+  right: 0;
+}
+.local-badge {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  font-size: 10px;
+}
+.local-badge > span,
+.connection-dot {
+  width: 5px;
+  height: 5px;
+  background: color-mix(in srgb, var(--color-neutral) 76%, var(--color-black));
+  border-radius: 50%;
+  display: inline-block;
+  flex: none;
+}
+.local-badge > span,
+.connection-dot.online {
+  background: var(--accent);
+}
+.header-actions {
+  margin-left: auto;
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  -webkit-app-region: no-drag;
+}
+.icon-button {
+  width: 31px;
+  height: 31px;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border-radius: 6px;
+  color: color-mix(in srgb, var(--color-neutral) 81%, var(--color-white));
+  flex: none;
+}
+.icon-button svg {
+  width: 16px;
+  height: 16px;
+}
+.icon-button:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--color-neutral) 33%, var(--color-black));
+  color: var(--text);
+}
+.button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px 14px;
+  border: 1px solid transparent;
+  border-radius: 7px;
+  font-weight: 600;
+  font-size: 12px;
+  white-space: nowrap;
+  min-height: 37px;
+  background: transparent;
+  line-height: 1.2;
+  transition:
+    background 0.15s,
+    transform 0.15s;
+}
+.button.primary {
+  background: var(--accent);
+  color: color-mix(in srgb, var(--color-accent) 20%, var(--color-black));
+  border-color: var(--accent);
+  box-shadow: 0 1px 0
+    color-mix(
+      in srgb,
+      color-mix(in srgb, var(--color-neutral) 0%, var(--color-white)) 13%,
+      transparent
+    )
+    inset;
+}
+.button.primary:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--color-accent) 68%, var(--color-white));
+  border-color: color-mix(in srgb, var(--color-accent) 68%, var(--color-white));
+}
+.button.secondary {
+  background: color-mix(in srgb, var(--color-neutral) 30%, var(--color-black));
+  border-color: color-mix(in srgb, var(--color-neutral) 44%, var(--color-black));
+  color: color-mix(in srgb, var(--color-neutral) 33%, var(--color-white));
+}
+.button.secondary:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--color-neutral) 38%, var(--color-black));
+}
+.button.subtle {
+  color: color-mix(in srgb, var(--color-neutral) 76%, var(--color-white));
+  border-color: var(--line);
+  background: transparent;
+}
+.button.subtle:hover:not(:disabled) {
+  color: color-mix(in srgb, var(--color-neutral) 22%, var(--color-white));
+  background: color-mix(in srgb, var(--color-neutral) 29%, var(--color-black));
+}
+.button.large {
+  font-size: 13px;
+  min-height: 44px;
+  padding: 13px 18px;
+  border-radius: 8px;
+}
+.button.tiny {
+  padding: 5px 8px;
+  min-height: 28px;
+  font-size: 11px;
+  color: color-mix(in srgb, var(--color-neutral) 73%, var(--color-white));
+}
+.button.tiny:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--color-neutral) 37%, var(--color-black));
+}
+.button.full {
+  width: 100%;
+  margin: 6px 0;
+}
+.button-row {
+  display: flex;
+  gap: 8px;
+}
+.button-row > .button {
+  flex: 1;
+}
+.danger-text {
+  color: var(--danger) !important;
+}
+.spin {
+  animation: spin 1s linear infinite;
+}
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+.error-banner {
+  position: relative;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 15px;
+  padding: 8px 16px;
+  background: color-mix(in srgb, var(--color-danger) 32%, var(--color-black));
+  color: color-mix(in srgb, var(--color-danger) 48%, var(--color-white));
+  font-size: 12px;
+  flex: none;
+}
+.error-banner > span {
+  overflow-wrap: anywhere;
+}
+.error-banner > button:not(.icon-button) {
+  color: color-mix(in srgb, var(--color-danger) 34%, var(--color-white));
+  background: color-mix(in srgb, var(--color-danger) 40%, var(--color-black));
+  border-radius: 4px;
+  padding: 5px 10px;
+  white-space: nowrap;
+}
+.toast {
+  position: fixed;
+  z-index: 100;
+  left: 50%;
+  top: 89px;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  background: color-mix(in srgb, var(--color-neutral) 37%, var(--color-black));
+  border: 1px solid color-mix(in srgb, var(--color-accent) 44%, var(--color-black));
+  box-shadow: 0 8px 30px
+    color-mix(
+      in srgb,
+      color-mix(in srgb, var(--color-neutral) 0%, var(--color-black)) 33%,
+      transparent
+    );
+  padding: 12px 20px;
+  border-radius: 8px;
+  font-size: 12px;
+  color: color-mix(in srgb, var(--color-accent) 52%, var(--color-white));
+}

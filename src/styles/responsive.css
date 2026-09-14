@@ -1,0 +1,861 @@
+@media (min-width: 1600px) {
+  .library-main {
+    padding-left: 70px;
+    padding-right: 70px;
+  }
+  .project-grid {
+    grid-template-columns: repeat(auto-fill, minmax(290px, 1fr));
+  }
+  .project-cover {
+    height: 190px;
+  }
+  .inspector {
+    width: 310px;
+    min-width: 310px;
+  }
+  .preview-stage {
+    padding: 15px 55px 23px;
+  }
+}
+@media (max-width: 1150px) {
+  .library-sidebar {
+    width: 185px;
+    min-width: 185px;
+  }
+  .library-main {
+    padding: 35px 30px 0;
+  }
+  .library-title-row h1 {
+    font-size: 31px;
+  }
+  .library-title-row p {
+    font-size: 11px;
+  }
+  .project-grid {
+    grid-template-columns: repeat(auto-fill, minmax(225px, 1fr));
+  }
+  .project-cover {
+    height: 151px;
+  }
+  .inspector {
+    width: 259px;
+    min-width: 259px;
+  }
+  .inspector-body {
+    padding: 17px 14px;
+  }
+  .save-indicator {
+    display: none;
+  }
+  .project-title {
+    max-width: 180px;
+  }
+  .editing .app-header {
+    gap: 17px;
+    padding: 0 15px;
+  }
+  .editing .brand {
+    font-size: 18px;
+  }
+  .save-button {
+    display: none;
+  }
+  .timeline-toolbar {
+    gap: 6px;
+    padding-left: 12px;
+    padding-right: 12px;
+  }
+  .timeline-zoom {
+    width: 70px;
+  }
+  .timeline-title {
+    display: none;
+  }
+  .timeline-range {
+    gap: 6px;
+  }
+  .top-navigation {
+    margin-left: 0;
+  }
+  .empty-state > h2 {
+    font-size: 22px;
+  }
+  .library-title-row > .button {
+    font-size: 11px;
+  }
+}
+@media (max-height: 800px) {
+  .timeline {
+    height: 225px;
+    min-height: 225px;
+  }
+  .timeline-content {
+    height: 176px;
+  }
+  .track,
+  .track-labels > span {
+    height: 32px;
+  }
+  .clip {
+    height: 23px;
+    top: 4px;
+  }
+  .camera-hidden {
+    height: 23px;
+    top: 4px;
+  }
+  .effect-track .clip {
+    height: 12px;
+  }
+  .record-empty-icon {
+    width: 54px;
+    height: 54px;
+    border-radius: 15px;
+    margin-bottom: 15px;
+  }
+  .record-empty {
+    min-height: 220px;
+    padding: 10px;
+  }
+  .record-empty h2 {
+    font-size: 24px;
+    margin: 7px 0;
+  }
+  .record-empty .button {
+    margin-top: 14px;
+  }
+  .record-empty p {
+    font-size: 11px;
+  }
+  .preview-toolbar {
+    min-height: 35px;
+    padding-top: 9px;
+    padding-bottom: 9px;
+  }
+  .library-main {
+    padding-top: 32px;
+  }
+  .empty-state {
+    min-height: 350px;
+    padding-top: 16px;
+  }
+  .empty-illustration {
+    height: 110px;
+    margin-bottom: 17px;
+  }
+  .library-title-row {
+    margin-bottom: 25px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *:before,
+  *:after {
+    animation: none !important;
+    transition: none !important;
+    scroll-behavior: auto !important;
+  }
+}
+.button.danger-button {
+  background: color-mix(in srgb, var(--color-danger) 87%, var(--color-black));
+  color: color-mix(in srgb, var(--color-danger) 20%, var(--color-black));
+  border-color: color-mix(in srgb, var(--color-danger) 87%, var(--color-black));
+}
+.button.danger-button:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--color-danger) 99%, var(--color-black));
+}
+.export-complete {
+  position: fixed;
+  bottom: 42px;
+  right: 18px;
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  gap: 13px;
+  background: color-mix(in srgb, var(--color-accent) 26%, var(--color-black));
+  border: 1px solid color-mix(in srgb, var(--color-accent) 53%, var(--color-black));
+  box-shadow: 0 7px 30px
+    color-mix(
+      in srgb,
+      color-mix(in srgb, var(--color-neutral) 0%, var(--color-black)) 40%,
+      transparent
+    );
+  border-radius: 9px;
+  padding: 14px;
+  color: color-mix(in srgb, var(--color-accent) 80%, var(--color-white));
+}
+.export-complete strong {
+  font-size: 11px;
+}
+.export-complete p {
+  font-size: 9px;
+  color: color-mix(in srgb, var(--color-accent) 79%, var(--color-black));
+  max-width: 190px;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  margin-top: 5px;
+}
+.export-complete .button {
+  min-height: 29px;
+  padding: 7px 10px;
+  font-size: 10px;
+}
+/* Keep the work surface neutral so recorded colors remain easy to judge. */
+.editor-main {
+  background: radial-gradient(
+    ellipse at center,
+    color-mix(in srgb, var(--color-neutral) 30%, var(--color-black)),
+    color-mix(in srgb, var(--color-neutral) 22%, var(--color-black)) 72%
+  );
+}
+.tool-rail,
+.library-sidebar {
+  background: color-mix(in srgb, var(--color-neutral) 19%, var(--color-black));
+}
+.inspector {
+  background: color-mix(in srgb, var(--color-neutral) 22%, var(--color-black));
+}
+.timeline {
+  background: color-mix(in srgb, var(--color-neutral) 21%, var(--color-black));
+}
+.editor-status {
+  background: color-mix(in srgb, var(--color-neutral) 19%, var(--color-black));
+}
+.dialog-error {
+  margin-bottom: 19px;
+}
+.recording-hud .muted {
+  opacity: 0.45;
+}
+.app.desktop .app-header {
+  padding-left: 88px;
+}
+
+/* Composition and precise timeline editing */
+.aspect-options {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 5px;
+  margin-bottom: 17px;
+}
+.aspect-options button {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  height: 70px;
+  padding: 6px 2px;
+  border: 1px solid color-mix(in srgb, var(--color-neutral) 44%, var(--color-black));
+  border-radius: 7px;
+  background: color-mix(in srgb, var(--color-neutral) 29%, var(--color-black));
+  color: color-mix(in srgb, var(--color-accent) 88%, var(--color-black));
+  font-size: 9px;
+}
+.aspect-options button > span {
+  display: block;
+  width: 25px;
+  max-height: 29px;
+  border: 1.5px solid currentColor;
+  border-radius: 3px;
+}
+.aspect-options button.selected,
+.background-options button.selected {
+  border-color: color-mix(in srgb, var(--color-accent) 83%, var(--color-black));
+  background: color-mix(in srgb, var(--color-accent) 28%, var(--color-black));
+  color: color-mix(in srgb, var(--color-accent) 72%, var(--color-white));
+}
+.background-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-bottom: 15px;
+}
+.background-options button {
+  border: 1px solid color-mix(in srgb, var(--color-neutral) 44%, var(--color-black));
+  border-radius: 5px;
+  background: color-mix(in srgb, var(--color-neutral) 28%, var(--color-black));
+  color: color-mix(in srgb, var(--color-accent) 85%, var(--color-black));
+  padding: 6px 7px;
+  font-size: 9px;
+}
+.wallpaper-options {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin: 10px 0 17px;
+}
+.wallpaper-swatch {
+  height: 68px;
+  position: relative;
+  border: 2px solid transparent;
+  border-radius: 7px;
+  overflow: hidden;
+}
+.wallpaper-swatch.selected {
+  border-color: color-mix(in srgb, var(--color-accent) 89%, var(--color-white));
+}
+.wallpaper-swatch > span {
+  position: absolute;
+  bottom: 7px;
+  left: 8px;
+  color: white;
+  font-size: 9px;
+  text-shadow: 0 1px 5px color-mix(in srgb, var(--color-neutral) 0%, var(--color-black));
+}
+.wallpaper-swatch > svg {
+  position: absolute;
+  right: 7px;
+  top: 7px;
+  color: white;
+}
+.wallpaper-swatch.aurora {
+  background:
+    radial-gradient(
+      ellipse at 25% 20%,
+      color-mix(in srgb, var(--color-info) 67%, var(--color-black)),
+      transparent 70%
+    ),
+    linear-gradient(
+      135deg,
+      color-mix(in srgb, var(--color-info) 29%, var(--color-black)),
+      color-mix(in srgb, var(--color-camera) 61%, var(--color-black))
+    );
+}
+.wallpaper-swatch.sunset {
+  background:
+    radial-gradient(
+      ellipse at 20% 10%,
+      color-mix(in srgb, var(--color-warning) 82%, var(--color-black)),
+      transparent 70%
+    ),
+    linear-gradient(
+      135deg,
+      color-mix(in srgb, var(--color-danger) 95%, var(--color-black)),
+      color-mix(in srgb, var(--color-camera) 84%, var(--color-black))
+    );
+}
+.wallpaper-swatch.ocean {
+  background:
+    radial-gradient(
+      ellipse at 20% 10%,
+      color-mix(in srgb, var(--color-info) 77%, var(--color-black)),
+      transparent 65%
+    ),
+    linear-gradient(
+      135deg,
+      color-mix(in srgb, var(--color-info) 47%, var(--color-black)),
+      color-mix(in srgb, var(--color-accent) 22%, var(--color-black))
+    );
+}
+.wallpaper-swatch.dusk {
+  background:
+    radial-gradient(
+      ellipse at 20% 10%,
+      color-mix(in srgb, var(--color-camera) 80%, var(--color-white)),
+      transparent 65%
+    ),
+    linear-gradient(
+      135deg,
+      color-mix(in srgb, var(--color-info) 49%, var(--color-black)),
+      color-mix(in srgb, var(--color-camera) 44%, var(--color-black))
+    );
+}
+.zoom-list {
+  display: grid;
+  gap: 5px;
+  margin: 13px 0;
+}
+.zoom-list > button {
+  display: flex;
+  gap: 9px;
+  align-items: center;
+  text-align: left;
+  background: color-mix(in srgb, var(--color-neutral) 29%, var(--color-black));
+  border: 1px solid color-mix(in srgb, var(--color-accent) 30%, var(--color-black));
+  border-radius: 6px;
+  padding: 10px;
+  color: color-mix(in srgb, var(--color-accent) 97%, var(--color-black));
+}
+.zoom-list > button.selected {
+  background: color-mix(in srgb, var(--color-accent) 30%, var(--color-black));
+  border-color: color-mix(in srgb, var(--color-accent) 75%, var(--color-black));
+}
+.zoom-list > button > span {
+  flex: 1;
+  font-size: 10px;
+}
+.zoom-list small {
+  display: block;
+  margin-top: 4px;
+  font-size: 8px;
+  color: color-mix(in srgb, var(--color-accent) 74%, var(--color-black));
+}
+.zoom-list b {
+  font-size: 10px;
+}
+.record-countdown {
+  text-align: center;
+  font-size: 100px;
+  font-weight: 500;
+  color: var(--accent);
+  line-height: 1.7;
+  font-variant-numeric: tabular-nums;
+}
+.timeline-speed,
+.restore-select {
+  font-size: 9px;
+  padding: 5px 7px;
+  height: 27px;
+  width: 65px;
+  border-radius: 5px;
+}
+.restore-select {
+  width: 104px;
+}
+.timeline .screen-clip {
+  padding-left: 15px;
+  padding-right: 15px;
+  cursor: pointer;
+}
+.clip-speed {
+  font-size: 9px;
+  font-weight: 500;
+  opacity: 0.8;
+}
+.trim-handle {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 9px;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: color-mix(
+    in srgb,
+    color-mix(in srgb, var(--color-accent) 93%, var(--color-black)) 27%,
+    transparent
+  );
+  cursor: ew-resize;
+  touch-action: none;
+  z-index: 2;
+}
+.trim-handle::after {
+  content: "";
+  position: absolute;
+  top: 25%;
+  bottom: 25%;
+  left: 4px;
+  width: 1px;
+  background: color-mix(in srgb, var(--color-accent) 81%, var(--color-white));
+}
+.trim-handle.start {
+  left: 0;
+}
+.trim-handle.end {
+  right: 0;
+}
+.screen-clip:not(.selected) .trim-handle {
+  opacity: 0.3;
+}
+.screen-clip:hover .trim-handle {
+  opacity: 1;
+}
+.effect-track .zoom-clip {
+  cursor: grab;
+  touch-action: none;
+  min-width: 19px;
+  padding-left: 11px;
+  padding-right: 11px;
+}
+.zoom-clip.selected {
+  border-color: color-mix(in srgb, var(--color-warning) 87%, var(--color-white));
+  background: color-mix(in srgb, var(--color-warning) 49%, var(--color-black));
+}
+.zoom-clip .trim-handle {
+  width: 7px;
+  background: color-mix(
+    in srgb,
+    color-mix(in srgb, var(--color-warning) 85%, var(--color-white)) 33%,
+    transparent
+  );
+}
+.source-gap {
+  position: absolute;
+  top: 5px;
+  height: 28px;
+  width: 15px;
+  padding: 0;
+  transform: translateX(-50%);
+  border: 1px solid color-mix(in srgb, var(--color-warning) 80%, var(--color-black));
+  border-radius: 2px;
+  background: repeating-linear-gradient(
+    45deg,
+    color-mix(
+        in srgb,
+        color-mix(in srgb, var(--color-warning) 58%, var(--color-black)) 47%,
+        transparent
+      )
+      0,
+    color-mix(
+        in srgb,
+        color-mix(in srgb, var(--color-warning) 58%, var(--color-black)) 47%,
+        transparent
+      )
+      3px,
+    color-mix(
+        in srgb,
+        color-mix(in srgb, var(--color-neutral) 30%, var(--color-black)) 47%,
+        transparent
+      )
+      3px,
+    color-mix(
+        in srgb,
+        color-mix(in srgb, var(--color-neutral) 30%, var(--color-black)) 47%,
+        transparent
+      )
+      6px
+  );
+  color: color-mix(in srgb, var(--color-warning) 63%, var(--color-white));
+  display: grid;
+  place-items: center;
+  z-index: 4;
+}
+.drag-time-readout {
+  position: sticky;
+  bottom: 0;
+  left: 0;
+  width: max-content;
+  margin: 0 auto;
+  padding: 5px 9px;
+  background: color-mix(
+    in srgb,
+    color-mix(in srgb, var(--color-neutral) 14%, var(--color-black)) 91%,
+    transparent
+  );
+  border: 1px solid color-mix(in srgb, var(--color-accent) 58%, var(--color-black));
+  border-radius: 4px;
+  color: color-mix(in srgb, var(--color-accent) 69%, var(--color-white));
+  font-size: 10px;
+  pointer-events: none;
+  z-index: 6;
+}
+.clip-context-menu {
+  position: fixed;
+  z-index: 80;
+  width: min(590px, calc(100vw - 24px));
+  background: color-mix(in srgb, var(--color-neutral) 25%, var(--color-black));
+  border: 1px solid color-mix(in srgb, var(--color-accent) 49%, var(--color-black));
+  border-radius: 9px;
+  box-shadow: 0 10px 35px
+    color-mix(
+      in srgb,
+      color-mix(in srgb, var(--color-neutral) 0%, var(--color-black)) 60%,
+      transparent
+    );
+  padding: 12px;
+}
+.timeline-row-menu {
+  position: fixed;
+  z-index: 81;
+  width: 218px;
+  padding: 8px;
+  border: 1px solid color-mix(in srgb, var(--color-accent) 44%, var(--color-black));
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--color-neutral) 25%, var(--color-black));
+  box-shadow: 0 12px 35px color-mix(in srgb, var(--color-black) 68%, transparent);
+}
+.timeline-row-menu strong,
+.timeline-row-menu small {
+  display: block;
+  padding: 5px 8px;
+}
+.timeline-row-menu strong {
+  color: color-mix(in srgb, var(--color-accent) 76%, var(--color-white));
+  font-size: 10px;
+}
+.timeline-row-menu small {
+  padding-top: 0;
+  color: color-mix(in srgb, var(--color-accent) 48%, var(--color-white));
+  font-size: 8px;
+}
+.timeline-row-menu button {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 8px;
+  border-radius: 5px;
+  background: transparent;
+  color: color-mix(in srgb, var(--color-neutral) 28%, var(--color-white));
+  font-size: 10px;
+  text-align: left;
+}
+.timeline-row-menu button:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--color-accent) 13%, transparent);
+}
+.timeline-row-menu button.danger {
+  color: color-mix(in srgb, var(--color-danger) 75%, var(--color-white));
+}
+.clip-context-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  color: color-mix(in srgb, var(--color-accent) 76%, var(--color-white));
+  font-size: 11px;
+  margin-bottom: 8px;
+}
+.clip-context-actions {
+  display: flex;
+  align-items: end;
+  gap: 6px;
+}
+.clip-context-actions > button {
+  padding: 8px 7px;
+  border: 1px solid color-mix(in srgb, var(--color-accent) 41%, var(--color-black));
+  border-radius: 5px;
+  color: color-mix(in srgb, var(--color-accent) 97%, var(--color-black));
+  background: color-mix(in srgb, var(--color-accent) 25%, var(--color-black));
+  font-size: 9px;
+  height: 31px;
+}
+.clip-context-actions .field {
+  width: 105px;
+  margin: 0;
+}
+.clip-context-actions .field > span,
+.clip-trim-form .field > span {
+  font-size: 8px;
+}
+.clip-context-actions select {
+  padding: 7px;
+  font-size: 9px;
+}
+.clip-trim-form {
+  display: flex;
+  align-items: end;
+  gap: 9px;
+  margin-top: 10px;
+}
+.clip-trim-form .field {
+  flex: 1;
+  margin: 0;
+}
+.clip-trim-form input {
+  font-size: 10px;
+  padding: 7px;
+}
+.clip-trim-form > button {
+  height: 31px;
+  font-size: 9px;
+}
+
+.author-card {
+  padding: 12px 4px 2px;
+  border-top: 1px solid var(--line);
+  display: grid;
+  gap: 9px;
+  text-align: left;
+}
+.author-card > small {
+  padding: 0 6px;
+  font-size: 8px;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  color: var(--muted);
+}
+.author-profile {
+  appearance: none;
+  width: 100%;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 8px;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  color: var(--text);
+  background: transparent;
+  text-align: left;
+}
+.author-profile:hover {
+  border-color: color-mix(in srgb, var(--color-accent) 24%, transparent);
+  background: color-mix(in srgb, var(--color-accent) 7%, transparent);
+}
+.author-avatar {
+  width: 30px;
+  height: 30px;
+  flex: 0 0 30px;
+  display: grid;
+  place-items: center;
+  border-radius: 9px;
+  color: color-mix(in srgb, var(--color-accent) 88%, var(--color-white));
+  background: color-mix(in srgb, var(--color-accent) 15%, var(--surface));
+  border: 1px solid color-mix(in srgb, var(--color-accent) 25%, var(--line));
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+}
+.author-identity {
+  min-width: 0;
+  display: grid;
+  gap: 2px;
+}
+.author-identity strong {
+  overflow: hidden;
+  font-size: 11px;
+  line-height: 1.2;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.author-identity > span {
+  color: var(--muted);
+  font-size: 9px;
+}
+.author-profile > svg {
+  margin-left: auto;
+  color: var(--muted);
+}
+.author-profile:hover > svg {
+  color: var(--color-accent);
+}
+.author-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 14px;
+  padding: 0 8px;
+}
+.author-card a {
+  color: var(--muted);
+  font-size: 10px;
+  text-decoration: none;
+}
+.author-card a:hover {
+  color: var(--accent);
+  text-decoration: underline;
+}
+.author-popover {
+  margin-top: auto;
+  position: relative;
+}
+.author-popover summary {
+  padding: 10px;
+  cursor: pointer;
+  color: var(--accent);
+  list-style: none;
+}
+.author-popover .author-card {
+  position: absolute;
+  bottom: 0;
+  left: 52px;
+  width: 230px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  padding: 18px;
+  border-radius: var(--radius-md);
+  z-index: 20;
+  box-shadow: 0 12px 40px color-mix(in srgb, var(--color-black) 40%, transparent);
+}
+.help-content {
+  display: grid;
+  gap: 18px;
+}
+.help-content h3 {
+  margin: 0 0 6px;
+}
+.help-content p {
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.7;
+}
+.library-sidebar {
+  overflow-y: auto;
+}
+
+/* Direct manipulation surfaces must keep pointer capture while the preview updates. */
+.native-preview,
+.timeline-tracks,
+.slider-field input {
+  touch-action: none;
+}
+.native-preview {
+  outline: none;
+  cursor: default;
+}
+.playhead {
+  pointer-events: auto;
+  width: 12px;
+  margin-left: -6px;
+  background: transparent;
+  cursor: ew-resize;
+  z-index: 5;
+  box-shadow: none;
+}
+.playhead::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 6px;
+  width: 1px;
+  background: var(--color-accent);
+}
+.playhead > span {
+  left: 2px;
+}
+.timeline-tracks {
+  user-select: none;
+}
+.selection-actions {
+  min-height: 32px;
+  padding: 4px 16px;
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  border-bottom: 1px solid var(--line);
+  font-size: 10px;
+  flex-wrap: wrap;
+}
+.selection-actions > span {
+  color: var(--color-accent);
+  margin-right: 8px;
+}
+.selection-actions button {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 8px;
+  border-radius: 5px;
+  background: var(--surface);
+}
+.selection-actions button:hover {
+  background: color-mix(in srgb, var(--color-accent) 14%, transparent);
+}
+.edit-scope {
+  display: flex;
+  gap: 4px;
+  margin: 18px 0 6px;
+}
+.edit-scope button {
+  flex: 1;
+  padding: 9px 4px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  font-size: 11px;
+}
+.edit-scope button[aria-pressed="true"] {
+  color: var(--color-accent);
+  background: color-mix(in srgb, var(--color-accent) 12%, transparent);
+}
+.about-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 20px;
+}
+.monitor-status {
+  max-width: 150px;
+  font-size: 9px;
+  color: var(--muted);
+}
