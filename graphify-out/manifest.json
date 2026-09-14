@@ -60,9 +60,9 @@
     "semantic_hash": ""
   },
   "scripts/check-desktop.ts": {
-    "mtime": 1789365311.9176834,
-    "seen": 1789365355.1959832,
-    "ast_hash": "6fc2ce86cc2bf1afb17a30711d4a4b2c",
+    "mtime": 1789370698.4430587,
+    "seen": 1789370927.270725,
+    "ast_hash": "8a791a60c852e6f572fed4aec0b0e929",
     "semantic_hash": ""
   },
   "scripts/check-local-ai.ts": {
@@ -252,9 +252,9 @@
     "semantic_hash": ""
   },
   "docs/release.md": {
-    "mtime": 1789323615.798562,
-    "seen": 1789323618.078975,
-    "ast_hash": "497c4af9a11290d3f83bd5a11260fb32",
+    "mtime": 1789370587.426132,
+    "seen": 1789370927.27088,
+    "ast_hash": "be5d460e5daadd7eec235a609b51f635",
     "semantic_hash": ""
   },
   "index.html": {

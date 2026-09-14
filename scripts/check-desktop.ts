@@ -7,13 +7,27 @@ import { randomUUID } from "node:crypto";
 import { setTimeout as delay } from "node:timers/promises";
 import { Client } from "@modelcontextprotocol/sdk/client/index.js";
 import { StdioClientTransport } from "@modelcontextprotocol/sdk/client/stdio.js";
-import type { Job, Project, ProjectSummary } from "@/shared/types.js";
+import { ApplicationService } from "@/server/service.js";
+import { AppClient } from "@/server/infrastructure/rpc.js";
+import type {
+  AppCapabilities,
+  Job,
+  McpPermissions,
+  Project,
+  ProjectSummary,
+} from "@/shared/types.js";
 import { duration } from "@/shared/timeline.js";
 
 assert(
   process.env.SCREENREC_DATA_DIR,
   "Set SCREENREC_DATA_DIR to the isolated running desktop service.",
 );
+assert(
+  process.env.SCREENREC_PROJECTS_DIR,
+  "Set SCREENREC_PROJECTS_DIR to the isolated running desktop service.",
+);
+const dataDir = path.resolve(process.env.SCREENREC_DATA_DIR);
+const projectsDir = path.resolve(process.env.SCREENREC_PROJECTS_DIR);
 const video = path.resolve(process.argv[2] ?? "");
 assert(process.argv[2] && (await fs.stat(video)).isFile(), "Pass a synthetic test MP4 path.");
 const artifacts = await fs.mkdtemp(path.join(os.tmpdir(), "screenrec-desktop-check-"));
@@ -22,6 +36,7 @@ const env = Object.fromEntries(
 );
 const created: string[] = [];
 const resources = path.resolve(process.env.SCREENREC_TEST_RESOURCES || "resources");
+const app = new AppClient(path.join(dataDir, "service.sock"));
 let client: Client;
 async function connect() {
   const next = new Client({ name: "desktop-acceptance-check", version: "1.0.0" });
@@ -50,13 +65,89 @@ async function finish(id: string) {
   throw new Error("Desktop job timed out");
 }
 
+await app.connect(false);
+const originalSettings = await app.call("settings.get");
+const originalPermissions: McpPermissions = originalSettings.mcpPermissions;
+await app.call("settings.update", {
+  mcpPermissions: {
+    read: true,
+    edit: true,
+    export: true,
+    recording: true,
+    sensitive: true,
+    destructive: true,
+  },
+});
 client = await connect();
 try {
   const tools = await client.listTools();
   assert(tools.tools.length >= 40);
-  const capabilities = await call<{ nativeAvailable: boolean }>("app.capabilities");
+  const capabilities = await call<AppCapabilities>("app.capabilities");
   assert(capabilities.nativeAvailable, "The native desktop service must be running.");
+  assert(capabilities.permissions.screen, "Screen recording permission must be granted.");
+  const display = capabilities.sources.find((source) => source.kind === "display");
+  assert(display, "A display capture source must be available.");
   const baseline = await call<ProjectSummary[]>("project.list");
+
+  let captured = await call<Project>("project.create", { name: "Desktop golden path" });
+  created.push(captured.id);
+  await call("recording.start", {
+    projectId: captured.id,
+    settings: {
+      sourceId: display.id,
+      sourceKind: "display",
+      systemAudio: false,
+      cameraShape: "circle",
+      width: 1280,
+      height: 720,
+      fps: 30,
+    },
+  });
+  await delay(1500);
+  captured = await call("recording.stop", { projectId: captured.id });
+  assert.equal(captured.status, "ready");
+  assert(captured.source && captured.source.durationMs > 500);
+  captured = await call("project.open", { projectId: captured.id });
+  const cutEnd = Math.min(400, captured.source!.durationMs - 50);
+  assert(cutEnd > 100, "Recorded media is too short for the golden-path edit.");
+  captured = await call("timeline.apply", {
+    projectId: captured.id,
+    expectedRevision: captured.revision,
+    operations: [{ type: "cut", startMs: 100, endMs: cutEnd }],
+  });
+  await call("preview.load", { projectId: captured.id });
+  const capturedFrame = await client.callTool({
+    name: "preview_frame",
+    arguments: { projectId: captured.id, timeMs: 100 },
+  });
+  assert(
+    !capturedFrame.isError &&
+      Array.isArray(capturedFrame.content) &&
+      capturedFrame.content.some((content) => content.type === "image"),
+  );
+  const capturedExport = path.join(artifacts, "golden-path.mp4");
+  await finish(
+    (
+      await call<Job>("export.start", {
+        projectId: captured.id,
+        path: capturedExport,
+        width: 640,
+        height: 360,
+      })
+    ).id,
+  );
+  assert((await fs.stat(capturedExport)).size > 1000);
+  const summary = (await call<ProjectSummary[]>("project.list")).find(
+    (project) => project.id === captured.id,
+  );
+  assert(summary && (await fs.stat(path.join(summary.path, captured.source!.screen))).size > 1000);
+  const coldStart = new ApplicationService({ dataDir, projectsDir });
+  await coldStart.initialize();
+  const reopenedAfterRestart = await coldStart.command("project.open", {
+    projectId: captured.id,
+  });
+  assert.deepEqual(reopenedAfterRestart.edits, captured.edits);
+
   const requestId = randomUUID();
   let first = await call<Project>("project.create", { name: "MCP acceptance draft A", requestId });
   created.push(first.id);
@@ -240,7 +331,7 @@ try {
     "Existing projects must survive.",
   );
   console.log(
-    `Desktop MCP checks passed: ${tools.tools.length} tools, schema/revisions, independent projects, idempotency, reconnect, speed/cuts, editable zoom, transcript text timing, portrait preview/export, undo/redo and Trash with output preservation.`,
+    `Desktop checks passed: real record/stop/reopen/edit/preview/export/cold-start persistence plus ${tools.tools.length} MCP tools, revisions, idempotency, reconnect, portrait export, undo/redo and Trash preservation.`,
   );
   console.log(`Artifacts: ${artifacts}`);
 } finally {
@@ -253,4 +344,8 @@ try {
     );
   }
   await client.close();
+  await app
+    .call("settings.update", { mcpPermissions: originalPermissions })
+    .catch((error) => console.error(`Settings cleanup: ${String(error)}`));
+  app.close();
 }
