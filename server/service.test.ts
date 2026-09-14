@@ -433,6 +433,26 @@ test("private socket client coalesces concurrent initial connections and emits p
   assert.deepEqual(await changed, { projectId: project.id, revision: 0 });
 });
 
+test("project list reads compact revision-checked summaries and repairs a damaged cache", async (t) => {
+  const { service } = await setup(t);
+  const project = await ready(service);
+  const get = service.store.get.bind(service.store);
+  service.store.get = async () => {
+    throw new Error("Full project parsing should not run for a current summary");
+  };
+  const listed = await service.command("project.list");
+  assert.equal(listed.length, 1);
+  assert.equal(listed[0]!.id, project.id);
+  assert.equal(listed[0]!.durationMs, 10000);
+
+  service.store.get = get;
+  const summary = path.join(service.store.dir(project.id), "project.summary.json");
+  await fs.writeFile(summary, "{broken");
+  assert.equal((await service.command("project.list"))[0]!.id, project.id);
+  const repaired = await fs.readFile(summary, "utf8");
+  assert.doesNotThrow(() => JSON.parse(repaired));
+});
+
 test("backup recovery and source traversal validation protect project media", async (t) => {
   const { service, root } = await setup(t);
   const p = await ready(service);

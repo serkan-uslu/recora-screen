@@ -5506,7 +5506,7 @@
       "file_type": "code",
       "norm_label": "deferred()",
       "source_file": "server/service.test.ts",
-      "source_location": "L1421"
+      "source_location": "L1517"
     },
     {
       "id": "server_service_test_waitjob",
@@ -14299,7 +14299,7 @@
       "file_type": "code",
       "norm_label": "capturesettings",
       "source_file": "server/service.test.ts",
-      "source_location": "L1428"
+      "source_location": "L1524"
     },
     {
       "id": "docs_website_analytics",
@@ -19742,7 +19742,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "server/services/ai.ts",
-      "source_location": "L254",
+      "source_location": "L253",
       "weight": 1.0
     },
     {
@@ -19754,7 +19754,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "server/services/ai.ts",
-      "source_location": "L266",
+      "source_location": "L265",
       "weight": 1.0
     },
     {
@@ -19778,7 +19778,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "server/services/ai.ts",
-      "source_location": "L326",
+      "source_location": "L317",
       "weight": 1.0
     },
     {
@@ -19790,7 +19790,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "server/services/ai.ts",
-      "source_location": "L444",
+      "source_location": "L374",
       "weight": 1.0
     },
     {
@@ -20558,7 +20558,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "server/services/ProjectService.ts",
-      "source_location": "L169",
+      "source_location": "L138",
       "weight": 1.0
     },
     {
@@ -20570,7 +20570,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "server/services/ProjectService.ts",
-      "source_location": "L171",
+      "source_location": "L176",
       "weight": 1.0
     },
     {
@@ -46311,7 +46311,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "server/service.test.ts",
-      "source_location": "L1421",
+      "source_location": "L1517",
       "weight": 1.0
     },
     {
@@ -46322,7 +46322,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "server/service.test.ts",
-      "source_location": "L1428",
+      "source_location": "L1524",
       "weight": 1.0
     },
     {
@@ -52477,7 +52477,7 @@
       "confidence_score": 0.8,
       "context": "call",
       "source_file": "server/services/EditingService.ts",
-      "source_location": "L90",
+      "source_location": "L93",
       "weight": 1.0
     },
     {
@@ -52489,7 +52489,7 @@
       "confidence_score": 0.8,
       "context": "call",
       "source_file": "server/services/EditingService.ts",
-      "source_location": "L91",
+      "source_location": "L94",
       "weight": 1.0
     },
     {
@@ -52681,7 +52681,7 @@
       "confidence_score": 0.8,
       "context": "call",
       "source_file": "server/services/ProjectService.ts",
-      "source_location": "L149",
+      "source_location": "L152",
       "weight": 1.0
     },
     {
@@ -52693,7 +52693,7 @@
       "confidence_score": 0.8,
       "context": "call",
       "source_file": "server/services/ProjectService.ts",
-      "source_location": "L152",
+      "source_location": "L155",
       "weight": 1.0
     },
     {
@@ -52705,7 +52705,7 @@
       "confidence_score": 0.8,
       "context": "call",
       "source_file": "server/services/ProjectService.ts",
-      "source_location": "L153",
+      "source_location": "L156",
       "weight": 1.0
     },
     {
@@ -52717,7 +52717,7 @@
       "confidence_score": 0.8,
       "context": "call",
       "source_file": "server/services/ProjectService.ts",
-      "source_location": "L154",
+      "source_location": "L157",
       "weight": 1.0
     },
     {
@@ -55566,5 +55566,5 @@
     }
   ],
   "hyperedges": [],
-  "built_at_commit": "16d0461e3f71d57a345efcf3049300e4d0cc569e"
+  "built_at_commit": "21bdaede6d41f3f8b80aa47987a093bef5d48502"
 }

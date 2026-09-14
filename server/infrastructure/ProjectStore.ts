@@ -47,6 +47,21 @@ export async function atomicJSON(file: string, value: unknown) {
 }
 
 type Document = { project: Project; undo: Project[]; redo: Project[] };
+const summarySchema = z
+  .object({
+    manifestMtimeNs: z.string(),
+    manifestSize: z.number().int().nonnegative(),
+    project: z.object({
+      id: idSchema,
+      name: z.string(),
+      createdAt: z.string(),
+      updatedAt: z.string(),
+      revision: z.number().int().nonnegative(),
+      status: z.enum(["draft", "recording", "ready"]),
+      durationMs: z.number().nonnegative(),
+    }),
+  })
+  .strict();
 function parseDocument(input: unknown, id: string): Document {
   const data = object(input);
   const document = {
@@ -257,6 +272,9 @@ export class ProjectStore extends EventEmitter {
       if (error instanceof Error && "code" in error && error.code !== "ENOENT") throw error;
     }
     await atomicJSON(manifest, document);
+    await this.writeSummary(document.project).catch(async () => {
+      await fs.rm(path.join(dir, "project.summary.json"), { force: true }).catch(() => {});
+    });
     this.emit("changed", {
       projectId: document.project.id,
       revision: document.project.revision,
@@ -291,29 +309,62 @@ export class ProjectStore extends EventEmitter {
     const rows: ProjectSummary[] = [];
     for (const e of entries.filter((e) => e.isDirectory() && idSchema.safeParse(e.name).success)) {
       try {
-        const p = await this.get(e.name);
-        const thumbnail = path.join(this.dir(p.id), "cache", "thumbnail.png");
-        rows.push({
-          id: p.id,
-          name: p.name,
-          createdAt: p.createdAt,
-          updatedAt: p.updatedAt,
-          revision: p.revision,
-          status: p.status,
-          durationMs: duration(p.edits.segments),
-          path: this.dir(p.id),
-          ...((await fs.stat(thumbnail).then(
-            () => true,
-            () => false,
-          ))
-            ? { thumbnail }
-            : {}),
-        });
+        rows.push(await this.readSummary(e.name));
       } catch {
-        /* Damaged folders remain on disk for manual recovery. */
+        try {
+          rows.push(
+            await this.exclusive(e.name, async () => {
+              const project = await this.get(e.name);
+              await this.writeSummary(project);
+              return this.readSummary(e.name);
+            }),
+          );
+        } catch {
+          /* Damaged folders remain on disk for manual recovery. */
+        }
       }
     }
     return rows.sort((a, b) => b.updatedAt.localeCompare(a.updatedAt));
+  }
+  private async writeSummary(project: Project) {
+    const dir = this.dir(project.id);
+    const manifest = await fs.stat(path.join(dir, "project.json"), { bigint: true });
+    await atomicJSON(path.join(dir, "project.summary.json"), {
+      manifestMtimeNs: String(manifest.mtimeNs),
+      manifestSize: Number(manifest.size),
+      project: {
+        id: project.id,
+        name: project.name,
+        createdAt: project.createdAt,
+        updatedAt: project.updatedAt,
+        revision: project.revision,
+        status: project.status,
+        durationMs: duration(project.edits.segments),
+      },
+    });
+  }
+  private async readSummary(id: string): Promise<ProjectSummary> {
+    const dir = this.dir(id);
+    const manifest = await fs.stat(path.join(dir, "project.json"), { bigint: true });
+    const cached = summarySchema.parse(
+      JSON.parse(await fs.readFile(path.join(dir, "project.summary.json"), "utf8")),
+    );
+    if (
+      cached.manifestMtimeNs !== String(manifest.mtimeNs) ||
+      cached.manifestSize !== Number(manifest.size)
+    )
+      throw new Error("Stale project summary");
+    const thumbnail = path.join(dir, "cache", "thumbnail.png");
+    return {
+      ...cached.project,
+      path: dir,
+      ...((await fs.stat(thumbnail).then(
+        () => true,
+        () => false,
+      ))
+        ? { thumbnail }
+        : {}),
+    };
   }
   async mutate(
     id: string,
