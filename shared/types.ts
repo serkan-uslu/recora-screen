@@ -221,6 +221,15 @@ export type AppCapabilities = {
   sources: CaptureSource[];
   cameras: Device[];
   microphones: Device[];
+  mcpPermissions?: McpPermissions;
+  mcpCommands?: {
+    method: string;
+    description: string;
+    readOnly: boolean;
+    destructive: boolean;
+    permission: McpPermissionCategory;
+    examples: string[];
+  }[];
 };
 export type RpcRequest = { id?: string; method: string; params?: Record<string, unknown> };
 export type RpcError = { code: string; message: string; details?: unknown };

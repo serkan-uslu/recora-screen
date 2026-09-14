@@ -195,12 +195,15 @@ const readOnly = new Set([
   "app.canQuit",
   "project.list",
   "project.open",
+  "recording.status",
   "settings.get",
   "ai.models/list",
   "jobs.list",
   "jobs.get",
+  "preview.metrics",
   "preview.status",
   "preview.geometry",
+  "preview.frame",
 ]);
 export const isReadOnly = (method: string) => readOnly.has(method);
 
@@ -219,6 +222,74 @@ const permissionOverrides: Partial<Record<string, McpPermissionCategory>> = {
 export function mcpPermissionCategory(method: string): McpPermissionCategory {
   const override = permissionOverrides[method];
   if (override) return override;
-  if (method.startsWith("recording.")) return "recording";
-  return isReadOnly(method) ? "read" : "edit";
+  if (isReadOnly(method)) return "read";
+  return method.startsWith("recording.") ? "recording" : "edit";
 }
+
+const descriptions: Partial<Record<string, string>> = {
+  "preview.draft":
+    "Render validated edits transiently in the active project preview. Requires expectedRevision. Does not save, add history, or affect export. Commit with timeline_apply; reload preview_load to discard.",
+  "project.open":
+    "Read a project, its current revision and source-time edit state. Source media remains immutable.",
+  "timeline.apply":
+    "Apply sequential edits atomically. Times are OUTPUT milliseconds except clip.trim sourceStartMs/sourceEndMs and source.restore startMs/endMs explicitly use SOURCE time. Speed is 0.25–8. Stale expectedRevision is rejected. One batch is one undo step.",
+  "ai.cleanSilence":
+    "Analyze source microphone RMS audio and protect audible system audio. By default returns suggested OUTPUT cut ranges and operations; apply=true commits one undoable edit. Returns a Job; poll jobs_get.",
+  "ai.transcribe":
+    "Run offline Whisper transcription with an already downloaded model. Source timestamps are preserved and captions become editable. Returns a Job.",
+  "ai.assistant":
+    "Send project metadata and transcript to the selected BYOK OpenAI or Anthropic provider and let it edit through validated project tools. Video is not uploaded. Returns a Job.",
+  "ai.models/download":
+    "Download one pinned SHA-256 verified multilingual Whisper model. base is 148 MB and small is 488 MB. Returns a Job.",
+  "recording.camera":
+    "Change the live camera bubble or hardware capture. Hardware-off gaps cannot be restored; use timeline_apply camera.hide for reversible post-recording visibility.",
+  "project.delete":
+    "Move an idle project to the operating-system Trash. Active recordings and jobs prevent deletion.",
+  "export.start":
+    "Render the current project snapshot to a new external MP4. Custom dimensions must be supplied together, even, and at most 3840 on either axis. Existing files and source media are never overwritten. Returns a Job.",
+  "transcript.export":
+    "Return SRT or VTT text aligned to the edited timeline and optionally write it to a new external file.",
+};
+
+const examples: Partial<Record<string, string[]>> = {
+  "project.open": ['project_open({"projectId":"PROJECT_ID"})'],
+  "timeline.apply": [
+    'timeline_apply({"projectId":"PROJECT_ID","expectedRevision":3,"operations":[{"type":"cut","startMs":1000,"endMs":2000}]})',
+  ],
+  "history.undo": ['history_undo({"projectId":"PROJECT_ID","expectedRevision":4})'],
+  "jobs.get": ['jobs_get({"jobId":"JOB_ID"})'],
+  "preview.frame": ['preview_frame({"projectId":"PROJECT_ID","timeMs":1500})'],
+  "export.start": [
+    'export_start({"projectId":"PROJECT_ID","path":"/absolute/path/video.mp4","quality":"1080"})',
+  ],
+};
+
+export type CommandMetadata = {
+  method: string;
+  schema: z.ZodType;
+  description: string;
+  readOnly: boolean;
+  destructive: boolean;
+  permission: McpPermissionCategory;
+  examples: string[];
+};
+
+export const commandRegistry: Record<string, CommandMetadata> = Object.fromEntries(
+  Object.entries(methodSchemas).map(([method, schema]) => {
+    const permission = mcpPermissionCategory(method);
+    return [
+      method,
+      {
+        method,
+        schema,
+        description:
+          descriptions[method] ??
+          "Run the corresponding desktop application command and return its current state or background job.",
+        readOnly: isReadOnly(method),
+        destructive: permission === "destructive",
+        permission,
+        examples: examples[method] ?? [`${method.replace(/[./]/g, "_")}({ ... })`],
+      },
+    ];
+  }),
+);

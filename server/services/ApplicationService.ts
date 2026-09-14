@@ -2,7 +2,7 @@ import { promises as fs } from "node:fs";
 import path from "node:path";
 import { EventEmitter } from "node:events";
 import { CommandController } from "@/server/controllers/CommandController.js";
-import { settingsSchema } from "@/server/contracts/commands.js";
+import { commandRegistry, settingsSchema } from "@/server/contracts/commands.js";
 import { AppError, errorOf } from "@/server/contracts/validation.js";
 import { ProjectStore, appDataDir, atomicJSON } from "@/server/infrastructure/ProjectStore.js";
 import { AssistantService } from "@/server/services/AssistantService.js";
@@ -203,11 +203,22 @@ export class ApplicationService extends EventEmitter {
           bundleId: "com.screenrecorder.desktop",
         }
       : null;
+    const mcpCommands = Object.values(commandRegistry).map(
+      ({ method, description, readOnly, destructive, permission, examples }) => ({
+        method,
+        description,
+        readOnly,
+        destructive,
+        permission,
+        examples,
+      }),
+    );
     try {
       return {
         ...(await this.native("capabilities", {})),
         nativeAvailable: true,
         mcp,
+        mcpCommands,
         mcpPermissions: this.settings.mcpPermissions,
       };
     } catch (error) {
@@ -227,6 +238,7 @@ export class ApplicationService extends EventEmitter {
         mcpPermissions: this.settings.mcpPermissions,
         error: errorOf(error).message,
         mcp,
+        mcpCommands,
       };
     }
   }

@@ -6,7 +6,13 @@ import os from "node:os";
 import { setTimeout as delay } from "node:timers/promises";
 import { Client } from "@modelcontextprotocol/sdk/client/index.js";
 import { InMemoryTransport } from "@modelcontextprotocol/sdk/inMemory.js";
-import { ApplicationService, methodSchemas, type NativeCall } from "@/server/service.js";
+import {
+  ApplicationService,
+  commandRegistry,
+  isReadOnly,
+  methodSchemas,
+  type NativeCall,
+} from "@/server/service.js";
 import { ProjectStore } from "@/server/infrastructure/ProjectStore.js";
 import { AppClient, serveSocket } from "@/server/infrastructure/rpc.js";
 import { createMcpServer } from "@/server/mcp.js";
@@ -153,8 +159,27 @@ test("official MCP client and UI command share one revision and one undo history
     await server.close();
   });
   const tools = await client.listTools();
+  assert.equal(tools.tools.length, Object.keys(commandRegistry).length);
+  assert(
+    Object.values(commandRegistry).every(
+      (metadata) =>
+        metadata.description.length > 0 &&
+        metadata.examples.length > 0 &&
+        metadata.permission.length > 0 &&
+        metadata.readOnly === isReadOnly(metadata.method),
+    ),
+  );
   assert(tools.tools.some((t) => t.name === "recording_start"));
   assert(tools.tools.some((t) => t.name === "ai_models_download"));
+  assert.equal(
+    tools.tools.find((t) => t.name === "recording_status")!.annotations!.readOnlyHint,
+    true,
+  );
+  assert.equal(
+    tools.tools.find((t) => t.name === "app_shutdown")!.annotations!.destructiveHint,
+    true,
+  );
+  assert.match(tools.tools.find((t) => t.name === "project_open")!.description!, /Examples:/);
   assert.equal(
     tools.tools.find((t) => t.name === "transcript_export")!.annotations!.readOnlyHint,
     false,
@@ -169,6 +194,7 @@ test("official MCP client and UI command share one revision and one undo history
   });
   assert.equal(result.isError, undefined);
   const ui = await service.command("project.open", { projectId: p.id });
+  assert.equal(typeof ui.revision, "number");
   assert.equal(ui.edits.camera.shape, "square");
   assert.equal(ui.revision, (result.structuredContent as { result: Project }).result.revision);
   const undone = await service.command("history.undo", {
@@ -215,6 +241,14 @@ test("official MCP client and UI command share one revision and one undo history
     expectedRevision: removed.revision,
   });
   assert.deepEqual(restored.edits.camera.layouts, layoutProject.edits.camera.layouts);
+  const capabilities = await service.command("app.capabilities");
+  assert.equal(capabilities.mcpCommands.length, Object.keys(commandRegistry).length);
+  assert.equal(
+    capabilities.mcpCommands.find(
+      (metadata: { method: string }) => metadata.method === "timeline.apply",
+    ).permission,
+    "edit",
+  );
 });
 
 test("MCP access policy blocks protected commands until the desktop setting enables them", async (t) => {

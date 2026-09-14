@@ -6,15 +6,15 @@
     "semantic_hash": ""
   },
   "native/Bridge.swift": {
-    "mtime": 1789309660.8034518,
-    "seen": 1789311190.441966,
-    "ast_hash": "f87170f54f6e5551e2361c0998c7c08e",
+    "mtime": 1789372410.1860082,
+    "seen": 1789372575.1829891,
+    "ast_hash": "ba122408a0e09c4c99397c4138098b64",
     "semantic_hash": ""
   },
   "native/Capture.swift": {
-    "mtime": 1789309480.2700152,
-    "seen": 1789311190.4419682,
-    "ast_hash": "1b2d75582c89ef1c6f3bc2ca51c1cb4a",
+    "mtime": 1789372225.112967,
+    "seen": 1789372575.182991,
+    "ast_hash": "a07ce31c6a8cdaf92282c7aa8074122a",
     "semantic_hash": ""
   },
   "native/Check.swift": {
@@ -24,9 +24,9 @@
     "semantic_hash": ""
   },
   "native/Composition.swift": {
-    "mtime": 1789309660.8031301,
-    "seen": 1789311190.4419708,
-    "ast_hash": "4a950b7eb68107161a6be2ce43c1a84f",
+    "mtime": 1789372307.3411312,
+    "seen": 1789372575.1829948,
+    "ast_hash": "4864616e7b0ce9c42bfc26799fbc1957",
     "semantic_hash": ""
   },
   "native/Models.swift": {
@@ -36,15 +36,15 @@
     "semantic_hash": ""
   },
   "native/build.sh": {
-    "mtime": 1789295779.595131,
-    "seen": 1789296675.099488,
-    "ast_hash": "4000ebac23b4f8b5f6c25f55122817ca",
+    "mtime": 1789372429.3828387,
+    "seen": 1789372575.1829991,
+    "ast_hash": "dbb1e1a1e67edf5efa9d5532d91aa524",
     "semantic_hash": ""
   },
   "native/check.sh": {
-    "mtime": 1789295248.022262,
-    "seen": 1789296675.099488,
-    "ast_hash": "d3a49e63763fd587b448e07de8675c05",
+    "mtime": 1789372429.3831477,
+    "seen": 1789372575.183,
+    "ast_hash": "52854458041e4bfd8e1d5f352175452d",
     "semantic_hash": ""
   },
   "package.json": {
@@ -1080,9 +1080,9 @@
     "semantic_hash": ""
   },
   "native/check-capture-input.sh": {
-    "mtime": 1789308897.5260699,
-    "seen": 1789311190.441973,
-    "ast_hash": "e51efe36d3a24ab40dcb17d989e6cc79",
+    "mtime": 1789372242.1891952,
+    "seen": 1789372575.1829991,
+    "ast_hash": "2e75de347b979bc3963204f5f9e8dc12",
     "semantic_hash": ""
   },
   "scripts/check-interactions.ts": {
@@ -1425,6 +1425,60 @@
     "mtime": 1789371605.527383,
     "seen": 1789371968.672458,
     "ast_hash": "9524bc55ade7e6e155dc7341907bbca6",
+    "semantic_hash": ""
+  },
+  "native/CameraBubbleView.swift": {
+    "mtime": 1789372156.4679725,
+    "seen": 1789372575.18299,
+    "ast_hash": "1cbb8395a8dd8996c559820b2dc6257c",
+    "semantic_hash": ""
+  },
+  "native/CaptureInput.swift": {
+    "mtime": 1789372156.467614,
+    "seen": 1789372575.182993,
+    "ast_hash": "e08e4d6a9f60c08cbf625e09d249fff7",
+    "semantic_hash": ""
+  },
+  "native/CaptureWriter.swift": {
+    "mtime": 1789372156.467819,
+    "seen": 1789372575.182993,
+    "ast_hash": "f17bfb895db8e1fc0a19dfece1e80f64",
+    "semantic_hash": ""
+  },
+  "native/CompositionGeometry.swift": {
+    "mtime": 1789372307.340171,
+    "seen": 1789372575.1829948,
+    "ast_hash": "3549c5b314e628aa7fb89857e6858b49",
+    "semantic_hash": ""
+  },
+  "native/NativeAppSupport.swift": {
+    "mtime": 1789372410.1855023,
+    "seen": 1789372575.182996,
+    "ast_hash": "2791df63ab76cd177b0c66b3149bb3a4",
+    "semantic_hash": ""
+  },
+  "native/NativeFFI.swift": {
+    "mtime": 1789372410.1851254,
+    "seen": 1789372575.182997,
+    "ast_hash": "47f6e3d30ac741a364e991328d91e679",
+    "semantic_hash": ""
+  },
+  "native/PreviewView.swift": {
+    "mtime": 1789372410.1853054,
+    "seen": 1789372575.182997,
+    "ast_hash": "ba5fc188a0f93a796b0a520a809f9ec3",
+    "semantic_hash": ""
+  },
+  "native/RenderInstruction.swift": {
+    "mtime": 1789372307.3403761,
+    "seen": 1789372575.182998,
+    "ast_hash": "622d80bdb88c50713752ba8e8b389469",
+    "semantic_hash": ""
+  },
+  "native/ScreenrecCompositor.swift": {
+    "mtime": 1789372307.3406813,
+    "seen": 1789372575.182998,
+    "ast_hash": "9e4731412710d9a7fc35775f1061e442",
     "semantic_hash": ""
   }
 }
