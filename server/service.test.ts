@@ -251,6 +251,124 @@ test("official MCP client and UI command share one revision and one undo history
   );
 });
 
+test("concurrent UI and MCP edits accept one revision and reject the stale writer", async (t) => {
+  const { service } = await setup(t);
+  const project = await ready(service);
+  const server = createMcpServer((method, params) => service.command(method, params));
+  const client = new Client({ name: "revision-race", version: "1" });
+  const [clientTransport, serverTransport] = InMemoryTransport.createLinkedPair();
+  await server.connect(serverTransport);
+  await client.connect(clientTransport);
+  t.after(async () => {
+    await client.close();
+    await server.close();
+  });
+
+  const [ui, mcp] = await Promise.allSettled([
+    service.command("timeline.apply", {
+      projectId: project.id,
+      expectedRevision: project.revision,
+      operations: [{ type: "camera.update", settings: { x: 0.2 } }],
+    }),
+    client.callTool({
+      name: "timeline_apply",
+      arguments: {
+        projectId: project.id,
+        expectedRevision: project.revision,
+        operations: [{ type: "camera.update", settings: { x: 0.8 } }],
+      },
+    }),
+  ]);
+  assert.equal(mcp.status, "fulfilled");
+  const mcpResult = mcp.value.structuredContent as
+    { result: Project } | { error: { code: string } };
+  const uiSucceeded = ui.status === "fulfilled";
+  const mcpSucceeded = "result" in mcpResult;
+  assert.notEqual(uiSucceeded, mcpSucceeded);
+  if (!uiSucceeded) assert.equal((ui.reason as { code?: string }).code, "REVISION_CONFLICT");
+  if (!mcpSucceeded) assert.equal(mcpResult.error.code, "REVISION_CONFLICT");
+  const committed = await service.store.get(project.id);
+  assert.equal(committed.revision, project.revision + 1);
+  assert([0.2, 0.8].includes(committed.edits.camera.x));
+});
+
+test("large transcripts survive repeated edits and undo/redo history", async (t) => {
+  const { service } = await setup(t);
+  let project = await ready(service);
+  const transcript = Array.from({ length: 750 }, (_, index) => ({
+    id: `line-${index}`,
+    startMs: index * 10,
+    endMs: index * 10 + 9,
+    text: `Transcript line ${index} with enough content to exercise persisted history.`,
+  }));
+  project = await service.command("timeline.apply", {
+    projectId: project.id,
+    expectedRevision: project.revision,
+    operations: [{ type: "transcript.update", segments: transcript }],
+  });
+  for (let index = 0; index < 60; index++)
+    project = await service.command("timeline.apply", {
+      projectId: project.id,
+      expectedRevision: project.revision,
+      operations: [{ type: "camera.update", settings: { x: (index + 1) / 100 } }],
+    });
+  const finalX = project.edits.camera.x;
+  for (let index = 0; index < 10; index++)
+    project = await service.command("history.undo", {
+      projectId: project.id,
+      expectedRevision: project.revision,
+    });
+  assert.equal(project.edits.camera.x, 0.5);
+  assert.deepEqual(project.transcript, transcript);
+  for (let index = 0; index < 10; index++)
+    project = await service.command("history.redo", {
+      projectId: project.id,
+      expectedRevision: project.revision,
+    });
+  assert.equal(project.edits.camera.x, finalX);
+  assert.deepEqual((await service.store.get(project.id)).transcript, transcript);
+});
+
+test("export renders the project revision captured when the job starts", async (t) => {
+  const exportEntered = deferred<void>();
+  const finishExport = deferred<void>();
+  let exported: Project | undefined;
+  const { root, service } = await setup(t, async (method, params) => {
+    if (method === "export.start") {
+      exported = structuredClone(params!.project as Project);
+      await fs.writeFile(params!.path as string, "snapshot export");
+      exportEntered.resolve();
+      await finishExport.promise;
+      return {};
+    }
+    if (method === "export.status") return { status: "completed", progress: 1 };
+    if (method === "export.cancel") return {};
+    throw Error(method);
+  });
+  t.after(() => finishExport.resolve());
+  const project = await ready(service);
+  const output = path.join(root, "snapshot.mp4");
+  const job: Job = await service.command("export.start", {
+    projectId: project.id,
+    path: output,
+    quality: "1080",
+  });
+  await exportEntered.promise;
+  const edited = await service.command("timeline.apply", {
+    projectId: project.id,
+    expectedRevision: project.revision,
+    operations: [{ type: "camera.update", settings: { visible: false } }],
+  });
+  finishExport.resolve();
+  const completed = await waitJob(service, job.id);
+  assert.equal(completed.status, "completed", completed.error);
+  assert.equal(exported!.revision, project.revision);
+  assert.equal(exported!.edits.camera.visible, true);
+  assert.equal((completed.result as { revision: number }).revision, project.revision);
+  assert.equal(edited.edits.camera.visible, false);
+  assert.equal(await fs.readFile(output, "utf8"), "snapshot export");
+});
+
 test("MCP access policy blocks protected commands until the desktop setting enables them", async (t) => {
   const { service } = await setup(t);
   const project = await service.command("project.create", { name: "Protected" });

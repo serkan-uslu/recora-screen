@@ -114,9 +114,9 @@
     "semantic_hash": ""
   },
   "server/mcp.ts": {
-    "mtime": 1789370138.8490198,
-    "seen": 1789370214.485646,
-    "ast_hash": "49d1b921cda53eb2eb39629b1dcfa942",
+    "mtime": 1789372893.6814184,
+    "seen": 1789372991.6704159,
+    "ast_hash": "c38de3cbade8b45eca82f6408ac8268f",
     "semantic_hash": ""
   },
   "server/rpc.ts": {
@@ -126,15 +126,15 @@
     "semantic_hash": ""
   },
   "server/service.test.ts": {
-    "mtime": 1789371312.534474,
-    "seen": 1789371377.939966,
-    "ast_hash": "bcf388c7d568e9935fe763a5b3194be2",
+    "mtime": 1789372947.9329436,
+    "seen": 1789372991.670418,
+    "ast_hash": "efafe28fe17ad52ebd65d86f84e0d59d",
     "semantic_hash": ""
   },
   "server/service.ts": {
-    "mtime": 1789369773.7132995,
-    "seen": 1789370214.485648,
-    "ast_hash": "804eecb42d3bd654de36dcf4a20b35f8",
+    "mtime": 1789372811.6927626,
+    "seen": 1789372991.670419,
+    "ast_hash": "f4c4bb14c3e42700bb9b4610ad45a5d2",
     "semantic_hash": ""
   },
   "shared/timeline.test.ts": {
@@ -150,9 +150,9 @@
     "semantic_hash": ""
   },
   "shared/types.ts": {
-    "mtime": 1789369773.7123291,
-    "seen": 1789370214.4856598,
-    "ast_hash": "300d9bb8a6b09183af88eca5f7d0be51",
+    "mtime": 1789372841.537385,
+    "seen": 1789372991.670429,
+    "ast_hash": "f0cee53192a8fce49cd15bbacfd7c53c",
     "semantic_hash": ""
   },
   "src-tauri/Cargo.toml": {
@@ -690,9 +690,9 @@
     "semantic_hash": ""
   },
   "server/contracts/commands.ts": {
-    "mtime": 1789370138.8487008,
-    "seen": 1789370214.48564,
-    "ast_hash": "a6f5ef95364a365eea36e8b6d6a9d832",
+    "mtime": 1789372767.7516558,
+    "seen": 1789372991.670411,
+    "ast_hash": "23b94c0fadbee8b90a8c06516e260019",
     "semantic_hash": ""
   },
   "server/contracts/validation.ts": {
@@ -732,9 +732,9 @@
     "semantic_hash": ""
   },
   "server/services/ApplicationService.ts": {
-    "mtime": 1789369699.1039302,
-    "seen": 1789370214.4856489,
-    "ast_hash": "e98ace0d1faafe125d19818de8002015",
+    "mtime": 1789372828.2752426,
+    "seen": 1789372991.670419,
+    "ast_hash": "881dd2ae1e3828a58edafda7cbb877f3",
     "semantic_hash": ""
   },
   "server/services/Jobs.ts": {
