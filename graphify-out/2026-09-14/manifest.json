@@ -18,9 +18,9 @@
     "semantic_hash": ""
   },
   "native/Check.swift": {
-    "mtime": 1789311030.2886343,
-    "seen": 1789311190.4419699,
-    "ast_hash": "565a5cbf9a1381981118fb392071fe06",
+    "mtime": 1789366990.0576458,
+    "seen": 1789367072.890878,
+    "ast_hash": "5522979807fa66a27a90eeb4a3ef1fb6",
     "semantic_hash": ""
   },
   "native/Composition.swift": {
@@ -228,9 +228,9 @@
     "semantic_hash": ""
   },
   "README.md": {
-    "mtime": 1789365177.4230149,
-    "seen": 1789365355.196061,
-    "ast_hash": "9d0ad0ad1dc8d34ffc8cc45fe00af615",
+    "mtime": 1789366006.880722,
+    "seen": 1789367072.8909702,
+    "ast_hash": "378a2202936aa47c5bafa5f0306e425d",
     "semantic_hash": ""
   },
   "THIRD_PARTY_NOTICES.md": {
@@ -1056,8 +1056,8 @@
     "semantic_hash": ""
   },
   "website/public/icon.svg": {
-    "mtime": 1789365401.0719934,
-    "seen": 1789365443.3675032,
+    "mtime": 1789366280.1834717,
+    "seen": 1789367072.891009,
     "ast_hash": "777a2e8e600e0beebd17eb58e7bfd6c3",
     "semantic_hash": ""
   },
@@ -1151,60 +1151,6 @@
     "ast_hash": "9bf23cb9dafb17ad8c87c46ba28884fe",
     "semantic_hash": ""
   },
-  "marketing/github-metadata.json": {
-    "mtime": 1789364939.490123,
-    "seen": 1789365081.584799,
-    "ast_hash": "a405f5c88d73711cd9360f352d571d2b",
-    "semantic_hash": ""
-  },
-  "marketing/product-hunt/assets/manifest.json": {
-    "mtime": 1789323126.9885821,
-    "seen": 1789323618.078866,
-    "ast_hash": "ed4a6927ed66cf9a511c31a8cc2e34ea",
-    "semantic_hash": ""
-  },
-  "marketing/product-hunt/brand-reference/provenance.json": {
-    "mtime": 1789322408.8658664,
-    "seen": 1789323618.078866,
-    "ast_hash": "e4c95d78379786ab036aacc0beb75c07",
-    "semantic_hash": ""
-  },
-  "marketing/product-hunt/check-kit.py": {
-    "mtime": 1789323012.9034803,
-    "seen": 1789323618.078867,
-    "ast_hash": "7d15f7dcb1faf6ccead33a9ef83a20cd",
-    "semantic_hash": ""
-  },
-  "marketing/product-hunt/launch-copy.json": {
-    "mtime": 1789321809.768484,
-    "seen": 1789323618.078872,
-    "ast_hash": "654308cd342cb2702e9d0702fe9f8726",
-    "semantic_hash": ""
-  },
-  "marketing/product-hunt/media/codex-proof.json": {
-    "mtime": 1789322887.6051424,
-    "seen": 1789323618.0788732,
-    "ast_hash": "6ac21145a96e8ff3757ae83c06542b22",
-    "semantic_hash": ""
-  },
-  "marketing/product-hunt/media/evidence.json": {
-    "mtime": 1789323074.9373872,
-    "seen": 1789323618.0788732,
-    "ast_hash": "415709d5f9dacfa80e33d5eed5b967dc",
-    "semantic_hash": ""
-  },
-  "marketing/product-hunt/render-assets.py": {
-    "mtime": 1789323071.7631564,
-    "seen": 1789323618.078874,
-    "ast_hash": "d42f1277b101fef639e841c132631f35",
-    "semantic_hash": ""
-  },
-  "marketing/product-hunt/render-proof.sh": {
-    "mtime": 1789322894.6229324,
-    "seen": 1789323618.078874,
-    "ast_hash": "025ca4db81d30ceba568dc243e19f8b7",
-    "semantic_hash": ""
-  },
   "scripts/check-launch.ts": {
     "mtime": 1789365311.9120276,
     "seen": 1789365355.195984,
@@ -1248,231 +1194,15 @@
     "semantic_hash": ""
   },
   "docs/launch-readiness.md": {
-    "mtime": 1789364939.3977642,
-    "seen": 1789365081.584897,
-    "ast_hash": "e7ec342918ed68f208426efa1ab4090d",
-    "semantic_hash": ""
-  },
-  "marketing/product-hunt/README.md": {
-    "mtime": 1789364939.5156639,
-    "seen": 1789365081.584901,
-    "ast_hash": "8341635eb3b325d09b1f471c90b1f0af",
-    "semantic_hash": ""
-  },
-  "marketing/product-hunt/assets/index.html": {
-    "mtime": 1789323126.9887867,
-    "seen": 1789323618.078977,
-    "ast_hash": "91800fd1ea2aa82672113aa3aca19ea0",
-    "semantic_hash": ""
-  },
-  "marketing/product-hunt/brand-reference/README.md": {
-    "mtime": 1789322408.894769,
-    "seen": 1789323618.078978,
-    "ast_hash": "76f51231273e20a73ea780f4aaed3945",
-    "semantic_hash": ""
-  },
-  "marketing/product-hunt/claim-ledger.md": {
-    "mtime": 1789364939.498262,
-    "seen": 1789365081.584903,
-    "ast_hash": "823a44df2784567fc49a4317d836c2a7",
-    "semantic_hash": ""
-  },
-  "marketing/product-hunt/replies.md": {
-    "mtime": 1789321809.7689147,
-    "seen": 1789323618.078979,
-    "ast_hash": "bdfccda1e6a52271f32cbaadef93fc41",
-    "semantic_hash": ""
-  },
-  "marketing/product-hunt/storyboard.md": {
-    "mtime": 1789364939.5359576,
-    "seen": 1789365081.584904,
-    "ast_hash": "bd59567f8a3b582b3964529cf8a95b26",
+    "mtime": 1789366007.171992,
+    "seen": 1789367072.890974,
+    "ast_hash": "a45509b62e692e8efa33bad6fd6babf5",
     "semantic_hash": ""
   },
   "design-system/product-icon.svg": {
     "mtime": 1789321662.070247,
     "seen": 1789323618.078998,
     "ast_hash": "777a2e8e600e0beebd17eb58e7bfd6c3",
-    "semantic_hash": ""
-  },
-  "marketing/product-hunt/assets/01-direct-the-edit.png": {
-    "mtime": 1789323124.59779,
-    "seen": 1789323618.078999,
-    "ast_hash": "17d45572a5be0fe088024fbd7e745a32",
-    "semantic_hash": ""
-  },
-  "marketing/product-hunt/assets/01-direct-the-edit.svg": {
-    "mtime": 1789323124.3126338,
-    "seen": 1789323618.078999,
-    "ast_hash": "8b30cfc51eb5f8b7acb1f9e0eb70221b",
-    "semantic_hash": ""
-  },
-  "marketing/product-hunt/assets/02-mcp-command-result.png": {
-    "mtime": 1789323124.9073377,
-    "seen": 1789323618.079,
-    "ast_hash": "92af380d2fd58f36d41094cda5867c34",
-    "semantic_hash": ""
-  },
-  "marketing/product-hunt/assets/02-mcp-command-result.svg": {
-    "mtime": 1789323124.6025577,
-    "seen": 1789323618.079,
-    "ast_hash": "25186db541d88972f0723c95eac5fb0c",
-    "semantic_hash": ""
-  },
-  "marketing/product-hunt/assets/03-automatic-zoom.png": {
-    "mtime": 1789323125.102582,
-    "seen": 1789323618.0790012,
-    "ast_hash": "e5da6fbad72c56305f796b650d988fbb",
-    "semantic_hash": ""
-  },
-  "marketing/product-hunt/assets/03-automatic-zoom.svg": {
-    "mtime": 1789323124.9121978,
-    "seen": 1789323618.0790012,
-    "ast_hash": "92e6716003b1e628af7acdd648b10859",
-    "semantic_hash": ""
-  },
-  "marketing/product-hunt/assets/04-camera-layout.png": {
-    "mtime": 1789323125.2839162,
-    "seen": 1789323618.0790021,
-    "ast_hash": "62566a0a6648b05c97e7327db6c3ede3",
-    "semantic_hash": ""
-  },
-  "marketing/product-hunt/assets/04-camera-layout.svg": {
-    "mtime": 1789323125.106353,
-    "seen": 1789323618.0790021,
-    "ast_hash": "ab431838572392f4eaf09510d7b488d2",
-    "semantic_hash": ""
-  },
-  "marketing/product-hunt/assets/05-quiet-moments.png": {
-    "mtime": 1789323125.4773955,
-    "seen": 1789323618.0790029,
-    "ast_hash": "8f5a8e31a5a152a8f45635a3e2d9e173",
-    "semantic_hash": ""
-  },
-  "marketing/product-hunt/assets/05-quiet-moments.svg": {
-    "mtime": 1789323125.2872958,
-    "seen": 1789323618.0790029,
-    "ast_hash": "9c4b1dea1aa9ad232c96c8ba77fbfc01",
-    "semantic_hash": ""
-  },
-  "marketing/product-hunt/assets/06-projects-export.png": {
-    "mtime": 1789323125.667292,
-    "seen": 1789323618.0790038,
-    "ast_hash": "4f8aaa7dab996133de05b9527ab29c12",
-    "semantic_hash": ""
-  },
-  "marketing/product-hunt/assets/06-projects-export.svg": {
-    "mtime": 1789323125.4803998,
-    "seen": 1789323618.0790038,
-    "ast_hash": "18ce6b419b185b483e326e3ced667adf",
-    "semantic_hash": ""
-  },
-  "marketing/product-hunt/assets/announcement-square.png": {
-    "mtime": 1789323126.5637782,
-    "seen": 1789323618.079005,
-    "ast_hash": "4c6bc2a7460b84f4720ba879cff82110",
-    "semantic_hash": ""
-  },
-  "marketing/product-hunt/assets/announcement-square.svg": {
-    "mtime": 1789323126.2535815,
-    "seen": 1789323618.079005,
-    "ast_hash": "37b1a449567c58bb45743a8a98c87d9b",
-    "semantic_hash": ""
-  },
-  "marketing/product-hunt/assets/github-social.png": {
-    "mtime": 1789323126.2483654,
-    "seen": 1789323618.079005,
-    "ast_hash": "6f0aa45b947aade3522fcb0c00fb4789",
-    "semantic_hash": ""
-  },
-  "marketing/product-hunt/assets/github-social.svg": {
-    "mtime": 1789323125.9872513,
-    "seen": 1789323618.079006,
-    "ast_hash": "be13b329c9d6d7840ddb0b4b32768686",
-    "semantic_hash": ""
-  },
-  "marketing/product-hunt/assets/social-share.png": {
-    "mtime": 1789323125.982604,
-    "seen": 1789323618.079006,
-    "ast_hash": "4ae0af75154cf7c63f8da2bad056c756",
-    "semantic_hash": ""
-  },
-  "marketing/product-hunt/assets/social-share.svg": {
-    "mtime": 1789323125.7348409,
-    "seen": 1789323618.079007,
-    "ast_hash": "b0f44f6e8d12edf250330b5e74e19bd9",
-    "semantic_hash": ""
-  },
-  "marketing/product-hunt/assets/thumbnail.png": {
-    "mtime": 1789323125.732003,
-    "seen": 1789323618.079007,
-    "ast_hash": "e00321cfe5f1596a2ee19a79a39b6955",
-    "semantic_hash": ""
-  },
-  "marketing/product-hunt/assets/thumbnail.svg": {
-    "mtime": 1789323125.6707983,
-    "seen": 1789323618.079008,
-    "ast_hash": "fa0b64d1884984fe0d845705446749fc",
-    "semantic_hash": ""
-  },
-  "marketing/product-hunt/assets/video-cover.png": {
-    "mtime": 1789323126.9827752,
-    "seen": 1789323618.079008,
-    "ast_hash": "25fa112a5ada048598b3e21d5d9c4ee5",
-    "semantic_hash": ""
-  },
-  "marketing/product-hunt/assets/video-cover.svg": {
-    "mtime": 1789323126.568726,
-    "seen": 1789323618.079009,
-    "ast_hash": "872021662c2fdf0eca8c53999f2397f5",
-    "semantic_hash": ""
-  },
-  "marketing/product-hunt/brand-reference/claude-app.png": {
-    "mtime": 1789322408.8654692,
-    "seen": 1789323618.079009,
-    "ast_hash": "011f791cff1d300aacf7eb4f43f7a43c",
-    "semantic_hash": ""
-  },
-  "marketing/product-hunt/brand-reference/claude-tray-dark-3x.png": {
-    "mtime": 1789322408.8656645,
-    "seen": 1789323618.07901,
-    "ast_hash": "23f75e8b7cba42aed0aa87bfe4a6fdfa",
-    "semantic_hash": ""
-  },
-  "marketing/product-hunt/brand-reference/codex-app-dark.png": {
-    "mtime": 1789322408.8648732,
-    "seen": 1789323618.07901,
-    "ast_hash": "d59bbf589905db550bd212b2b073bf55",
-    "semantic_hash": ""
-  },
-  "marketing/product-hunt/brand-reference/codex-app-light.png": {
-    "mtime": 1789322408.8642504,
-    "seen": 1789323618.079011,
-    "ast_hash": "357b7884d9351295cb8f98e0a3ffd389",
-    "semantic_hash": ""
-  },
-  "marketing/product-hunt/media/client-command.png": {
-    "mtime": 1789323124.3056617,
-    "seen": 1789323618.079011,
-    "ast_hash": "44cd95fc5bd8f3764e396ba2adae4e49",
-    "semantic_hash": ""
-  },
-  "marketing/product-hunt/media/client-command.svg": {
-    "mtime": 1789323124.1046412,
-    "seen": 1789323618.0790122,
-    "ast_hash": "55007593690ac19927dcbb7e05963917",
-    "semantic_hash": ""
-  },
-  "marketing/product-hunt/media/editor.jpg": {
-    "mtime": 1789322577.2947066,
-    "seen": 1789323618.0790122,
-    "ast_hash": "2f79993b0aa49f6eea663f2d58a87a71",
-    "semantic_hash": ""
-  },
-  "marketing/product-hunt/media/mcp-result.jpg": {
-    "mtime": 1789322727.8087482,
-    "seen": 1789323618.079013,
-    "ast_hash": "2f79993b0aa49f6eea663f2d58a87a71",
     "semantic_hash": ""
   },
   "website/public/brands/claude.png": {
@@ -1491,18 +1221,6 @@
     "mtime": 1789322577.294346,
     "seen": 1789323618.0790248,
     "ast_hash": "2f79993b0aa49f6eea663f2d58a87a71",
-    "semantic_hash": ""
-  },
-  "marketing/product-hunt/media/codex-export-original.mp4": {
-    "mtime": 1789322894.6202495,
-    "seen": 1789323618.079026,
-    "ast_hash": "5af35d860a15b5668da11fe4ce193690",
-    "semantic_hash": ""
-  },
-  "marketing/product-hunt/media/codex-proof.mp4": {
-    "mtime": 1789322648.0759485,
-    "seen": 1789323618.079026,
-    "ast_hash": "b197574bb9e39a7589001d6cebcf93ed",
     "semantic_hash": ""
   },
   "website/public/media/codex-proof.mp4": {
@@ -1524,9 +1242,9 @@
     "semantic_hash": ""
   },
   "knip.json": {
-    "mtime": 1789365011.3732326,
-    "seen": 1789365081.5847979,
-    "ast_hash": "6529971bcd4ae97504509b1afb51ab39",
+    "mtime": 1789365456.0337331,
+    "seen": 1789367072.8908741,
+    "ast_hash": "dadb950b86f431e3e1ab49d00f35b31b",
     "semantic_hash": ""
   },
   "playwright.config.ts": {
@@ -1548,9 +1266,9 @@
     "semantic_hash": ""
   },
   "docs/development-standards.md": {
-    "mtime": 1789365400.6166327,
-    "seen": 1789365443.3674428,
-    "ast_hash": "dbe3799dcf71f7f064704a56847e4aa1",
+    "mtime": 1789366248.0883498,
+    "seen": 1789367072.8909729,
+    "ast_hash": "59c05a9bd37d53e464b424faf4950c1f",
     "semantic_hash": ""
   }
 }

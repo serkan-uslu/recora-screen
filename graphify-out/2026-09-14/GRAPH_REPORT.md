@@ -1,16 +1,16 @@
 # Graph Report - screen-recorder  (2026-09-14)
 
 ## Corpus Check
-- 188 files · ~342,185 words
+- 174 files · ~130,349 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 1288 nodes · 2918 edges · 91 communities (54 shown, 24 thin omitted)
+- 1240 nodes · 2853 edges · 87 communities (53 shown, 22 thin omitted)
 - Extraction: 93% EXTRACTED · 7% INFERRED · 0% AMBIGUOUS · INFERRED: 210 edges (avg confidence: 0.84)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `63998206`
+- Built from commit: `b18bc78d`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -24,13 +24,13 @@
 - dependencies
 - bundle
 - README.md
-- EditorScreen.tsx
+- types.ts
 - main.rs
 - compilerOptions
-- AppError
+- ProjectStore
 - devDependencies
-- Project
-- ApplicationService.ts
+- AppError
+- edits.ts
 - permissions
 - verify-bundle.mjs
 - check-interactions.ts
@@ -42,7 +42,7 @@
 - native/README.md
 - screen-recorder
 - Bridge.swift
-- Launch discussion replies
+- ApplicationService.ts
 - bundle-notices.mjs
 - scripts
 - package-dmg.mjs
@@ -70,23 +70,20 @@
 - download-stats.mjs
 - check-launch.ts
 - Architecture and contribution guide
-- messageOf
-- project
+- StudioDialogs.tsx
+- entry
 - Screen Recorder
-- render-assets.py
 - Launch readiness — 13 September 2026
 - App.tsx
 - MCP setup
 - Privacy
 - Validation and release
 - ScreenCursor feature parity
-- types.ts
+- messageOf
 - Product website
 - check-capture-input.sh
 - Editor interaction and capture validation
 - THIRD_PARTY_NOTICES.md
-- brand-reference/README.md
-- render-proof.sh
 - useStudioController.ts
 - .prettierrc.json
 - Development standards
@@ -109,35 +106,35 @@
 ## Surprising Connections (you probably didn't know these)
 - `revealRange()` --calls--> `outputRanges()`  [EXTRACTED]
   src/features/editor/EditorScreen.tsx → shared/timeline.ts
-- `applyEdits()` --calls--> `cameraLayoutSettings()`  [EXTRACTED]
-  server/domain/edits.ts → shared/camera.ts
-- `applyEdits()` --calls--> `sameCameraLayout()`  [EXTRACTED]
-  server/domain/edits.ts → shared/camera.ts
 - `applyEdits()` --calls--> `defaultAutoZoom()`  [EXTRACTED]
   server/domain/edits.ts → shared/types.ts
+- `ApplicationService` --references--> `Project`  [EXTRACTED]
+  server/services/ApplicationService.ts → shared/types.ts
 - `ApplicationService` --references--> `RecordingStatus`  [EXTRACTED]
   server/services/ApplicationService.ts → shared/types.ts
+- `assistant()` --calls--> `duration()`  [EXTRACTED]
+  server/services/ai.ts → shared/timeline.ts
 
 ## Import Cycles
 - None detected.
 
-## Communities (91 total, 24 thin omitted)
+## Communities (87 total, 22 thin omitted)
 
 ### Community 0 - "Models.swift"
-Cohesion: 0.20
-Nodes (30): Codable, Audio, CameraLayout, CameraSettings, CanvasSettings, Captions, CaptureSettings, color() (+22 more)
+Cohesion: 0.19
+Nodes (32): Codable, Audio, CameraLayout, CameraSettings, CanvasSettings, Captions, CaptureSettings, color() (+24 more)
 
 ### Community 1 - "useStudioController"
-Cohesion: 0.12
-Nodes (35): StudioDialogs(), StudioHeader(), useStudioController(), acceptCurrentProject(), apply(), backToLibrary(), cancelDraftPreview(), cancelJob() (+27 more)
+Cohesion: 0.13
+Nodes (32): StudioDialogs(), StudioHeader(), useStudioController(), acceptCurrentProject(), apply(), backToLibrary(), cancelDraftPreview(), cancelJob() (+24 more)
 
 ### Community 2 - "Composition.swift"
 Cohesion: 0.07
 Nodes (59): AVAsynchronousVideoCompositionRequest, AVMutableAudioMix, AVMutableComposition, AVMutableVideoComposition, AVVideoCompositing, AVVideoCompositionInstructionProtocol, AVVideoCompositionRenderContext, CameraLayout (+51 more)
 
 ### Community 3 - "CaptureEngine"
-Cohesion: 0.05
-Nodes (54): AppKit, AVAssetWriter, AVAssetWriterInput, AVCaptureConnection, AVCaptureOutput, AVCaptureSession, AVCaptureVideoDataOutputSampleBufferDelegate, CaptureSettings (+46 more)
+Cohesion: 0.06
+Nodes (51): AppKit, AVCaptureConnection, AVCaptureOutput, AVCaptureSession, AVCaptureVideoDataOutputSampleBufferDelegate, CaptureSettings, CFMachPort, CFRunLoop (+43 more)
 
 ### Community 4 - "check-desktop-ai.ts"
 Cohesion: 0.08
@@ -145,7 +142,7 @@ Nodes (21): cachedModel, client, dataDir, env, fixture, installedModel, probe, r
 
 ### Community 5 - "validation.ts"
 Cohesion: 0.05
-Nodes (40): absolutePath, model, none, projectId, provider, readOnly, revision, settingsSchema (+32 more)
+Nodes (41): absolutePath, methodSchemas, model, none, projectId, provider, readOnly, revision (+33 more)
 
 ### Community 6 - "dependencies"
 Cohesion: 0.12
@@ -155,9 +152,9 @@ Nodes (17): lucide-react, @modelcontextprotocol/sdk, dependencies, lucide-react,
 Cohesion: 0.05
 Nodes (37): app, icons/128x128@2x.png, icons/128x128.png, icons/32x32.png, icons/icon.icns, ../native/build/libscreenrec.dylib, app, security (+29 more)
 
-### Community 9 - "EditorScreen.tsx"
-Cohesion: 0.18
-Nodes (22): CameraLayoutSettings, defaultAutoZoom(), EditOperation, Range, Switch(), Field(), PanelIntro(), RangeSummary() (+14 more)
+### Community 9 - "types.ts"
+Cohesion: 0.13
+Nodes (35): Asset, AutoZoomSettings, CameraLayout, CameraLayoutSettings, CameraSettings, CanvasSettings, CaptureSource, defaultAutoZoom() (+27 more)
 
 ### Community 10 - "main.rs"
 Cohesion: 0.11
@@ -167,20 +164,20 @@ Nodes (26): AppHandle, Arc, Box, c_char, Child, ChildStdin, Mutex, Reply (+18 mo
 Cohesion: 0.06
 Nodes (30): DOM, DOM.Iterable, ES2023, node, playwright.config.ts, scripts/*.ts, server, shared (+22 more)
 
-### Community 12 - "AppError"
-Cohesion: 0.09
-Nodes (18): setup(), AppError, checkRevision(), id, object(), parseProject(), projectSchema, sourceSchema (+10 more)
+### Community 12 - "ProjectStore"
+Cohesion: 0.15
+Nodes (6): setup(), checkRevision(), archiveManifest(), ProjectStore, defaultEdits(), ProjectSummary
 
 ### Community 13 - "devDependencies"
 Cohesion: 0.05
 Nodes (43): esbuild, eslint, eslint-config-prettier, @eslint/js, eslint-plugin-jsx-a11y, eslint-plugin-react-hooks, globals, husky (+35 more)
 
-### Community 14 - "Project"
-Cohesion: 0.23
-Nodes (5): cursorClicks(), ready, setup(), ApplicationService, Project
+### Community 14 - "AppError"
+Cohesion: 0.14
+Nodes (5): AppError, cursorClicks(), setup(), ApplicationService, Jobs
 
-### Community 15 - "ApplicationService.ts"
-Cohesion: 0.19
+### Community 15 - "edits.ts"
+Cohesion: 0.16
 Nodes (26): applyEdits(), AudioWindow, checkedRange(), coalesceSegments(), found(), mergeRanges(), silenceCuts(), sourceSpan() (+18 more)
 
 ### Community 16 - "permissions"
@@ -192,8 +189,8 @@ Cohesion: 0.35
 Nodes (10): binariesIn(), walk(), dependencies(), inside(), portableReference(), run(), runpaths(), systemPath() (+2 more)
 
 ### Community 18 - "check-interactions.ts"
-Cohesion: 0.13
-Nodes (10): artifacts, client, finish(), native, pattern, audioInspection(), inspect(), { values } (+2 more)
+Cohesion: 0.11
+Nodes (11): artifacts, client, finish(), native, pattern, audioInspection(), inspect(), { values } (+3 more)
 
 ### Community 19 - "prepare-runtime.mjs"
 Cohesion: 0.29
@@ -208,12 +205,12 @@ Cohesion: 0.50
 Nodes (3): args, child, env
 
 ### Community 29 - "Bridge.swift"
-Cohesion: 0.15
-Nodes (11): AVFoundation, CChar, CoreImage, screenrec_attach_window(), screenrec_command(), NativeCallback, ScreenCaptureKit, Security (+3 more)
+Cohesion: 0.17
+Nodes (10): AVFoundation, CChar, CoreImage, screenrec_attach_window(), screenrec_command(), NativeCallback, ScreenCaptureKit, Security (+2 more)
 
-### Community 30 - "Launch discussion replies"
-Cohesion: 0.06
-Nodes (28): Claims to keep out of the launch kit, Decision gates, Launch claim checks, Fill the form, Product Hunt launch kit, Reference checks, Release checklist, Start here (+20 more)
+### Community 30 - "ApplicationService.ts"
+Cohesion: 0.15
+Nodes (16): object(), operationsSchema, parseProject(), projectSchema, sourceSchema, CommandController, appDataDir, atomicJSON() (+8 more)
 
 ### Community 31 - "bundle-notices.mjs"
 Cohesion: 0.28
@@ -232,19 +229,19 @@ Cohesion: 0.22
 Nodes (8): description, engines, node, license, name, private, type, version
 
 ### Community 52 - "service.test.ts"
-Cohesion: 0.11
-Nodes (20): client, isolated, server, service, isReadOnly(), methodSchemas, errorOf(), AppClient (+12 more)
+Cohesion: 0.12
+Nodes (20): client, isolated, server, service, isReadOnly(), errorOf(), socketPath, readLines() (+12 more)
 
 ### Community 53 - ".command"
 Cohesion: 0.14
 Nodes (22): AVAssetExportSession, AVPlayer, AVPlayerItem, ExportJob, .result, NativeApp, PreviewView, Any (+14 more)
 
 ### Community 55 - "NativeFailure"
-Cohesion: 0.13
-Nodes (21): AVAssetReader, AVAssetReaderTrackOutput, Error, FileHandle, Foundation, LocalizedError, analyzeAudio(), audioReader() (+13 more)
+Cohesion: 0.11
+Nodes (24): AVAssetReader, AVAssetReaderTrackOutput, AVAssetWriter, AVAssetWriterInput, Error, Foundation, LocalizedError, analyzeAudio() (+16 more)
 
 ### Community 56 - ".main"
-Cohesion: 0.19
+Cohesion: 0.18
 Nodes (15): CGImage, NativeCheck, Bool, CGRect, Data, Double, Int, Project (+7 more)
 
 ### Community 57 - "Timeline"
@@ -252,12 +249,12 @@ Cohesion: 0.23
 Nodes (10): Timeline(), finishDrag(), menuPosition(), moveRange(), openClipMenu(), openTrackMenu(), releaseDragPointer(), startDrag() (+2 more)
 
 ### Community 58 - "usePreviewEditingController.ts"
-Cohesion: 0.12
-Nodes (21): cameraAt(), cameraLayoutSettings(), cameraOutputLayouts(), CameraRun, sameCameraLayout(), PlaybackState, PreviewGeometry, PreviewItem (+13 more)
+Cohesion: 0.15
+Nodes (16): PlaybackState, PreviewGeometry, PreviewItem, PreviewPlayback, Send, useNativePreviewController(), accent(), clamp() (+8 more)
 
 ### Community 59 - "check-desktop.ts"
-Cohesion: 0.12
-Nodes (7): created, env, resources, video, atomicJSON(), Jobs, Job
+Cohesion: 0.18
+Nodes (5): created, env, resources, video, Job
 
 ### Community 62 - "check-launch.ts"
 Cohesion: 0.09
@@ -267,29 +264,25 @@ Nodes (21): Check, checks, Evidence, evidenceSchema, requiredAcceptance, root, a
 Cohesion: 0.40
 Nodes (5): Adding behavior, Architecture and contribution guide, Checks, Interactive preview and recording, Invariants
 
-### Community 64 - "messageOf"
-Cohesion: 0.21
-Nodes (13): AboutDialog(), AuthorFooter(), Dialog(), useAuthorLinks(), open(), useCaptureDialogController(), permission(), CanvasPanel() (+5 more)
+### Community 64 - "StudioDialogs.tsx"
+Cohesion: 0.19
+Nodes (13): formatMcpConfig(), McpClient, Field(), AboutDialog(), AuthorFooter(), Dialog(), useAuthorLinks(), open() (+5 more)
 
-### Community 65 - "project"
+### Community 65 - "entry"
 Cohesion: 0.09
-Nodes (22): entry, ignoreBinaries, ignoreDependencies, project, $schema, cmake, ffmpeg, ffprobe (+14 more)
+Nodes (23): entry, ignoreBinaries, ignoreDependencies, project, $schema, cmake, ffmpeg, ffprobe (+15 more)
 
 ### Community 67 - "Screen Recorder"
 Cohesion: 0.25
 Nodes (8): Connect Claude or Codex, Contribute, Create, edit and keep your work, Develop, License, Local processing and current limits, Screen Recorder, Try the development preview
-
-### Community 68 - "render-assets.py"
-Cohesion: 0.46
-Nodes (12): banner(), board(), cover(), footer(), main(), render_gallery(), render_trace(), reviewed_source() (+4 more)
 
 ### Community 70 - "Launch readiness — 13 September 2026"
 Cohesion: 0.33
 Nodes (6): Alignment delivered, Current development artifact, Launch readiness — 13 September 2026, Real MCP evidence, Still needed before public beta, What was actually checked
 
 ### Community 71 - "App.tsx"
-Cohesion: 0.18
-Nodes (13): formatTime(), App(), IconButton(), useProjectThumbnailController(), StudioController, deleteProject(), PlaybackToolbar(), JobNotifications() (+5 more)
+Cohesion: 0.23
+Nodes (11): formatTime(), App(), IconButton(), StudioController, deleteProject(), importProject(), PlaybackToolbar(), JobNotifications() (+3 more)
 
 ### Community 72 - "MCP setup"
 Cohesion: 0.29
@@ -307,9 +300,9 @@ Nodes (7): Hardware acceptance before public release, Historical development val
 Cohesion: 0.40
 Nodes (5): Delivery boundary, Historical development verification, Implementation and acceptance, ScreenCursor feature parity, What the reference demonstrates
 
-### Community 76 - "types.ts"
-Cohesion: 0.11
-Nodes (19): Asset, AutoZoomSettings, CameraLayout, CameraSettings, CanvasSettings, CaptureSettings, CaptureSource, Device (+11 more)
+### Community 76 - "messageOf"
+Cohesion: 0.19
+Nodes (10): RpcRequest, RpcResponse, useProjectThumbnailController(), openExport(), ProjectThumbnail(), desktop, pickPath(), sendCommand() (+2 more)
 
 ### Community 77 - "Product website"
 Cohesion: 0.50
@@ -320,8 +313,8 @@ Cohesion: 0.50
 Nodes (4): Desktop acceptance record, Editor interaction and capture validation, Environment and measured checks, Signed-app bounded capture reports
 
 ### Community 84 - "useStudioController.ts"
-Cohesion: 0.18
-Nodes (12): formatMcpConfig(), McpClient, createPreviewPlayback(), McpConfig, Modal, Model, Settings, Tab (+4 more)
+Cohesion: 0.16
+Nodes (14): CaptureSettings, createPreviewPlayback(), McpConfig, Modal, Model, Settings, Tab, useCaptureDialogController() (+6 more)
 
 ### Community 85 - ".prettierrc.json"
 Cohesion: 0.29
@@ -340,24 +333,24 @@ Cohesion: 0.40
 Nodes (5): lint-staged, *.{js,mjs,ts,tsx}, *.{json,css,html,md,yml,yaml}, eslint --fix --max-warnings 0 --no-warn-ignored, prettier --write
 
 ## Knowledge Gaps
-- **381 isolated node(s):** `semi`, `singleQuote`, `trailingComma`, `tabWidth`, `printWidth` (+376 more)
-  These have ≤1 connection - possible missing edges or undocumented components. (Counts symbols only; 526 node(s) total have ≤1 connection when file, concept and rationale nodes are included.)
-- **24 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
+- **356 isolated node(s):** `semi`, `singleQuote`, `trailingComma`, `tabWidth`, `printWidth` (+351 more)
+  These have ≤1 connection - possible missing edges or undocumented components. (Counts symbols only; 497 node(s) total have ≤1 connection when file, concept and rationale nodes are included.)
+- **22 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
 - **Why does `devDependencies` connect `devDependencies` to `package.json`?**
-  _High betweenness centrality (0.053) - this node is a cross-community bridge._
-- **Why does `Project` connect `Project` to `messageOf`, `check-desktop-ai.ts`, `validation.ts`, `EditorScreen.tsx`, `AppError`, `types.ts`, `ApplicationService.ts`, `check-interactions.ts`, `useStudioController.ts`, `service.test.ts`, `usePreviewEditingController.ts`, `check-desktop.ts`?**
-  _High betweenness centrality (0.021) - this node is a cross-community bridge._
-- **Why does `scripts` connect `scripts` to `package.json`?**
+  _High betweenness centrality (0.046) - this node is a cross-community bridge._
+- **Why does `Project` connect `types.ts` to `StudioDialogs.tsx`, `check-desktop-ai.ts`, `validation.ts`, `ProjectStore`, `messageOf`, `AppError`, `edits.ts`, `check-interactions.ts`, `useStudioController.ts`, `service.test.ts`, `usePreviewEditingController.ts`, `check-desktop.ts`, `ApplicationService.ts`?**
   _High betweenness centrality (0.016) - this node is a cross-community bridge._
+- **Why does `AppError` connect `AppError` to `check-desktop-ai.ts`, `validation.ts`, `ProjectStore`, `edits.ts`, `check-interactions.ts`, `service.test.ts`, `ApplicationService.ts`?**
+  _High betweenness centrality (0.014) - this node is a cross-community bridge._
 - **Are the 23 inferred relationships involving `useStudioController()` (e.g. with `backToLibrary()` and `cancelJob()`) actually correct?**
   _`useStudioController()` has 23 INFERRED edges - model-reasoned connections that need verification._
 - **Are the 27 inferred relationships involving `NativeFailure` (e.g. with `analyzeAudio()` and `audioReader()`) actually correct?**
   _`NativeFailure` has 27 INFERRED edges - model-reasoned connections that need verification._
 - **What connects `semi`, `singleQuote`, `trailingComma` to the rest of the system?**
-  _381 weakly-connected nodes found - possible documentation gaps or missing edges._
+  _356 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `useStudioController` be split into smaller, more focused modules?**
-  _Cohesion score 0.11561561561561562 - nodes in this community are weakly interconnected._
+  _Cohesion score 0.1265597147950089 - nodes in this community are weakly interconnected._
