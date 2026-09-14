@@ -4,13 +4,24 @@
   "sourceCommit": null,
   "artifact": {
     "name": "Screen-Recorder_0.1.0_macOS-arm64.dmg",
+    "bytes": null,
     "sha256": null
   },
   "distribution": {
     "developerId": false,
     "notarized": false,
     "gatekeeperAccepted": false,
+    "signingIdentity": null,
+    "notarizationResult": null,
     "evidence": null
+  },
+  "build": {
+    "runner": null,
+    "architecture": null,
+    "macOS": null,
+    "node": null,
+    "rustc": null,
+    "xcode": null
   },
   "acceptance": {
     "brandApproved": { "status": "pending", "evidence": null },

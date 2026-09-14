@@ -30,12 +30,14 @@ const requiredAcceptance = [
 ] as const;
 const evidenceSchema = z.object({
   version: z.string(),
+  status: z.enum(["development-preview", "release-candidate", "public-beta"]),
   sourceCommit: z
     .string()
     .regex(/^[a-f0-9]{40}$/)
     .nullable(),
   artifact: z.object({
     name: z.string(),
+    bytes: z.number().int().positive().nullable(),
     sha256: z
       .string()
       .regex(/^[a-f0-9]{64}$/)
@@ -45,7 +47,17 @@ const evidenceSchema = z.object({
     developerId: z.boolean(),
     notarized: z.boolean(),
     gatekeeperAccepted: z.boolean(),
+    signingIdentity: z.string().nullable(),
+    notarizationResult: z.string().nullable(),
     evidence: z.string().nullable(),
+  }),
+  build: z.object({
+    runner: z.string().nullable(),
+    architecture: z.string().nullable(),
+    macOS: z.string().nullable(),
+    node: z.string().nullable(),
+    rustc: z.string().nullable(),
+    xcode: z.string().nullable(),
   }),
   acceptance: z.record(
     z.string(),
@@ -88,6 +100,16 @@ function acceptanceComplete(evidence: Evidence) {
       Boolean(evidence.acceptance[key]?.evidence?.trim()),
   );
 }
+function distributionComplete(evidence: Evidence) {
+  return (
+    evidence.distribution.developerId &&
+    evidence.distribution.notarized &&
+    evidence.distribution.gatekeeperAccepted &&
+    Boolean(evidence.distribution.signingIdentity?.startsWith("Developer ID Application:")) &&
+    Boolean(evidence.distribution.notarizationResult?.trim()) &&
+    Boolean(evidence.distribution.evidence?.trim())
+  );
+}
 
 if (process.argv.includes("--self-check")) {
   const url =
@@ -104,6 +126,30 @@ if (process.argv.includes("--self-check")) {
     );
   }
   const evidence = {
+    version: "0.1.0",
+    status: "public-beta",
+    sourceCommit: "a".repeat(40),
+    artifact: {
+      name: "Screen-Recorder_0.1.0_macOS-arm64.dmg",
+      bytes: 1,
+      sha256: "b".repeat(64),
+    },
+    distribution: {
+      developerId: true,
+      notarized: true,
+      gatekeeperAccepted: true,
+      signingIdentity: "Developer ID Application: Example (TEAM)",
+      notarizationResult: "Accepted example",
+      evidence: "notarization.json",
+    },
+    build: {
+      runner: "self-check",
+      architecture: "arm64",
+      macOS: "15.0",
+      node: "v22",
+      rustc: "rustc",
+      xcode: "Xcode",
+    },
     acceptance: Object.fromEntries(
       requiredAcceptance.map((key) => [
         key,
@@ -111,6 +157,8 @@ if (process.argv.includes("--self-check")) {
       ]),
     ),
   } as Evidence;
+  assert(evidenceSchema.safeParse(evidence).success);
+  assert(distributionComplete(evidence));
   assert(acceptanceComplete(evidence));
   evidence.acceptance.cleanMacInstall = { status: "pending", evidence: null };
   assert(!acceptanceComplete(evidence));
@@ -190,10 +238,25 @@ if (process.argv.includes("--self-check")) {
   check(
     "artifact-identity",
     evidence.artifact.name === release.assetName &&
-      /^[a-f0-9]{64}$/.test(evidence.artifact.sha256 ?? ""),
-    `${evidence.artifact.name}: ${evidence.artifact.sha256 ?? "not recorded"}`,
+      /^[a-f0-9]{64}$/.test(evidence.artifact.sha256 ?? "") &&
+      Number(evidence.artifact.bytes) > 0,
+    `${evidence.artifact.name}: ${evidence.artifact.sha256 ?? "not recorded"}; ${evidence.artifact.bytes ?? 0} bytes`,
   );
-  check("release-status", String(release.status) === "public-beta", String(release.status));
+  check(
+    "build-environment",
+    Object.values(evidence.build).every((value) => Boolean(value?.trim())),
+    JSON.stringify(evidence.build),
+  );
+  check(
+    "distribution-evidence",
+    distributionComplete(evidence),
+    evidence.distribution.evidence || "Developer ID, notarization and Gatekeeper evidence required",
+  );
+  check(
+    "release-status",
+    String(release.status) === "public-beta" && evidence.status === "public-beta",
+    `${release.status} / ${evidence.status}`,
+  );
   for (const key of requiredAcceptance) {
     const value = evidence.acceptance[key];
     check(
@@ -206,12 +269,6 @@ if (process.argv.includes("--self-check")) {
   let artifact: { path: string; sha256: string | null; bytes: number | null } | null = null;
   let signing: Record<string, unknown> | null = null;
   if (siteOnly) {
-    check(
-      "distribution-evidence",
-      Object.values(evidence.distribution).every(Boolean),
-      evidence.distribution.evidence ||
-        "Developer ID, notarization and Gatekeeper evidence required",
-    );
     const releaseTag = run("git", ["rev-parse", `v${packageJson.version}^{commit}`]);
     check(
       "release-tag",

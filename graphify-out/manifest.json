@@ -48,9 +48,9 @@
     "semantic_hash": ""
   },
   "package.json": {
-    "mtime": 1789365400.6164675,
-    "seen": 1789365443.367351,
-    "ast_hash": "da5281d8ccdc8f33264c0c0aee87053c",
+    "mtime": 1789375698.5152383,
+    "seen": 1789375993.560628,
+    "ast_hash": "b3f5c67a27e9bdb476ea5a61dbeb6632",
     "semantic_hash": ""
   },
   "scripts/build-server.mjs": {
@@ -66,9 +66,9 @@
     "semantic_hash": ""
   },
   "scripts/check-local-ai.ts": {
-    "mtime": 1789365311.9184957,
-    "seen": 1789365355.195984,
-    "ast_hash": "fa64769d72aec62a16ab2d416e447729",
+    "mtime": 1789375698.5165558,
+    "seen": 1789375993.5606349,
+    "ast_hash": "e0266fa619f009141c2db91c5f0f16c8",
     "semantic_hash": ""
   },
   "scripts/desktop.mjs": {
@@ -222,9 +222,9 @@
     "semantic_hash": ""
   },
   ".github/workflows/release.yml": {
-    "mtime": 1789364939.2481897,
-    "seen": 1789365081.5848918,
-    "ast_hash": "43913f618b2ff987634d750ae7d49ae4",
+    "mtime": 1789375698.5155284,
+    "seen": 1789375993.560726,
+    "ast_hash": "b87102870786a7657c907d8615fd2489",
     "semantic_hash": ""
   },
   "README.md": {
@@ -252,9 +252,9 @@
     "semantic_hash": ""
   },
   "docs/release.md": {
-    "mtime": 1789370587.426132,
-    "seen": 1789370927.27088,
-    "ast_hash": "be5d460e5daadd7eec235a609b51f635",
+    "mtime": 1789375719.8400717,
+    "seen": 1789375993.560734,
+    "ast_hash": "a6e8b10969663ec5dd5a5a499e432900",
     "semantic_hash": ""
   },
   "index.html": {
@@ -1146,15 +1146,15 @@
     "semantic_hash": ""
   },
   "docs/releases/0.1.0.json": {
-    "mtime": 1789321935.4783173,
-    "seen": 1789323618.0788622,
-    "ast_hash": "9bf23cb9dafb17ad8c87c46ba28884fe",
+    "mtime": 1789375513.466586,
+    "seen": 1789375993.560611,
+    "ast_hash": "b3489732bcc65605917d4c870165812e",
     "semantic_hash": ""
   },
   "scripts/check-launch.ts": {
-    "mtime": 1789365311.9120276,
-    "seen": 1789365355.195984,
-    "ast_hash": "aaf983b95eab981c61a37c7b2606a577",
+    "mtime": 1789375791.3612149,
+    "seen": 1789375993.5606341,
+    "ast_hash": "47b809f0ea3c08cf1ae412389fdb2935",
     "semantic_hash": ""
   },
   "shared/mcp-config.test.ts": {
@@ -1479,6 +1479,24 @@
     "mtime": 1789372307.3406813,
     "seen": 1789372575.182998,
     "ast_hash": "9e4731412710d9a7fc35775f1061e442",
+    "semantic_hash": ""
+  },
+  "scripts/check-clean-install.mjs": {
+    "mtime": 1789375698.5160306,
+    "seen": 1789375993.560631,
+    "ast_hash": "015b7301b91f80a85e11c0accc20fdbe",
+    "semantic_hash": ""
+  },
+  "scripts/create-release-evidence.mjs": {
+    "mtime": 1789375855.3849967,
+    "seen": 1789375993.5606349,
+    "ast_hash": "218eea3e6711fccfd7bc94abca310d32",
+    "semantic_hash": ""
+  },
+  "docs/clean-mac-acceptance.md": {
+    "mtime": 1789375816.544165,
+    "seen": 1789375993.560729,
+    "ast_hash": "02acac733086e08e48c690ae59e791ca",
     "semantic_hash": ""
   }
 }

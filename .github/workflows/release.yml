@@ -1,4 +1,4 @@
-name: Development macOS artifacts (not notarized)
+name: Signed macOS release candidate
 
 on:
   workflow_dispatch:
@@ -7,55 +7,122 @@ permissions:
   contents: read
 
 concurrency:
-  group: development-macos-${{ github.ref }}
+  group: signed-macos-${{ github.ref }}
   cancel-in-progress: false
 
 jobs:
   build:
     runs-on: macos-15
-    timeout-minutes: 90
+    timeout-minutes: 120
     env:
-      APPLE_SIGNING_IDENTITY: "-"
+      APPLE_SIGNING_IDENTITY: ${{ secrets.APPLE_SIGNING_IDENTITY }}
+      APPLE_CERTIFICATE: ${{ secrets.APPLE_CERTIFICATE }}
+      APPLE_CERTIFICATE_PASSWORD: ${{ secrets.APPLE_CERTIFICATE_PASSWORD }}
+      APPLE_ID: ${{ secrets.APPLE_ID }}
+      APPLE_PASSWORD: ${{ secrets.APPLE_PASSWORD }}
+      APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - uses: actions/setup-node@v4
         with:
           node-version: "22"
           cache: npm
       - uses: dtolnay/rust-toolchain@stable
-      - name: Install dependencies
-        run: npm ci
-      - name: Check project and timeline behavior
-        run: npm test
-      - name: Check native composition and audio
-        run: npm run test:native
-      - name: Check bundle verifier
-        run: node scripts/verify-bundle.mjs --self-test
-      - name: Build and verify host architecture application and DMG
+      - name: Require release credentials
+        shell: bash
+        run: |
+          set -euo pipefail
+          for name in APPLE_SIGNING_IDENTITY APPLE_CERTIFICATE APPLE_CERTIFICATE_PASSWORD APPLE_ID APPLE_PASSWORD APPLE_TEAM_ID; do
+            test -n "${!name:-}" || { echo "Missing required secret: $name" >&2; exit 1; }
+          done
+          [[ "$APPLE_SIGNING_IDENTITY" == "Developer ID Application:"* ]] || { echo 'APPLE_SIGNING_IDENTITY must be a Developer ID Application identity.' >&2; exit 1; }
+      - name: Import Developer ID certificate
+        shell: bash
+        run: |
+          set -euo pipefail
+          certificate="$RUNNER_TEMP/developer-id.p12"
+          keychain="$RUNNER_TEMP/release.keychain-db"
+          keychain_password="$(openssl rand -hex 24)"
+          printf '%s' "$APPLE_CERTIFICATE" | /usr/bin/base64 -D > "$certificate"
+          security create-keychain -p "$keychain_password" "$keychain"
+          security set-keychain-settings -lut 21600 "$keychain"
+          security unlock-keychain -p "$keychain_password" "$keychain"
+          security import "$certificate" -P "$APPLE_CERTIFICATE_PASSWORD" -A -t cert -f pkcs12 -k "$keychain"
+          security set-key-partition-list -S apple-tool:,apple: -s -k "$keychain_password" "$keychain"
+          security list-keychains -d user -s "$keychain" login.keychain-db
+          security find-identity -v -p codesigning "$keychain" | grep -F "$APPLE_SIGNING_IDENTITY"
+      - name: Install and test
+        run: |
+          npm ci
+          npm run build
+          npx playwright install chromium
+          npm run test:e2e
+          npm run test:native
+          npm run desktop:check
+          node scripts/verify-bundle.mjs --self-test
+      - name: Build Developer ID application
+        shell: bash
+        run: |
+          set -euo pipefail
+          env -u APPLE_ID -u APPLE_PASSWORD -u APPLE_TEAM_ID npm run desktop:app
+          app='src-tauri/target/release/bundle/macos/Screen Recorder.app'
+          codesign --verify --deep --strict --verbose=2 "$app"
+          codesign --display --verbose=4 "$app" 2>&1 | grep '^Authority=Developer ID Application:'
+      - name: Notarize and staple application
         shell: bash
         run: |
           set -euo pipefail
           mkdir -p artifacts
-          npm run desktop:build | tee artifacts/build-verification.txt
-      - name: Collect development ZIP and DMG
+          app='src-tauri/target/release/bundle/macos/Screen Recorder.app'
+          ditto -c -k --keepParent "$app" artifacts/Screen-Recorder.app.zip
+          xcrun notarytool submit artifacts/Screen-Recorder.app.zip \
+            --apple-id "$APPLE_ID" --password "$APPLE_PASSWORD" --team-id "$APPLE_TEAM_ID" \
+            --wait --output-format json > artifacts/app-notarization.json
+          node -e "const r=require('./artifacts/app-notarization.json'); if(r.status!=='Accepted') process.exit(1)"
+          xcrun stapler staple "$app"
+          xcrun stapler validate "$app"
+      - name: Package, notarize and staple DMG
+        shell: bash
+        run: |
+          set -euo pipefail
+          node scripts/package-dmg.mjs
+          dmg="$(find src-tauri/target/release/bundle/dmg -maxdepth 1 -name '*.dmg' -type f -print -quit)"
+          test -n "$dmg"
+          xcrun notarytool submit "$dmg" \
+            --apple-id "$APPLE_ID" --password "$APPLE_PASSWORD" --team-id "$APPLE_TEAM_ID" \
+            --wait --output-format json > artifacts/notarization.json
+          node -e "const r=require('./artifacts/notarization.json'); if(r.status!=='Accepted') process.exit(1)"
+          xcrun stapler staple "$dmg"
+          xcrun stapler validate "$dmg"
+          spctl --assess --type execute --verbose=2 'src-tauri/target/release/bundle/macos/Screen Recorder.app'
+      - name: Create immutable candidate evidence
         shell: bash
         run: |
           set -euo pipefail
           app='src-tauri/target/release/bundle/macos/Screen Recorder.app'
-          architecture="$(uname -m)"
-          /usr/bin/ditto -c -k --sequesterRsrc --keepParent "$app" "artifacts/Screen-Recorder-macOS-$architecture-development.app.zip"
-          cp src-tauri/target/release/bundle/dmg/*.dmg artifacts/
-          printf '%s\n' 'Development artifacts only. The application is ad-hoc signed, not Developer ID signed or notarized. Gatekeeper may prevent opening a downloaded copy. No public release was published.' > artifacts/READ-ME.txt
-          cd artifacts
-          /usr/bin/shasum -a 256 ./*.dmg ./*.zip > SHA256SUMS
-      - name: Upload development artifacts
+          dmg="$(find src-tauri/target/release/bundle/dmg -maxdepth 1 -name '*.dmg' -type f -print -quit)"
+          npm run evidence:release -- \
+            --app "$app" --dmg "$dmg" --notarization artifacts/notarization.json \
+            --output artifacts/release-evidence.json
+          cp "$dmg" artifacts/
+          shasum -a 256 artifacts/*.dmg > artifacts/SHA256SUMS
+      - name: Upload notarized candidate and evidence
         uses: actions/upload-artifact@v4
         with:
-          name: screen-recorder-macos-${{ runner.arch }}-development-not-notarized
-          path: artifacts/
+          name: screen-recorder-macos-notarized-candidate-${{ github.sha }}
+          path: |
+            artifacts/*.dmg
+            artifacts/*.json
+            artifacts/SHA256SUMS
           if-no-files-found: error
-          retention-days: 14
-      - name: Record artifact status
+          retention-days: 30
+      - name: Record candidate status
         shell: bash
         run: |
-          printf '%s\n' '### Development build only' 'Host architecture app and DMG were built and checked.' 'The app has an ad-hoc signature. It is not Developer ID signed or notarized.' 'This workflow uploads build artifacts and does not create or publish a GitHub Release.' >> "$GITHUB_STEP_SUMMARY"
+          printf '%s\n' \
+            '### Notarized release candidate created' \
+            'The artifact is Developer ID signed, notarized and accompanied by immutable machine evidence.' \
+            'Public release remains blocked until every acceptance item in release-evidence.json is passed with release-bound evidence.' \
+            >> "$GITHUB_STEP_SUMMARY"

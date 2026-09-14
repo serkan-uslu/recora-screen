@@ -13,7 +13,7 @@ npm run test:launch
 npm run --silent check:launch -- --json > .cache/launch-inspection.json
 ```
 
-The second command is read-only and exits **1 until every gate passes**. Its JSON output includes the observed source commit and dirty files, versions from package/lock/Tauri/Cargo/shared branding, the command count derived from the shared UI/MCP registry, the actual DMG SHA-256, signature authority, Gatekeeper assessment and stapled-ticket validation. A valid Apple Development signature is explicitly insufficient. A locally installed certificate is reported separately from the artifact's actual signature. On non-macOS hosts, local signature validation remains pending.
+The second command is read-only and exits **1 until every gate passes**. Its JSON output includes the observed source commit and dirty files, versions from package/lock/Tauri/Cargo/shared branding, the command count derived from the shared UI/MCP registry, artifact bytes and DMG SHA-256, build environment, signature authority, Gatekeeper assessment and stapled-ticket validation. A valid Apple Development signature is explicitly insufficient. A locally installed certificate is reported separately from the artifact's actual signature. On non-macOS hosts, local signature validation remains pending.
 
 For an approved candidate, copy the template to `artifacts/release-evidence.json`, fill it with the exact built source commit, actual DMG digest and links to measured reports, then run:
 
@@ -57,7 +57,7 @@ For the actual desktop/MCP integration check, launch the app with `SCREENREC_DAT
 
 `bash native/check.sh --capture-check` records only a synthetic test window for about three seconds, including a pause/resume, with separate microphone and system audio. It requires existing screen and microphone permissions. It does not request camera permission or record the user's desktop.
 
-`test:ai` downloads the checksum-verified multilingual base model, synthesizes a spoken English sentence locally, runs the bundled whisper.cpp executable, and checks that the resulting transcript contains the expected words and valid timestamps. It caches the test model under `.cache/local-ai-check/`. No cloud API calls are made.
+`test:ai` downloads the checksum-verified multilingual base model, synthesizes English and Turkish speech locally, runs the bundled whisper.cpp executable, and checks both transcripts for expected words and valid timestamps. It caches the test model under `.cache/local-ai-check/`. No cloud API calls are made.
 
 For the full local-AI desktop check, first run `test:ai`, then launch the release app with isolated data/project directories under `.cache`. Run the following with the same `SCREENREC_DATA_DIR`, using the synthetic screen video printed by `test:native`:
 
@@ -98,7 +98,7 @@ Public distribution requires a **Developer ID Application** identity, an Apple D
 4. Install the DMG on a clean Mac and complete the hardware checklist. Publish the DMG, SHA-256 checksum, source tag, changelog, and notices on GitHub Releases.
 5. Record a real product demo showing project creation, capture, transcript cleanup, a camera visibility interval, an MCP edit, and export. Use this tested download for the Product Hunt launch.
 
-The manual `release.yml` workflow reuses the same build and verification scripts, forces development signing, and uploads app ZIP/DMG artifacts and checksums. It does not publish a GitHub Release or Product Hunt listing. No signing keys or notarization credentials are supplied by this repository.
+The manual `release.yml` workflow requires a base64 PKCS#12 Developer ID certificate plus Apple notarization credentials in GitHub Actions secrets. It fails before building when any credential is absent or the identity is not `Developer ID Application`. The workflow signs the app and bundled runtimes with hardened runtime, notarizes and staples the app, packages and notarizes the DMG, verifies Gatekeeper, then uploads the DMG, Apple results, checksum and generated `release-evidence.json` as a source-commit-named candidate artifact. It does not publish a GitHub Release or Product Hunt listing. The generated evidence retains pending manual acceptance rows; complete [the clean Mac checklist](clean-mac-acceptance.md) against that exact candidate before publication.
 
 ## Website publication after the approved release
 

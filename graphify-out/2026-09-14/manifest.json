@@ -126,9 +126,9 @@
     "semantic_hash": ""
   },
   "server/service.test.ts": {
-    "mtime": 1789374835.5183074,
-    "seen": 1789374959.1322281,
-    "ast_hash": "6c08318378bc717c791e6d0c7b03fca7",
+    "mtime": 1789375131.7409077,
+    "seen": 1789375194.81041,
+    "ast_hash": "9886fdf258f4128129e04de81ac819c8",
     "semantic_hash": ""
   },
   "server/service.ts": {
@@ -720,9 +720,9 @@
     "semantic_hash": ""
   },
   "server/infrastructure/ProjectStore.ts": {
-    "mtime": 1789374549.989584,
-    "seen": 1789374959.1322198,
-    "ast_hash": "2543affd5357468f21fe048847609061",
+    "mtime": 1789375086.148957,
+    "seen": 1789375194.810405,
+    "ast_hash": "9acf57ca39224478afc2b7f8a903e6d8",
     "semantic_hash": ""
   },
   "server/infrastructure/rpc.ts": {
