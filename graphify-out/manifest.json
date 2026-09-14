@@ -882,9 +882,9 @@
     "semantic_hash": ""
   },
   "src/features/editor/Timeline.tsx": {
-    "mtime": 1789365314.3681064,
-    "seen": 1789365355.1960268,
-    "ast_hash": "ddc4f800a6218530e0f2ec1d689d61f1",
+    "mtime": 1789369484.9581704,
+    "seen": 1789369557.885105,
+    "ast_hash": "9c1b2d5d70fd2ba86fbdb9a74063d7f5",
     "semantic_hash": ""
   },
   "src/features/editor/panels/CameraPanel.tsx": {
@@ -1317,6 +1317,78 @@
     "mtime": 1789368046.6690931,
     "seen": 1789368595.175529,
     "ast_hash": "f0c41e1befcd39ddb8a751bc20802e48",
+    "semantic_hash": ""
+  },
+  "src/features/editor/clips/TimelineClip.tsx": {
+    "mtime": 1789369245.3710494,
+    "seen": 1789369557.8851058,
+    "ast_hash": "b9b37c7a13ef1cd61c9cd44c383a669f",
+    "semantic_hash": ""
+  },
+  "src/features/editor/clips/TrimHandle.tsx": {
+    "mtime": 1789369484.9584324,
+    "seen": 1789369557.885107,
+    "ast_hash": "70a1c54e104f3a8c124827cbe09ab5b9",
+    "semantic_hash": ""
+  },
+  "src/features/editor/hooks/useTimelineDrag.ts": {
+    "mtime": 1789369462.4937077,
+    "seen": 1789369557.885107,
+    "ast_hash": "2ac0710a4f92a3cda04c604318f497f3",
+    "semantic_hash": ""
+  },
+  "src/features/editor/hooks/useTimelineGeometry.ts": {
+    "mtime": 1789368722.8170187,
+    "seen": 1789369557.885108,
+    "ast_hash": "2363509ef77ba606a9b866712673c566",
+    "semantic_hash": ""
+  },
+  "src/features/editor/hooks/useTimelineSelection.ts": {
+    "mtime": 1789369335.582521,
+    "seen": 1789369557.885109,
+    "ast_hash": "1751e912316cebdef172eabb85563a8b",
+    "semantic_hash": ""
+  },
+  "src/features/editor/menus/ClipContextMenu.tsx": {
+    "mtime": 1789369245.4365652,
+    "seen": 1789369557.885109,
+    "ast_hash": "a35e490315cf56f90780bae372a6e369",
+    "semantic_hash": ""
+  },
+  "src/features/editor/menus/TrackContextMenu.tsx": {
+    "mtime": 1789368942.7346704,
+    "seen": 1789369557.885109,
+    "ast_hash": "ddf592d55b88325bcb4a02eff1c95e81",
+    "semantic_hash": ""
+  },
+  "src/features/editor/timelineTypes.ts": {
+    "mtime": 1789368760.738047,
+    "seen": 1789369557.8851142,
+    "ast_hash": "80b9d7ffb17f7b9fcbbb724192e5ba0e",
+    "semantic_hash": ""
+  },
+  "src/features/editor/tracks/AudioTrack.tsx": {
+    "mtime": 1789369245.5491412,
+    "seen": 1789369557.8851142,
+    "ast_hash": "42f6791f1e080e046765bed2cd44d248",
+    "semantic_hash": ""
+  },
+  "src/features/editor/tracks/CameraTrack.tsx": {
+    "mtime": 1789368820.5547922,
+    "seen": 1789369557.885115,
+    "ast_hash": "e2eeada2b1d4eeca5eef7f3f1a40b1b2",
+    "semantic_hash": ""
+  },
+  "src/features/editor/tracks/EffectsTrack.tsx": {
+    "mtime": 1789369484.958681,
+    "seen": 1789369557.885115,
+    "ast_hash": "617587d505cba253978383dcfc0f1e6c",
+    "semantic_hash": ""
+  },
+  "src/features/editor/tracks/ScreenTrack.tsx": {
+    "mtime": 1789368820.555157,
+    "seen": 1789369557.8851159,
+    "ast_hash": "3457c3dc69151805a539d563f979c942",
     "semantic_hash": ""
   }
 }
