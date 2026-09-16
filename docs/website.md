@@ -25,7 +25,7 @@ Next.js prerenders HTML for `/` and `/documentation/` and generates canonical, O
 
 `NEXT_PUBLIC_SITE_URL` overrides the planned public URL and requires HTTPS without credentials, query or fragment. `NEXT_PUBLIC_DOWNLOAD_URL` replaces the local preview download with an HTTPS release asset URL. These values are public; never place private credentials in `NEXT_PUBLIC_` settings.
 
-Vercel uses the public GitHub Releases download URL from `vercel.json`, so its Linux build does not depend on a locally built macOS DMG.
+Vercel uses the public GitHub Releases download URL from `vercel.json`, so its Linux build does not depend on a locally built macOS DMG. The framework preset is `null` because Vercel serves the generated `website/out` directory as static files rather than as a Next.js server build.
 
 Without a download override, `build:site` copies the current packaged Apple silicon DMG into the ignored `website/public/downloads/` directory. Run `npm run desktop:build` first. A missing local DMG fails the site build instead of producing a broken download. This is a **development preview**, not a verified public beta. Rebuilding can change its checksum under the same development filename.
 
