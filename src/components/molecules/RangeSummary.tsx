@@ -1,12 +1,12 @@
 import { type Range } from "@/shared/types";
-import { seconds } from "@/src/lib/format";
+import { formatTimecode } from "@/src/lib/format";
 
 export function RangeSummary({ selection }: { selection: Range }) {
   return (
     <div className="range-summary">
-      <span>Selected range</span>
+      <span>{selection.endMs > selection.startMs ? "Selected time" : "Select a time range"}</span>
       <code>
-        {seconds(selection.startMs)}s — {seconds(selection.endMs)}s
+        {formatTimecode(selection.startMs)} — {formatTimecode(selection.endMs)}
       </code>
     </div>
   );

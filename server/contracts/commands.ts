@@ -79,6 +79,7 @@ export const methodSchemas: Record<string, z.ZodType> = {
   "history.redo": z.object(revision).strict(),
   "asset.import": z
     .object({
+      kind: z.enum(["image", "audio", "video"]).optional(),
       ...projectId,
       path: absolutePath,
       expectedRevision: finite.int().min(0).optional(),
@@ -176,11 +177,24 @@ export const methodSchemas: Record<string, z.ZodType> = {
   "preview.pause": none,
   "preview.status": none,
   "preview.frame": z.object({ ...projectId, timeMs: time }).strict(),
+  "preview.media": z
+    .object({
+      ...projectId,
+      assetId: id.optional(),
+      startMs: time,
+      endMs: time,
+      kind: z.enum(["filmstrip", "waveform"]),
+    })
+    .strict()
+    .refine((p) => p.endMs > p.startMs, "Choose a non-empty source interval"),
   "export.start": z
     .object({
       ...projectId,
       path: absolutePath,
       quality: z.enum(["720", "1080", "4k"]).optional(),
+      format: z.enum(["mp4", "gif"]).optional(),
+      gifFps: z.union([z.literal(15), z.literal(20), z.literal(25), z.literal(30)]).optional(),
+      loop: z.boolean().optional(),
       width: finite.int().min(16).max(3840).optional(),
       height: finite.int().min(16).max(3840).optional(),
     })
@@ -204,6 +218,7 @@ const readOnly = new Set([
   "preview.status",
   "preview.geometry",
   "preview.frame",
+  "preview.media",
 ]);
 export const isReadOnly = (method: string) => readOnly.has(method);
 
@@ -232,7 +247,7 @@ const descriptions: Partial<Record<string, string>> = {
   "project.open":
     "Read a project, its current revision and source-time edit state. Source media remains immutable.",
   "timeline.apply":
-    "Apply sequential edits atomically. Times are OUTPUT milliseconds except clip.trim sourceStartMs/sourceEndMs and source.restore startMs/endMs explicitly use SOURCE time. Speed is 0.25–8. Stale expectedRevision is rejected. One batch is one undo step.",
+    "Apply sequential edits atomically. Times are OUTPUT milliseconds except clip.trim/clip.insert sourceStartMs/sourceEndMs and source.restore startMs/endMs use SOURCE time. clip.move uses final zero-based toIndex; clip.insert splits the timeline at atMs. source.restore optionally inserts at output atMs without reordering existing clips. Speed is 0.25–8. Stale expectedRevision is rejected. One batch is one undo step.",
   "ai.cleanSilence":
     "Analyze source microphone RMS audio and protect audible system audio. By default returns suggested OUTPUT cut ranges and operations; apply=true commits one undoable edit. Returns a Job; poll jobs_get.",
   "ai.transcribe":
@@ -246,7 +261,7 @@ const descriptions: Partial<Record<string, string>> = {
   "project.delete":
     "Move an idle project to the operating-system Trash. Active recordings and jobs prevent deletion.",
   "export.start":
-    "Render the current project snapshot to a new external MP4. Custom dimensions must be supplied together, even, and at most 3840 on either axis. Existing files and source media are never overwritten. Returns a Job.",
+    "Render the current project snapshot to a new external MP4 or GIF. GIF supports 15/20/25/30 FPS and loop, up to 60 seconds and 1280 pixels per axis. Custom dimensions must be supplied together, even, and at most 3840 on either axis. Existing files and source media are never overwritten. Returns a Job.",
   "transcript.export":
     "Return SRT or VTT text aligned to the edited timeline and optionally write it to a new external file.",
 };

@@ -1,5 +1,12 @@
+export type ExportOptions = {
+  width: number;
+  height: number;
+  format?: "mp4" | "gif";
+  gifFps?: 15 | 20 | 25 | 30;
+  loop?: boolean;
+};
 export type Range = { startMs: number; endMs: number };
-export type TimelineSegment = Range & { speed?: number };
+export type TimelineSegment = Range & { speed?: number; assetId?: string };
 export const mcpPermissionCategories = [
   "read",
   "edit",
@@ -64,6 +71,10 @@ export type CameraLayoutSettings = {
   y: number;
   size: number;
   shadow: boolean;
+  mirror?: boolean;
+  radius?: number;
+  shadowOpacity?: number;
+  zoomReactive?: boolean;
 };
 export type CameraLayout = CameraLayoutSettings & Range & { id: string };
 type CameraSettings = CameraLayoutSettings & {
@@ -106,7 +117,10 @@ export type CanvasSettings = {
 };
 export type Overlay = Range & {
   id: string;
-  kind: "text" | "image";
+  kind: "text" | "image" | "arrow" | "blur" | "redact";
+  height?: number;
+  rotation?: number;
+  blur?: number;
   text?: string;
   assetId?: string;
   x: number;
@@ -117,16 +131,36 @@ export type Overlay = Range & {
   animation: "none" | "fade" | "slide";
 };
 export type TranscriptSegment = Range & { id: string; text: string };
-type Asset = { id: string; name: string; path: string; kind: "image" };
+export type AudioClip = Range & { id: string; assetId: string; offsetMs: number; volume: number };
+type Asset = {
+  id: string;
+  name: string;
+  path: string;
+  kind: "image" | "audio" | "video";
+  durationMs?: number;
+  width?: number;
+  height?: number;
+};
 export type EditState = {
   segments: TimelineSegment[];
+  audioClips?: AudioClip[];
   camera: CameraSettings;
   zooms: Zoom[];
   overlays: Overlay[];
   canvas?: CanvasSettings;
   autoZoom?: AutoZoomSettings;
   audio: { microphoneVolume: number; systemVolume: number };
-  cursor: { visible: boolean; highlight: boolean; smooth: boolean; size: number };
+  cursor: {
+    visible: boolean;
+    highlight: boolean;
+    smooth: boolean;
+    size: number;
+    motionBlur?: boolean;
+    bounce?: boolean;
+    sway?: boolean;
+    loop?: boolean;
+    style?: "dark" | "light";
+  };
   captions: { enabled: boolean; fontSize: number; color: string; background: string };
 };
 export type Project = {
@@ -160,7 +194,15 @@ export type EditOperation =
   | { type: "split"; atMs: number }
   | { type: "clip.trim"; index: number; sourceStartMs: number; sourceEndMs: number }
   | { type: "clip.merge"; index: number }
-  | ({ type: "source.restore" } & Range)
+  | { type: "clip.move"; index: number; toIndex: number }
+  | {
+      type: "clip.insert";
+      assetId: string;
+      atMs: number;
+      sourceStartMs?: number;
+      sourceEndMs?: number;
+    }
+  | ({ type: "source.restore"; atMs?: number } & Range)
   | { type: "camera.update"; settings: Partial<Omit<CameraSettings, "hiddenRanges" | "layouts">> }
   | ({ type: "camera.hide"; hidden: boolean } & Range)
   | ({ type: "camera.layout.set"; settings: Partial<CameraLayoutSettings> } & Range)
@@ -171,6 +213,9 @@ export type EditOperation =
   | { type: "overlay.add"; overlay: Omit<Overlay, "id"> }
   | { type: "overlay.update"; id: string; overlay: Partial<Omit<Overlay, "id">> }
   | { type: "overlay.remove"; id: string }
+  | { type: "audioClip.add"; clip: Omit<AudioClip, "id"> }
+  | { type: "audioClip.update"; id: string; clip: Partial<Omit<AudioClip, "id">> }
+  | { type: "audioClip.remove"; id: string }
   | { type: "audio.update"; settings: Partial<EditState["audio"]> }
   | { type: "cursor.update"; settings: Partial<EditState["cursor"]> }
   | { type: "captions.update"; settings: Partial<EditState["captions"]> }

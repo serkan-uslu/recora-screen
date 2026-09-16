@@ -1,4 +1,4 @@
-import { useSyncExternalStore, useContext } from "react";
+import { useSyncExternalStore, useContext, useRef } from "react";
 import { DraftPreviewContext } from "@/src/controllers/StudioContexts";
 import {
   ArrowLeft,
@@ -11,7 +11,7 @@ import {
   Scissors,
   Video,
 } from "lucide-react";
-import { formatTime, outputRanges } from "@/shared/timeline";
+import { formatTime, duration } from "@/shared/timeline";
 import { IconButton } from "@/src/components/atoms/IconButton";
 import { Slider } from "@/src/components/molecules/Slider";
 import { PanelIntro } from "@/src/components/molecules/PanelIntro";
@@ -19,13 +19,23 @@ import { NativePreview } from "@/src/features/editor/NativePreview";
 import { CanvasPanel } from "@/src/features/editor/panels/CanvasPanel";
 import { CameraPanel } from "@/src/features/editor/panels/CameraPanel";
 import { ZoomPanel } from "@/src/features/editor/panels/ZoomPanel";
+import { ZoomSettingsDialog } from "@/src/features/editor/panels/ZoomSettingsDialog";
 import { OverlaysPanel } from "@/src/features/editor/panels/OverlaysPanel";
+import { AudioClipsPanel } from "@/src/features/audio/AudioClipsPanel";
 import { SilenceControls } from "@/src/features/audio/SilenceControls";
 import { TranscriptPanel } from "@/src/features/transcript/TranscriptPanel";
 import { AssistantPanel } from "@/src/features/assistant/AssistantPanel";
 import { Timeline } from "@/src/features/editor/Timeline";
 import { tabItems } from "@/src/features/editor/tabs";
-import { seconds } from "@/src/lib/format";
+import {
+  cameraSource,
+  targetPreviewTime,
+  previewCameraRange,
+} from "@/src/controllers/editorSelection";
+import { useTimelineGeometry } from "@/src/features/editor/hooks/useTimelineGeometry";
+import { ClipContextMenu } from "@/src/features/editor/menus/ClipContextMenu";
+import { EditorQuickStart } from "@/src/features/help/EditorQuickStart";
+import { seconds, formatTimecode } from "@/src/lib/format";
 import { type StudioController } from "@/src/controllers/useStudioController";
 
 export function EditorScreen({
@@ -41,17 +51,17 @@ export function EditorScreen({
     | "tab"
     | "setTab"
     | "selectedZoom"
-    | "setSelectedZoom"
     | "inspectorRef"
     | "setError"
     | "busy"
     | "playback"
-    | "selectedOverlay"
-    | "setSelectedOverlay"
     | "cameraScope"
     | "setCameraScope"
     | "selection"
     | "setSelection"
+    | "editorTarget"
+    | "selectEditorTarget"
+    | "importVideo"
     | "settings"
     | "chats"
     | "setChats"
@@ -59,6 +69,8 @@ export function EditorScreen({
     | "setSilenceReview"
     | "total"
     | "importImage"
+    | "importAudio"
+    | "insertMedia"
     | "apply"
     | "backToLibrary"
     | "seek"
@@ -76,17 +88,17 @@ export function EditorScreen({
     tab,
     setTab,
     selectedZoom,
-    setSelectedZoom,
     inspectorRef,
     setError,
     busy,
     playback,
-    selectedOverlay,
-    setSelectedOverlay,
     cameraScope,
     setCameraScope,
     selection,
     setSelection,
+    editorTarget,
+    selectEditorTarget,
+    importVideo,
     settings,
     chats,
     setChats,
@@ -94,6 +106,8 @@ export function EditorScreen({
     setSilenceReview,
     total,
     importImage,
+    importAudio,
+    insertMedia,
     apply,
     backToLibrary,
     seek,
@@ -101,15 +115,17 @@ export function EditorScreen({
     projectBusy,
   } = studio;
   const { send: draftPreview } = useContext(DraftPreviewContext);
+  const clipPanelRef = useRef<HTMLDivElement>(null);
   if (!project) return null;
-  function revealRange(range: { startMs: number; endMs: number }) {
-    const ranges = outputRanges(project!.edits.segments, range);
-    const time = playback.getSnapshot().timeMs;
-    const visible = ranges.find((item) => time >= item.startMs && time < item.endMs) ?? ranges[0];
-    if (visible) {
-      setSelection(visible);
-      void seek((visible.startMs + visible.endMs) / 2);
-    }
+  const editingZoom = project.edits.zooms.find((zoom) => zoom.id === selectedZoom);
+  function editZoom(id: string) {
+    if (!project) return;
+    const zoom = project.edits.zooms.find((item) => item.id === id);
+    if (!zoom) return;
+    selectEditorTarget({ kind: "zoom", id });
+    const time = targetPreviewTime(project, { kind: "zoom", id }, playback.getSnapshot().timeMs);
+    if (time !== null) void seek(time);
+    setModal("zoom");
   }
   return (
     <>
@@ -126,20 +142,26 @@ export function EditorScreen({
               aria-label={item.title}
               aria-pressed={tab === item.id}
               title={item.title}
-              onClick={() => setTab(item.id)}
+              onClick={() => {
+                if (item.id === tab) return;
+                if (
+                  item.id === "camera" &&
+                  project.source?.camera &&
+                  selection.endMs > selection.startMs
+                )
+                  selectEditorTarget({
+                    kind: "camera",
+                    range: selection,
+                    source: cameraSource(project),
+                  });
+                else {
+                  setSelection(selection);
+                  setTab(item.id);
+                }
+              }}
             >
               <item.icon size={19} />
-              <span>
-                {item.id === "transcript"
-                  ? "Captions"
-                  : item.id === "overlays"
-                    ? "Layers"
-                    : item.id === "ai"
-                      ? "AI"
-                      : item.id === "zoom"
-                        ? "Zoom"
-                        : item.title}
-              </span>
+              <span>{item.title} </span>
             </button>
           ))}
         </nav>
@@ -160,6 +182,7 @@ export function EditorScreen({
               <span className="preview-fit">Fit</span>
             </div>
           </div>
+          {project.source && <EditorQuickStart onHelp={() => setModal("help")} />}
           {project.source ? (
             <NativePreview
               project={project}
@@ -169,18 +192,34 @@ export function EditorScreen({
               selection={selection}
               cameraScope={cameraScope}
               selected={
-                tab === "camera"
+                editorTarget?.kind === "camera"
                   ? { kind: "camera" }
-                  : tab === "overlays" && selectedOverlay
-                    ? { kind: "overlay", id: selectedOverlay }
+                  : editorTarget?.kind === "overlay"
+                    ? { kind: "overlay", id: editorTarget.id }
                     : null
               }
               onSelect={(item) => {
-                if (item?.kind === "camera") setTab("camera");
-                else if (item?.kind === "overlay") {
-                  setSelectedOverlay(item.id!);
-                  setTab("overlays");
-                } else setSelectedOverlay(null);
+                if (item?.kind === "camera") {
+                  const scope = tab === "camera" ? cameraScope : "selection";
+                  const range = previewCameraRange(
+                    project,
+                    playback.getSnapshot().timeMs,
+                    selection,
+                    scope,
+                    editorTarget?.kind === "camera",
+                  );
+                  if (range) {
+                    selectEditorTarget({
+                      kind: "camera",
+                      range,
+                      source: cameraSource(project),
+                      scope,
+                    });
+                    return { selection: range, cameraScope: scope };
+                  }
+                } else if (item?.kind === "overlay" && item.id) {
+                  selectEditorTarget({ kind: "overlay", id: item.id });
+                } else selectEditorTarget(null);
               }}
               apply={apply}
               disabled={projectBusy}
@@ -205,6 +244,13 @@ export function EditorScreen({
                 <Circle size={16} fill="currentColor" />
                 Set up recording
               </button>
+              <button
+                className="button secondary"
+                disabled={busy || recording.active}
+                onClick={() => void importVideo()}
+              >
+                Import video
+              </button>
               <span className="record-empty-note">
                 <Mic size={12} />
                 Separate screen, camera & audio tracks
@@ -220,11 +266,25 @@ export function EditorScreen({
         </main>
         <aside className="inspector">
           <div className="inspector-title">
-            <span>{tabItems.find((i) => i.id === tab)?.title}</span>
+            <span>{tab === "clip" ? "Video clip" : tabItems.find((i) => i.id === tab)?.title}</span>
             {tab === "ai" && <span className="mini-tag">BYOK</span>}
           </div>
           <div className="inspector-body" ref={inspectorRef}>
             <fieldset disabled={projectBusy} className="unstyled-fieldset">
+              {tab === "clip" && editorTarget?.kind === "clip" && (
+                <SelectedClipPanel
+                  project={project}
+                  selection={selection}
+                  index={editorTarget.index}
+                  playback={playback}
+                  disabled={projectBusy}
+                  apply={apply}
+                  panelRef={clipPanelRef}
+                />
+              )}
+              {tab === "clip" && editorTarget?.kind !== "clip" && (
+                <p className="helper">Select a video clip to edit its timing, speed or position.</p>
+              )}
               {tab === "general" && (
                 <CanvasPanel
                   project={project}
@@ -238,7 +298,23 @@ export function EditorScreen({
                   project={project}
                   selection={selection}
                   cameraScope={cameraScope}
-                  onScopeChange={setCameraScope}
+                  onScopeChange={(scope) => {
+                    const range = previewCameraRange(
+                      project,
+                      playback.getSnapshot().timeMs,
+                      selection,
+                      scope,
+                      cameraScope === "selection",
+                    );
+                    if (range)
+                      selectEditorTarget({
+                        kind: "camera",
+                        range,
+                        source: cameraSource(project),
+                        scope,
+                      });
+                    else setCameraScope(scope);
+                  }}
                   apply={apply}
                 />
               )}
@@ -247,12 +323,9 @@ export function EditorScreen({
                   project={project}
                   selection={selection}
                   apply={apply}
-                  selectedId={selectedZoom}
-                  onSelect={(id) => {
-                    setSelectedZoom(id);
-                    const zoom = project.edits.zooms.find((item) => item.id === id);
-                    if (zoom) revealRange(zoom);
-                  }}
+                  selectedId={editorTarget?.kind === "zoom" ? editorTarget.id : null}
+                  onEdit={editZoom}
+                  onSelect={(id) => selectEditorTarget(id ? { kind: "zoom", id } : null)}
                 />
               )}
               {tab === "overlays" && (
@@ -262,54 +335,82 @@ export function EditorScreen({
                   apply={apply}
                   importImage={importImage}
                   onError={setError}
-                  selected={selectedOverlay}
+                  selected={editorTarget?.kind === "overlay" ? editorTarget.id : null}
                   onSelect={(id) => {
-                    setSelectedOverlay(id);
-                    const overlay = project.edits.overlays.find((item) => item.id === id);
-                    if (overlay) revealRange(overlay);
+                    selectEditorTarget(id ? { kind: "overlay", id } : null);
+                    if (!id) return;
+                    const time = targetPreviewTime(
+                      project,
+                      { kind: "overlay", id },
+                      playback.getSnapshot().timeMs,
+                    );
+                    if (time !== null) void seek(time);
                   }}
                 />
               )}
               {tab === "audio" && (
                 <>
                   <PanelIntro
-                    title="A little clarity goes a long way."
-                    text="Balance your voice and the sounds on your screen."
-                  />
-                  <h3 className="panel-section">MIXER</h3>
-                  <Slider
-                    label="Microphone"
-                    value={project.edits.audio.microphoneVolume}
-                    max={2}
-                    onPreview={(v) =>
-                      draftPreview([{ type: "audio.update", settings: { microphoneVolume: v } }])
-                    }
-                    onChange={(v) =>
-                      void apply([
-                        {
-                          type: "audio.update",
-                          settings: { microphoneVolume: v },
-                        },
-                      ])
+                    title={editorTarget?.kind === "audio" ? "Audio clip" : "Video audio"}
+                    text={
+                      editorTarget?.kind === "audio"
+                        ? "Timing and volume apply only to this imported audio clip."
+                        : "The recorded audio mix applies to the entire video. Imported clips have their own volume."
                     }
                   />
-                  <Slider
-                    label="System audio"
-                    value={project.edits.audio.systemVolume}
-                    max={2}
-                    onPreview={(v) =>
-                      draftPreview([{ type: "audio.update", settings: { systemVolume: v } }])
-                    }
-                    onChange={(v) =>
-                      void apply([
-                        {
-                          type: "audio.update",
-                          settings: { systemVolume: v },
-                        },
-                      ])
-                    }
+                  {editorTarget?.kind !== "audio" && (
+                    <>
+                      <h3 className="panel-section">VIDEO DEFAULT MIX</h3>
+                      <Slider
+                        label={
+                          project.source?.microphone === project.source?.screen
+                            ? "Video audio"
+                            : "Microphone"
+                        }
+                        value={project.edits.audio.microphoneVolume}
+                        max={2}
+                        onPreview={(v) =>
+                          draftPreview([
+                            { type: "audio.update", settings: { microphoneVolume: v } },
+                          ])
+                        }
+                        onChange={(v) =>
+                          void apply([
+                            {
+                              type: "audio.update",
+                              settings: { microphoneVolume: v },
+                            },
+                          ])
+                        }
+                      />
+                      <Slider
+                        label="System audio"
+                        value={project.edits.audio.systemVolume}
+                        max={2}
+                        onPreview={(v) =>
+                          draftPreview([{ type: "audio.update", settings: { systemVolume: v } }])
+                        }
+                        onChange={(v) =>
+                          void apply([
+                            {
+                              type: "audio.update",
+                              settings: { systemVolume: v },
+                            },
+                          ])
+                        }
+                      />
+                      <div className="panel-divider" />
+                    </>
+                  )}
+                  <AudioClipsPanel
+                    selectedId={editorTarget?.kind === "audio" ? editorTarget.id : null}
+                    onSelect={(id) => selectEditorTarget({ kind: "audio", id })}
+                    project={project}
+                    selection={selection}
+                    apply={apply}
+                    importAudio={importAudio}
+                    onError={setError}
                   />
-                  <div className="panel-divider" />
                   <h3 className="panel-section">SMART CLEANUP</h3>
                   <p className="helper">
                     Find pauses using the recorded audio. Review every suggested cut before applying
@@ -403,30 +504,33 @@ export function EditorScreen({
         </aside>
       </div>
       <LiveTimeline
+        insertMedia={insertMedia}
         project={project}
         total={total}
         playback={playback}
         selection={selection}
         setSelection={setSelection}
+        target={editorTarget}
+        onSelectTarget={selectEditorTarget}
         seek={seek}
         apply={apply}
-        disabled={projectBusy}
-        selectedZoom={selectedZoom}
+        disabled={projectBusy || Boolean(modal)}
         beginScrub={playback.beginScrub}
         endScrub={playback.endScrub}
-        onSelectOverlay={(id) => {
-          setSelectedOverlay(id);
-          setTab("overlays");
-        }}
-        onCameraLayout={() => {
-          setCameraScope("selection");
-          setTab("camera");
-        }}
-        onSelectZoom={(id) => {
-          setSelectedZoom(id);
-          setTab("zoom");
-        }}
+        onCameraLayout={() =>
+          selectEditorTarget({ kind: "camera", range: selection, source: cameraSource(project) })
+        }
+        onEditZoom={editZoom}
       />
+      {modal === "zoom" && editingZoom && (
+        <ZoomSettingsDialog
+          project={project}
+          zoom={editingZoom}
+          apply={apply}
+          disabled={projectBusy}
+          onClose={() => setModal(null)}
+        />
+      )}
       <div className="editor-status">
         <span>
           <span className="connection-dot online" />
@@ -499,4 +603,49 @@ function LiveTimeline({
 }) {
   const { timeMs } = useSyncExternalStore(playback.subscribe, playback.getSnapshot);
   return <Timeline {...props} timeMs={timeMs} />;
+}
+
+function SelectedClipPanel({
+  project,
+  selection,
+  index,
+  playback,
+  disabled,
+  apply,
+  panelRef,
+}: {
+  project: NonNullable<StudioController["project"]>;
+  selection: { startMs: number; endMs: number };
+  index: number;
+  playback: StudioController["playback"];
+  disabled: boolean;
+  apply: StudioController["apply"];
+  panelRef: React.RefObject<HTMLDivElement | null>;
+}) {
+  const { timeMs } = useSyncExternalStore(playback.subscribe, playback.getSnapshot);
+  const { intervals } = useTimelineGeometry(project, duration(project.edits.segments), selection);
+  const clip = intervals[index];
+  if (!clip) return null;
+  return (
+    <>
+      <p className="selection-context">
+        Clip {index + 1} · {formatTimecode(clip.outputStart)}–{formatTimecode(clip.outputEnd)}
+      </p>
+      <p className="helper">
+        Changes apply to this video clip. Camera and effects stay aligned with their source footage.
+      </p>
+      <ClipContextMenu
+        embedded
+        menuRef={panelRef}
+        position={{ x: 0, y: 0 }}
+        project={project}
+        intervals={intervals}
+        clip={clip}
+        timeMs={timeMs}
+        disabled={disabled}
+        close={() => {}}
+        apply={(operations) => void apply(operations)}
+      />
+    </>
+  );
 }

@@ -34,7 +34,9 @@ export default function App() {
   useEffect(() => {
     const close = (e: Event) => {
       const target = e.target instanceof Element ? e.target : null;
-      for (const menu of document.querySelectorAll<HTMLDetailsElement>("details[open]")) {
+      for (const menu of document.querySelectorAll<HTMLDetailsElement>(
+        ".project-menu[open], .editor-project-menu[open], .timeline-range-options[open]",
+      )) {
         if (
           (e instanceof KeyboardEvent && e.key === "Escape") ||
           (e.type === "pointerdown" && !menu.contains(target)) ||
@@ -80,12 +82,12 @@ export default function App() {
             <div className="export-complete" role="status">
               <Check size={17} />
               <div>
-                <strong>Your video is ready</strong>
+                <strong>Your export is ready</strong>
                 <p>{exportPath.split("/").pop()}</p>
               </div>
               {desktop && (
                 <button className="button secondary" onClick={openExport}>
-                  Open video
+                  Open export
                 </button>
               )}
               <IconButton label="Dismiss export result" onClick={() => setExportPath("")}>

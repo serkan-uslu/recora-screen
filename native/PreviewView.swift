@@ -32,6 +32,7 @@ final class PreviewView: NSView {
 }
 final class ExportJob {
     var status = "running"; var path: String; var error: String?; var session: AVAssetExportSession?; var task: Task<Void, Never>?
+    var gifProgress = 0.0
     init(path: String) { self.path = path }
-    var result: [String: Any] { var r: [String: Any] = ["status": status, "progress": status == "completed" ? 1 : Double(session?.progress ?? 0), "path": path]; if let error { r["error"] = error }; return r }
+    var result: [String: Any] { var r: [String: Any] = ["status": status, "progress": status == "completed" ? 1 : max(gifProgress, Double(session?.progress ?? 0)), "path": path]; if let error { r["error"] = error }; return r }
 }

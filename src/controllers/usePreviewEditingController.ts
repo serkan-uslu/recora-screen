@@ -18,7 +18,9 @@ export type PreviewEditingProps = {
   selection: Range;
   cameraScope: "selection" | "entire";
   selected: PreviewSelection;
-  onSelect: (item: PreviewSelection) => void;
+  onSelect: (
+    item: PreviewSelection,
+  ) => { selection: Range; cameraScope: "selection" | "entire" } | void;
   apply: (operations: EditOperation[], revision?: number) => Promise<void>;
   disabled: boolean;
   onError: (error: string) => void;
@@ -206,9 +208,9 @@ export function usePreviewEditingController(props: PreviewEditingProps) {
       const camera = cameraAt(active.project, active.time);
       active.operation = cameraEdit(active.selection, active.cameraScope, {
         ...camera,
-        x: transform.x,
-        y: transform.y,
-        size: transform.width,
+        x: clamp(camera.x + transform.x - active.item.x, 0, 1),
+        y: clamp(camera.y + transform.y - active.item.y, 0, 1),
+        size: clamp((camera.size * transform.width) / active.item.width, 0.05, 0.8),
       });
     } else {
       const overlay = active.project.edits.overlays.find((item) => item.id === active.item.id)!;
@@ -224,7 +226,9 @@ export function usePreviewEditingController(props: PreviewEditingProps) {
                 width: transform.width,
                 ...(overlay.kind === "text"
                   ? { fontSize: clamp(overlay.fontSize * transform.scale, 12, 200) }
-                  : {}),
+                  : ["arrow", "blur", "redact"].includes(overlay.kind)
+                    ? { height: clamp(transform.height, 0.02, 1) }
+                    : {}),
               }
             : {}),
         },
@@ -306,7 +310,9 @@ export function usePreviewEditingController(props: PreviewEditingProps) {
           item.kind === "camera"
             ? { kind: "camera" as const }
             : { kind: "overlay" as const, id: item.id };
-        current.onSelect(selectedItem);
+        const selectedContext = current.onSelect(selectedItem);
+        const selection = selectedContext?.selection ?? current.selection;
+        const cameraScope = selectedContext?.cameraScope ?? current.cameraScope;
         void command("preview.selection", { selection: selectedItem, color: accent() }).catch(
           () => {},
         );
@@ -314,10 +320,10 @@ export function usePreviewEditingController(props: PreviewEditingProps) {
         // Camera was not the active inspector tab at pointer-down.
         if (
           item.kind === "camera" &&
-          current.cameraScope === "selection" &&
-          current.selection.endMs > current.selection.startMs
+          cameraScope === "selection" &&
+          selection.endMs > selection.startMs
         )
-          time = (current.selection.startMs + current.selection.endMs) / 2;
+          time = (selection.startMs + selection.endMs) / 2;
         const overlay =
           item.kind === "overlay"
             ? initialProject.edits.overlays.find((entry) => entry.id === item.id)
@@ -341,8 +347,8 @@ export function usePreviewEditingController(props: PreviewEditingProps) {
               corner,
               operation: null,
               time,
-              selection: current.selection,
-              cameraScope: current.cameraScope,
+              selection,
+              cameraScope,
               ...(overlay?.kind === "text"
                 ? {
                     text: {
@@ -385,16 +391,6 @@ export function usePreviewEditingController(props: PreviewEditingProps) {
         event.stopPropagation();
         if (gesture.current || pending.current) finish(true);
         else props.onSelect(null);
-      }
-      if (
-        (event.key === "Delete" || event.key === "Backspace") &&
-        props.selected?.kind === "overlay" &&
-        props.selected.id &&
-        !props.disabled
-      ) {
-        event.preventDefault();
-        void props.apply([{ type: "overlay.remove", id: props.selected.id }]);
-        props.onSelect(null);
       }
     },
   };

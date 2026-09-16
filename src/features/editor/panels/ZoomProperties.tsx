@@ -1,4 +1,4 @@
-import { useContext, useEffect, useRef, useState } from "react";
+import { useContext, useState } from "react";
 import { Trash2 } from "lucide-react";
 import { type EditOperation, type Project, type Zoom } from "@/shared/types";
 import { duration, outputRanges } from "@/shared/timeline";
@@ -19,10 +19,6 @@ export function ZoomProperties({
   apply: (ops: EditOperation[]) => Promise<void>;
   onRemove: () => void;
 }) {
-  const propertiesRef = useRef<HTMLDivElement>(null);
-  useEffect(() => {
-    propertiesRef.current?.scrollIntoView({ block: "nearest" });
-  }, [zoom.id]);
   const { send: draftPreview } = useContext(DraftPreviewContext);
   const preview = (zoomPatch: Partial<Omit<Zoom, "id">>) =>
     draftPreview([{ type: "zoom.update", id: zoom.id, zoom: zoomPatch }]);
@@ -34,8 +30,7 @@ export function ZoomProperties({
   const update = (patch: Partial<Omit<Zoom, "id">>) =>
     void apply([{ type: "zoom.update", id: zoom.id, zoom: patch }]);
   return (
-    <div className="layer-properties" ref={propertiesRef}>
-      <h3 className="panel-section">SELECTED ZOOM</h3>
+    <div className="layer-properties">
       <form
         onSubmit={(e) => {
           e.preventDefault();

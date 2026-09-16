@@ -2,6 +2,8 @@ import AppKit
 import AVFoundation
 import ScreenCaptureKit
 import Security
+import ImageIO
+import UniformTypeIdentifiers
 
 @MainActor extension NativeApp {
     func seek(_ time: CMTime) async {
@@ -37,7 +39,7 @@ import Security
             items.append(["kind": kind, "id": id, "x": Double(rect.minX / size.width), "y": Double(1 - rect.maxY / size.height), "width": Double(rect.width / size.width), "height": Double(rect.height / size.height)])
         }
         if cameraVisible(project, at: sourceMs) {
-            add("camera", "camera", cameraRect(cameraVisual(instruction.cameraRuns, at: time, fallback: CameraVisual(project.edits.camera)), bounds: bounds))
+            add("camera", "camera", cameraRect(renderedCamera(instruction, outputMs: time, sourceMs: sourceMs), bounds: bounds))
         }
         for overlay in project.edits.overlays where sourceMs >= overlay.startMs && sourceMs < overlay.endMs {
             add("overlay", overlay.id, overlayRect(overlay, sourceMs: sourceMs, bounds: bounds, images: instruction.images))
@@ -95,7 +97,12 @@ import Security
         let presets: [String: CGSize] = ["1:1": CGSize(width: 1080, height: 1080), "4:5": CGSize(width: 1080, height: 1350)]
         let size = presets[project.edits.canvas?.aspectRatio ?? "source"] ?? renderDimensions(project, longEdge: 1920)
         let w = params["width"] as? Int ?? Int(size.width), h = params["height"] as? Int ?? Int(size.height)
-        let destination = URL(fileURLWithPath: path), temporary = destination.deletingLastPathComponent().appendingPathComponent(".screenrec-\(UUID().uuidString).mp4")
+        let format = params["format"] as? String ?? "mp4", fps = params["gifFps"] as? Int ?? 15
+        guard ["mp4", "gif"].contains(format), URL(fileURLWithPath: path).pathExtension.lowercased() == format else { throw NativeFailure("Export format and filename must match.", code: "invalid_params") }
+        if format == "gif" {
+            guard [15,20,25,30].contains(fps), w <= 1280, h <= 1280, timelineDuration(project.edits.segments) <= 60000 else { throw NativeFailure("GIF supports 15–30 FPS, up to 60 seconds and 1280 pixels per axis.", code: "invalid_params") }
+        }
+        let destination = URL(fileURLWithPath: path), temporary = destination.deletingLastPathComponent().appendingPathComponent(".screenrec-\(UUID().uuidString).\(format)")
         try FileManager.default.createDirectory(at: destination.deletingLastPathComponent(), withIntermediateDirectories: true)
         let job = ExportJob(path: path); jobs[id] = job
         job.task = Task { @MainActor in
@@ -104,6 +111,12 @@ import Security
                 let built = try await makeComposition(project, directory: directory, width: w, height: h)
                 try Task.checkCancellation()
                 guard job.status != "cancelled" else { return }
+                if format == "gif" {
+                    try await self.exportGIF(built, to: temporary, fps: fps, loop: params["loop"] as? Bool ?? true, job: job)
+                    try Task.checkCancellation()
+                    guard job.status != "cancelled" else { try? FileManager.default.removeItem(at: temporary); return }
+                    try FileManager.default.moveItem(at: temporary, to: destination); job.status = "completed"; return
+                }
                 guard let session = AVAssetExportSession(asset: built.composition, presetName: AVAssetExportPresetHighestQuality) else { throw NativeFailure("Cannot create export session.") }
                 job.session = session; session.videoComposition = built.video; session.audioMix = built.audio; session.audioTimePitchAlgorithm = .spectral; session.shouldOptimizeForNetworkUse = true
                 try await session.export(to: temporary, as: .mp4)
@@ -113,6 +126,48 @@ import Security
         }
         return ["started": true, "jobId": id]
     }
+    func exportGIF(_ built: BuiltComposition, to url: URL, fps: Int, loop: Bool, job: ExportJob) async throws {
+        let seconds = built.instruction.timeRange.duration.seconds
+        let count = max(1, Int(ceil(seconds * Double(fps))))
+        guard let destination = CGImageDestinationCreateWithURL(url as CFURL, UTType.gif.identifier as CFString, count, nil) else { throw NativeFailure("Could not create GIF output.") }
+        if loop { CGImageDestinationSetProperties(destination, [kCGImagePropertyGIFDictionary: [kCGImagePropertyGIFLoopCount: 0]] as CFDictionary) }
+        let generator = AVAssetImageGenerator(asset: built.composition)
+        built.video.frameDuration = CMTime(value: 1, timescale: CMTimeScale(fps))
+        generator.videoComposition = built.video; generator.requestedTimeToleranceBefore = .zero; generator.requestedTimeToleranceAfter = .zero
+        defer { generator.cancelAllCGImageGeneration() }
+        // ImageIO writes to a file destination; one decoded frame is held at a time.
+        for index in 0..<count {
+            try Task.checkCancellation()
+            let time = Double(index) / Double(fps)
+            let image = try await generator.image(at: CMTime(seconds: time, preferredTimescale: 600000)).image
+            let delay = max(0.02, (min(seconds, Double(index + 1) / Double(fps)) * 100).rounded() / 100 - (time * 100).rounded() / 100)
+            CGImageDestinationAddImage(destination, image, [kCGImagePropertyGIFDictionary: [kCGImagePropertyGIFDelayTime: delay, kCGImagePropertyGIFUnclampedDelayTime: delay]] as CFDictionary)
+            job.gifProgress = Double(index + 1) / Double(count) * 0.95
+        }
+        try Task.checkCancellation()
+        guard CGImageDestinationFinalize(destination) else { throw NativeFailure("GIF encoding failed.") }
+    }
+    func timelineFrames(_ path: String, image: Bool, startMs: Double, endMs: Double) async throws -> [[String: Any]] {
+        func encoded(_ image: CGImage, at time: Double) throws -> [String: Any] {
+            guard let data = NSBitmapImageRep(cgImage: image).representation(using: .jpeg, properties: [.compressionFactor: 0.6]) else { throw NativeFailure("Could not encode timeline frame.") }
+            return ["timeMs": time, "src": "data:image/jpeg;base64," + data.base64EncodedString()]
+        }
+        if image {
+            guard let source = CGImageSourceCreateWithURL(URL(fileURLWithPath: path) as CFURL, nil), let frame = CGImageSourceCreateThumbnailAtIndex(source, 0, [kCGImageSourceCreateThumbnailFromImageAlways: true, kCGImageSourceCreateThumbnailWithTransform: true, kCGImageSourceThumbnailMaxPixelSize: 192] as CFDictionary) else { throw NativeFailure("Could not decode timeline image.") }
+            return try (0..<8).map { _ in try encoded(frame, at: startMs) }
+        }
+        let asset = AVURLAsset(url: URL(fileURLWithPath: path)), generator = AVAssetImageGenerator(asset: asset)
+        generator.appliesPreferredTrackTransform = true; generator.maximumSize = CGSize(width: 192, height: 108)
+        generator.requestedTimeToleranceBefore = mediaTime(1000 / 30); generator.requestedTimeToleranceAfter = mediaTime(1000 / 30)
+        var frames: [[String: Any]] = []
+        for index in 0..<8 {
+            try Task.checkCancellation()
+            let frame = try await generator.image(at: mediaTime(startMs + (endMs - startMs) * (Double(index) + 0.5) / 8))
+            frames.append(try encoded(frame.image, at: max(0, milliseconds(frame.actualTime))))
+        }
+        return frames
+    }
+
     func inspectMedia(_ path: String) async throws -> [String: Any] {
         let asset = AVURLAsset(url: URL(fileURLWithPath: path))
         guard let video = try await asset.loadTracks(withMediaType: .video).first else { throw NativeFailure("Selected file has no video track.", code: "invalid_media") }

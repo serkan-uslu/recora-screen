@@ -128,7 +128,12 @@ export function CaptureDialog({
           </div>
           <Field label="Capture source">
             <div className="input-action">
-              <select required value={sourceId} onChange={(e) => setSourceId(e.target.value)}>
+              <select
+                aria-label="Capture source"
+                required
+                value={sourceId}
+                onChange={(e) => setSourceId(e.target.value)}
+              >
                 <option value="" disabled>
                   {sources.length ? "Choose a source" : "No sources available"}
                 </option>

@@ -1,6 +1,7 @@
 import AppKit
 import AVFoundation
 import CoreImage
+import ImageIO
 
 @main struct NativeCheck {
     @MainActor static func main() async {
@@ -65,7 +66,11 @@ import CoreImage
             let cursor = (0..<120).map { CursorEvent(tMs: Double($0) * 1000 / 30, x: 0.2 + Double($0) / 240, y: 0.2 + Double($0) / 600, click: $0 > 80) }
             try JSONEncoder().encode(cursor).write(to: dir.appendingPathComponent("media/cursor.json"))
             var project = Project(schemaVersion: 2, id: "test", name: "Synthetic native check", source: RecordingSource(durationMs: 4000, width: previewWidth, height: previewHeight, fps: 30, screen: "media/screen.mov", camera: "media/camera.mov", microphone: "media/mic.wav", systemAudio: nil, cursor: "media/cursor.json"), edits: EditState(segments: [MediaRange(startMs: 0, endMs: 1000), MediaRange(startMs: 2000, endMs: 4000)], camera: CameraSettings(visible: true, shape: "circle", x: 0.72, y: 0.55, size: 0.2, shadow: true, hiddenRanges: [MediaRange(startMs: 2200, endMs: 2800)]), zooms: [Zoom(id: "z", startMs: 100, endMs: 900, scale: 1.7, x: 0.3, y: 0.3)], overlays: [Overlay(id: "text", kind: "text", startMs: 2000, endMs: 4000, text: "Merhaba dünya — İstanbul", assetId: nil, x: 0.05, y: 0.08, width: 0.65, fontSize: 54, color: "#ffffff", animation: "fade")], audio: EditState.Audio(microphoneVolume: 0.8, systemVolume: 1), cursor: EditState.Cursor(visible: true, highlight: true, smooth: true, size: 1), captions: EditState.Captions(enabled: true, fontSize: 42, color: "#ffffff", background: "#111318")), transcript: [TranscriptSegment(id: "s", startMs: 2000, endMs: 4000, text: "Altyazı: ş ğ ü ı ö ç")], assets: [])
+            try await timelineEditingChecks(project, directory: dir)
+            try await timelineMediaChecks(project, directory: dir)
+            try await editorFeatureChecks(project, directory: dir)
             try cameraLayoutChecks(project)
+            try await splitZoomChecks(project, directory: dir)
             try await livePreviewChecks(project, directory: dir)
             if CommandLine.arguments.contains("--preview-check") || CommandLine.arguments.contains("--preview-4k-check") { print("Live preview checks passed: stable player item, paused frame redraw, geometry, native handles, coalesced seek, stale draft rejection and camera ranges. Artifacts: \(dir.path)"); return }
             assert(readCursor(Data("[{\"tMs\":0,\"x\":0.5,\"y\":0.5},{\"tMs\":".utf8)).count == 1)
@@ -164,6 +169,282 @@ import CoreImage
             print("Native checks passed: deterministic seek, source-time cuts/speeds, all-track retiming, circle camera mask and visibility, text/captions/cursor/zoom, canvas backgrounds/frames/aspects/blur, 1080p/4K/portrait H.264 export with audio and preview pixel parity, 20ms silence bins, 16k WAV, path validation, cancellation cleanup, camera bounds, project switching and modal preview hiding.")
             print("Artifacts: \(dir.path)")
         } catch { fputs("Native check failed: \(error)\n", stderr); exit(1) }
+    }
+    @MainActor static func timelineMediaChecks(_ project: Project, directory: URL) async throws {
+        let frames = try await NativeApp.shared.timelineFrames(directory.appendingPathComponent("media/screen.mov").path, image: false, startMs: 500, endMs: 1500)
+        assert(frames.count == 8 && Set(frames.map { $0["src"] as! String }).count > 1, "Filmstrip did not sample real changing frames")
+        for frame in frames {
+            let time = frame["timeMs"] as! Double, data = Data(base64Encoded: String((frame["src"] as! String).dropFirst("data:image/jpeg;base64,".count)))!
+            let image = NSBitmapImageRep(data: data)!
+            assert(time >= 466 && time <= 1534 && image.pixelsWide <= 192 && image.pixelsHigh <= 108)
+        }
+        let imageFrames = try await NativeApp.shared.timelineFrames(directory.appendingPathComponent("media/insert.png").path, image: true, startMs: 1000, endMs: 2000)
+        assert(imageFrames.count == 8 && Set(imageFrames.map { $0["src"] as! String }).count == 1)
+        let samples = try await audioWaveform(directory.appendingPathComponent("media/mic.wav"), startMs: 0, endMs: 4000)
+        assert(samples.count == 256 && samples[0..<64].allSatisfy { $0 > 0.15 } && samples[64..<128].allSatisfy { $0 < 0.001 } && samples[128..<192].allSatisfy { $0 > 0.15 }, "Waveform lost real tone/silence timing")
+        let silence = try await audioWaveform(directory.appendingPathComponent("media/mic.wav"), startMs: 1000, endMs: 2000)
+        assert(silence.allSatisfy { $0 < 0.001 }, "Waveform interval was ignored")
+        let imported = try await audioWaveform(directory.appendingPathComponent("media/insert-with-audio.mov"), startMs: 2000, endMs: 2500)
+        assert(imported.count == 256 && imported.allSatisfy { $0 > 0.15 }, "Imported video's real audio was not sampled")
+        let silentVideo = try await audioWaveform(directory.appendingPathComponent("media/screen.mov"), startMs: 0, endMs: 1000)
+        assert(silentVideo.isEmpty, "Silent video fabricated an audio waveform")
+        print("Timeline media checks passed: bounded real filmstrip frames, still images, source-interval waveform timing, video audio and silent-source handling.")
+    }
+    @MainActor static func timelineEditingChecks(_ original: Project, directory: URL) async throws {
+        let portrait = directory.appendingPathComponent("media/insert-portrait.mov")
+        try await syntheticVideo(portrait, camera: false, height: 640, width: 360)
+        let media = AVMutableComposition(), movie = AVURLAsset(url: portrait), tone = AVURLAsset(url: directory.appendingPathComponent("media/mic.wav"))
+        let video = media.addMutableTrack(withMediaType: .video, preferredTrackID: kCMPersistentTrackID_Invalid)!
+        try video.insertTimeRange(CMTimeRange(start: .zero, duration: mediaTime(4000)), of: try await movie.loadTracks(withMediaType: .video).first!, at: .zero)
+        video.preferredTransform = CGAffineTransform(a: 0, b: 1, c: -1, d: 0, tx: 640, ty: 0)
+        try media.addMutableTrack(withMediaType: .audio, preferredTrackID: kCMPersistentTrackID_Invalid)!.insertTimeRange(CMTimeRange(start: .zero, duration: mediaTime(4000)), of: try await tone.loadTracks(withMediaType: .audio).first!, at: .zero)
+        let insertedMovie = directory.appendingPathComponent("media/insert-with-audio.mov")
+        try await AVAssetExportSession(asset: media, presetName: AVAssetExportPresetPassthrough)!.export(to: insertedMovie, as: .mov)
+        let still = CIImage(color: CIColor(red: 0.1, green: 0.8, blue: 0.9)).cropped(to: CGRect(x: 0, y: 0, width: 320, height: 180))
+        let context = CIContext(), image = context.createCGImage(still, from: still.extent)!
+        try NSBitmapImageRep(cgImage: image).representation(using: .png, properties: [:])!.write(to: directory.appendingPathComponent("media/insert.png"))
+        var project = original
+        project.assets += [MediaAsset(id: "insert-video", name: "Inserted video", path: "media/insert-with-audio.mov", kind: "video", durationMs: 4000, width: 640, height: 360), MediaAsset(id: "insert-image", name: "Inserted still", path: "media/insert.png", kind: "image")]
+        project.edits.segments = [MediaRange(startMs: 2000, endMs: 3000), MediaRange(startMs: 0, endMs: 1000, speed: 2, assetId: "insert-video"), MediaRange(startMs: 0, endMs: 700, assetId: "insert-image"), MediaRange(startMs: 0, endMs: 500), MediaRange(startMs: 2000, endMs: 2500, speed: 0.5, assetId: "insert-video"), MediaRange(startMs: 2000, endMs: 2500), MediaRange(startMs: 0, endMs: 400, assetId: "insert-image")]
+        project.edits.canvas = CanvasSettings(); project.edits.audio.microphoneVolume = 0; project.edits.audio.systemVolume = 0.6
+        project.edits.overlays = [Overlay(id: "source-cover", kind: "redact", startMs: 0, endMs: 4000, text: nil, assetId: nil, x: 0, y: 0, width: 1, fontSize: 48, color: "#000000", animation: "none", height: 1)]
+        assert(timelineDuration(project.edits.segments) == 4600 && sourceTime(project.edits.segments, 100) == 2100 && sourceTime(project.edits.segments, 1200) == -1 && sourceTime(project.edits.segments, 1800) == -1 && sourceTime(project.edits.segments, 2300) == 100 && sourceTime(project.edits.segments, 3800) == 2100)
+        func generator(_ project: Project) async throws -> (BuiltComposition, AVAssetImageGenerator) {
+            let built = try await makeComposition(project, directory: directory.path, width: 640, height: 360)
+            let generator = AVAssetImageGenerator(asset: built.composition); generator.videoComposition = built.video
+            generator.requestedTimeToleranceBefore = .zero; generator.requestedTimeToleranceAfter = .zero
+            return (built, generator)
+        }
+        let (built, preview) = try await generator(project)
+        assert(abs(milliseconds(built.composition.duration) - 4600) < 1, "Image tail truncated the composition")
+        let primary = built.composition.track(withTrackID: built.instruction.screenID)!
+        let occupied = primary.segments.filter { !$0.isEmpty }
+        assert(occupied.count == project.edits.segments.count && abs(milliseconds(occupied[0].timeMapping.source.start) - 2000) < 1 && abs(milliseconds(occupied[5].timeMapping.source.start) - 2000) < 1)
+        let originalAudio = built.composition.tracks(withMediaType: .audio).filter { built.audioKinds[$0.trackID] == "microphone" }
+        assert(originalAudio.reduce(0) { $0 + $1.segments.filter { !$0.isEmpty }.count } == 3, "Original microphone leaked into inserted segments")
+        var plain = project; plain.edits.overlays = []; plain.edits.zooms = []; plain.edits.camera.visible = false; plain.edits.cursor.visible = false; plain.edits.captions.enabled = false
+        let (_, plainPreview) = try await generator(plain)
+        for time in [1200.0, 1800, 3100, 4500] {
+            let actual = try await preview.image(at: mediaTime(time)).image, expected = try await plainPreview.image(at: mediaTime(time)).image
+            assert(imageBytes(actual) == imageBytes(expected), "An original effect leaked onto inserted media")
+        }
+        let originalFrame = try await preview.image(at: mediaTime(100)).image, repeatedFrame = try await preview.image(at: mediaTime(3800)).image
+        assert(pixel(originalFrame, x: 320, y: 180).prefix(3).allSatisfy { $0 < 5 } && imageBytes(originalFrame) == imageBytes(repeatedFrame), "Reordered/repeated source effects lost their source anchor")
+        let rawVideo = AVAssetImageGenerator(asset: AVURLAsset(url: insertedMovie)); rawVideo.appliesPreferredTrackTransform = true; rawVideo.requestedTimeToleranceBefore = .zero; rawVideo.requestedTimeToleranceAfter = .zero
+        let rawFrame = try await rawVideo.image(at: mediaTime(400)).image, insertedFrame = try await preview.image(at: mediaTime(1200)).image
+        try NSBitmapImageRep(cgImage: rawFrame).representation(using: .png, properties: [:])!.write(to: directory.appendingPathComponent("insert-raw.png"))
+        try NSBitmapImageRep(cgImage: insertedFrame).representation(using: .png, properties: [:])!.write(to: directory.appendingPathComponent("insert-composed.png"))
+        assert(rawFrame.width == 640 && rawFrame.height == 360)
+        let content = CanvasLayout(project: project, bounds: CGRect(x: 0, y: 0, width: 640, height: 360)).content
+        for (x, y) in [(80, 80), (440, 200), (540, 250)] {
+            let expected = meanPixel(rawFrame, x: x, y: y), actual = meanPixel(insertedFrame, x: Int(content.minX + Double(x) / 640 * content.width), y: Int(360 - content.maxY + Double(y) / 360 * content.height))
+            assert(zip(expected, actual).allSatisfy { abs($0 - $1) < 32 }, "Inserted video's preferred transform changed at \(x),\(y): \(expected) vs \(actual)")
+        }
+        var muted = project; muted.edits.audio.systemVolume = 0
+        let live = try await updateComposition(muted, previous: built)
+        for parameter in live.audio.inputParameters where live.audioKinds[parameter.trackID]?.hasPrefix("video:") == true {
+            var start: Float = 1, end: Float = 1, range = CMTimeRange.zero
+            assert(parameter.getVolumeRamp(for: .zero, startVolume: &start, endVolume: &end, timeRange: &range) && start == 0)
+        }
+        let output = directory.appendingPathComponent("timeline-inserts.mp4"), session = AVAssetExportSession(asset: built.composition, presetName: AVAssetExportPresetHighestQuality)!
+        session.videoComposition = built.video; session.audioMix = built.audio
+        try await session.export(to: output, as: .mp4)
+        let encoded = AVAssetImageGenerator(asset: AVURLAsset(url: output)); encoded.requestedTimeToleranceBefore = .zero; encoded.requestedTimeToleranceAfter = .zero
+        for time in [1200.0, 1800, 3100, 4500] { assertVisualMatch(try await encoded.image(at: mediaTime(time)).image, try await preview.image(at: mediaTime(time)).image, x: 320, y: 180, label: "Inserted media preview/export") }
+        for (start, end) in [(1100.0, 1400.0), (2900, 3400)] { let pitch = try await tonePitch(output, fromMs: start, toMs: end); assert(abs(pitch - 440) < 20, "Inserted video audio lost timing/pitch: \(pitch)") }
+        var imagesOnly = project; imagesOnly.id = "images-only"; imagesOnly.edits.segments = [MediaRange(startMs: 0, endMs: 500, assetId: "insert-image"), MediaRange(startMs: 100, endMs: 600, speed: 0.5, assetId: "insert-image")]
+        let (imageBuilt, imagePreview) = try await generator(imagesOnly)
+        assert(abs(milliseconds(imageBuilt.composition.duration) - 1500) < 1)
+        let finalImage = try await imagePreview.image(at: mediaTime(1466.6667)).image
+        assert(pixel(finalImage, x: 320, y: 180)[1] > 180)
+        _ = try await NativeApp.shared.command("preview.load", ["project": try jsonObject(imagesOnly), "projectDir": directory.path])
+        _ = try await NativeApp.shared.command("preview.seek", ["timeMs": 1200])
+        assert(NativeApp.shared.player?.currentItem?.status == .readyToPlay && abs(milliseconds(NativeApp.shared.player!.currentTime()) - 1200) < 40)
+        assert((NativeApp.shared.previewGeometry(at: 1200)["items"] as! [[String: Any]]).isEmpty, "Source handles leaked into inserted image")
+        let imageOutput = directory.appendingPathComponent("timeline-images.mp4"), imageSession = AVAssetExportSession(asset: imageBuilt.composition, presetName: AVAssetExportPresetHighestQuality)!
+        imageSession.videoComposition = imageBuilt.video
+        try await imageSession.export(to: imageOutput, as: .mp4)
+        let imageInfo = try await NativeApp.shared.inspectMedia(imageOutput.path)
+        assert(abs((imageInfo["durationMs"] as! Double) - 1500) < 40)
+        let gif = directory.appendingPathComponent("timeline-images.gif")
+        _ = try await NativeApp.shared.command("export.start", ["project": try jsonObject(imagesOnly), "projectDir": directory.path, "path": gif.path, "width": 640, "height": 360, "format": "gif", "gifFps": 20, "jobId": "timeline-images-gif"])
+        for _ in 0..<200 {
+            let result = try await NativeApp.shared.command("export.status", ["jobId": "timeline-images-gif"]) as! [String: Any]
+            if result["status"] as? String == "completed" { break }
+            if result["status"] as? String == "failed" { throw NativeFailure("Image-only GIF failed: \(result)") }
+            try await Task.sleep(nanoseconds: 50_000_000)
+        }
+        let gifSource = CGImageSourceCreateWithURL(gif as CFURL, nil)!
+        assert(CGImageSourceGetCount(gifSource) == 30 && pixel(CGImageSourceCreateImageAtIndex(gifSource, 29, nil)!, x: 320, y: 180)[1] > 180)
+        var invalid = project; invalid.edits.segments[1].endMs = 5000
+        do { _ = try await makeComposition(invalid, directory: directory.path); assertionFailure("Oversized video range accepted") } catch { assert((error as? NativeFailure)?.code == "invalid_project") }
+        invalid = project; invalid.assets[0].path = "../escape.mov"
+        do { _ = try await makeComposition(invalid, directory: directory.path); assertionFailure("Inserted media escaped project") } catch { assert((error as? NativeFailure)?.code == "invalid_path") }
+        print("Timeline editing checks passed: reorder/repeats, inserted oriented video/audio, stills between clips and at tail, image-only player/MP4/GIF, source-effect isolation and preview/export parity.")
+    }
+    @MainActor static func editorFeatureChecks(_ original: Project, directory: URL) async throws {
+        var project = original
+        project.edits.segments = [MediaRange(startMs: 0, endMs: 2000)]
+        project.edits.canvas = nil; project.edits.zooms = []; project.edits.overlays = []
+        project.edits.camera.visible = false; project.edits.cursor.visible = false; project.edits.captions.enabled = false
+        project.source?.microphone = nil; project.source?.systemAudio = nil
+        func frame(_ project: Project, at time: Double) async throws -> CGImage {
+            let built = try await makeComposition(project, directory: directory.path, width: 640, height: 360)
+            let generator = AVAssetImageGenerator(asset: built.composition); generator.videoComposition = built.video
+            generator.requestedTimeToleranceBefore = .zero; generator.requestedTimeToleranceAfter = .zero
+            return try await generator.image(at: mediaTime(time)).image
+        }
+        func export(_ project: Project, name: String, format: String = "mp4", loop: Bool = true) async throws -> URL {
+            let url = directory.appendingPathComponent(name + "." + format)
+            _ = try await NativeApp.shared.command("export.start", ["project": try jsonObject(project), "projectDir": directory.path, "path": url.path, "width": 640, "height": 360, "format": format, "gifFps": 15, "loop": loop, "jobId": name])
+            for _ in 0..<600 {
+                let status = try await NativeApp.shared.command("export.status", ["jobId": name]) as! [String: Any]
+                if status["status"] as? String == "completed" { return url }
+                if status["status"] as? String == "failed" { throw NativeFailure("Feature export failed: \(status)") }
+                try await Task.sleep(nanoseconds: 50_000_000)
+            }
+            throw NativeFailure("Feature export timed out")
+        }
+        let plain = try await frame(project, at: 500)
+        let cover = Overlay(id: "cover", kind: "redact", startMs: 0, endMs: 1000, text: nil, assetId: nil, x: 0.05, y: 0.05, width: 0.45, fontSize: 48, color: "#00000000", animation: "fade", height: 0.8)
+        let arrow = Overlay(id: "arrow", kind: "arrow", startMs: 0, endMs: 2000, text: nil, assetId: nil, x: 0.55, y: 0.1, width: 0.35, fontSize: 48, color: "#ffffff", animation: "none", height: 0.3, rotation: 45)
+        project.edits.overlays = [cover, arrow, Overlay(id: "late-text", kind: "text", startMs: 0, endMs: 2000, text: "Covered text", assetId: nil, x: 0.1, y: 0.2, width: 0.3, fontSize: 60, color: "#ffffff", animation: "none")]
+        let start = try await frame(project, at: 0)
+        assert(pixel(start, x: 100, y: 100).prefix(3).allSatisfy { $0 < 4 }, "Cover is transparent or fades at its start")
+        assert(brightPixels(start, in: CGRect(x: 34, y: 20, width: 280, height: 280)) == 0, "Later text bypasses the cover")
+        try NSBitmapImageRep(cgImage: start).representation(using: .png, properties: [:])!.write(to: directory.appendingPathComponent("new-features-start.png"))
+        print("New feature pixels: \(directory.path)/new-features-start.png")
+        assert(pixel(start, x: 464, y: 90).prefix(3).allSatisfy { $0 > 220 }, "Arrow was not rendered")
+        let ended = try await frame(project, at: 1000)
+        assert(pixel(ended, x: 100, y: 50)[0] > 40, "Cover persists beyond its interval")
+        let gif = try await export(project, name: "features-loop", format: "gif")
+        guard let gifSource = CGImageSourceCreateWithURL(gif as CFURL, nil) else { throw NativeFailure("GIF cannot be decoded") }
+        assert(CGImageSourceGetCount(gifSource) == 30, "Wrong GIF frame count")
+        let properties = CGImageSourceCopyProperties(gifSource, nil) as? [String: Any]
+        assert((properties?[kCGImagePropertyGIFDictionary as String] as? [String: Any])?[kCGImagePropertyGIFLoopCount as String] as? Int == 0)
+        let gifFrame = CGImageSourceCreateImageAtIndex(gifSource, 0, nil)!
+        assert(gifFrame.width == 640 && gifFrame.height == 360)
+        assert(pixel(gifFrame, x: 100, y: 100).prefix(3).allSatisfy { $0 < 6 }, "GIF lost its cover")
+        var gifDuration = 0.0
+        for index in 0..<30 {
+            let frameProperties = CGImageSourceCopyPropertiesAtIndex(gifSource, index, nil) as! [String: Any]
+            let metadata = frameProperties[kCGImagePropertyGIFDictionary as String] as! [String: Any]
+            gifDuration += metadata[kCGImagePropertyGIFUnclampedDelayTime as String] as? Double ?? metadata[kCGImagePropertyGIFDelayTime as String] as? Double ?? 0
+        }
+        assert(abs(gifDuration - 2) < 0.02, "GIF timing drifted")
+        let once = try await export(project, name: "features-once", format: "gif", loop: false)
+        let onceSource = CGImageSourceCreateWithURL(once as CFURL, nil)!
+        let onceProperties = CGImageSourceCopyProperties(onceSource, nil) as? [String: Any]
+        assert((onceProperties?[kCGImagePropertyGIFDictionary as String] as? [String: Any])?[kCGImagePropertyGIFLoopCount as String] as? Int == 1, "Non-looping GIF does not play exactly once")
+        let onceData = try Data(contentsOf: once)
+        assert(onceData.range(of: Data("NETSCAPE2.0".utf8)) == nil, "One-play GIF contains a loop extension")
+        let cancelled = directory.appendingPathComponent("cancelled-gif.gif")
+        _ = try await NativeApp.shared.command("export.start", ["project":try jsonObject(project), "projectDir":directory.path, "path":cancelled.path, "width":640,"height":360,"format":"gif","jobId":"cancelled-gif"])
+        _ = try await NativeApp.shared.command("export.cancel", ["jobId":"cancelled-gif"])
+        try await Task.sleep(nanoseconds: 100_000_000)
+        assert(!FileManager.default.fileExists(atPath: cancelled.path), "Cancelled GIF was published")
+        project.edits.overlays = [Overlay(id: "blur", kind: "blur", startMs: 0, endMs: 2000, text: nil, assetId: nil, x: 0.04, y: 0.6, width: 0.2, fontSize: 48, color: "#ffffff", animation: "slide", height: 0.3, blur: 80)]
+        let blurred = try await frame(project, at: 500)
+        assert(pixel(plain, x: 44, y: 250) != pixel(blurred, x: 44, y: 250), "Regional blur does not soften the tile edge")
+        assert(pixel(plain, x: 500, y: 200) == pixel(blurred, x: 500, y: 200), "Regional blur changed pixels outside its bounds")
+        project.edits.overlays = [cover, arrow]
+        project.assets = [MediaAsset(id: "music", name: "Synthetic tone", path: "media/mic.wav", kind: "audio")]
+        project.edits.audioClips = [AudioClip(id: "music", assetId: "music", startMs: 500, endMs: 1500, offsetMs: 0, volume: 0.5)]
+        let audioBuilt = try await makeComposition(project, directory: directory.path, width: 640, height: 360)
+        let tracks = audioBuilt.composition.tracks(withMediaType: .audio)
+        assert(tracks.count == 1)
+        let occupied = tracks[0].segments.filter { !$0.isEmpty }
+        assert(abs(milliseconds(occupied[0].timeMapping.target.start) - 500) < 1)
+        assert(abs(milliseconds(occupied[0].timeMapping.target.duration) - 1000) < 1)
+        var muted = project; muted.edits.audioClips?[0].volume = 0
+        let beforeStructure = try mediaStructure(project, directory: directory.path), afterStructure = try mediaStructure(muted, directory: directory.path)
+        assert(beforeStructure == afterStructure, "Volume update recreates the player composition")
+        let mutedBuilt = try await updateComposition(muted, previous: audioBuilt)
+        var startVolume: Float = 1, endVolume: Float = 1, ramp = CMTimeRange.zero
+        assert(mutedBuilt.audio.inputParameters[0].getVolumeRamp(for: .zero, startVolume: &startVolume, endVolume: &endVolume, timeRange: &ramp) && startVolume == 0, "Live imported volume update ignored")
+        let movie = try await export(project, name: "features-audio")
+        let pitch = try await tonePitch(movie, fromMs: 700, toMs: 1200)
+        assert(abs(pitch - 440) < 20, "Imported audio missing or wrong pitch: \(pitch)")
+        let bins = try await analyzeAudio(movie)
+        assert(bins.filter { $0["db"]! > -40 }.allSatisfy { $0["startMs"]! >= 450 && $0["endMs"]! <= 1550 }, "Imported audio timing leaked outside the selected interval")
+        let movieGenerator = AVAssetImageGenerator(asset: AVURLAsset(url: movie)); movieGenerator.requestedTimeToleranceBefore = .zero; movieGenerator.requestedTimeToleranceAfter = .zero
+        let movieFrame = try await movieGenerator.image(at: .zero).image
+        assert(pixel(movieFrame, x: 100, y: 100).prefix(3).allSatisfy { $0 < 10 }, "MP4 lost cover")
+        var shortened = project; shortened.edits.segments = [MediaRange(startMs: 0, endMs: 800)]
+        let shortBuilt = try await makeComposition(shortened, directory: directory.path)
+        assert(abs(milliseconds(shortBuilt.composition.duration) - 800) < 1, "Audio extended a trimmed video")
+        project.edits.audioClips = []; project.edits.overlays = []; project.edits.segments = [MediaRange(startMs:0,endMs:4000)]
+        project.edits.camera.visible = true; project.edits.camera.hiddenRanges = []; project.edits.camera.shape = "square"; project.edits.camera.size = 0.4; project.edits.camera.x = 0.5; project.edits.camera.y = 0.25; project.edits.camera.radius = 0
+        project.source?.camera = "media/screen.mov"
+        let normal = try await frame(project, at: 2000)
+        project.edits.camera.mirror = true
+        let mirrored = try await frame(project, at: 2000)
+        assertVisualMatch(normal, mirrored, x: 450, y: 200, label: "Mirror uniform area")
+        let left = pixel(normal, x: 355, y: 275), flipped = pixel(mirrored, x: 541, y: 275)
+        assert(abs(left[2] - flipped[2]) < 15 && left[2] > 150, "Camera mirror failed")
+        project.edits.camera.zoomReactive = true; project.edits.zooms = [Zoom(id:"zoom",startMs:0,endMs:2000,scale:2,x:0.5,y:0.5)]
+        let reactive = try await makeComposition(project, directory: directory.path)
+        let visual = renderedCamera(reactive.instruction, outputMs: 1000, sourceMs:1000)
+        assert(abs(visual.size - 0.2) < 0.0001, "Camera did not shrink with zoom")
+        project.edits.camera.visible = false; project.edits.zooms = []; project.edits.cursor.visible = true
+        let cursorBase = try await frame(project, at:2800)
+        for effect in ["motionBlur", "bounce", "sway", "style"] {
+            var changed = project
+            switch effect { case "motionBlur": changed.edits.cursor.motionBlur = true; case "bounce": changed.edits.cursor.bounce = true; case "sway": changed.edits.cursor.sway = true; default: changed.edits.cursor.style = "light" }
+            let image = try await frame(changed, at:2800)
+            assert(imageBytes(image) != imageBytes(cursorBase), "Cursor effect did not render: \(effect)")
+        }
+        project.edits.cursor.loop = true
+        let loopBuilt = try await makeComposition(project, directory: directory.path)
+        let first = renderedCursor(loopBuilt.instruction, outputMs:0)!, last = renderedCursor(loopBuilt.instruction, outputMs:3999)!
+        assert(abs(first.x - last.x) < 0.001 && abs(first.y - last.y) < 0.001, "Cursor loop is discontinuous")
+        print("Editor feature checks passed: opaque covers, arrows, regional blur, imported audio timing/pitch/volume, GIF frames/timing/loop/cancel, cursor effects and camera mirror/zoom geometry.")
+    }
+    @MainActor static func splitZoomChecks(_ original: Project, directory: URL) async throws {
+        var project = original
+        project.edits.segments = [MediaRange(startMs: 0, endMs: 4000)]
+        project.edits.overlays = []; project.edits.captions.enabled = false
+        project.edits.camera.hiddenRanges = []; project.edits.camera.zoomReactive = true
+        let zoom = Zoom(id: "left", startMs: 500, endMs: 3500, scale: 2, x: 0.3, y: 0.3, followCursor: true)
+        project.edits.zooms = [zoom]
+        let baseline = try await makeComposition(project, directory: directory.path, width: 640, height: 360)
+        project.edits.segments = [MediaRange(startMs: 0, endMs: 2000), MediaRange(startMs: 2000, endMs: 4000)]
+        var left = zoom, right = zoom
+        left.endMs = 2000; right.id = "right"; right.startMs = 2000; right.motion = "gentle"
+        project.edits.zooms = [left, right]
+        let split = try await makeComposition(project, directory: directory.path, width: 640, height: 360)
+        let joined = split.instruction.renderZooms
+        assert(project.edits.zooms.count == 2 && joined.count == 1 && joined[0].id == "left")
+        let originalFrames = AVAssetImageGenerator(asset: baseline.composition), splitFrames = AVAssetImageGenerator(asset: split.composition)
+        originalFrames.videoComposition = baseline.video; splitFrames.videoComposition = split.video
+        for generator in [originalFrames, splitFrames] { generator.requestedTimeToleranceBefore = .zero; generator.requestedTimeToleranceAfter = .zero }
+        for time in [1900.0, 2000.0, 2100.0] {
+            assert(zoomAmount(joined[0], at: time) == 1, "A split restarted zoom easing")
+            let before = zoomFocus(zoom, path: baseline.instruction.focusPaths[zoom.id] ?? [], at: time)
+            let after = zoomFocus(joined[0], path: split.instruction.focusPaths[joined[0].id] ?? [], at: time)
+            assert(before == after, "A split restarted cursor following")
+            assert(abs(renderedCamera(split.instruction, outputMs: time, sourceMs: time).size - project.edits.camera.size / 2) < 0.0001, "A split restarted camera zoom response")
+            let originalFrame = try await originalFrames.image(at: mediaTime(time)).image
+            let splitFrame = try await splitFrames.image(at: mediaTime(time)).image
+            assert(imageBytes(originalFrame) == imageBytes(splitFrame), "Splitting changed rendered pixels at \(time)ms")
+        }
+        for property in ["scale", "x", "y", "motion", "followCursor"] {
+            var changed = right
+            switch property {
+            case "scale": changed.scale = 3
+            case "x": changed.x = 0.7
+            case "y": changed.y = 0.7
+            case "motion": changed.motion = "snappy"
+            default: changed.followCursor = false
+            }
+            assert(continuousZooms([left, changed]).count == 2, "Independent zoom \(property) was merged")
+        }
+        var override = zoom; override.id = "override"; override.startMs = 1800; override.endMs = 2200; override.scale = 3
+        assert(continuousZooms([left, override, right]).count == 3, "Coalescing changed overlapping zoom priority")
+        project.edits.zooms[1].x = 0.8
+        let changed = try await updateComposition(project, previous: split)
+        assert(changed.instruction.renderZooms.count == 2 && changed.instruction.focusPaths["right"]?.first?.x == 0.8, "Split edit reused a stale focus path")
+        print("Split zoom checks passed: independent settings, continuous easing/following/camera response, unchanged native pixels, overlap priority and live focus cache.")
     }
     @MainActor static func permissionRequestChecks() throws {
         for (kind, pane, name) in [("screen", "Privacy_ScreenCapture", "Screen & System Audio Recording"), ("input", "Privacy_ListenEvent", "Input Monitoring")] {

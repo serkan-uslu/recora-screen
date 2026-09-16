@@ -1,12 +1,7 @@
 import { DraftPreviewContext } from "@/src/controllers/StudioContexts";
 import { useContext } from "react";
 import { Download, Scissors, Sparkles } from "lucide-react";
-import {
-  type EditOperation,
-  type Project,
-  type Range,
-  type TranscriptSegment,
-} from "@/shared/types";
+import { type EditOperation, type Project, type Range } from "@/shared/types";
 import { formatTime, outputRanges } from "@/shared/timeline";
 import { Field } from "@/src/components/molecules/Field";
 import { Switch } from "@/src/components/atoms/Switch";
@@ -31,10 +26,6 @@ export function TranscriptPanel({
 }) {
   const { send: draftPreview } = useContext(DraftPreviewContext);
   const captions = project.edits.captions;
-  const rangeFor = (segment: TranscriptSegment) => {
-    const ranges = outputRanges(project.edits.segments, segment);
-    return ranges.length ? { startMs: ranges[0]!.startMs, endMs: ranges.at(-1)!.endMs } : null;
-  };
   return (
     <>
       <PanelIntro
@@ -124,7 +115,8 @@ export function TranscriptPanel({
       </h3>
       <div className="transcript-list">
         {project.transcript.map((segment) => {
-          const range = rangeFor(segment);
+          const ranges = outputRanges(project.edits.segments, segment);
+          const range = ranges[0];
           return (
             <div key={segment.id} className={!range ? "removed" : ""}>
               <button
@@ -154,7 +146,9 @@ export function TranscriptPanel({
               {range && (
                 <button
                   className="transcript-cut"
-                  onClick={() => void apply([{ type: "cut", ...range }])}
+                  onClick={() =>
+                    void apply([...ranges].reverse().map((item) => ({ type: "cut", ...item })))
+                  }
                 >
                   <Scissors size={12} />
                   Cut this sentence

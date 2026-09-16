@@ -1,7 +1,9 @@
 import type { RefObject } from "react";
 import { Camera, Eye, EyeOff, Layers, ZoomIn } from "lucide-react";
 import { defaultAutoZoom, type EditOperation, type Project, type Range } from "@/shared/types";
-import { seconds } from "@/src/lib/format";
+import { sourceRanges } from "@/shared/timeline";
+import { cameraVisibilityEdits } from "@/src/controllers/cameraEdit";
+import { formatTimecode } from "@/src/lib/format";
 import type { TimelineMenu } from "@/src/features/editor/timelineTypes";
 
 export function TrackContextMenu({
@@ -16,7 +18,7 @@ export function TrackContextMenu({
   apply,
   seek,
   onCameraLayout,
-  onSelectZoom,
+  onEditZoom,
   onSelectOverlay,
 }: {
   menuRef: RefObject<HTMLDivElement | null>;
@@ -30,10 +32,12 @@ export function TrackContextMenu({
   apply: (operations: EditOperation[]) => void;
   seek: (time: number) => Promise<void>;
   onCameraLayout: () => void;
-  onSelectZoom: (id: string) => void;
+  onEditZoom: (id: string) => void;
   onSelectOverlay: (id: string) => void;
 }) {
   const selected = selection.endMs > selection.startMs;
+  const originalSelected =
+    sourceRanges(project.edits.segments, selection.startMs, selection.endMs).length > 0;
   const action = (run: () => void) => {
     close();
     run();
@@ -43,13 +47,13 @@ export function TrackContextMenu({
       ref={menuRef}
       className="timeline-row-menu"
       style={{ left: menu.x, top: menu.y }}
-      role="menu"
+      role="dialog"
       aria-label={`${menu.kind} track actions`}
     >
       <strong>{menu.kind[0]!.toUpperCase() + menu.kind.slice(1)} track</strong>
       {selected && (
         <small>
-          {seconds(selection.startMs)}–{seconds(selection.endMs)}s selected
+          {formatTimecode(selection.startMs)}–{formatTimecode(selection.endMs)} selected
         </small>
       )}
       {menu.kind === "screen" && (
@@ -61,16 +65,16 @@ export function TrackContextMenu({
             Split at playhead
           </button>
           <button
-            disabled={disabled || !selected}
+            disabled={disabled || !selected || total - (selection.endMs - selection.startMs) < 1}
             onClick={() => action(() => apply([{ type: "cut", ...selection }]))}
           >
-            Cut selection
+            Delete video time range
           </button>
           <button
             disabled={disabled || !selected}
             onClick={() => action(() => apply([{ type: "trim", ...selection }]))}
           >
-            Keep selection
+            Keep only this video range
           </button>
         </>
       )}
@@ -90,26 +94,26 @@ export function TrackContextMenu({
             }
           >
             {project.edits.camera.visible ? <EyeOff size={13} /> : <Eye size={13} />}
-            {project.edits.camera.visible ? "Hide camera" : "Show camera"}
+            {project.edits.camera.visible ? "Disable camera track" : "Enable camera track"}
           </button>
           <button
-            disabled={disabled || !project.source?.camera || !selected}
+            disabled={disabled || !project.source?.camera || !originalSelected}
             onClick={() =>
-              action(() => apply([{ type: "camera.hide", ...selection, hidden: true }]))
+              action(() => apply(cameraVisibilityEdits(project, selection, "selection", false)))
             }
           >
             Hide in selection
           </button>
           <button
-            disabled={disabled || !project.source?.camera || !selected}
+            disabled={disabled || !project.source?.camera || !originalSelected}
             onClick={() =>
-              action(() => apply([{ type: "camera.hide", ...selection, hidden: false }]))
+              action(() => apply(cameraVisibilityEdits(project, selection, "selection", true)))
             }
           >
             Show in selection
           </button>
           <button
-            disabled={disabled || !project.source?.camera || !selected}
+            disabled={disabled || !project.source?.camera || !originalSelected}
             onClick={() =>
               action(() => {
                 onCameraLayout();
@@ -140,7 +144,9 @@ export function TrackContextMenu({
                 )
               }
             >
-              {project.edits.audio.microphoneVolume ? "Mute microphone" : "Unmute microphone"}
+              {project.edits.audio.microphoneVolume ? "Mute" : "Unmute"}{" "}
+              {project.source.microphone === project.source.screen ? "video audio" : "microphone"}{" "}
+              (whole video)
             </button>
           )}
           {project.source?.systemAudio && (
@@ -157,7 +163,8 @@ export function TrackContextMenu({
                 )
               }
             >
-              {project.edits.audio.systemVolume ? "Mute system audio" : "Unmute system audio"}
+              {project.edits.audio.systemVolume ? "Mute system audio" : "Unmute system audio"}{" "}
+              (whole video)
             </button>
           )}
           <button
@@ -180,7 +187,7 @@ export function TrackContextMenu({
       {menu.kind === "effects" && (
         <>
           {menu.zoomId && (
-            <button onClick={() => action(() => onSelectZoom(menu.zoomId!))}>
+            <button onClick={() => action(() => onEditZoom(menu.zoomId!))}>
               <ZoomIn size={13} />
               Edit zoom
             </button>
@@ -210,7 +217,7 @@ export function TrackContextMenu({
             </button>
           )}
           <button
-            disabled={disabled || !selected}
+            disabled={disabled || !originalSelected}
             onClick={() =>
               action(() => {
                 const settings = project.edits.autoZoom ?? defaultAutoZoom();

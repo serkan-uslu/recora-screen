@@ -1,7 +1,10 @@
 import {
   ArrowDownToLine,
   Check,
+  CircleAlert,
+  CircleHelp,
   LoaderCircle,
+  MoreHorizontal,
   PencilLine,
   Redo2,
   Save,
@@ -12,6 +15,7 @@ import { IconButton } from "@/src/components/atoms/IconButton";
 import { product } from "@/shared/brand";
 import productIcon from "@/design-system/product-icon.svg";
 import { type StudioController } from "@/src/controllers/useStudioController";
+import { useProjectSaveState } from "@/src/controllers/useProjectController";
 
 export function StudioHeader({
   studio,
@@ -20,7 +24,6 @@ export function StudioHeader({
     StudioController,
     | "project"
     | "setModal"
-    | "busy"
     | "saveDraft"
     | "backToLibrary"
     | "history"
@@ -28,14 +31,16 @@ export function StudioHeader({
     | "projectBusy"
   >;
 }) {
-  const { project, setModal, busy, saveDraft, backToLibrary, history, renameProject, projectBusy } =
+  const { project, setModal, saveDraft, backToLibrary, history, renameProject, projectBusy } =
     studio;
-  if (!project) return null;
+  const saveState = useProjectSaveState(project?.id);
+  if (!project)
+    return <div className="library-titlebar" data-tauri-drag-region aria-hidden="true" />;
   return (
     <header className="app-header" data-tauri-drag-region>
       <button
         className="brand"
-        onClick={() => project && void backToLibrary()}
+        onClick={() => void backToLibrary()}
         aria-label={`${product.name} projects`}
       >
         <span className="brand-mark">
@@ -46,69 +51,82 @@ export function StudioHeader({
           <span className="brand-dot">.</span>
         </span>
       </button>
-      {project ? (
-        <div className="project-heading">
-          <span className="header-divider" />
-          <button className="project-title" onClick={() => void renameProject(project)}>
-            {project.name}
-            <PencilLine size={12} />
-          </button>
-          <span className="save-indicator">
-            {busy ? <LoaderCircle className="spin" size={12} /> : <Check size={12} />}
-            {busy ? "Saving…" : "All changes saved"}
-          </span>
-        </div>
-      ) : (
-        <div className="top-navigation">
-          <span className="active">Workspace</span>
-          <span className="local-badge">
-            <span />
-            Local & private
-          </span>
-        </div>
-      )}
+      <div className="project-heading">
+        <span className="header-divider" />
+        <button className="project-title" onClick={() => renameProject(project)}>
+          {project.name}
+          <PencilLine size={12} />
+        </button>
+        <span
+          className={`save-indicator ${saveState}`}
+          role="status"
+          title="Edits save to this project on your Mac. Export video creates a separate video file."
+        >
+          {saveState === "saving" ? (
+            <LoaderCircle className="spin" size={14} />
+          ) : saveState === "failed" ? (
+            <CircleAlert size={14} />
+          ) : (
+            <Check size={14} />
+          )}
+          {saveState === "saving"
+            ? "Saving changes…"
+            : saveState === "failed"
+              ? "Change could not be saved"
+              : "Saved automatically"}
+        </span>
+      </div>
       <div className="header-actions">
-        {project && (
-          <div className="history-actions">
-            <IconButton
-              label="Undo (⌘Z)"
-              disabled={projectBusy}
-              onClick={() => void history("undo")}
-            >
-              <Undo2 />
-            </IconButton>
-            <IconButton
-              label="Redo (⇧⌘Z)"
-              disabled={projectBusy}
-              onClick={() => void history("redo")}
-            >
-              <Redo2 />
-            </IconButton>
-          </div>
-        )}
-        <IconButton label="Settings" onClick={() => setModal("settings")}>
-          <Settings2 />
-        </IconButton>
-        {project && (
-          <div className="output-actions">
+        <div className="history-actions">
+          <IconButton label="Undo (⌘Z)" disabled={projectBusy} onClick={() => void history("undo")}>
+            <Undo2 />
+          </IconButton>
+          <IconButton
+            label="Redo (⇧⌘Z)"
+            disabled={projectBusy}
+            onClick={() => void history("redo")}
+          >
+            <Redo2 />
+          </IconButton>
+        </div>
+        <button className="button subtle quick-start-button" onClick={() => setModal("help")}>
+          <CircleHelp size={16} />
+          Quick start
+        </button>
+        <details className="editor-project-menu">
+          <summary aria-label="Project options" title="Project options">
+            <MoreHorizontal size={20} />
+          </summary>
+          <div className="editor-project-menu-content">
             <button
-              className="button subtle save-button"
               disabled={projectBusy}
-              onClick={() => void saveDraft()}
+              onClick={(event) => {
+                event.currentTarget.closest("details")?.removeAttribute("open");
+                void saveDraft();
+              }}
             >
               <Save size={15} />
-              Save draft
+              Save now <kbd>⌘S</kbd>
             </button>
             <button
-              className="button primary"
-              disabled={!project.source || projectBusy}
-              onClick={() => setModal("export")}
+              onClick={(event) => {
+                event.currentTarget.closest("details")?.removeAttribute("open");
+                setModal("settings");
+              }}
             >
-              <ArrowDownToLine size={15} />
-              Export video
+              <Settings2 size={15} />
+              Settings
             </button>
           </div>
-        )}
+        </details>
+        <button
+          className="button primary"
+          disabled={!project.source || projectBusy}
+          onClick={() => setModal("export")}
+        >
+          <ArrowDownToLine size={15} />
+          Export video
+        </button>
       </div>
     </header>
   );

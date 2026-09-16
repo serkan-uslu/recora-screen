@@ -76,7 +76,7 @@ export class ApplicationService extends EventEmitter {
     this.projects = new ProjectService(this.store, this.jobs, this.native, this.preview, (data) =>
       this.emit("project-changed", data),
     );
-    this.editing = new EditingService(this.store, this.preview);
+    this.editing = new EditingService(this.store, this.preview, this.native);
     this.recording = new RecordingService(this.store, this.jobs, this.native, this.preview);
     this.exporting = new ExportService(this.projects, this.jobs, this.native);
     this.transcription = new TranscriptionService(

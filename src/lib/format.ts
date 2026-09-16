@@ -16,3 +16,10 @@ export const date = (value: string) =>
     month: "short",
     day: "numeric",
   });
+
+export const formatTimecode = (ms: number) => {
+  const centiseconds = Math.floor(Math.max(0, ms) / 10);
+  const minutes = Math.floor(centiseconds / 6000);
+  const seconds = Math.floor((centiseconds % 6000) / 100);
+  return `${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}.${String(centiseconds % 100).padStart(2, "0")}`;
+};

@@ -8,6 +8,7 @@ import { applyEdits } from "@/server/domain/edits.js";
 import { parseProject, projectSchema } from "@/server/contracts/validation.js";
 import { cameraAt, cameraOutputLayouts } from "@/shared/camera.js";
 import type { Project } from "@/shared/types.js";
+import { cameraEdit, cameraVisibilityEdits } from "@/src/controllers/cameraEdit.js";
 
 async function setup(t: TestContext) {
   const root = await fs.mkdtemp(path.join(os.tmpdir(), "screenrec-camera-"));
@@ -34,6 +35,43 @@ async function setup(t: TestContext) {
 }
 const times = (project: Project) =>
   project.edits.camera.layouts.map(({ startMs, endMs, x, size }) => ({ startMs, endMs, x, size }));
+
+test("split camera settings and visibility stay in their range through persistence and undo", async (t) => {
+  const { store, project: original } = await setup(t);
+  const first = { startMs: 0, endMs: 5000 },
+    second = { startMs: 5000, endMs: 10000 };
+  let project = await store.mutate(original.id, original.revision, (p) =>
+    applyEdits(p, [{ type: "split", atMs: 5000 }]),
+  );
+  project = await store.mutate(project.id, project.revision, (p) =>
+    applyEdits(p, [
+      cameraEdit(second, "selection", { shape: "square" }),
+      cameraEdit(second, "selection", { mirror: true }),
+      ...cameraVisibilityEdits(p, second, "selection", false),
+    ]),
+  );
+  assert.equal(cameraAt(project, 2500).shape, original.edits.camera.shape);
+  assert.equal(cameraAt(project, 2500).mirror ?? false, false);
+  assert.equal(cameraAt(project, 7500).shape, "square");
+  assert.equal(cameraAt(project, 7500).mirror, true);
+  assert.deepEqual(project.edits.camera.hiddenRanges, [second]);
+  const ranged = structuredClone(project);
+  project = await store.mutate(project.id, project.revision, (p) =>
+    applyEdits(p, cameraVisibilityEdits(p, first, "entire", false)),
+  );
+  const globallyHidden = structuredClone(project);
+  project = await store.mutate(project.id, project.revision, (p) =>
+    applyEdits(p, cameraVisibilityEdits(p, second, "selection", true)),
+  );
+  assert.equal(project.edits.camera.visible, true);
+  assert.deepEqual(project.edits.camera.hiddenRanges, [first]);
+  assert.deepEqual(project.edits.camera.layouts, ranged.edits.camera.layouts);
+  assert.deepEqual((await new ProjectStore(store.root).get(project.id)).edits, project.edits);
+  const undone = await store.history(project.id, project.revision, "undo");
+  assert.deepEqual(undone.edits, globallyHidden.edits);
+  const redone = await store.history(project.id, undone.revision, "redo");
+  assert.deepEqual(redone.edits, project.edits);
+});
 
 test("camera layouts preserve disjoint source spans, partial overlap, history and source restoration", async (t) => {
   const { store, project: original } = await setup(t);
@@ -239,4 +277,20 @@ test("unsupported project or history versions never fall back or overwrite origi
     /layouts/,
     "v1 schema does not accept unrecognized v2 fields",
   );
+});
+
+test("camera layout mapping revisits earlier layouts after reordered clips and inserted media", async (t) => {
+  const { project } = await setup(t);
+  applyEdits(project, [
+    { type: "camera.layout.set", startMs: 0, endMs: 2000, settings: { x: 0.1 } },
+    { type: "camera.layout.set", startMs: 7000, endMs: 10000, settings: { x: 0.7 } },
+  ]);
+  project.edits.segments = [
+    { startMs: 7000, endMs: 10000 },
+    { assetId: "still", startMs: 0, endMs: 2000 },
+    { startMs: 0, endMs: 2000 },
+  ];
+  assert.equal(cameraAt(project, 1000).x, 0.7);
+  assert.equal(cameraAt(project, 4000).x, project.edits.camera.x);
+  assert.equal(cameraAt(project, 6000).x, 0.1);
 });

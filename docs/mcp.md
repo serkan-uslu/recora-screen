@@ -78,7 +78,7 @@ Tools expose the same validated commands as the UI. Tool names replace dots and 
 | AI/settings    | `ai_transcribe`, `ai_cleanSilence`, `ai_assistant`, `ai_models_list`, `ai_models_download`, `settings_get`, `settings_update`, `keychain_set`, `keychain_delete`            |
 | Jobs           | `jobs_list`, `jobs_get`, `jobs_cancel`                                                                                                                                      |
 
-Read `project_open` before writing and supply its `revision` as `expectedRevision`. Stale revisions fail without changing the project. A `timeline_apply` batch is atomic and uses one undo step. Timed input uses **current output timeline milliseconds**, except `clip.trim`'s explicit `sourceStartMs`/`sourceEndMs` and `source.restore`'s removed **source** range. Returned project annotations use **source milliseconds**. When cutting several intervals, submit cuts from the latest interval backwards so earlier cuts do not shift later inputs.
+Read `project_open` before writing and supply its `revision` as `expectedRevision`. Stale revisions fail without changing the project. A `timeline_apply` batch is atomic and uses one undo step. Timed input uses **current output timeline milliseconds**, except `clip.trim`/`clip.insert`'s explicit `sourceStartMs`/`sourceEndMs` and `source.restore`'s removed **source** range. Returned recording annotations use **source milliseconds**; imported audio clip timing stays in **output milliseconds**. When cutting several intervals, submit cuts from the latest interval backwards so earlier cuts do not shift later inputs.
 
 ```json
 {
@@ -91,7 +91,9 @@ Read `project_open` before writing and supply its `revision` as `expectedRevisio
 
 Use a unique `requestId` for a mutation and reuse it only for an identical retry in the same app session. The service retains the latest 1,000 retry receipts. Recording also requires an empty, idle project; export refuses to overwrite existing files.
 
-`timeline_apply` also supports `canvas.update`, `autoZoom.update`, `zoom.update`, `speed`, `clip.trim`, `clip.merge`, and `source.restore`. Use `transcript.text` with a cue's `id` and new `text` to edit words without changing source timestamps. Speed changes apply to every media track through the same mapping; old projects without a segment speed use 1×. `export_start` derives dimensions from the canvas when both dimensions are omitted; explicit dimensions must be supplied together. The 720p, 1080p, and 4K presets include portrait and square output.
+`timeline_apply` also supports `canvas.update`, `autoZoom.update`, `zoom.update`, `speed`, `clip.trim`, `clip.merge`, `clip.move`, `clip.insert`, and `source.restore`. Use `clip.move` with zero-based `index` and final-order `toIndex`; use `clip.insert` with an imported video/image `assetId`, output `atMs`, and optional `sourceStartMs` / `sourceEndMs`. Inserting inside a clip splits it. `source.restore` accepts an optional output `atMs` to insert missing original footage without reordering retained clips. See the [timeline editing contract](editor-features.md#timeline-commands).
+
+Use `transcript.text` with a cue's `id` and new `text` to edit words without changing source timestamps. Speed changes retime a clip and its associated source audio; imported music/voiceover clips stay anchored to output time. Old projects without a segment speed use 1×. `export_start` derives dimensions from the canvas when both dimensions are omitted; explicit dimensions must be supplied together. The 720p, 1080p, and 4K presets include portrait and square output.
 
 `preview_draft` accepts the same `projectId`, `expectedRevision`, and `operations` as an edit batch, after `preview_load` selects the project. It changes only the native preview: saved edits, revisions, and undo history stay intact. Supply an increasing `sequence` for a gesture stream. Use `timeline_apply` to commit or `preview_reset` with the project revision and a later sequence to restore the saved composition. Send at most one draft request at a time and coalesce interactive updates. Visual drafts reuse the current player item and never enter exports or undo history. `preview_geometry` returns current visible object bounds; `preview_selection` selects a camera or overlay for native editing handles (or accepts `null` to clear selection).
 
@@ -101,8 +103,12 @@ Use a unique `requestId` for a mutation and reuse it only for an identical retry
 
 `recording_status.phase` distinguishes `starting`, `recording`, `paused`, `finalizing`, and `idle`. During recording or finalization, other projects remain editable and the recording project stays protected. `recording_stop` still waits for and returns the final Project; it does not return a Job. Disconnecting a client does not stop recording.
 
-AI, model downloads, and exports return a Job with `id`. Poll `jobs_get` with `{ "jobId": "..." }` until completed, failed, or cancelled. `jobs_cancel` cancels a running operation. Export paths must be absolute, new `.mp4` files outside project storage. `preview_frame` returns a PNG image as MCP image content, plus its local path.
+AI, model downloads, and exports return a Job with `id`. Poll `jobs_get` with `{ "jobId": "..." }` until completed, failed, or cancelled. `jobs_cancel` cancels a running operation. Export paths must be absolute, new `.mp4` or `.gif` files matching the requested format, outside project storage. `preview_frame` returns a PNG image as MCP image content, plus its local path.
 
 Example prompt: “Open my React tutorial. Suggest silence cuts, preserve system audio, and show me the proposed intervals. Then hide my camera between 10 and 20 seconds, add a title for the first 3 seconds, and export a 1080p MP4 to Movies.”
 
 Local transcription needs a downloaded Whisper model and an audio track. Silence cleanup requires a microphone track; it protects audible system audio by default and returns proposed cuts unless you request application. Review those intervals before committing them. The optional in-app cloud assistant uses the same editing validation and has separate provider billing. Connected model clients may send returned transcript or preview content to their provider; see [Privacy](privacy.md).
+
+## Additional editor features
+
+See [timeline editing, arrows, privacy covers, imported audio, GIF export and cursor/camera controls](editor-features.md) for the UI workflow, exact operation fields, timing rules and limits. All edits use `timeline_apply`, retain revision checks and support undo. `asset_import` accepts image, audio and video kinds; `export_start` accepts `format: "gif"`, `gifFps` and `loop`.

@@ -1,11 +1,12 @@
 import { useMemo } from "react";
 import type { Project, Range, TimelineSegment } from "@/shared/types";
-import { segmentDuration } from "@/shared/timeline";
+import { segmentDuration, subtractRanges } from "@/shared/timeline";
 
 export type TimelineInterval = TimelineSegment & {
   index: number;
   outputStart: number;
   outputEnd: number;
+  name: string;
 };
 
 export type TimelineGap = Range & { outputMs: number };
@@ -19,6 +20,9 @@ export function useTimelineGeometry(project: Project, total: number, selection: 
         index,
         outputStart: offset,
         outputEnd: offset + segmentDuration(segment),
+        name: segment.assetId
+          ? (project.assets.find((asset) => asset.id === segment.assetId)?.name ?? "Imported media")
+          : "Screen",
       };
       offset = interval.outputEnd;
       return interval;
@@ -28,19 +32,26 @@ export function useTimelineGeometry(project: Project, total: number, selection: 
         Math.abs(interval.outputStart - selection.startMs) < 0.1 &&
         Math.abs(interval.outputEnd - selection.endMs) < 0.1,
     );
-    const gaps: TimelineGap[] = [];
-    let lastSource = 0;
-    let outputMs = 0;
-    for (const interval of intervals) {
-      if (interval.startMs > lastSource)
-        gaps.push({ startMs: lastSource, endMs: interval.startMs, outputMs });
-      lastSource = interval.endMs;
-      outputMs = interval.outputEnd;
-    }
-    if (project.source && lastSource < project.source.durationMs)
-      gaps.push({ startMs: lastSource, endMs: project.source.durationMs, outputMs: total });
+    const originals = intervals.filter((interval) => !interval.assetId);
+    const gaps: TimelineGap[] = subtractRanges(
+      project.source ? [{ startMs: 0, endMs: project.source.durationMs }] : [],
+      originals,
+    ).map((gap) => ({
+      ...gap,
+      outputMs:
+        originals.find((interval) => Math.abs(interval.startMs - gap.endMs) < 0.01)?.outputStart ??
+        originals.find((interval) => Math.abs(interval.endMs - gap.startMs) < 0.01)?.outputEnd ??
+        total,
+    }));
     const ratio = (value: number) =>
       total ? `${Math.max(0, Math.min(100, (value / total) * 100))}%` : "0%";
     return { intervals, gaps, selectedClip, ratio };
-  }, [project.edits.segments, project.source, selection.endMs, selection.startMs, total]);
+  }, [
+    project.assets,
+    project.edits.segments,
+    project.source,
+    selection.endMs,
+    selection.startMs,
+    total,
+  ]);
 }

@@ -1,18 +1,19 @@
 import { randomUUID } from "node:crypto";
 import { promises as fs } from "node:fs";
 import path from "node:path";
-import { AppError, checkRevision } from "@/server/contracts/validation.js";
+import { AppError, checkRevision, finite, sourceSchema } from "@/server/contracts/validation.js";
 import { cursorClicks } from "@/server/domain/cursor.js";
 import { applyEdits } from "@/server/domain/edits.js";
 import type { ProjectStore } from "@/server/infrastructure/ProjectStore.js";
 import type { PreviewService } from "@/server/services/PreviewService.js";
-import type { CommandParams } from "@/server/services/types.js";
+import type { CommandParams, NativeCall } from "@/server/services/types.js";
 import type { CursorEvent, EditOperation } from "@/shared/types.js";
 
 export class EditingService {
   constructor(
     private readonly store: ProjectStore,
     private readonly preview: PreviewService,
+    private readonly native: NativeCall,
   ) {}
 
   async apply(params: CommandParams) {
@@ -70,6 +71,45 @@ export class EditingService {
     if (inputInfo.isSymbolicLink())
       throw new AppError("INVALID_PATH", "Symbolic links cannot be imported");
     const info = await fs.stat(p.path);
+    if (p.kind === "audio" || p.kind === "video") {
+      const video = p.kind === "video";
+      const extension = path.extname(p.path).toLowerCase();
+      if (
+        !info.isFile() ||
+        info.size > (video ? 2_000_000_000 : 500_000_000) ||
+        !(
+          video ? [".mp4", ".mov", ".m4v"] : [".mp3", ".wav", ".m4a", ".aac", ".aiff", ".caf"]
+        ).includes(extension)
+      )
+        throw new AppError(
+          "INVALID_ASSET",
+          video
+            ? "Choose an MP4, MOV or M4V video smaller than 2 GB"
+            : "Choose a supported audio file smaller than 500 MB",
+        );
+      const inspected = await this.native(video ? "media.inspect" : "audio.inspect", {
+        path: p.path,
+      });
+      const dimensions = video
+        ? sourceSchema
+            .pick({ width: true, height: true })
+            .parse({ width: inspected.width, height: inspected.height })
+        : {};
+      const durationMs = finite.positive().max(Number.MAX_SAFE_INTEGER).parse(inspected.durationMs);
+      const assetId = randomUUID(),
+        relative = `assets/${assetId}${extension}`;
+      await this.store.copyMedia(project.id, p.path, relative);
+      return this.store.mutate(project.id, project.revision, (current) => {
+        current.assets.push({
+          id: assetId,
+          name: path.basename(p.path).slice(0, 200),
+          path: relative,
+          kind: video ? "video" : "audio",
+          durationMs,
+          ...dimensions,
+        });
+      });
+    }
     if (!info.isFile() || info.size > 50_000_000)
       throw new AppError("INVALID_ASSET", "Select a PNG, JPEG or WebP image smaller than 50 MB.");
     const handle = await fs.open(p.path, "r");

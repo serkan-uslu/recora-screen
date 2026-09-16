@@ -1,6 +1,7 @@
 import type { RefObject } from "react";
 import { X } from "lucide-react";
 import type { EditOperation, Project } from "@/shared/types";
+import { segmentSourceDuration } from "@/shared/timeline";
 import { IconButton } from "@/src/components/atoms/IconButton";
 import { Field } from "@/src/components/molecules/Field";
 import type { TimelineInterval } from "@/src/features/editor/hooks/useTimelineGeometry";
@@ -8,6 +9,7 @@ import type { TimelineInterval } from "@/src/features/editor/hooks/useTimelineGe
 const speeds = [0.25, 0.5, 0.75, 1, 1.25, 1.5, 2, 3, 4, 8];
 
 export function ClipContextMenu({
+  embedded = false,
   menuRef,
   position,
   project,
@@ -18,6 +20,7 @@ export function ClipContextMenu({
   close,
   apply,
 }: {
+  embedded?: boolean;
   menuRef: RefObject<HTMLDivElement | null>;
   position: { x: number; y: number };
   project: Project;
@@ -38,6 +41,7 @@ export function ClipContextMenu({
     return Boolean(
       before &&
       after &&
+      before.assetId === after.assetId &&
       Math.abs(before.endMs - after.startMs) < 0.01 &&
       (before.speed ?? 1) === (after.speed ?? 1),
     );
@@ -45,16 +49,20 @@ export function ClipContextMenu({
   return (
     <div
       ref={menuRef}
-      className="clip-context-menu"
-      style={{ left: position.x, top: position.y }}
-      role="dialog"
+      className={embedded ? "clip-inspector" : "clip-context-menu"}
+      style={embedded ? undefined : { left: position.x, top: position.y }}
+      role={embedded ? "group" : "dialog"}
       aria-label={`Clip ${clip.index + 1} actions`}
     >
       <div className="clip-context-header">
-        <strong>Clip {clip.index + 1}</strong>
-        <IconButton label="Close clip actions" onClick={close}>
-          <X size={12} />
-        </IconButton>
+        <strong>
+          Clip {clip.index + 1} · {clip.name}
+        </strong>
+        {!embedded && (
+          <IconButton label="Close clip actions" onClick={close}>
+            <X size={12} />
+          </IconButton>
+        )}
       </div>
       <div className="clip-context-actions">
         <Field label="Playback speed">
@@ -106,6 +114,41 @@ export function ClipContextMenu({
           Merge with next
         </button>
       </div>
+      <div className="clip-context-actions">
+        <button
+          disabled={disabled || clip.index === 0}
+          onClick={() =>
+            action([{ type: "clip.move", index: clip.index, toIndex: clip.index - 1 }])
+          }
+        >
+          Move earlier
+        </button>
+        <button
+          disabled={disabled || clip.index === intervals.length - 1}
+          onClick={() =>
+            action([{ type: "clip.move", index: clip.index, toIndex: clip.index + 1 }])
+          }
+        >
+          Move later
+        </button>
+        <Field label="Clip position">
+          <select
+            value={clip.index}
+            disabled={disabled || intervals.length < 2}
+            onChange={(event) =>
+              action([
+                { type: "clip.move", index: clip.index, toIndex: Number(event.target.value) },
+              ])
+            }
+          >
+            {intervals.map((interval) => (
+              <option key={interval.index} value={interval.index}>
+                {interval.index + 1} of {intervals.length}
+              </option>
+            ))}
+          </select>
+        </Field>
+      </div>
       <form
         key={`${project.revision}-${clip.index}`}
         className="clip-trim-form"
@@ -128,7 +171,7 @@ export function ClipContextMenu({
             name="sourceStart"
             type="number"
             step={0.001}
-            min={(intervals[clip.index - 1]?.endMs ?? 0) / 1000}
+            min={0}
             max={(clip.endMs - 1) / 1000}
             defaultValue={clip.startMs / 1000}
           />
@@ -140,7 +183,7 @@ export function ClipContextMenu({
             type="number"
             step={0.001}
             min={(clip.startMs + 1) / 1000}
-            max={(intervals[clip.index + 1]?.startMs ?? project.source!.durationMs) / 1000}
+            max={segmentSourceDuration(project, clip) / 1000}
             defaultValue={clip.endMs / 1000}
           />
         </Field>

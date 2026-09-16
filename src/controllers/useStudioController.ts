@@ -14,8 +14,9 @@ import { useJobsController } from "@/src/controllers/useJobsController";
 import { useProjectController } from "@/src/controllers/useProjectController";
 import { useRecordingController } from "@/src/controllers/useRecordingController";
 import { useStableCallback } from "@/src/controllers/useStableCallback";
-import { duration, outputRanges } from "@/shared/timeline";
+import { duration, outputRanges, segmentDuration } from "@/shared/timeline";
 import { command, desktop, messageOf, pickPath } from "@/src/api";
+import { targetRange, targetAfterEdit, type EditorTarget } from "@/src/controllers/editorSelection";
 import { type Modal, type Tab, type McpConfig } from "@/src/controllers/studioTypes";
 
 export const reconcileProjectRefresh = (current: Project | null, next: Project) =>
@@ -32,8 +33,12 @@ export function useStudioController() {
   const [selectedZoom, setSelectedZoom] = useState<string | null>(null);
   const inspectorRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
-    if (tab !== "zoom" || !selectedZoom) inspectorRef.current?.scrollTo({ top: 0 });
-  }, [tab, selectedZoom]);
+    inspectorRef.current?.scrollTo({ top: 0 });
+  }, [tab, project?.id]);
+  useEffect(() => {
+    if (modal === "zoom" && !project?.edits.zooms.some((zoom) => zoom.id === selectedZoom))
+      setModal(null);
+  }, [modal, project, selectedZoom]);
   const [search, setSearch] = useState("");
   const [sort, setSort] = useState("modified");
   const [error, setError] = useState("");
@@ -47,9 +52,44 @@ export function useStudioController() {
       (error) => setError(messageOf(error)),
     ),
   );
-  const [selectedOverlay, setSelectedOverlay] = useState<string | null>(null);
   const [cameraScope, setCameraScope] = useState<"selection" | "entire">("selection");
-  const [selection, setSelection] = useState<Range>({ startMs: 0, endMs: 0 });
+  const [selection, updateSelection] = useState<Range>({ startMs: 0, endMs: 0 });
+  const [editorTarget, setEditorTarget] = useState<EditorTarget | null>(null);
+  const editorTargetRef = useRef(editorTarget);
+  editorTargetRef.current = editorTarget;
+  const setSelection = useCallback((next: React.SetStateAction<Range>) => {
+    editorTargetRef.current = null;
+    setEditorTarget(null);
+    updateSelection(next);
+  }, []);
+  function selectEditorTarget(target: EditorTarget | null, current = project) {
+    editorTargetRef.current = target;
+    setEditorTarget(target);
+    if (!target || !current) {
+      updateSelection({ startMs: 0, endMs: 0 });
+      return;
+    }
+    const range = targetRange(current, target);
+    if (range) updateSelection(range);
+    if (target.kind === "clip") setTab("clip");
+    else if (target.kind === "camera") {
+      setCameraScope(target.scope ?? "selection");
+      setTab("camera");
+    } else if (target.kind === "zoom") {
+      setSelectedZoom(target.id);
+      setTab("zoom");
+    } else if (target.kind === "overlay") {
+      setTab("overlays");
+    } else setTab("audio");
+  }
+  useEffect(() => {
+    if (!project || !editorTarget) return;
+    const range = targetRange(project, editorTarget);
+    if (!range) {
+      setEditorTarget(null);
+      updateSelection({ startMs: 0, endMs: 0 });
+    } else updateSelection({ startMs: range.startMs, endMs: range.endMs });
+  }, [project, editorTarget]);
   const pendingProjectChanges = useRef(new Map<string, { revision?: number; deleted?: boolean }>());
   const busyRef = useRef(false);
   const projectRef = useRef(project);
@@ -118,11 +158,12 @@ export function useStudioController() {
   }
   useEffect(() => () => cancelDraftPreview(), []);
   const total = project ? duration(project.edits.segments) : 0;
-  async function importImage() {
+  async function importImage(kind: "image" | "audio" = "image") {
     if (!project) return;
-    const path = await pickPath("image");
+    const path = await pickPath(kind);
     if (!path) return;
     const next = await command<Project>("asset.import", {
+      kind,
       projectId: project.id,
       path,
       expectedRevision: project.revision,
@@ -149,6 +190,42 @@ export function useStudioController() {
   const refreshProjects = useCallback(async () => {
     setProjects(await command<ProjectSummary[]>("project.list"));
   }, []);
+  async function insertMedia(kind: "video" | "image") {
+    cancelDraftPreview();
+    await run(async () => {
+      const current = projectRef.current;
+      if (!current?.source) return;
+      const atMs = playback.getSnapshot().timeMs;
+      const path = await pickPath(kind);
+      if (!path || projectRef.current?.id !== current.id) return;
+      if (projectRef.current.revision !== current.revision)
+        throw new Error("The project changed while choosing media. Please insert it again.");
+      const imported = await command<Project>("asset.import", {
+        kind,
+        projectId: current.id,
+        path,
+        expectedRevision: current.revision,
+      });
+      acceptCurrentProject(imported);
+      if (projectRef.current?.id !== current.id) return;
+      const asset = imported.assets.find(
+        (item) => !current.assets.some((old) => old.id === item.id),
+      );
+      if (!asset) throw new Error("The imported media could not be found.");
+      const next = await command<Project>("timeline.apply", {
+        projectId: current.id,
+        expectedRevision: imported.revision,
+        operations: [{ type: "clip.insert", assetId: asset.id, atMs }],
+      });
+      if (projectRef.current?.id !== current.id) return;
+      acceptCurrentProject(next);
+      const inserted = next.edits.segments.find((segment) => segment.assetId === asset.id);
+      if (inserted) setSelection({ startMs: atMs, endMs: atMs + segmentDuration(inserted) });
+      playback.setDuration(duration(next.edits.segments));
+      await playback.seek(atMs);
+      await refreshProjects();
+    });
+  }
   const {
     settings,
     models,
@@ -207,6 +284,8 @@ export function useStudioController() {
     openProject,
     backToLibrary,
     importProject,
+    importVideo,
+    startRecordingProject,
     renameProject,
     deleteProject,
     createProject,
@@ -341,12 +420,11 @@ export function useStudioController() {
     setSelection({ startMs: 0, endMs: 0 });
     setSilenceReview(null);
     setSelectedZoom(null);
-    setSelectedOverlay(null);
     setCameraScope("selection");
-  }, [project?.id, playback, setSilenceReview]);
+  }, [project?.id, playback, setSilenceReview, setSelection]);
   useEffect(() => {
     playback.setDuration(total);
-    setSelection((s) => ({
+    updateSelection((s) => ({
       startMs: Math.min(s.startMs, total),
       endMs: Math.min(s.endMs, total),
     }));
@@ -368,6 +446,9 @@ export function useStudioController() {
         throw error;
       }
       if (projectRef.current?.id !== next.id) return;
+      const nextTarget = targetAfterEdit(editorTargetRef.current, project, next, operations);
+      if (editorTargetRef.current && !nextTarget) updateSelection({ startMs: 0, endMs: 0 });
+      setEditorTarget(nextTarget);
       acceptCurrentProject(next);
       const zoom = next.edits.zooms.find(
         (item) => !project.edits.zooms.some((old) => old.id === item.id),
@@ -376,18 +457,24 @@ export function useStudioController() {
         (item) => !project.edits.overlays.some((old) => old.id === item.id),
       );
       if (zoom && operations.some((op) => op.type === "zoom.add")) {
-        setSelectedZoom(zoom.id);
-        setSelectedOverlay(null);
-        setTab("zoom");
+        selectEditorTarget({ kind: "zoom", id: zoom.id }, next);
         const ranges = outputRanges(next.edits.segments, zoom);
         if (ranges[0]) await playback.seek((ranges[0].startMs + ranges[0].endMs) / 2);
       }
       if (overlay && operations.some((op) => op.type === "overlay.add")) {
-        setSelectedOverlay(overlay.id);
+        selectEditorTarget({ kind: "overlay", id: overlay.id }, next);
         setSelectedZoom(null);
-        setTab("overlays");
         const ranges = outputRanges(next.edits.segments, overlay);
         if (ranges[0]) await playback.seek((ranges[0].startMs + ranges[0].endMs) / 2);
+      }
+      const moved = operations.find((op) => op.type === "clip.move");
+      if (moved?.type === "clip.move") {
+        const clip = next.edits.segments[moved.toIndex];
+        if (clip) {
+          const startMs = duration(next.edits.segments.slice(0, moved.toIndex));
+          updateSelection({ startMs, endMs: startMs + segmentDuration(clip) });
+          await playback.seek(startMs);
+        }
       }
       void refreshProjects();
     });
@@ -447,7 +534,11 @@ export function useStudioController() {
         e.preventDefault();
         void history(e.shiftKey ? "redo" : "undo");
       }
-      if (e.code === "Space" && project?.source) {
+      if (
+        e.code === "Space" &&
+        project?.source &&
+        !(e.target instanceof HTMLElement && e.target.closest("button, summary, a, [role=button]"))
+      ) {
         e.preventDefault();
         void togglePlayback();
       }
@@ -497,6 +588,8 @@ export function useStudioController() {
     startJob,
     projectLocked,
     createProject,
+    importVideo,
+    startRecordingProject,
     commitRename,
     confirmDelete,
     refreshCapabilities,
@@ -512,22 +605,23 @@ export function useStudioController() {
     tab,
     setTab,
     selectedZoom,
-    setSelectedZoom,
     inspectorRef,
     playback,
-    selectedOverlay,
-    setSelectedOverlay,
     cameraScope,
     setCameraScope,
     recordingBusy,
     selection,
     setSelection,
+    editorTarget,
+    selectEditorTarget,
     chats,
     setChats,
     silenceReview,
     setSilenceReview,
     total,
-    importImage: useStableCallback(importImage),
+    importImage: useStableCallback(() => importImage()),
+    importAudio: useStableCallback(() => importImage("audio")),
+    insertMedia: useStableCallback(insertMedia),
     apply: useStableCallback(apply),
     seek,
     togglePlayback,

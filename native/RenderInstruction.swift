@@ -49,15 +49,27 @@ final class RenderInstruction: NSObject, AVVideoCompositionInstructionProtocol, 
     let images: [String: CIImage]
     let directory: String
     let transforms: [CMPersistentTrackID: CGAffineTransform]
+    let mediaTransforms: [String: CGAffineTransform]
+    let mediaSizes: [String: CGSize]
+    let renderZooms: [Zoom]
     let focusPaths: [String: [CursorEvent]]
+    let clicks: [CursorEvent]
     let interactions: [CursorEvent]
     let cameraRuns: [CameraRun]
-    init(project: Project, duration: CMTime, screenID: CMPersistentTrackID, cameraID: CMPersistentTrackID?, cursor: [CursorEvent], directory: String, images: [String: CIImage], transforms: [CMPersistentTrackID: CGAffineTransform], previous: RenderInstruction? = nil) {
+    init(project: Project, duration: CMTime, screenID: CMPersistentTrackID, cameraID: CMPersistentTrackID?, cursor: [CursorEvent], directory: String, images: [String: CIImage], transforms: [CMPersistentTrackID: CGAffineTransform], mediaTransforms: [String: CGAffineTransform] = [:], mediaSizes: [String: CGSize] = [:], previous: RenderInstruction? = nil) {
         let renderCursor = previous?.cursor ?? cursor.filter { $0.kind != "typing" }
-        self.project = project; self.screenID = screenID; self.cameraID = cameraID; self.cursor = renderCursor; self.directory = directory; self.images = images; self.transforms = transforms
+        self.project = project; self.screenID = screenID; self.cameraID = cameraID; self.cursor = renderCursor; self.directory = directory; self.images = images; self.transforms = transforms; self.mediaTransforms = mediaTransforms; self.mediaSizes = mediaSizes
+        var clicks: [CursorEvent] = [], pressed = false
+        for event in renderCursor {
+            if event.kind == "click" || (event.click == true && !pressed) { clicks.append(event) }
+            pressed = event.click == true
+        }
+        self.clicks = clicks
         self.interactions = cursor; self.cameraRuns = cameraOutputRuns(project)
-        self.focusPaths = Dictionary(project.edits.zooms.map { zoom in
-            let unchanged = previous?.project.edits.zooms.first(where: { $0.id == zoom.id }).map { (try? JSONEncoder().encode($0)) == (try? JSONEncoder().encode(zoom)) } ?? false
+        let renderZooms = continuousZooms(project.edits.zooms)
+        self.renderZooms = renderZooms
+        self.focusPaths = Dictionary(renderZooms.map { zoom in
+            let unchanged = previous?.renderZooms.first(where: { $0.id == zoom.id }).map { (try? JSONEncoder().encode($0)) == (try? JSONEncoder().encode(zoom)) } ?? false
             return (zoom.id, unchanged ? (previous?.focusPaths[zoom.id] ?? []) : zoomFocusPath(zoom, cursor: renderCursor, interactions: cursor))
         }, uniquingKeysWith: { _, last in last })
         timeRange = CMTimeRange(start: .zero, duration: duration)

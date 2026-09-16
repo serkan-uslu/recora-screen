@@ -1,4 +1,4 @@
-import { useContext, useEffect, useRef, type ReactNode } from "react";
+import { useContext, useLayoutEffect, useRef, type ReactNode } from "react";
 import { X } from "lucide-react";
 import { IconButton } from "@/src/components/atoms/IconButton";
 import { ErrorContext } from "@/src/controllers/StudioContexts";
@@ -18,7 +18,7 @@ export function Dialog({
 }) {
   const dialog = useRef<HTMLDialogElement>(null);
   const error = useContext(ErrorContext);
-  useEffect(() => {
+  useLayoutEffect(() => {
     const element = dialog.current;
     element?.showModal();
     return () => element?.close();

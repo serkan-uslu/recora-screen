@@ -1,8 +1,9 @@
 import type { McpPermissions } from "@/shared/types";
 
 export type Modal =
-  "new" | "record" | "settings" | "export" | "rename" | "delete" | "help" | "about" | null;
-export type Tab = "general" | "camera" | "zoom" | "overlays" | "audio" | "transcript" | "ai";
+  "new" | "record" | "settings" | "export" | "rename" | "delete" | "help" | "about" | "zoom" | null;
+export type Tab =
+  "clip" | "general" | "camera" | "zoom" | "overlays" | "audio" | "transcript" | "ai";
 export type Settings = {
   provider: "openai" | "anthropic";
   openaiModel: string;

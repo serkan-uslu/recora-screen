@@ -85,28 +85,6 @@
   }
 }
 @media (max-height: 800px) {
-  .timeline {
-    height: 225px;
-    min-height: 225px;
-  }
-  .timeline-content {
-    height: 176px;
-  }
-  .track,
-  .track-labels > span {
-    height: 32px;
-  }
-  .clip {
-    height: 23px;
-    top: 4px;
-  }
-  .camera-hidden {
-    height: 23px;
-    top: 4px;
-  }
-  .effect-track .clip {
-    height: 12px;
-  }
   .record-empty-icon {
     width: 54px;
     height: 54px;
@@ -484,7 +462,7 @@
 .source-gap {
   position: absolute;
   top: 5px;
-  height: 28px;
+  height: calc(var(--timeline-track-height) - 10px);
   width: 15px;
   padding: 0;
   transform: translateX(-50%);
@@ -610,6 +588,10 @@
   display: flex;
   align-items: end;
   gap: 6px;
+  flex-wrap: wrap;
+}
+.clip-context-actions + .clip-context-actions {
+  margin-top: 8px;
 }
 .clip-context-actions > button {
   padding: 8px 7px;
@@ -793,14 +775,20 @@
   user-select: none;
 }
 .selection-actions {
-  min-height: 32px;
+  height: 36px;
+  flex: none;
   padding: 4px 16px;
   display: flex;
   gap: 8px;
   align-items: center;
   border-bottom: 1px solid var(--line);
   font-size: 10px;
-  flex-wrap: wrap;
+  white-space: nowrap;
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+.selection-actions > * {
+  flex: none;
 }
 .selection-actions > span {
   color: var(--color-accent);

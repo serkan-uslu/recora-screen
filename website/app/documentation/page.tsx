@@ -31,7 +31,7 @@ export default function DocumentationPage() {
         <aside className="docs-toc" aria-label="On this page">
           <span className="eyebrow">ON THIS PAGE</span>
           <a href="#overview">Overview</a>
-          <a href="#record">Record</a>
+          <a href="#record">Record or import</a>
           <a href="#edit">Edit</a>
           <a href="#ai">Local AI</a>
           <a href="#mcp">MCP</a>
@@ -82,12 +82,12 @@ export default function DocumentationPage() {
             <h2>Record your first take.</h2>
             <ol className="docs-steps">
               <li>
-                <strong>Create a project.</strong> Choose New project on the Projects screen and
-                give the draft a useful name.
+                <strong>Choose Record screen.</strong> Capture setup opens with a new draft; no
+                project name is required first. Rename it from the editor header when ready.
               </li>
               <li>
-                <strong>Choose Record.</strong> Capture an entire display, one window or a selected
-                region.
+                <strong>Choose a source.</strong> Capture an entire display, one window or a
+                selected region.
               </li>
               <li>
                 <strong>Select sources.</strong> Enable a camera, microphone and system audio only
@@ -106,6 +106,14 @@ export default function DocumentationPage() {
                 you work in another project.
               </li>
             </ol>
+            <h3>Start with an existing video</h3>
+            <p>
+              Choose Import video on the Projects screen for an MP4, MOV or M4V. The app copies it
+              into a new editable project with its duration, dimensions, frame rate and embedded
+              audio intact. This does not start a recording or require capture permissions. Its
+              soundtrack appears as Video audio; a separate camera or cursor track is not created.
+              Open project instead reopens a saved Screen Recorder project folder.
+            </p>
             <div className="docs-callout">
               <p>
                 <strong>Cursor events:</strong> pointer movement works without Input Monitoring.
@@ -118,15 +126,49 @@ export default function DocumentationPage() {
           <section className="docs-section" id="edit">
             <p className="eyebrow">CREATOR GUIDE · EDIT</p>
             <h2>Shape the story.</h2>
+            <h3>Your first edit</h3>
+            <p>
+              Follow the first-edit guide above the preview: play, split/delete, then export. Quick
+              start stays in the header after dismissing the guide. Click a clip to see its
+              properties on the right. The selection label names the object and its time range, so
+              you can check what an action will affect before applying it.
+            </p>
+            <p>
+              Edits save automatically. Project options → Save now and ⌘S remain available for
+              manual saving. Export video makes a separate MP4 or GIF; the saved project remains
+              editable.
+            </p>
             <h3>Timeline</h3>
             <p>
-              Drag the playhead to scrub with a live preview. Drag across the Screen, Camera, Audio
-              or empty timeline area to select a range. Every row has a context menu; use Shift-drag
-              over an existing effect to create a range selection.
+              Drag the playhead to scrub with a live preview. Click a video, camera, zoom, layer or
+              imported audio clip to select it and see its controls. Drag an empty timeline area or
+              Shift-drag across clips to select a range. Every row has a context menu. Selection
+              actions keep their own row, so the tracks stay in place when a selection changes.
+            </p>
+            <p>
+              Filmstrips from the original footage and waveforms from decoded audio help locate
+              content. Use Preview to check the finished composition. Zoom and Layers use separate
+              rows. The delete button follows the selection: Delete video clip, Delete zoom, Delete
+              layer or Delete audio clip removes that object; Hide camera clip affects only the
+              camera. A time-range selection instead offers Delete time range or Keep only this
+              range. Split video cuts at the playhead.
+            </p>
+            <p>
+              Delete or Backspace removes an object selected in the timeline, inspector or preview.
+              Deleting a camera clip only hides that camera interval; restore it with the camera
+              visibility switch or Undo. Deleting a time range with the keyboard requires timeline
+              focus. These shortcuts leave timeline items alone while you edit a text or number
+              field. Drag the timeline’s top boundary to adjust its height, or focus the boundary
+              and use the Up/Down arrow keys. Escape cancels a resize drag.
+            </p>
+            <p>
+              The timeline must retain some footage: split or trim the final video to remove only
+              part of it, or add another clip before deleting it entirely.
             </p>
             <ul>
               <li>
-                Cut or keep a selection, split and merge clips, change speed, and undo or redo.
+                Cut/delete or keep a selection, split at the playhead, trim clip edges, merge
+                adjacent clips, change speed, and undo or redo.
               </li>
               <li>
                 Add a manual zoom to a range, then adjust depth, position, motion and cursor
@@ -137,6 +179,54 @@ export default function DocumentationPage() {
               </li>
               <li>Adjust microphone and system audio independently.</li>
             </ul>
+            <h3>Zoom settings and split clips</h3>
+            <p>
+              Continuous typing near the same target holds one automatic zoom; pauses and target
+              changes create separate moments. Hold controls how long a zoom remains after activity.
+              New recordings use this automatically. On an existing recording, open Automatic zoom
+              settings in Zoom and choose Redetect automatic zooms to replace the current zooms,
+              including manual ones, in one undoable step.
+            </p>
+            <p>
+              Click a zoom in the list to open its settings in a dialog without scrolling the list.
+              On the timeline, click once to select, then double-click or choose Edit selected zoom
+              to open settings. Done or Escape returns to your list position. Appearance changes
+              save immediately; use Update timing for start and duration changes.
+            </p>
+            <p>
+              Select a split camera clip and use This selection for independent position, size,
+              shape, mirror, shadow and visibility. Video default changes the base appearance for
+              footage without its own layout; existing clip layouts and hidden ranges stay intact.
+              Split at the playhead separates a crossing zoom into independently editable zooms.
+              Canvas, cursor styling and master audio volumes remain global; repeated source footage
+              shares its source-bound effects.
+            </p>
+            <h3>Move clips and insert media</h3>
+            <p>
+              Right-click a clip or open Selected clip actions. Move earlier and Move later swap its
+              place with the next clip in that direction; Clip position moves it to a chosen
+              position. Original zooms, camera layouts, captions and layers follow their footage.
+              Cuts and splits affect only the selected occurrence in the output timeline.
+            </p>
+            <p>
+              Choose Add media at playhead → Insert video… or Insert image… to add an intro, cutaway
+              or closing card. Inserting inside a clip splits it around the new media. Videos
+              support MP4, MOV and M4V up to 2 GB; images support PNG, JPEG and WebP. Files are
+              copied into the project. Images start at three seconds: adjust Source in / Source out
+              and choose Apply trim to extend them up to 60 seconds.
+            </p>
+            <p>
+              Inserted videos keep their embedded audio, trim and speed, using the system-audio
+              volume setting. Inserted media uses the global canvas, without the original
+              recording’s camera, cursor effects, captions or layers. Imported music and voiceovers
+              stay at their output times, so review their timing after rearranging video.
+            </p>
+            <p>
+              Use Restore deleted footage at playhead to insert a missing original interval without
+              reordering the remaining clips. Undo and redo cover timeline edits; source files
+              remain intact. Editing uses one video sequence with cuts, without stacked video tracks
+              or transition effects.
+            </p>
             <h3>Direct manipulation</h3>
             <p>
               Select the camera, text or an image in the preview. Drag to move it and use corner
@@ -144,10 +234,53 @@ export default function DocumentationPage() {
               undo step when the gesture ends. Press Escape during a gesture to restore its starting
               value.
             </p>
+            <h3>Arrows and privacy covers</h3>
+            <p>
+              Select an interval, open Layers, and choose Add arrow, Add blur or Add solid cover.
+              Drag the layer in the preview; adjust width, height, arrow direction, color or blur
+              strength in its properties. Use selected time range changes its timing.
+            </p>
+            <p>
+              Blur softens details; choose a solid cover for sensitive information. Covers are
+              opaque and unanimated, stay fixed on the output canvas, and render over the camera and
+              captions. Review every covered interval through zooms and layout changes. Original
+              media remains in the editable project.
+            </p>
+            <h3>Imported audio</h3>
+            <p>
+              Select an interval and choose Audio → Add audio to selection. Supported files are MP3,
+              WAV, M4A, AAC, AIFF and CAF up to 500 MB. Each file is copied into the project. Adjust
+              Start, End, Skip into audio and Clip volume, or remove the clip. Imported clips appear
+              on the Audio timeline row.
+            </p>
+            <p>
+              Music and voiceovers use output time: screen cuts and speed changes do not retime
+              them. Playback is clipped at the current video end. Move a clip back into the video if
+              a trim leaves it outside the timeline. Undo restores edits; removing a clip retains
+              its file in the project.
+            </p>
+            <h3>Cursor and camera effects</h3>
+            <p>
+              In Zoom → Cursor → Cursor effects and style, enable motion blur, click bounce, sway or
+              Loop cursor path, and choose a light or dark pointer. Cursor effects need recorded
+              pointer metadata. Loop blends the last 350 ms toward the first visible pointer
+              position; it does not loop the screen footage.
+            </p>
+            <p>
+              In Camera, enable Mirror camera or Shrink camera during zoom. Square cameras have an
+              adjustable corner radius, and shadows have an opacity slider. These settings follow
+              This selection or Video default just like camera position and size. Saved range
+              layouts retain their settings. Canvas → Frame and spacing holds advanced canvas
+              controls.
+            </p>
             <h3>Captions and export</h3>
             <p>
               Edit transcript cues, burn captions into the video or save SRT/VTT. Export produces a
-              separate MP4, so the project and original media remain editable.
+              separate MP4 or GIF, so the project and original media remain editable. MP4 keeps
+              audio and supports up to 4K. GIF is silent: choose 640 or 1280 pixels on the longest
+              edge, 15/20/25/30 FPS and continuous looping or one play. GIF supports up to 60
+              seconds; trim longer timelines or choose MP4. Export progress and cancellation are
+              available for both formats.
             </p>
           </section>
 

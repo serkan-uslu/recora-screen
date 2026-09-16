@@ -1,8 +1,19 @@
-import { useState, type Dispatch, type FormEvent, type SetStateAction } from "react";
+import {
+  useState,
+  useSyncExternalStore,
+  type Dispatch,
+  type FormEvent,
+  type SetStateAction,
+} from "react";
+import { projectSaveState, subscribeProjectSave } from "@/src/services/projectSaveState";
 import { command, pickPath } from "@/src/api";
 import type { RunAction } from "@/src/controllers/controllerTypes";
 import type { Modal } from "@/src/controllers/studioTypes";
 import type { Project, RecordingStatus } from "@/shared/types";
+
+export function useProjectSaveState(projectId: string | undefined) {
+  return useSyncExternalStore(subscribeProjectSave, () => projectSaveState(projectId));
+}
 
 export function useProjectController({
   project,
@@ -34,7 +45,7 @@ export function useProjectController({
     if (!project || (recording.active && recording.projectId === project.id)) return;
     await run(async () => {
       acceptCurrentProject(await command<Project>("project.save", { projectId: project.id }));
-      setNotice("Draft saved");
+      setNotice("Project saved");
       await refreshProjects();
     });
   }
@@ -59,13 +70,25 @@ export function useProjectController({
     });
   }
 
-  async function importProject() {
+  async function importProject(kind: "project" | "video" = "project") {
     await run(async () => {
-      const path = await pickPath("project");
+      const path = await pickPath(kind);
       if (!path) return;
+      cancelDraftPreview();
       const imported = await command<Project>("project.import", { path });
       await refreshProjects();
       setProject(imported);
+      setModal(null);
+    });
+  }
+
+  async function startRecordingProject() {
+    if (recording.active) return;
+    await run(async () => {
+      const created = await command<Project>("project.create");
+      setProject(created);
+      setModal("record");
+      await refreshProjects();
     });
   }
 
@@ -125,6 +148,8 @@ export function useProjectController({
     openProject,
     backToLibrary,
     importProject,
+    importVideo: () => importProject("video"),
+    startRecordingProject,
     renameProject,
     deleteProject,
     createProject,

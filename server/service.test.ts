@@ -1008,7 +1008,7 @@ test("clip extension, merging and source restoration preserve neighboring speeds
     service.command("timeline.apply", {
       projectId: p.id,
       expectedRevision: p.revision,
-      operations: [{ type: "clip.trim", index: 0, sourceStartMs: 0, sourceEndMs: 6000 }],
+      operations: [{ type: "clip.trim", index: 0, sourceStartMs: 0, sourceEndMs: 11000 }],
     }),
     { code: "INVALID_RANGE" },
   );
@@ -1831,4 +1831,440 @@ test("an edit committed during initial preview preparation is rendered after the
   const [, committed] = await Promise.all([loading, editing]);
   assert.equal(preview!.revision, committed.revision);
   assert.equal(preview!.edits.camera.x, 0.2);
+});
+
+test("new layers and camera/cursor settings persist, map times and undo atomically", async (t) => {
+  const { service } = await setup(t);
+  const before = await ready(service);
+  const project: Project = await service.command("timeline.apply", {
+    projectId: before.id,
+    expectedRevision: before.revision,
+    operations: [
+      { type: "cut", startMs: 1000, endMs: 2000 },
+      ...(["arrow", "blur", "redact"] as const).map((kind) => ({
+        type: "overlay.add",
+        overlay: {
+          kind,
+          startMs: 500,
+          endMs: 1500,
+          x: 0.1,
+          y: 0.2,
+          width: 0.3,
+          height: 0.15,
+          rotation: 45,
+          blur: 40,
+          fontSize: 48,
+          color: "#000000",
+          animation: "none",
+        },
+      })),
+      {
+        type: "camera.layout.set",
+        startMs: 500,
+        endMs: 1500,
+        settings: { mirror: true, radius: 0.2, shadowOpacity: 0.7, zoomReactive: true },
+      },
+      {
+        type: "cursor.update",
+        settings: { motionBlur: true, bounce: true, sway: true, loop: true, style: "light" },
+      },
+    ],
+  });
+  assert.equal(project.edits.overlays.length, 3);
+  assert.equal(project.edits.overlays[0]!.endMs, 2500);
+  assert.equal(project.edits.camera.layouts.length, 2);
+  assert(
+    project.edits.camera.layouts.every(
+      (layout) => layout.mirror && layout.zoomReactive && layout.radius === 0.2,
+    ),
+  );
+  assert.deepEqual(
+    (await new ProjectStore(service.store.root).get(project.id)).edits,
+    project.edits,
+  );
+  await assert.rejects(
+    service.command("timeline.apply", {
+      projectId: project.id,
+      expectedRevision: project.revision,
+      operations: [
+        { type: "overlay.update", id: project.edits.overlays[0]!.id, overlay: { height: -1 } },
+      ],
+    }),
+    /height/,
+  );
+  const undone: Project = await service.command("history.undo", {
+    projectId: project.id,
+    expectedRevision: project.revision,
+  });
+  assert.deepEqual(undone.edits, before.edits);
+});
+
+test("audio imports are copied, type checked and independent of screen timing", async (t) => {
+  const { root, service } = await setup(t, async (method) => {
+    if (method === "audio.inspect") return { durationMs: 5000 };
+    throw Error(method);
+  });
+  let p = await ready(service);
+  const file = path.join(root, "music.wav");
+  await fs.writeFile(file, "isolated decoder fixture");
+  p = await service.command("asset.import", {
+    projectId: p.id,
+    path: file,
+    kind: "audio",
+    expectedRevision: p.revision,
+  });
+  const asset = p.assets[0]!;
+  assert.equal(asset.kind, "audio");
+  assert.equal(asset.durationMs, 5000);
+  assert.equal(
+    await fs.readFile(path.join(service.store.dir(p.id), asset.path), "utf8"),
+    "isolated decoder fixture",
+  );
+  p = await service.command("timeline.apply", {
+    projectId: p.id,
+    expectedRevision: p.revision,
+    operations: [
+      {
+        type: "audioClip.add",
+        clip: { assetId: asset.id, startMs: 1000, endMs: 4000, offsetMs: 500, volume: 0.5 },
+      },
+    ],
+  });
+  const original = structuredClone(p.edits.audioClips);
+  p = await service.command("timeline.apply", {
+    projectId: p.id,
+    expectedRevision: p.revision,
+    operations: [
+      { type: "speed", startMs: 0, endMs: 5000, speed: 2 },
+      { type: "cut", startMs: 0, endMs: 1000 },
+    ],
+  });
+  assert.deepEqual(p.edits.audioClips, original);
+  const id = p.edits.audioClips![0]!.id;
+  await assert.rejects(
+    service.command("timeline.apply", {
+      projectId: p.id,
+      expectedRevision: p.revision,
+      operations: [{ type: "audioClip.update", id, clip: { offsetMs: 4000 } }],
+    }),
+    /duration/,
+  );
+  await assert.rejects(
+    service.command("timeline.apply", {
+      projectId: p.id,
+      expectedRevision: p.revision,
+      operations: [
+        {
+          type: "overlay.add",
+          overlay: {
+            kind: "image",
+            assetId: asset.id,
+            startMs: 0,
+            endMs: 500,
+            x: 0,
+            y: 0,
+            width: 0.5,
+            fontSize: 48,
+            color: "#ffffff",
+            animation: "none",
+          },
+        },
+      ],
+    }),
+    /image/,
+  );
+  p = await service.command("timeline.apply", {
+    projectId: p.id,
+    expectedRevision: p.revision,
+    operations: [{ type: "audioClip.remove", id }],
+  });
+  assert.equal(p.edits.audioClips!.length, 0);
+  p = await service.command("history.undo", { projectId: p.id, expectedRevision: p.revision });
+  assert.deepEqual(p.edits.audioClips, original);
+  assert.deepEqual(
+    (await new ProjectStore(service.store.root).get(p.id)).edits.audioClips,
+    original,
+  );
+  const link = path.join(root, "link.wav");
+  await fs.symlink(file, link);
+  await assert.rejects(
+    service.command("asset.import", { projectId: p.id, path: link, kind: "audio" }),
+    /Symbolic/,
+  );
+});
+
+test("GIF export validates limits and forwards settings without overwriting outputs", async (t) => {
+  let options: Record<string, unknown> | undefined;
+  const { root, service } = await setup(t, async (method, params) => {
+    if (method === "export.start") {
+      options = params;
+      assert.equal(typeof params?.path, "string");
+      await fs.writeFile(String(params?.path), "gif fixture");
+      return {};
+    }
+    if (method === "export.status") return { status: "completed", progress: 1 };
+    throw Error(method);
+  });
+  const p = await ready(service),
+    file = path.join(root, "demo.gif");
+  const job: Job = await service.command("export.start", {
+    projectId: p.id,
+    path: file,
+    format: "gif",
+    width: 640,
+    height: 360,
+    gifFps: 25,
+    loop: false,
+  });
+  assert.equal((await waitJob(service, job.id)).status, "completed");
+  assert.equal(options?.format, "gif");
+  assert.equal(options?.gifFps, 25);
+  assert.equal(options?.loop, false);
+  await assert.rejects(
+    service.command("export.start", { projectId: p.id, path: file, format: "gif" }),
+    /exists/,
+  );
+  await assert.rejects(
+    service.command("export.start", {
+      projectId: p.id,
+      path: path.join(root, "bad.mp4"),
+      format: "gif",
+    }),
+    /gif/,
+  );
+  await assert.rejects(
+    service.command("export.start", {
+      projectId: p.id,
+      path: path.join(root, "large.gif"),
+      format: "gif",
+      width: 1920,
+      height: 1080,
+    }),
+    /1280/,
+  );
+  await assert.rejects(
+    service.command("export.start", {
+      projectId: p.id,
+      path: path.join(root, "fps.gif"),
+      format: "gif",
+      gifFps: 60,
+    }),
+    /gifFps/,
+  );
+});
+
+test("moving clips preserves source effects and cut/split affect only the selected output occurrence", async (t) => {
+  const { service } = await setup(t);
+  let p = await ready(service);
+  p = await service.command("timeline.apply", {
+    projectId: p.id,
+    expectedRevision: p.revision,
+    operations: [
+      { type: "zoom.add", zoom: { startMs: 0, endMs: 1000, scale: 2, x: 0.5, y: 0.5 } },
+      { type: "split", atMs: 2000 },
+      { type: "split", atMs: 5000 },
+      { type: "clip.move", index: 0, toIndex: 2 },
+      { type: "clip.trim", index: 0, sourceStartMs: 0, sourceEndMs: 5000 },
+    ],
+  });
+  assert.deepEqual(p.edits.segments, [
+    { startMs: 0, endMs: 5000 },
+    { startMs: 5000, endMs: 10000 },
+    { startMs: 0, endMs: 2000 },
+  ]);
+  const before = structuredClone(p);
+  p = await service.command("timeline.apply", {
+    projectId: p.id,
+    expectedRevision: p.revision,
+    operations: [
+      { type: "split", atMs: 11000 },
+      { type: "cut", startMs: 10000, endMs: 10500 },
+    ],
+  });
+  assert.deepEqual(p.edits.segments, [
+    before.edits.segments[0],
+    before.edits.segments[1],
+    { startMs: 500, endMs: 1000 },
+    { startMs: 1000, endMs: 2000 },
+  ]);
+  assert.deepEqual(p.edits.zooms, before.edits.zooms);
+  assert.deepEqual(outputRanges(p.edits.segments, p.edits.zooms[0]!), [
+    { startMs: 0, endMs: 1000 },
+    { startMs: 10000, endMs: 10500 },
+  ]);
+  const undone = await service.command("history.undo", {
+    projectId: p.id,
+    expectedRevision: p.revision,
+  });
+  assert.deepEqual(undone.edits, before.edits);
+  const redone = await service.command("history.redo", {
+    projectId: p.id,
+    expectedRevision: undone.revision,
+  });
+  assert.deepEqual((await new ProjectStore(service.store.root).get(p.id)).edits, redone.edits);
+  await assert.rejects(
+    service.command("timeline.apply", {
+      projectId: p.id,
+      expectedRevision: redone.revision,
+      operations: [{ type: "clip.move", index: 0, toIndex: 99 }],
+    }),
+    { code: "NOT_FOUND" },
+  );
+});
+
+test("video and image inserts split at output time, retain copied assets and validate independent source bounds", async (t) => {
+  const { service, root } = await setup(t, async (method) => {
+    if (method === "media.inspect")
+      return { durationMs: 4000, width: 640, height: 360, fps: 30, hasAudio: true };
+    throw Error(method);
+  });
+  let p = await ready(service);
+  const file = path.join(root, "insert.mp4");
+  await fs.writeFile(file, "immutable inserted video");
+  p = await service.command("asset.import", {
+    projectId: p.id,
+    expectedRevision: p.revision,
+    path: file,
+    kind: "video",
+  });
+  const video = p.assets[0]!;
+  assert.equal(video.durationMs, 4000);
+  assert.equal(video.width, 640);
+  const imagePath = path.join(root, "card.png");
+  await fs.writeFile(imagePath, Buffer.from("89504e470d0a1a0a0000000000000000", "hex"));
+  p = await service.command("asset.import", {
+    projectId: p.id,
+    expectedRevision: p.revision,
+    path: imagePath,
+    kind: "image",
+  });
+  const image = p.assets[1]!;
+  p = await service.command("timeline.apply", {
+    projectId: p.id,
+    expectedRevision: p.revision,
+    operations: [
+      { type: "speed", startMs: 0, endMs: 10000, speed: 2 },
+      { type: "clip.insert", assetId: video.id, atMs: 1000, sourceStartMs: 500, sourceEndMs: 2500 },
+      { type: "clip.insert", assetId: image.id, atMs: 7000 },
+      { type: "clip.move", index: 3, toIndex: 0 },
+    ],
+  });
+  assert.deepEqual(p.edits.segments, [
+    { assetId: image.id, startMs: 0, endMs: 3000 },
+    { startMs: 0, endMs: 2000, speed: 2 },
+    { assetId: video.id, startMs: 500, endMs: 2500 },
+    { startMs: 2000, endMs: 10000, speed: 2 },
+  ]);
+  for (const operation of [
+    { type: "clip.insert", assetId: video.id, atMs: 10001 },
+    { type: "clip.insert", assetId: video.id, atMs: 0, sourceEndMs: 4001 },
+    { type: "clip.trim", index: 0, sourceStartMs: 0, sourceEndMs: 60001 },
+    { type: "clip.merge", index: 1 },
+    { type: "clip.insert", assetId: "missing", atMs: 0 },
+  ])
+    await assert.rejects(
+      service.command("timeline.apply", {
+        projectId: p.id,
+        expectedRevision: p.revision,
+        operations: [operation],
+      }),
+    );
+  assert.equal(
+    projectSchema.safeParse({
+      ...p,
+      edits: { ...p.edits, segments: [{ assetId: "missing", startMs: 0, endMs: 3000 }] },
+    }).success,
+    false,
+  );
+  p = await service.command("timeline.apply", {
+    projectId: p.id,
+    expectedRevision: p.revision,
+    operations: [
+      { type: "split", atMs: 4500 },
+      { type: "cut", startMs: 4000, endMs: 4500 },
+      { type: "trim", startMs: 0, endMs: 3000 },
+    ],
+  });
+  assert.deepEqual(p.edits.segments, [{ assetId: image.id, startMs: 0, endMs: 3000 }]);
+  assert.deepEqual((await new ProjectStore(service.store.root).get(p.id)).edits, p.edits);
+  assert.equal(
+    await fs.readFile(await service.store.resolveMedia(p.id, video.path), "utf8"),
+    "immutable inserted video",
+  );
+  assert.equal(await fs.readFile(file, "utf8"), "immutable inserted video");
+  const linked = path.join(root, "linked.mp4");
+  await fs.symlink(file, linked);
+  await assert.rejects(
+    service.command("asset.import", { projectId: p.id, path: linked, kind: "video" }),
+    { code: "INVALID_PATH" },
+  );
+  const invalid = path.join(root, "not-video.mp4");
+  await fs.mkdir(invalid);
+  await assert.rejects(
+    service.command("asset.import", { projectId: p.id, path: invalid, kind: "video" }),
+    { code: "INVALID_ASSET" },
+  );
+});
+
+test("restoring deleted recording at the playhead preserves clip order and ignores inserted source timestamps", async (t) => {
+  const { service } = await setup(t);
+  const p = await ready(service);
+  p.assets.push({ id: "still", kind: "image", name: "Card", path: "assets/card.png" });
+  p.edits.segments = [
+    { startMs: 7000, endMs: 10000 },
+    { assetId: "still", startMs: 0, endMs: 3000 },
+    { startMs: 0, endMs: 2000 },
+  ];
+  applyEdits(p, [{ type: "source.restore", startMs: 2000, endMs: 7000, atMs: 1500 }]);
+  assert.deepEqual(p.edits.segments, [
+    { startMs: 7000, endMs: 8500 },
+    { startMs: 2000, endMs: 7000 },
+    { startMs: 8500, endMs: 10000 },
+    { assetId: "still", startMs: 0, endMs: 3000 },
+    { startMs: 0, endMs: 2000 },
+  ]);
+  assert.throws(
+    () =>
+      applyEdits(p, [
+        {
+          type: "overlay.add",
+          overlay: {
+            kind: "text",
+            text: "Wrong source",
+            startMs: 8500,
+            endMs: 9000,
+            x: 0,
+            y: 0,
+            width: 0.5,
+            fontSize: 24,
+            color: "#ffffff",
+            animation: "none",
+          },
+        },
+      ]),
+    { code: "INVALID_RANGE" },
+  );
+  applyEdits(
+    p,
+    [{ type: "zooms.auto" }],
+    [
+      { tMs: 1000, x: 0.5, y: 0.5, click: true },
+      { tMs: 8000, x: 0.5, y: 0.5, click: true },
+    ],
+  );
+  assert(p.edits.zooms.every((zoom) => zoom.endMs > zoom.startMs));
+  assert.equal(p.edits.zooms.length, 2, "reordered earlier-source events must not be skipped");
+  p.edits.segments = [
+    { startMs: 0, endMs: 1000 },
+    { startMs: 2000, endMs: 3000 },
+    { startMs: 1000, endMs: 2000 },
+  ];
+  assert.throws(
+    () =>
+      applyEdits(p, [
+        { type: "zoom.add", zoom: { startMs: 0, endMs: 2000, scale: 2, x: 0.5, y: 0.5 } },
+      ]),
+    { code: "INVALID_RANGE" },
+    "source effect must not silently spread into an unselected reordered clip",
+  );
 });

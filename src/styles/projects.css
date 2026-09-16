@@ -3,13 +3,12 @@
   flex: 1;
   min-height: 0;
 }
-.app.library::before {
-  content: "";
+.library-titlebar {
   height: 48px;
   min-height: 48px;
   border-bottom: 1px solid var(--line);
   background: color-mix(in srgb, var(--color-neutral) 18%, var(--color-black));
-  -webkit-app-region: drag;
+  user-select: none;
 }
 .library-sidebar {
   width: 214px;

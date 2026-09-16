@@ -1,13 +1,14 @@
 import Foundation
 import AVFoundation
 
-func audioReader(_ url: URL) async throws -> (AVAssetReader, AVAssetReaderTrackOutput) {
+func audioReader(_ url: URL, timeRange: CMTimeRange? = nil) async throws -> (AVAssetReader, AVAssetReaderTrackOutput) {
     let asset = AVURLAsset(url: url)
     guard let track = try await asset.loadTracks(withMediaType: .audio).first else { throw NativeFailure("Media has no audio track.", code: "audio_unavailable") }
     let reader = try AVAssetReader(asset: asset)
     let output = AVAssetReaderTrackOutput(track: track, outputSettings: [AVFormatIDKey: kAudioFormatLinearPCM, AVSampleRateKey: 16000, AVNumberOfChannelsKey: 1, AVLinearPCMBitDepthKey: 16, AVLinearPCMIsFloatKey: false, AVLinearPCMIsBigEndianKey: false, AVLinearPCMIsNonInterleaved: false])
     output.alwaysCopiesSampleData = false
     guard reader.canAdd(output) else { throw NativeFailure("Audio decoding unsupported.") }; reader.add(output)
+    if let timeRange { reader.timeRange = timeRange }
     guard reader.startReading() else { throw reader.error ?? NativeFailure("Could not decode audio.") }
     return (reader, output)
 }
@@ -42,6 +43,31 @@ func analyzeAudio(_ url: URL) async throws -> [[String: Double]] {
         flush(); if reader.status == .failed { throw reader.error ?? NativeFailure("Audio analysis failed.") }; return bins
     }.value
 }
+func audioWaveform(_ url: URL, startMs: Double, endMs: Double) async throws -> [Double] {
+    let range = CMTimeRange(start: mediaTime(startMs), end: mediaTime(endMs))
+    let reader: AVAssetReader, output: AVAssetReaderTrackOutput
+    do { (reader, output) = try await audioReader(url, timeRange: range) }
+    catch let error as NativeFailure where error.code == "audio_unavailable" { return [] }
+    return try await Task.detached(priority: .utility) {
+        let bins = 256, width = (endMs - startMs) / Double(bins)
+        var sums = [Double](repeating: 0, count: bins), counts = [Int](repeating: 0, count: bins)
+        while let sample = output.copyNextSampleBuffer() {
+            try Task.checkCancellation()
+            let data = try pcmData(sample), pts = milliseconds(sample.presentationTimeStamp)
+            data.withUnsafeBytes { raw in
+                for (index, sample) in raw.bindMemory(to: Int16.self).enumerated() {
+                    let position = Int(floor((pts + Double(index) / 16 - startMs) / width))
+                    guard position >= 0, position < bins else { continue }
+                    let value = Double(Int16(littleEndian: sample)) / 32768
+                    sums[position] += value * value; counts[position] += 1
+                }
+            }
+        }
+        if reader.status == .failed { throw reader.error ?? NativeFailure("Waveform decoding failed.") }
+        return (0..<bins).map { counts[$0] > 0 ? min(1, sqrt(sums[$0] / Double(counts[$0]))) : 0 }
+    }.value
+}
+
 func wavHeader(_ bytes: UInt32) -> Data {
     var data = Data()
     func text(_ value: String) { data.append(contentsOf: value.utf8) }

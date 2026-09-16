@@ -35,7 +35,7 @@ const range = z
   .refine((r) => r.endMs > r.startMs, "End must be after start");
 const speed = finite.min(0.25).max(8);
 const segment = z
-  .object({ ...rangeShape, speed: speed.optional() })
+  .object({ ...rangeShape, speed: speed.optional(), assetId: id.optional() })
   .strict()
   .refine((r) => r.endMs > r.startMs, "End must be after start");
 const motion = z.enum(["gentle", "snappy"]);
@@ -46,6 +46,10 @@ export const cameraLayoutSettings = z
     y: unit,
     size: finite.min(0.05).max(0.8),
     shadow: z.boolean(),
+    mirror: z.boolean().optional(),
+    radius: finite.min(0).max(0.5).optional(),
+    shadowOpacity: unit.optional(),
+    zoomReactive: z.boolean().optional(),
   })
   .strict();
 const cameraLayout = cameraLayoutSettings
@@ -109,7 +113,10 @@ const overlay = z
   .object({
     ...rangeShape,
     id,
-    kind: z.enum(["text", "image"]),
+    kind: z.enum(["text", "image", "arrow", "blur", "redact"]),
+    height: finite.min(0.02).max(1).optional(),
+    rotation: finite.min(0).max(360).optional(),
+    blur: finite.min(4).max(100).optional(),
     text: z.string().max(10000).optional(),
     assetId: id.optional(),
     x: unit,
@@ -119,6 +126,9 @@ const overlay = z
     color,
     animation: z.enum(["none", "fade", "slide"]),
   })
+  .strict();
+const audioClip = z
+  .object({ id, ...rangeShape, assetId: id, offsetMs: time, volume: finite.min(0).max(2) })
   .strict();
 const audio = z
   .object({
@@ -132,6 +142,11 @@ const cursor = z
     highlight: z.boolean(),
     smooth: z.boolean(),
     size: finite.min(0.5).max(4),
+    motionBlur: z.boolean().optional(),
+    bounce: z.boolean().optional(),
+    sway: z.boolean().optional(),
+    loop: z.boolean().optional(),
+    style: z.enum(["dark", "light"]).optional(),
   })
   .strict();
 const captions = z
@@ -147,17 +162,12 @@ const transcript = z
   .max(100000);
 const editState = z
   .object({
-    segments: z
-      .array(segment)
-      .max(10000)
-      .refine(
-        (segments) =>
-          segments.every(
-            (segment, index) => !index || segment.startMs >= segments[index - 1]!.endMs,
-          ),
-        "Segments must be in source order without overlaps",
-      ),
+    segments: z.array(segment).max(10000),
     camera,
+    audioClips: z
+      .array(audioClip.refine((c) => c.endMs > c.startMs, "End must be after start"))
+      .max(1000)
+      .optional(),
     zooms: z.array(zoom).max(10000),
     overlays: z.array(overlay).max(10000),
     audio,
@@ -195,7 +205,7 @@ export const sourceSchema = z
     title: z.string().max(1000).optional(),
   })
   .strict();
-export const projectSchema = z
+const projectObject = z
   .object({
     schemaVersion: z.literal(2),
     id,
@@ -214,7 +224,10 @@ export const projectSchema = z
             id,
             name: z.string().max(200),
             path: relativeFile,
-            kind: z.literal("image"),
+            kind: z.enum(["image", "audio", "video"]),
+            durationMs: time.positive().optional(),
+            width: finite.int().min(16).max(16384).optional(),
+            height: finite.int().min(16).max(16384).optional(),
           })
           .strict(),
       )
@@ -222,9 +235,28 @@ export const projectSchema = z
     recovered: z.boolean().optional(),
   })
   .strict();
-const legacyProjectSchema = projectSchema.extend({
+const legacyProjectSchema = projectObject.extend({
   schemaVersion: z.literal(1),
   edits: editState.extend({ camera: camera.omit({ layouts: true }) }),
+});
+
+export const projectSchema = projectObject.superRefine((project, context) => {
+  const assets = new Map(project.assets.map((asset) => [asset.id, asset]));
+  if (assets.size !== project.assets.length)
+    context.addIssue({ code: "custom", path: ["assets"], message: "Asset IDs must be unique" });
+  project.edits.segments.forEach((segment, index) => {
+    if (!segment.assetId) return;
+    const asset = assets.get(segment.assetId);
+    const limit =
+      asset?.kind === "image" ? 60000 : asset?.kind === "video" ? (asset.durationMs ?? 0) : 0;
+    if (segment.endMs > limit)
+      context.addIssue({
+        code: "custom",
+        path: ["edits", "segments", index],
+        message:
+          "Inserted clip must reference an image (up to 60 seconds) or a video within its inspected duration",
+      });
+  });
 });
 
 /** Upgrade only known formats. A newer document is not a corrupt document. */
@@ -240,11 +272,11 @@ export function parseProject(value: unknown): Project {
     );
   if (version === 1) {
     const legacy = legacyProjectSchema.parse(value);
-    return {
+    return projectSchema.parse({
       ...legacy,
       schemaVersion: 2,
       edits: { ...legacy.edits, camera: { ...legacy.edits.camera, layouts: [] } },
-    };
+    });
   }
   return projectSchema.parse(value);
 }
@@ -294,7 +326,23 @@ const operationSchema = z.discriminatedUnion("type", [
     })
     .strict(),
   z.object({ type: z.literal("clip.merge"), index: finite.int().min(0) }).strict(),
-  z.object({ type: z.literal("source.restore"), ...rangeShape }).strict(),
+  z
+    .object({
+      type: z.literal("clip.move"),
+      index: finite.int().min(0),
+      toIndex: finite.int().min(0),
+    })
+    .strict(),
+  z
+    .object({
+      type: z.literal("clip.insert"),
+      assetId: id,
+      atMs: time,
+      sourceStartMs: time.optional(),
+      sourceEndMs: time.optional(),
+    })
+    .strict(),
+  z.object({ type: z.literal("source.restore"), ...rangeShape, atMs: time.optional() }).strict(),
   z
     .object({
       type: z.literal("camera.update"),
@@ -333,6 +381,15 @@ const operationSchema = z.discriminatedUnion("type", [
     })
     .strict(),
   z.object({ type: z.literal("overlay.remove"), id }).strict(),
+  z.object({ type: z.literal("audioClip.add"), clip: audioClip.omit({ id: true }) }).strict(),
+  z
+    .object({
+      type: z.literal("audioClip.update"),
+      id,
+      clip: audioClip.omit({ id: true }).partial(),
+    })
+    .strict(),
+  z.object({ type: z.literal("audioClip.remove"), id }).strict(),
   z.object({ type: z.literal("audio.update"), settings: audio.partial() }).strict(),
   z.object({ type: z.literal("cursor.update"), settings: cursor.partial() }).strict(),
   z

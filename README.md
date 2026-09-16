@@ -2,7 +2,7 @@
 
 **The open-source screen recorder you can control with Claude and Codex.**
 
-Record your screen, camera and audio. Create projects, edit timelines and export through MCP—or work directly in the editor. Built for tutorials, walkthroughs and product demos on Mac.
+Record your screen, camera and audio, or start with an existing video. Select a clip to edit its properties, then export your video. Claude and Codex can also control projects, edits and exports through MCP. Built for tutorials, walkthroughs and product demos on Mac.
 
 ![The desktop editor with separate screen, camera, audio and effects tracks](website/public/media/editor.jpg)
 
@@ -40,12 +40,13 @@ The app and local tools are free. Your connected Claude/Codex client may require
 ## Create, edit and keep your work
 
 - **Capture:** screen, window or region; separate camera, microphone and system audio; pause/resume and a background recording control.
-- **Edit:** live timeline scrubbing, range selection, cut/split/trim, speed, clip merging, removed-range restoration and undo/redo. Each timeline row has its own context menu.
-- **Direct attention:** automatic and manual zooms, cursor highlight, editable timing/depth/motion, and camera placement or visibility for a selected interval.
-- **Compose:** circle or square camera; draggable text and images; backgrounds, blur, padding, rounded corners, shadows and browser frames. Landscape, portrait, square and 4:5 canvases are supported.
-- **Audio and captions:** independent audio levels, local Whisper transcription, editable captions and microphone-based silence suggestions that protect audible system audio by default.
-- **Export:** H.264/AAC MP4 up to 4K, using the same native composition engine as preview; captions can be burned in or saved as SRT/VTT.
-- **Projects:** create, search, rename, reopen, save, import and move project folders to the macOS Trash. Exported movies remain separate; original media stays intact.
+- **Start:** choose Record screen to open capture setup, Import video for an MP4/MOV/M4V, or Open project to resume a saved project folder. The editor’s first-edit guide and permanent Quick start help cover play, split/delete and export. [Getting started](docs/editor-features.md#get-started).
+- **Edit:** live timeline scrubbing, range selection, split/delete/trim, speed, clip merging, clip reordering, removed-range restoration and undo/redo. Select a clip to open its properties; the delete action names the affected object. Filmstrips and audio waveforms help locate content, with separate Zoom and Layers rows. Insert videos or still images between clips, use Delete/Backspace for selected objects, and resize the timeline vertically. [Timeline editing guide](docs/editor-features.md#timeline-editing).
+- **Direct attention:** continuous typing holds one automatic zoom; edit zoom timing/depth/motion in a dialog without losing your list position. Split camera ranges keep their own placement, appearance and visibility, and crossing zooms separate at the split. Cursor highlight, motion blur, click bounce, sway, light/dark styles and looped paths are available. [Zoom and clip settings](docs/editor-features.md#automatic-zooms-and-clip-settings).
+- **Compose:** circle or square camera with mirroring, adjustable corners/shadow and zoom-reactive scaling; draggable text, images and arrows; timed blur and opaque privacy covers; backgrounds, blur, padding, rounded corners, shadows and browser frames. Landscape, portrait, square and 4:5 canvases are supported.
+- **Audio and captions:** independent audio levels, imported music/voiceover clips with timing and volume controls, local Whisper transcription, editable captions and microphone-based silence suggestions that protect audible system audio by default.
+- **Export:** H.264/AAC MP4 up to 4K or silent GIF (15–30 FPS, up to 1280 pixels and 60 seconds, optional looping), using the same native composition engine as preview; captions can be burned in or saved as SRT/VTT.
+- **Projects:** create, search, rename, reopen, import and move project folders to the macOS Trash. Edits save automatically; Save now remains in Project options. Exported movies remain separate; original media stays intact.
 
 Projects live in `~/Movies/Screen Recorder Projects/`. Each portable folder contains its document, a previous valid backup, original media and imported assets. Saves are atomic. There are no artificial project-count or recording-duration limits; disk space and hardware determine capacity. One recording runs at a time, and its project is protected while other projects remain editable.
 
@@ -95,7 +96,7 @@ See the current [launch readiness report](docs/launch-readiness.md). Marketing a
 
 ## Contribute
 
-Start with [architecture and layer boundaries](docs/architecture.md), [design-system tokens](docs/design-system.md), [MCP setup](docs/mcp.md) and [website/analytics setup](docs/website.md). The in-app **How to use** dialog covers the creator workflow. Open an issue or contact [Serkan Uslu](https://serkanuslu.com) at [info@serkanuslu.com](mailto:info@serkanuslu.com).
+Start with [architecture and layer boundaries](docs/architecture.md), [design-system tokens](docs/design-system.md), [MCP setup](docs/mcp.md) and [website/analytics setup](docs/website.md). The in-app **Quick start** dialog covers the creator workflow. Open an issue or contact [Serkan Uslu](https://serkanuslu.com) at [info@serkanuslu.com](mailto:info@serkanuslu.com).
 
 ## License
 

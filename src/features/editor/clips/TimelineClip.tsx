@@ -1,14 +1,15 @@
-import type { KeyboardEvent, MouseEvent, PointerEvent } from "react";
+import type { MouseEvent, PointerEvent } from "react";
 import { Monitor } from "lucide-react";
 import { formatTime } from "@/shared/timeline";
+import { TimelineFilmstrip } from "@/src/features/editor/clips/TimelineFilmstrip";
 import { TrimHandle } from "@/src/features/editor/clips/TrimHandle";
 import type { TimelineInterval } from "@/src/features/editor/hooks/useTimelineGeometry";
 import type { TimelineDrag, TimelinePointerEvents } from "@/src/features/editor/timelineTypes";
 
 export function TimelineClip({
+  projectId,
   interval,
   current,
-  intervalCount,
   selected,
   disabled,
   ratio,
@@ -17,9 +18,9 @@ export function TimelineClip({
   startDrag,
   pointerEvents,
 }: {
+  projectId: string;
   interval: TimelineInterval;
   current: Pick<TimelineInterval, "startMs" | "endMs">;
-  intervalCount: number;
   selected: boolean;
   disabled: boolean;
   ratio: (value: number) => string;
@@ -34,28 +35,17 @@ export function TimelineClip({
 }) {
   const start = interval.outputStart + (current.startMs - interval.startMs) / (interval.speed ?? 1);
   const end = interval.outputEnd + (current.endMs - interval.endMs) / (interval.speed ?? 1);
-  const keyboard = (event: KeyboardEvent<HTMLElement>) => {
-    if (event.key !== "Enter" && event.key !== " ") return;
-    event.preventDefault();
-    select();
-    openMenu();
-  };
   const handleClick = (event: MouseEvent<HTMLButtonElement>) => {
     event.stopPropagation();
     openMenu(event);
   };
   return (
     <div
-      role="button"
-      tabIndex={0}
-      aria-label={`Screen clip ${interval.index + 1}, ${interval.speed ?? 1} times speed`}
       className={`clip screen-clip ${selected ? "selected" : ""}`}
       style={{ left: ratio(start), width: ratio(end - start) }}
-      onKeyDown={keyboard}
       onContextMenu={(event) => {
         event.preventDefault();
         event.stopPropagation();
-        select();
         openMenu(event);
       }}
     >
@@ -67,10 +57,25 @@ export function TimelineClip({
         onPointerDown={(event) => startDrag(event, "start", interval)}
         pointerEvents={pointerEvents}
       />
-      <Monitor size={12} />
-      <span>Screen {intervalCount > 1 ? interval.index + 1 : ""}</span>
-      <b className="clip-speed">{interval.speed ?? 1}×</b>
-      <span className="clip-end">{formatTime(end - start)}</span>
+      <TimelineFilmstrip
+        projectId={projectId}
+        assetId={interval.assetId}
+        startMs={current.startMs}
+        endMs={current.endMs}
+      />
+      <button
+        className="clip-select"
+        disabled={disabled}
+        aria-pressed={selected}
+        aria-label={`${interval.name} clip ${interval.index + 1}, ${interval.speed ?? 1} times speed`}
+        title={`${interval.name} · Clip ${interval.index + 1} · Click for properties`}
+        onClick={select}
+      >
+        <Monitor size={12} />
+        <span>{interval.name}</span>
+        <b className="clip-speed">{interval.speed ?? 1}×</b>
+        <span className="clip-end">{formatTime(end - start)}</span>
+      </button>
       <TrimHandle
         edge="end"
         label={`Trim end of clip ${interval.index + 1}`}

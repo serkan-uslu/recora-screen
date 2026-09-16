@@ -39,10 +39,10 @@ export default function HomePage() {
         </a>
         <p className="intro">{product.description}</p>
         <p className="hero-description">
-          Record your screen, camera and audio. Turn clicks, drags and typing into editable zooms.
+          Record your screen, camera and audio, or import a video and start editing.
           <br className="desktop-break" />
-          Cut silence locally, add captions and export up to 4K. Connect Claude or Codex through MCP
-          to control projects, edits and exports.
+          Select a clip, remove unwanted moments and export up to 4K. Quick start help stays close
+          by, and edits save automatically. Connect Claude or Codex through MCP for more help.
         </p>
         <div className="actions">
           <a
@@ -111,7 +111,8 @@ export default function HomePage() {
             </h3>
             <p>
               Record a screen, window or region with separate camera, microphone and system audio
-              tracks. Keep your camera round or square, then change its placement in the edit.
+              tracks. Mirror your camera, tune its corners and shadow, or let it shrink
+              automatically during zooms.
             </p>
             <div className="capture-art" aria-hidden="true">
               <div>
@@ -124,8 +125,9 @@ export default function HomePage() {
             <span className="feature-number">02 / EDIT</span>
             <h3>Find your flow.</h3>
             <p>
-              Cut, split and adjust speed. Show your camera only where it adds something. Original
-              recordings stay intact, so there’s always another way to tell it.
+              Select a clip to see its controls. Filmstrips and audio waveforms help you find the
+              moment; separate Zoom and Layers rows keep effects visible. Split, delete, trim or
+              reorder, with actions that name what they change. Undo keeps the original media safe.
             </p>
             <div className="cut-art" aria-hidden="true">
               <i></i>
@@ -138,8 +140,9 @@ export default function HomePage() {
             <span className="feature-number">03 / FOCUS</span>
             <h3>Point out what matters.</h3>
             <p>
-              Recorded clicks, drags and typing activity become editable automatic zooms. Refine
-              their timing, depth, motion and focus, or remove any zoom you do not need.
+              Continuous typing holds the zoom steady. Edit zoom settings in a dialog without losing
+              your list position. Change a selected camera clip’s appearance or the video default,
+              with the scope shown beside the controls. Add arrows, blur and covers.
             </p>
             <div className="focus-art" aria-hidden="true">
               ↖<span>2×</span>
@@ -178,16 +181,17 @@ export default function HomePage() {
             <span className="feature-number">06 / KEEP CREATING</span>
             <h3>Every idea gets a home.</h3>
             <p>
-              Create as many projects as your disk can hold. Automatic saves, editable drafts and
-              portable project folders keep your work ready for the next session.
+              Start with Record screen or Import video. Follow the first-edit guide, and reopen
+              Quick start whenever needed. Automatic saves and portable project folders keep your
+              work ready for the next session.
             </p>
           </article>
           <article className="feature">
             <span className="feature-number">07 / SHARE</span>
             <h3>Ready for your audience.</h3>
             <p>
-              Export H.264/AAC MP4 in 1080p or 4K, with captions burned in or saved as SRT/VTT. Your
-              project remains editable after export.
+              Export H.264/AAC MP4 up to 4K or a looping GIF up to 60 seconds. Burn in captions or
+              save SRT/VTT. Your project remains editable after export.
             </p>
           </article>
         </div>
@@ -205,8 +209,10 @@ export default function HomePage() {
           <li>
             <span>01</span>
             <div>
-              <h3>Make a little space.</h3>
-              <p>Create a project. Choose your screen, camera and audio. Hit record.</p>
+              <h3>Record or import.</h3>
+              <p>
+                Record screen opens capture setup. Import video opens an existing MP4, MOV or M4V.
+              </p>
             </div>
           </li>
           <li>
@@ -214,8 +220,8 @@ export default function HomePage() {
             <div>
               <h3>Keep the good bits.</h3>
               <p>
-                Trim the pauses, guide attention, add your words. Save your draft and come back
-                anytime.
+                Select a clip, split it and remove an unwanted part. Adjust camera or zoom where
+                needed. Your edits save automatically.
               </p>
             </div>
           </li>

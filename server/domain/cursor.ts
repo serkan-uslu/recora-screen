@@ -1,7 +1,14 @@
 import { createReadStream } from "node:fs";
+import { randomUUID } from "node:crypto";
 import { z } from "zod";
-import type { CursorEvent } from "@/shared/types.js";
+import type { AutoZoomSettings, CursorEvent, TimelineSegment, Zoom } from "@/shared/types.js";
+import { subtractRanges } from "@/shared/timeline.js";
 import { AppError, finite, time } from "@/server/contracts/validation.js";
+
+// Internal analysis metadata only; the recorded cursor file keeps its original event format.
+type CursorActivity = CursorEvent & { typingStartMs?: number };
+const typingSampleGapMs = 1200;
+const sameTarget = (a: CursorEvent, b: CursorEvent) => Math.hypot(a.x - b.x, a.y - b.y) <= 0.12;
 
 const eventSchema = z
   .object({
@@ -14,8 +21,8 @@ const eventSchema = z
   .strict();
 // Parse arrays and NDJSON incrementally. Retain activity rather than every pointer sample.
 // Long recordings adaptively thin activity to 10,000 candidates; capture duration is never limited.
-export async function cursorClicks(file: string): Promise<CursorEvent[]> {
-  let clicks: CursorEvent[] = [];
+export async function cursorClicks(file: string): Promise<CursorActivity[]> {
+  let clicks: CursorActivity[] = [];
   let item = "",
     quoted = false,
     escaped = false,
@@ -25,7 +32,18 @@ export async function cursorClicks(file: string): Promise<CursorEvent[]> {
     lastTyping = -Infinity,
     spacingMs = 0;
   function retain(event: CursorEvent) {
-    if (event.tMs - (clicks.at(-1)?.tMs ?? -Infinity) < spacingMs) return;
+    const previous = clicks.at(-1);
+    if (
+      previous?.kind === "typing" &&
+      event.kind === "typing" &&
+      event.tMs - previous.tMs <= typingSampleGapMs &&
+      sameTarget(previous, event)
+    ) {
+      previous.typingStartMs ??= previous.tMs;
+      previous.tMs = event.tMs;
+      return;
+    }
+    if (event.tMs - (previous?.tMs ?? -Infinity) < spacingMs) return;
     clicks.push(event);
     while (clicks.length > 10000) {
       spacingMs = Math.max(250, spacingMs * 2);
@@ -92,4 +110,63 @@ export async function cursorClicks(file: string): Promise<CursorEvent[]> {
   // A crash can omit the final array bracket, but a truncated event must not be silently accepted.
   if (depth) throw new AppError("INVALID_CURSOR", "Cursor metadata ends inside an event.");
   return clicks;
+}
+
+export function automaticZooms(
+  segments: TimelineSegment[],
+  activity: CursorActivity[],
+  settings: AutoZoomSettings,
+): Zoom[] {
+  const zooms: Zoom[] = [];
+  const events = activity
+    .filter((event) => event.click || event.kind)
+    .toSorted((a, b) => (a.typingStartMs ?? a.tMs) - (b.typingStartMs ?? b.tMs));
+  // Effects are source-based: repeated footage shares the first occurrence's zoom timing.
+  const recorded: TimelineSegment[] = [];
+  for (const segment of segments) {
+    if (!segment.assetId) recorded.push(...subtractRanges([segment], recorded));
+  }
+  for (const segment of recorded) {
+    const speed = segment.speed ?? 1;
+    const clipDuration = (segment.endMs - segment.startMs) / speed;
+    let previous: { zoom: Zoom; event: CursorEvent; end: number; activityEnd: number } | undefined;
+    for (const event of events) {
+      if ((event.typingStartMs ?? event.tMs) >= segment.endMs || event.tMs < segment.startMs)
+        continue;
+      const output =
+        (Math.max(segment.startMs, event.typingStartMs ?? event.tMs) - segment.startMs) / speed;
+      const activityEnd = (Math.min(segment.endMs, event.tMs) - segment.startMs) / speed;
+      const end = Math.min(clipDuration, activityEnd + settings.holdMs);
+      if (
+        previous &&
+        sameTarget(previous.event, event) &&
+        (output <= previous.end + settings.gapMs ||
+          (previous.event.kind === "typing" &&
+            event.kind === "typing" &&
+            output - previous.activityEnd <= typingSampleGapMs / speed))
+      ) {
+        previous.end = Math.max(previous.end, end);
+        previous.activityEnd = activityEnd;
+        previous.event = event;
+        previous.zoom.endMs = segment.startMs + previous.end * speed;
+        continue;
+      }
+      const earliest = previous ? previous.end + settings.gapMs : 0;
+      // A compacted typing interval may begin during cooldown and continue past it.
+      if (activityEnd < earliest || end - Math.max(output, earliest) < 200) continue;
+      const zoom: Zoom = {
+        id: randomUUID(),
+        startMs: segment.startMs + Math.max(earliest, output - settings.leadMs) * speed,
+        endMs: segment.startMs + end * speed,
+        x: event.x,
+        y: event.y,
+        scale: settings.scale,
+        motion: settings.motion,
+        followCursor: settings.followCursor,
+      };
+      zooms.push(zoom);
+      previous = { zoom, event, end, activityEnd };
+    }
+  }
+  return zooms;
 }

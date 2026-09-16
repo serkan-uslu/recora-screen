@@ -1,6 +1,7 @@
 import { useContext, useState } from "react";
 import { ImagePlus, Trash2, Type } from "lucide-react";
 import { type EditOperation, type Overlay, type Project, type Range } from "@/shared/types";
+import { sourceRanges } from "@/shared/timeline";
 import { DraftPreviewContext } from "@/src/controllers/StudioContexts";
 import { messageOf } from "@/src/lib/errors";
 import { IconButton } from "@/src/components/atoms/IconButton";
@@ -30,6 +31,8 @@ export function OverlaysPanel({
   const { send: draftPreview } = useContext(DraftPreviewContext);
   const [text, setText] = useState("");
   const overlay = project.edits.overlays.find((o) => o.id === selected);
+  const originalSelected =
+    sourceRanges(project.edits.segments, selection.startMs, selection.endMs).length > 0;
   const update = (value: Partial<Overlay>) => {
     if (overlay) void apply([{ type: "overlay.update", id: overlay.id, overlay: value }]);
   };
@@ -49,7 +52,7 @@ export function OverlaysPanel({
     <>
       <PanelIntro
         title="Add your finishing touches."
-        text="A title, a helpful image, a point worth remembering."
+        text="Add titles and arrows, or cover a sensitive area for the selected interval."
       />
       <RangeSummary selection={selection} />
       <Field label="Text">
@@ -62,7 +65,7 @@ export function OverlaysPanel({
       </Field>
       <button
         className="button secondary full"
-        disabled={!text.trim() || selection.endMs <= selection.startMs}
+        disabled={!text.trim() || !originalSelected}
         onClick={() => {
           void (async () => {
             await apply([
@@ -80,7 +83,7 @@ export function OverlaysPanel({
       </button>
       <button
         className="button subtle full"
-        disabled={selection.endMs <= selection.startMs}
+        disabled={!originalSelected}
         onClick={() => {
           void (async () => {
             try {
@@ -113,7 +116,37 @@ export function OverlaysPanel({
         <ImagePlus size={15} />
         Add image
       </button>
-      {project.assets.length > 0 && (
+      <div className="two-columns">
+        {(["arrow", "blur", "redact"] as const).map((kind) => (
+          <button
+            key={kind}
+            className="button secondary"
+            disabled={!originalSelected}
+            onClick={() =>
+              void apply([
+                {
+                  type: "overlay.add",
+                  overlay: {
+                    ...defaults,
+                    kind,
+                    width: 0.25,
+                    height: 0.15,
+                    animation: "none",
+                    color: kind === "redact" ? "#000000" : "#ffffff",
+                  },
+                },
+              ])
+            }
+          >
+            Add {kind === "redact" ? "solid cover" : kind}
+          </button>
+        ))}
+      </div>
+      <p className="helper">
+        Blur softens an area; use a solid cover to hide sensitive details. Covers stay fixed on the
+        canvas, so review their position through zooms. Layers apply to the original recording.
+      </p>
+      {project.assets.some((asset) => asset.kind === "image") && (
         <Field label="Imported images">
           <select
             defaultValue=""
@@ -132,14 +165,16 @@ export function OverlaysPanel({
                 ]);
               e.target.value = "";
             }}
-            disabled={selection.endMs <= selection.startMs}
+            disabled={!originalSelected}
           >
             <option value="">Choose an image to add…</option>
-            {project.assets.map((asset) => (
-              <option key={asset.id} value={asset.id}>
-                {asset.name}
-              </option>
-            ))}
+            {project.assets
+              .filter((asset) => asset.kind === "image")
+              .map((asset) => (
+                <option key={asset.id} value={asset.id}>
+                  {asset.name}
+                </option>
+              ))}
           </select>
         </Field>
       )}
@@ -149,7 +184,7 @@ export function OverlaysPanel({
       </h3>
       {!project.edits.overlays.length && (
         <p className="helper">
-          Your text and images will appear here. Select a timeline range to add your first layer.
+          Your layers will appear here. Select a timeline range to add your first layer.
         </p>
       )}
       <div className="layers-list">
@@ -160,7 +195,9 @@ export function OverlaysPanel({
               <span>
                 {o.kind === "text"
                   ? o.text
-                  : project.assets.find((a) => a.id === o.assetId)?.name || "Image"}
+                  : o.kind === "image"
+                    ? project.assets.find((a) => a.id === o.assetId)?.name || "Image"
+                    : o.kind}
                 <small>
                   {seconds(o.startMs)} – {seconds(o.endMs)}s · source
                 </small>
@@ -228,16 +265,61 @@ export function OverlaysPanel({
             onPreview={(width) => preview({ width })}
             onChange={(width) => update({ width })}
           />
-          <Field label="Animation">
-            <select
-              value={overlay.animation}
-              onChange={(e) => update({ animation: e.target.value as Overlay["animation"] })}
-            >
-              <option value="none">None</option>
-              <option value="fade">Fade</option>
-              <option value="slide">Slide in</option>
-            </select>
-          </Field>
+          {["arrow", "blur", "redact"].includes(overlay.kind) && (
+            <Slider
+              label="Height"
+              min={0.02}
+              max={1}
+              value={overlay.height ?? 0.15}
+              onPreview={(height) => preview({ height })}
+              onChange={(height) => update({ height })}
+            />
+          )}
+          {overlay.kind === "arrow" && (
+            <Slider
+              label="Arrow direction"
+              suffix="°"
+              min={0}
+              max={360}
+              step={15}
+              value={overlay.rotation ?? 0}
+              onPreview={(rotation) => preview({ rotation })}
+              onChange={(rotation) => update({ rotation })}
+            />
+          )}
+          {overlay.kind === "blur" && (
+            <Slider
+              label="Blur strength"
+              suffix="px"
+              min={4}
+              max={100}
+              step={1}
+              value={overlay.blur ?? 30}
+              onPreview={(blur) => preview({ blur })}
+              onChange={(blur) => update({ blur })}
+            />
+          )}
+          {["arrow", "redact"].includes(overlay.kind) && (
+            <Field label="Layer color">
+              <input
+                type="color"
+                value={overlay.color.slice(0, 7)}
+                onChange={(e) => update({ color: e.target.value })}
+              />
+            </Field>
+          )}
+          {!["blur", "redact"].includes(overlay.kind) && (
+            <Field label="Animation">
+              <select
+                value={overlay.animation}
+                onChange={(e) => update({ animation: e.target.value as Overlay["animation"] })}
+              >
+                <option value="none">None</option>
+                <option value="fade">Fade</option>
+                <option value="slide">Slide in</option>
+              </select>
+            </Field>
+          )}
           <button
             className="button secondary full"
             disabled={selection.endMs <= selection.startMs}

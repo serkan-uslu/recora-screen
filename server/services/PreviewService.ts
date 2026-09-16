@@ -1,3 +1,5 @@
+import { z } from "zod";
+import { timelineMediaSchema, type TimelineMedia } from "@/shared/timelineMedia.js";
 import { randomUUID } from "node:crypto";
 import { promises as fs } from "node:fs";
 import path from "node:path";
@@ -12,6 +14,8 @@ import type { CommandParams, NativeCall } from "@/server/services/types.js";
 export class PreviewService {
   private projectId?: string;
   private sequence = -1;
+  private readonly mediaCache = new Map<string, Promise<TimelineMedia>>();
+  private mediaQueue: Promise<unknown> = Promise.resolve();
 
   constructor(
     private readonly store: ProjectStore,
@@ -51,8 +55,81 @@ export class PreviewService {
     return project;
   }
 
+  private async timelineMedia(p: CommandParams): Promise<TimelineMedia> {
+    const project = await this.sourceProject(p.projectId);
+    const asset = p.assetId ? project.assets.find((asset) => asset.id === p.assetId) : undefined;
+    if (p.assetId && !asset) throw new AppError("NOT_FOUND", "Timeline media was not found");
+    const limit = asset
+      ? asset.kind === "image"
+        ? 60_000
+        : asset.durationMs
+      : project.source?.durationMs;
+    if (!limit || p.endMs > limit + 1)
+      throw new AppError("INVALID_RANGE", "Samples must stay inside the source media");
+    const files: { kind: "microphone" | "system" | "asset"; path: string }[] = [];
+    if (p.kind === "filmstrip") {
+      if (asset?.kind === "audio") return { frames: [], channels: [] };
+      files.push({ kind: "asset", path: asset?.path ?? project.source!.screen });
+    } else if (asset) {
+      if (asset.kind !== "image") files.push({ kind: "asset", path: asset.path });
+    } else {
+      if (project.source?.microphone)
+        files.push({ kind: "microphone", path: project.source.microphone });
+      if (project.source?.systemAudio)
+        files.push({ kind: "system", path: project.source.systemAudio });
+    }
+    const resolved = await Promise.all(
+      files.map(async (file) => {
+        const absolute = await this.store.resolveMedia(project.id, file.path);
+        const stat = await fs.stat(absolute);
+        return { ...file, absolute, size: stat.size, modified: stat.mtimeMs };
+      }),
+    );
+    const key = JSON.stringify([p.kind, p.startMs, p.endMs, resolved]);
+    const cached = this.mediaCache.get(key);
+    if (cached) return cached;
+    // ponytail: serial sampling bounds native decoder work; use a small pool if visible-clip queue latency warrants it.
+    const pending = this.mediaQueue.then(async () => {
+      if (p.kind === "filmstrip") {
+        const frames = await this.native("media.filmstrip", {
+          path: resolved[0].absolute,
+          image: asset?.kind === "image",
+          startMs: p.startMs,
+          endMs: p.endMs,
+        });
+        return timelineMediaSchema.parse({ frames, channels: [] });
+      }
+      const channels = [];
+      for (const file of resolved) {
+        const levels = z
+          .array(z.number().finite().min(0).max(1))
+          .max(256)
+          .parse(
+            await this.native("media.waveform", {
+              path: file.absolute,
+              startMs: p.startMs,
+              endMs: p.endMs,
+            }),
+          );
+        channels.push({ kind: file.kind, levels });
+      }
+      return timelineMediaSchema.parse({ frames: [], channels });
+    });
+    this.mediaQueue = pending.catch(() => {
+      if (this.mediaCache.get(key) === pending) this.mediaCache.delete(key);
+    });
+    this.mediaCache.set(key, pending);
+    if (this.mediaCache.size > 96) {
+      const oldest = this.mediaCache.keys().next().value;
+      if (oldest !== undefined) this.mediaCache.delete(oldest);
+    }
+    return pending;
+  }
+
   async command(method: string, p: CommandParams): Promise<unknown> {
     switch (method) {
+      case "preview.media":
+        return this.timelineMedia(p);
       case "preview.reset":
       case "preview.draft": {
         const project = await this.store.get(p.projectId);

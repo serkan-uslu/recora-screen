@@ -80,3 +80,25 @@ test("canvas dimensions support portrait, square, 720p, 4K and legacy source asp
   delete project.edits.canvas;
   assert.deepEqual(outputSize(project), { width: 1920, height: 1440 });
 });
+
+test("recording time mappings skip imported media and preserve repeated source occurrences", () => {
+  const segments = [
+    { startMs: 2000, endMs: 4000 },
+    { assetId: "video", startMs: 0, endMs: 4000, speed: 2 },
+    { startMs: 0, endMs: 3000 },
+  ];
+  assert.equal(sourceTime(segments, 2500), -1);
+  assert.equal(sourceTime(segments, 4500), 500);
+  assert.equal(timelineTime(segments, 500), 4500);
+  assert.deepEqual(outputRanges(segments, { startMs: 0, endMs: 3000 }), [
+    { startMs: 0, endMs: 1000 },
+    { startMs: 4000, endMs: 7000 },
+  ]);
+  assert.deepEqual(sourceRanges(segments, 1000, 5000), [
+    { startMs: 3000, endMs: 4000 },
+    { startMs: 0, endMs: 1000 },
+  ]);
+  assert.deepEqual(sliceSegments(segments, 2500, 3500), [
+    { assetId: "video", startMs: 1000, endMs: 3000, speed: 2 },
+  ]);
+});

@@ -43,10 +43,7 @@ export function CanvasPanel({
     void apply([{ type: "canvas.update", settings }], revision);
   return (
     <>
-      <PanelIntro
-        title="Give your screen some space."
-        text="Frame your recording for the place you’ll share it."
-      />
+      <PanelIntro title="Canvas and background" text="These settings apply to the whole video." />
       <h3 className="panel-section">CANVAS</h3>
       <div className="aspect-options" role="group" aria-label="Canvas aspect ratio">
         {(["source", "16:9", "1:1", "9:16", "4:5"] as const).map((aspectRatio) => (
@@ -147,11 +144,13 @@ export function CanvasPanel({
               <option value="" disabled>
                 Select an image
               </option>
-              {project.assets.map((asset) => (
-                <option key={asset.id} value={asset.id}>
-                  {asset.name}
-                </option>
-              ))}
+              {project.assets
+                .filter((asset) => asset.kind === "image")
+                .map((asset) => (
+                  <option key={asset.id} value={asset.id}>
+                    {asset.name}
+                  </option>
+                ))}
             </select>
           </Field>
           <button
@@ -185,51 +184,53 @@ export function CanvasPanel({
         <p className="helper">A plain canvas without a decorative background.</p>
       )}
       <div className="panel-divider" />
-      <h3 className="panel-section">SCREEN FRAME</h3>
-      <Field label="Frame style">
-        <select
-          value={canvas.frame}
-          onChange={(e) => update({ frame: e.target.value as CanvasSettings["frame"] })}
-        >
-          <option value="none">Hidden</option>
-          <option value="minimal">Minimal</option>
-          <option value="browser">Browser</option>
-        </select>
-      </Field>
-      {canvas.frame === "browser" && (
-        <Field label="Window title">
-          <input
-            key={`${project.id}-${canvas.title}`}
-            defaultValue={canvas.title}
-            placeholder={project.source?.title ?? project.name}
-            maxLength={200}
-            onBlur={(e) => {
-              if (e.target.value !== canvas.title) update({ title: e.target.value });
-            }}
-          />
+      <details className="advanced-settings">
+        <summary>Frame and spacing</summary>
+        <Field label="Frame style">
+          <select
+            value={canvas.frame}
+            onChange={(e) => update({ frame: e.target.value as CanvasSettings["frame"] })}
+          >
+            <option value="none">Hidden</option>
+            <option value="minimal">Minimal</option>
+            <option value="browser">Browser</option>
+          </select>
         </Field>
-      )}
-      <Slider
-        label="Padding"
-        max={0.2}
-        value={canvas.padding}
-        onChange={(padding) => update({ padding })}
-        onPreview={(padding) => preview({ padding })}
-      />
-      <Slider
-        label="Corner radius"
-        max={0.1}
-        step={0.005}
-        value={canvas.radius}
-        onChange={(radius) => update({ radius })}
-        onPreview={(radius) => preview({ radius })}
-      />
-      <Slider
-        label="Shadow"
-        value={canvas.shadow}
-        onChange={(shadow) => update({ shadow })}
-        onPreview={(shadow) => preview({ shadow })}
-      />
+        {canvas.frame === "browser" && (
+          <Field label="Window title">
+            <input
+              key={`${project.id}-${canvas.title}`}
+              defaultValue={canvas.title}
+              placeholder={project.source?.title ?? project.name}
+              maxLength={200}
+              onBlur={(e) => {
+                if (e.target.value !== canvas.title) update({ title: e.target.value });
+              }}
+            />
+          </Field>
+        )}
+        <Slider
+          label="Padding"
+          max={0.2}
+          value={canvas.padding}
+          onChange={(padding) => update({ padding })}
+          onPreview={(padding) => preview({ padding })}
+        />
+        <Slider
+          label="Corner radius"
+          max={0.1}
+          step={0.005}
+          value={canvas.radius}
+          onChange={(radius) => update({ radius })}
+          onPreview={(radius) => preview({ radius })}
+        />
+        <Slider
+          label="Shadow"
+          value={canvas.shadow}
+          onChange={(shadow) => update({ shadow })}
+          onPreview={(shadow) => preview({ shadow })}
+        />
+      </details>
     </>
   );
 }

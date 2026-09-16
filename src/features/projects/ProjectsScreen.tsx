@@ -1,6 +1,7 @@
 import {
   ArrowRight,
   Camera,
+  Circle,
   FileVideo,
   Folder,
   FolderOpen,
@@ -9,7 +10,6 @@ import {
   LoaderCircle,
   Monitor,
   MoreHorizontal,
-  Plus,
   RefreshCw,
   Search,
   ShieldCheck,
@@ -40,6 +40,9 @@ export function ProjectsScreen({
     | "initialize"
     | "openProject"
     | "importProject"
+    | "importVideo"
+    | "startRecordingProject"
+    | "recording"
     | "renameProject"
     | "deleteProject"
     | "filtered"
@@ -59,6 +62,9 @@ export function ProjectsScreen({
     initialize,
     openProject,
     importProject,
+    importVideo,
+    startRecordingProject,
+    recording,
     renameProject,
     deleteProject,
     filtered,
@@ -105,7 +111,7 @@ export function ProjectsScreen({
           </div>
           <div className="library-title-actions">
             <button
-              className="button secondary large"
+              className="button subtle large"
               disabled={busy || !connected}
               onClick={() => void importProject()}
             >
@@ -113,12 +119,20 @@ export function ProjectsScreen({
               Open project
             </button>
             <button
-              className="button primary large"
+              className="button secondary large"
               disabled={busy || !connected}
-              onClick={() => setModal("new")}
+              onClick={() => void importVideo()}
             >
-              <Plus size={18} />
-              New project
+              <FileVideo size={17} />
+              Import video
+            </button>
+            <button
+              className="button primary large"
+              disabled={busy || !connected || recording.active}
+              onClick={() => void startRecordingProject()}
+            >
+              <Circle size={15} fill="currentColor" />
+              Record screen
             </button>
           </div>
         </div>
@@ -236,17 +250,21 @@ export function ProjectsScreen({
                     </details>
                     <p>
                       Edited {date(p.updatedAt)}
-                      <span>{p.durationMs > 0 ? "Recording project" : "No recording yet"}</span>
+                      <span>{p.durationMs > 0 ? "Video project" : "No video yet"}</span>
                     </p>
                   </div>
                 </article>
               ))}
-              <button className="new-project-card" onClick={() => setModal("new")}>
+              <button
+                className="new-project-card"
+                disabled={busy || !connected || recording.active}
+                onClick={() => void startRecordingProject()}
+              >
                 <span>
-                  <Plus size={24} />
+                  <Monitor size={24} />
                 </span>
-                <strong>Start a new story</strong>
-                <p>Your next idea belongs here.</p>
+                <strong>Record a new video</strong>
+                <p>Choose your screen, camera and microphone.</p>
               </button>
             </div>
           </>
@@ -263,19 +281,33 @@ export function ProjectsScreen({
                 <Sparkles size={18} />
               </span>
             </div>
-            <span className="eyebrow">FROM FIRST TAKE TO FINAL CUT</span>
-            <h2>{search ? "No projects found" : "Your next great video starts here"}</h2>
+            <span className="eyebrow">RECORD · EDIT · EXPORT</span>
+            <h2>{search ? "No projects found" : "Make your first video"}</h2>
             <p>
               {search
                 ? "Try another project name."
-                : "Capture your screen and camera, polish the details, and turn your know-how into something shareable."}
+                : "Record your screen or import a video, remove unwanted parts, then export an MP4."}
             </p>
             {!search && (
-              <button className="button primary large" onClick={() => setModal("new")}>
-                <Plus size={17} />
-                Create your first project
-                <ArrowRight size={16} />
-              </button>
+              <div className="button-row">
+                <button
+                  className="button primary large"
+                  disabled={busy || !connected || recording.active}
+                  onClick={() => void startRecordingProject()}
+                >
+                  <Circle size={14} fill="currentColor" />
+                  Record screen
+                  <ArrowRight size={16} />
+                </button>
+                <button
+                  className="button secondary large"
+                  disabled={busy || !connected}
+                  onClick={() => void importVideo()}
+                >
+                  <FileVideo size={17} />
+                  Import video
+                </button>
+              </div>
             )}
             <div className="empty-features">
               <span>

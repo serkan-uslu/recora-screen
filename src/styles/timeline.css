@@ -1,9 +1,43 @@
 /* Timeline */
 .timeline {
-  height: 251px;
-  min-height: 251px;
+  --timeline-track-height: max(38px, calc((var(--timeline-height, 360px) - 128px) / 5));
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  flex: none;
+  height: var(--timeline-height, 360px);
+  min-height: 360px;
   background: color-mix(in srgb, var(--color-neutral) 19%, var(--color-black));
   border-top: 1px solid color-mix(in srgb, var(--color-accent) 29%, var(--color-black));
+}
+.timeline-resize-handle {
+  position: absolute;
+  top: -12px;
+  left: 0;
+  right: 0;
+  height: 24px;
+  z-index: 8;
+  cursor: ns-resize;
+  touch-action: none;
+  outline: none;
+}
+.timeline-resize-handle::after {
+  content: "";
+  position: absolute;
+  top: 11px;
+  left: calc(50% - 22px);
+  width: 44px;
+  height: 3px;
+  border-radius: 2px;
+  background: var(--muted);
+}
+.timeline-resize-handle:hover::after,
+.timeline-resize-handle:focus-visible::after {
+  background: var(--color-accent);
+}
+.timeline-resize-handle:focus-visible {
+  outline: 1px solid var(--color-accent);
+  outline-offset: -3px;
 }
 .timeline-toolbar {
   display: flex;
@@ -13,6 +47,7 @@
   gap: 12px;
   border-bottom: 1px solid color-mix(in srgb, var(--color-accent) 26%, var(--color-black));
   height: 47px;
+  flex: none;
 }
 .timeline-toolbar > div:first-child {
   display: flex;
@@ -37,17 +72,17 @@
   align-items: center;
 }
 .timeline-range > label {
-  font-size: 8px;
+  font-size: 12px;
   letter-spacing: 0.5px;
-  color: color-mix(in srgb, var(--color-accent) 59%, var(--color-black));
+  color: #b7c1b5;
   display: flex;
   align-items: center;
   gap: 6px;
 }
 .timeline-range input {
-  font-size: 9px;
+  font-size: 12px;
   padding: 5px 6px;
-  width: 66px;
+  width: 94px;
   border-radius: 4px;
   border-color: color-mix(in srgb, var(--color-accent) 29%, var(--color-black));
   background: color-mix(in srgb, var(--color-neutral) 17%, var(--color-black));
@@ -58,7 +93,7 @@
   display: flex;
   align-items: center;
   gap: 9px;
-  color: color-mix(in srgb, var(--color-accent) 59%, var(--color-black));
+  color: #b7c1b5;
   width: 100px;
 }
 .timeline-zoom input {
@@ -71,7 +106,8 @@
 }
 .timeline-content {
   display: flex;
-  height: 202px;
+  flex: 1;
+  min-height: 0;
   overflow: hidden;
 }
 .track-labels {
@@ -87,19 +123,20 @@
   display: flex;
   gap: 9px;
   align-items: center;
-  height: 38px;
-  font-size: 9px;
-  color: color-mix(in srgb, var(--color-accent) 69%, var(--color-black));
+  height: var(--timeline-track-height);
+  font-size: 12px;
+  color: #b7c1b5;
 }
 .timeline-scroll {
-  overflow: auto;
+  overflow-x: auto;
+  overflow-y: hidden;
   width: 100%;
   padding-right: 25px;
 }
 .timeline-tracks {
   position: relative;
   min-width: 100%;
-  height: 190px;
+  height: calc(31px + 5 * var(--timeline-track-height));
 }
 .timeline-ruler {
   height: 31px;
@@ -133,9 +170,9 @@
 }
 .timeline-ruler > span {
   position: absolute;
-  font-size: 8px;
+  font-size: 12px;
   top: 9px;
-  color: color-mix(in srgb, var(--color-accent) 58%, var(--color-black));
+  color: #b7c1b5;
   padding: 0 3px;
   font-variant-numeric: tabular-nums;
   transform: translateX(-50%);
@@ -148,7 +185,7 @@
   transform: translateX(-100%);
 }
 .track {
-  height: 38px;
+  height: var(--timeline-track-height);
   position: relative;
   border-bottom: 1px solid
     color-mix(
@@ -168,7 +205,7 @@
   border-radius: 5px;
   overflow: hidden;
   padding: 0 10px;
-  font-size: 9px;
+  font-size: 12px;
   white-space: nowrap;
   min-width: 3px;
   text-align: left;
@@ -179,8 +216,8 @@
 }
 .clip-end {
   margin-left: auto;
-  font-size: 8px;
-  opacity: 0.6;
+  font-size: 12px;
+  opacity: 0.9;
 }
 .screen-clip {
   background: color-mix(in srgb, var(--color-accent) 36%, var(--color-black));
@@ -192,10 +229,15 @@
   border-color: color-mix(in srgb, var(--color-camera) 61%, var(--color-black));
   color: color-mix(in srgb, var(--color-camera) 62%, var(--color-white));
 }
+.screen-clip,
+.camera-clip {
+  height: calc(var(--timeline-track-height) - 10px);
+}
 .camera-hidden {
   position: absolute;
+  pointer-events: none;
   top: 5px;
-  height: 28px;
+  height: calc(var(--timeline-track-height) - 10px);
   background: repeating-linear-gradient(
     45deg,
     color-mix(
@@ -247,29 +289,29 @@
   );
 }
 .zoom-clip {
-  height: 14px;
-  top: 3px;
+  height: 24px;
+  top: 6px;
   border-radius: 3px;
   padding: 0 5px;
-  font-size: 8px;
+  font-size: 12px;
   gap: 4px;
   background: color-mix(in srgb, var(--color-warning) 38%, var(--color-black));
   border-color: color-mix(in srgb, var(--color-warning) 49%, var(--color-black));
   color: color-mix(in srgb, var(--color-warning) 96%, var(--color-white));
 }
 .overlay-clip {
-  height: 14px;
+  height: 24px;
   border-radius: 3px;
   padding: 0 5px;
-  font-size: 8px;
+  font-size: 12px;
   gap: 4px;
   background: color-mix(in srgb, var(--color-info) 43%, var(--color-black));
   border-color: color-mix(in srgb, var(--color-info) 56%, var(--color-black));
   color: color-mix(in srgb, var(--color-info) 79%, var(--color-white));
 }
 .empty-track-label {
-  font-size: 9px;
-  color: color-mix(in srgb, var(--color-accent) 39%, var(--color-black));
+  font-size: 12px;
+  color: #b7c1b5;
   position: absolute;
   left: 17px;
   top: 13px;
@@ -320,8 +362,8 @@
   height: 26px;
   min-height: 26px;
   padding: 0 19px;
-  font-size: 8px;
-  color: color-mix(in srgb, var(--color-accent) 60%, var(--color-black));
+  font-size: 12px;
+  color: #b7c1b5;
   border-top: 1px solid color-mix(in srgb, var(--color-accent) 26%, var(--color-black));
   background: color-mix(in srgb, var(--color-neutral) 17%, var(--color-black));
   display: flex;
@@ -342,7 +384,7 @@
   border: none;
   padding: 0;
   color: color-mix(in srgb, var(--color-accent) 68%, var(--color-black));
-  font-size: 8px;
+  font-size: 12px;
 }
 .status-separator {
   margin: 0 5px;

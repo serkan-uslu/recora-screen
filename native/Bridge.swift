@@ -22,6 +22,12 @@ import Security
     }
     func command(_ method: String, _ params: [String: Any]) async throws -> Any {
         switch method {
+        case "audio.inspect":
+            let asset = AVURLAsset(url: URL(fileURLWithPath: try requiredString(params, "path")))
+            guard let track = try await asset.loadTracks(withMediaType: .audio).first else { throw NativeFailure("Selected file has no audio track.", code: "invalid_media") }
+            let range = try await track.load(.timeRange)
+            guard range.duration.isNumeric, range.duration > .zero else { throw NativeFailure("Audio duration is invalid.", code: "invalid_media") }
+            return ["durationMs": milliseconds(range.duration)]
         case "capabilities": return await capabilities()
         case "permissions.request":
             let kind = try requiredString(params, "kind")
@@ -139,6 +145,11 @@ import Security
             if let path = source.microphone { result["microphone"] = try await analyzeAudio(projectURL(directory, path)) }
             if let path = source.systemAudio { result["system"] = try await analyzeAudio(projectURL(directory, path)) }; return result
         case "audio.prepare": return try await prepareAudio(decode(RecordingSource.self, params["source"] ?? [:]), directory: requiredString(params, "projectDir"), destination: requiredString(params, "path"))
+        case "media.filmstrip", "media.waveform":
+            let path = try requiredString(params, "path"), start = (params["startMs"] as? NSNumber)?.doubleValue ?? -1, end = (params["endMs"] as? NSNumber)?.doubleValue ?? -1
+            guard start.isFinite, end.isFinite, start >= 0, end > start else { throw NativeFailure("Invalid media sample interval.", code: "invalid_params") }
+            if method == "media.waveform" { return try await audioWaveform(URL(fileURLWithPath: path), startMs: start, endMs: end) }
+            return try await timelineFrames(path, image: params["image"] as? Bool == true, startMs: start, endMs: end)
         case "media.inspect": return try await inspectMedia(requiredString(params, "path"))
         case "project.trash":
             let url = URL(fileURLWithPath: try requiredString(params, "path")); guard url.path != "/", url.path != NSHomeDirectory() else { throw NativeFailure("Invalid trash target.", code: "invalid_path") }

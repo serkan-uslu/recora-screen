@@ -52,7 +52,9 @@ export class ProjectService {
               ranges
                 .map((range) => ({ ...range, endMs: Math.min(range.endMs, limit) }))
                 .filter((range) => range.endMs > range.startMs);
-            current.edits.segments = clip(current.edits.segments);
+            current.edits.segments = current.edits.segments.flatMap((segment) =>
+              segment.assetId ? [segment] : clip([segment]),
+            );
             current.edits.camera.hiddenRanges = clip(current.edits.camera.hiddenRanges);
             current.edits.camera.layouts = clip(current.edits.camera.layouts);
             current.edits.zooms = clip(current.edits.zooms);
@@ -138,14 +140,20 @@ export class ProjectService {
       throw new AppError("INVALID_PATH", "Symbolic links cannot be imported");
     const info = await fs.stat(inputPath);
     if (!info.isDirectory() && path.extname(inputPath).toLowerCase() !== ".json") {
+      if (
+        !info.isFile() ||
+        ![".mp4", ".mov", ".m4v"].includes(path.extname(inputPath).toLowerCase())
+      )
+        throw new AppError("INVALID_ASSET", "Choose an MP4, MOV or M4V video.");
       const sourceInfo = await this.native("media.inspect", { path: inputPath });
       const source = sourceSchema.parse({
         durationMs: sourceInfo.durationMs,
         width: sourceInfo.width,
         height: sourceInfo.height,
         fps: sourceInfo.fps,
+        title: path.basename(inputPath).slice(0, 200),
         screen: `media/screen${path.extname(inputPath).toLowerCase()}`,
-        ...(sourceInfo.hasAudio
+        ...(sourceInfo.hasAudio === true
           ? { microphone: `media/screen${path.extname(inputPath).toLowerCase()}` }
           : {}),
       });

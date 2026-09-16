@@ -9,16 +9,18 @@ export function sourceTime(segments: TimelineSegment[], timelineMs: number): num
   let remaining = Math.max(0, timelineMs);
   for (const range of segments) {
     const length = segmentDuration(range);
-    if (remaining < length) return range.startMs + remaining * (range.speed ?? 1);
+    if (remaining < length)
+      return range.assetId ? -1 : range.startMs + remaining * (range.speed ?? 1);
     remaining -= length;
   }
-  return segments.at(-1)?.endMs ?? 0;
+  const last = segments.at(-1);
+  return last?.assetId ? -1 : (last?.endMs ?? 0);
 }
 
 export function timelineTime(segments: TimelineSegment[], sourceMs: number): number | null {
   let elapsed = 0;
   for (const range of segments) {
-    if (sourceMs >= range.startMs && sourceMs < range.endMs)
+    if (!range.assetId && sourceMs >= range.startMs && sourceMs < range.endMs)
       return elapsed + (sourceMs - range.startMs) / (range.speed ?? 1);
     elapsed += segmentDuration(range);
   }
@@ -55,7 +57,9 @@ export function sliceSegments(
 }
 
 export function sourceRanges(segments: TimelineSegment[], startMs: number, endMs: number): Range[] {
-  return sliceSegments(segments, startMs, endMs).map(({ startMs, endMs }) => ({ startMs, endMs }));
+  return sliceSegments(segments, startMs, endMs)
+    .filter((segment) => !segment.assetId)
+    .map(({ startMs, endMs }) => ({ startMs, endMs }));
 }
 
 export function outputRanges(segments: TimelineSegment[], range: Range): Range[] {
@@ -65,7 +69,7 @@ export function outputRanges(segments: TimelineSegment[], range: Range): Range[]
     const startMs = Math.max(segment.startMs, range.startMs),
       endMs = Math.min(segment.endMs, range.endMs),
       speed = segment.speed ?? 1;
-    if (endMs > startMs)
+    if (!segment.assetId && endMs > startMs)
       result.push({
         startMs: elapsed + (startMs - segment.startMs) / speed,
         endMs: elapsed + (endMs - segment.startMs) / speed,
@@ -121,3 +125,10 @@ export const formatTime = (ms: number) => {
     .toString()
     .padStart(2, "0")}:${(seconds % 60).toString().padStart(2, "0")}`;
 };
+
+/** Images can be held for up to one minute; video trim bounds come from inspected media. */
+export function segmentSourceDuration(project: Project, segment: TimelineSegment): number {
+  if (!segment.assetId) return project.source?.durationMs ?? 0;
+  const asset = project.assets.find((asset) => asset.id === segment.assetId);
+  return asset?.kind === "image" ? 60000 : asset?.kind === "video" ? (asset.durationMs ?? 0) : 0;
+}

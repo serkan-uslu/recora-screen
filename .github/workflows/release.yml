@@ -76,8 +76,8 @@ jobs:
           set -euo pipefail
           mkdir -p artifacts
           app='src-tauri/target/release/bundle/macos/Screen Recorder.app'
-          ditto -c -k --keepParent "$app" artifacts/Screen-Recorder.app.zip
-          xcrun notarytool submit artifacts/Screen-Recorder.app.zip \
+          ditto -c -k --keepParent "$app" artifacts/Screen Recorder.app.zip
+          xcrun notarytool submit artifacts/Screen Recorder.app.zip \
             --apple-id "$APPLE_ID" --password "$APPLE_PASSWORD" --team-id "$APPLE_TEAM_ID" \
             --wait --output-format json > artifacts/app-notarization.json
           node -e "const r=require('./artifacts/app-notarization.json'); if(r.status!=='Accepted') process.exit(1)"

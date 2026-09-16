@@ -126,24 +126,38 @@ final class ScreenrecCompositor: NSObject, AVVideoCompositing {
         c.setFillColor(NSColor.black.cgColor); c.setStrokeColor(NSColor.white.cgColor); c.setLineWidth(2); c.drawPath(using: .fillStroke)
         return CIImage(cgImage: c.makeImage()!)
     }()
-    private func cursorAt(_ events: [CursorEvent], _ t: Double, smooth: Bool) -> CursorEvent? {
-        guard !events.isEmpty else { return nil }
-        var lo = 0, hi = events.count
-        while lo < hi { let mid = (lo + hi) / 2; if events[mid].tMs <= t { lo = mid + 1 } else { hi = mid } }
-        let a = events[max(0, lo - 1)]
-        guard t >= a.tMs, t - a.tMs < 160 else { return nil }
-        guard smooth, lo < events.count, events[lo].tMs - a.tMs < 160 else { return a }
-        let b = events[lo], fraction = max(0, min(1, (t - a.tMs) / max(1, b.tMs - a.tMs)))
-        return CursorEvent(tMs: t, x: a.x + (b.x - a.x) * fraction, y: a.y + (b.y - a.y) * fraction, click: a.click)
+    private func annotationArrow(_ overlay: Overlay, size: CGSize) -> CIImage? {
+        let key = "arrow|\(size)|\(overlay.rotation ?? 0)|\(overlay.color)"
+        if let cached = textCache[key] { return cached }
+        guard let bitmap = CGContext(data: nil, width: max(1, Int(ceil(size.width))), height: max(1, Int(ceil(size.height))), bitsPerComponent: 8, bytesPerRow: 0, space: CGColorSpace(name: CGColorSpace.sRGB)!, bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue) else { return nil }
+        let angle = -(overlay.rotation ?? 0) * .pi / 180
+        let span = min(size.width * 0.35 / max(0.000001, abs(cos(angle))), size.height * 0.35 / max(0.000001, abs(sin(angle))))
+        let dx = cos(angle) * span, dy = sin(angle) * span
+        let end = CGPoint(x: size.width / 2 + dx, y: size.height / 2 + dy)
+        let direction = atan2(dy, dx), head = min(size.width, size.height) * 0.24
+        bitmap.setStrokeColor(color(overlay.color).cgColor); bitmap.setLineWidth(max(2, min(size.width, size.height) * 0.09)); bitmap.setLineCap(.round); bitmap.setLineJoin(.round)
+        bitmap.move(to: CGPoint(x: size.width / 2 - dx, y: size.height / 2 - dy)); bitmap.addLine(to: end)
+        bitmap.move(to: CGPoint(x: end.x - cos(direction - .pi / 4) * head, y: end.y - sin(direction - .pi / 4) * head)); bitmap.addLine(to: end); bitmap.addLine(to: CGPoint(x: end.x - cos(direction + .pi / 4) * head, y: end.y - sin(direction + .pi / 4) * head)); bitmap.strokePath()
+        guard let image = bitmap.makeImage() else { return nil }
+        let result = CIImage(cgImage: image)
+        if textCache.count > 256 { textCache.removeAll() }; textCache[key] = result
+        return result
     }
     private func frame(_ instruction: RenderInstruction, request: AVAsynchronousVideoCompositionRequest, sourceMs t: Double, bounds: CGRect) -> CIImage {
         let project = instruction.project, edits = project.edits, w = bounds.width, h = bounds.height
-        let layout = CanvasLayout(project: project, bounds: bounds)
+        let mediaID = timelineSegment(edits.segments, at: milliseconds(request.compositionTime))?.assetId
+        let still = mediaID.flatMap { instruction.images[$0] }
+        let mediaSize = mediaID.flatMap { instruction.mediaSizes[$0] } ?? still?.extent.size
+        let layout = CanvasLayout(project: project, bounds: bounds, mediaSize: mediaSize)
         let screenBounds = CGRect(origin: .zero, size: layout.content.size), sw = screenBounds.width, sh = screenBounds.height
         let clear = CIImage(color: .clear).cropped(to: bounds)
         var screen = CIImage(color: CIColor(red: 0.04, green: 0.05, blue: 0.07)).cropped(to: screenBounds)
-        if let buffer = request.sourceFrame(byTrackID: instruction.screenID) { screen = fitted(CIImage(cvPixelBuffer: buffer).transformed(by: instruction.transforms[instruction.screenID] ?? .identity), to: screenBounds).composited(over: screen) }
-        if edits.cursor.visible, let event = cursorAt(instruction.cursor, t, smooth: edits.cursor.smooth), event.x >= 0, event.x <= 1, event.y >= 0, event.y <= 1 {
+        if let still { screen = fitted(still, to: screenBounds).composited(over: screen) }
+        else if let buffer = request.sourceFrame(byTrackID: instruction.screenID) {
+            let transform = mediaID.flatMap { instruction.mediaTransforms[$0] } ?? instruction.transforms[instruction.screenID] ?? .identity
+            screen = fitted(CIImage(cvPixelBuffer: buffer).transformed(by: coreImageTransform(transform)), to: screenBounds).composited(over: screen)
+        }
+        if t >= 0, edits.cursor.visible, let event = renderedCursor(instruction, outputMs: milliseconds(request.compositionTime)), event.x >= 0, event.x <= 1, event.y >= 0, event.y <= 1 {
             let p = CGPoint(x: event.x * sw, y: (1 - event.y) * sh)
             if edits.cursor.highlight && event.click == true {
                 let radius = 22.0 * sw / 1920
@@ -151,10 +165,24 @@ final class ScreenrecCompositor: NSObject, AVVideoCompositing {
                 let m = mask(CGRect(x: p.x - radius, y: p.y - radius, width: radius * 2, height: radius * 2), circle: true)
                 screen = ring.applyingFilter("CIBlendWithMask", parameters: [kCIInputBackgroundImageKey: screen, kCIInputMaskImageKey: m])
             }
-            let scale = max(0.3, min(5, edits.cursor.size)) * sw / 1920
-            screen = arrow.transformed(by: CGAffineTransform(scaleX: scale, y: scale)).transformed(by: CGAffineTransform(translationX: p.x - 3 * scale, y: p.y - 46 * scale)).composited(over: screen)
+            let outputMs = milliseconds(request.compositionTime)
+            let before = renderedCursor(instruction, outputMs: max(0, outputMs - 25)) ?? event
+            let dx = (event.x - before.x) * sw, dy = (before.y - event.y) * sh
+            var low = 0, high = instruction.clicks.count
+            while low < high { let middle = (low + high) / 2; if instruction.clicks[middle].tMs <= t { low = middle + 1 } else { high = middle } }
+            let age = low > 0 ? t - instruction.clicks[low - 1].tMs : 1000
+            let bounce = edits.cursor.bounce == true && age >= 0 && age < 300 ? 1 - 0.22 * sin(.pi * age / 300) : 1
+            let scale = max(0.3, min(5, edits.cursor.size)) * sw / 1920 * bounce
+            var pointer = edits.cursor.style == "light" ? arrow.applyingFilter("CIColorInvert") : arrow
+            pointer = pointer.transformed(by: CGAffineTransform(translationX: -3, y: -46)).transformed(by: CGAffineTransform(scaleX: scale, y: scale))
+            if edits.cursor.sway == true { pointer = pointer.transformed(by: CGAffineTransform(rotationAngle: max(-0.25, min(0.25, -dx / max(1, sw) * 6)))) }
+            pointer = pointer.transformed(by: CGAffineTransform(translationX: p.x, y: p.y))
+            if edits.cursor.motionBlur == true {
+                pointer = pointer.applyingFilter("CIMotionBlur", parameters: [kCIInputRadiusKey: min(24 * sw / 1920, hypot(dx, dy) * 0.35), kCIInputAngleKey: atan2(dy, dx)])
+            }
+            screen = pointer.composited(over: screen)
         }
-        if let zoom = edits.zooms.last(where: { t >= $0.startMs && t < $0.endMs }) {
+        if t >= 0, let zoom = instruction.renderZooms.last(where: { t >= $0.startMs && t < $0.endMs }) {
             let scale = 1 + (max(1, min(5, zoom.scale)) - 1) * zoomAmount(zoom, at: t)
             let focus = zoomFocus(zoom, path: instruction.focusPaths[zoom.id] ?? [], at: t)
             let tx = min(0, max(sw * (1 - scale), sw / 2 - focus.x * sw * scale))
@@ -162,22 +190,25 @@ final class ScreenrecCompositor: NSObject, AVVideoCompositing {
             screen = screen.transformed(by: CGAffineTransform(scaleX: scale, y: scale)).transformed(by: CGAffineTransform(translationX: tx, y: ty)).cropped(to: screenBounds)
         }
         screen = decoratedScreen(screen, instruction: instruction, bounds: bounds, layout: layout)
-        let camera = cameraVisual(instruction.cameraRuns, at: milliseconds(request.compositionTime), fallback: CameraVisual(edits.camera))
+        guard t >= 0 else { return screen.cropped(to: bounds) }
+        let camera = renderedCamera(instruction, outputMs: milliseconds(request.compositionTime), sourceMs: t)
         if cameraVisible(project, at: t), let id = instruction.cameraID, let buffer = request.sourceFrame(byTrackID: id) {
             let rect = cameraRect(camera, bounds: bounds)
-            let m = mask(rect, circle: camera.shape == "circle")
+            let m = camera.shape == "circle" ? mask(rect, circle: true) : roundedMask(rect, radius: rect.width * max(0, min(0.5, camera.radius)))
             if camera.shadow {
-                let shadow = CIImage(color: CIColor(red: 0, green: 0, blue: 0, alpha: 0.4)).cropped(to: bounds).applyingFilter("CIBlendWithMask", parameters: [kCIInputBackgroundImageKey: clear, kCIInputMaskImageKey: m]).applyingFilter("CIGaussianBlur", parameters: [kCIInputRadiusKey: 10 * w / 1920]).transformed(by: CGAffineTransform(translationX: 0, y: -5 * w / 1920))
+                let shadow = CIImage(color: CIColor(red: 0, green: 0, blue: 0, alpha: max(0, min(1, camera.shadowOpacity)))).cropped(to: bounds).applyingFilter("CIBlendWithMask", parameters: [kCIInputBackgroundImageKey: clear, kCIInputMaskImageKey: m]).applyingFilter("CIGaussianBlur", parameters: [kCIInputRadiusKey: 10 * w / 1920]).transformed(by: CGAffineTransform(translationX: 0, y: -5 * w / 1920))
                 screen = shadow.composited(over: screen)
             }
-            screen = fitted(CIImage(cvPixelBuffer: buffer).transformed(by: instruction.transforms[id] ?? .identity), to: rect, fill: true).cropped(to: rect).applyingFilter("CIBlendWithMask", parameters: [kCIInputBackgroundImageKey: screen, kCIInputMaskImageKey: m])
+            var footage = CIImage(cvPixelBuffer: buffer).transformed(by: coreImageTransform(instruction.transforms[id] ?? .identity))
+            if camera.mirror { footage = footage.transformed(by: CGAffineTransform(a: -1, b: 0, c: 0, d: 1, tx: footage.extent.minX + footage.extent.maxX, ty: 0)) }
+            screen = fitted(footage, to: rect, fill: true).cropped(to: rect).applyingFilter("CIBlendWithMask", parameters: [kCIInputBackgroundImageKey: screen, kCIInputMaskImageKey: m])
         }
-        for overlay in edits.overlays where t >= overlay.startMs && t < overlay.endMs {
+        for overlay in edits.overlays where t >= overlay.startMs && t < overlay.endMs && !["blur", "redact"].contains(overlay.kind) {
             var image: CIImage?
             let width = max(24, min(w, overlay.width * w))
             if overlay.kind == "image", let id = overlay.assetId, let source = instruction.images[id] {
                 image = fitted(source, to: CGRect(x: 0, y: 0, width: width, height: width * source.extent.height / max(1, source.extent.width)))
-            } else { image = textImage(overlay.text ?? "", fontSize: overlay.fontSize * w / 1920, width: width, foreground: overlay.color) }
+            } else if overlay.kind == "arrow" { image = annotationArrow(overlay, size: overlayRect(overlay, sourceMs: t, bounds: bounds, images: instruction.images).size) } else { image = textImage(overlay.text ?? "", fontSize: overlay.fontSize * w / 1920, width: width, foreground: overlay.color) }
             if var image {
                 let ramp = max(0, min(1, min((t - overlay.startMs) / 220, (overlay.endMs - t) / 220)))
                 if overlay.animation != "none" { image = image.applyingFilter("CIColorMatrix", parameters: ["inputAVector": CIVector(x: 0, y: 0, z: 0, w: ramp)]) }
@@ -188,7 +219,15 @@ final class ScreenrecCompositor: NSObject, AVVideoCompositing {
         if edits.captions.enabled, let caption = project.transcript.first(where: { t >= $0.startMs && t < $0.endMs }), let image = textImage(caption.text, fontSize: edits.captions.fontSize * w / 1920, width: w * 0.8, foreground: edits.captions.color, background: edits.captions.background) {
             screen = image.transformed(by: CGAffineTransform(translationX: (w - image.extent.width) / 2, y: h * 0.055)).composited(over: screen)
         }
+        // Redactions are always opaque, unanimated and last, including over captions and camera.
+        for overlay in edits.overlays where t >= overlay.startMs && t < overlay.endMs && ["blur", "redact"].contains(overlay.kind) {
+            let rect = overlayRect(overlay, sourceMs: t, bounds: bounds, images: instruction.images).intersection(bounds)
+            if rect.isEmpty { continue }
+            let covered = overlay.kind == "redact"
+                ? CIImage(color: CIColor(color: color(String(overlay.color.prefix(7))))!).cropped(to: rect)
+                : screen.clampedToExtent().applyingFilter("CIGaussianBlur", parameters: [kCIInputRadiusKey: max(4, min(100, overlay.blur ?? 30)) * w / 1920]).cropped(to: rect)
+            screen = covered.composited(over: screen)
+        }
         return screen.cropped(to: bounds)
     }
 }
-

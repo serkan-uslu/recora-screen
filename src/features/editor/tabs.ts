@@ -9,11 +9,11 @@ import {
 } from "lucide-react";
 
 export const tabItems = [
-  { id: "general", icon: SlidersHorizontal, title: "General" },
+  { id: "general", icon: SlidersHorizontal, title: "Canvas" },
   { id: "camera", icon: Camera, title: "Camera" },
   { id: "zoom", icon: MousePointer2, title: "Zoom & cursor" },
-  { id: "overlays", icon: Layers, title: "Overlays" },
+  { id: "overlays", icon: Layers, title: "Layers" },
   { id: "audio", icon: AudioLines, title: "Audio" },
-  { id: "transcript", icon: Subtitles, title: "Transcript" },
+  { id: "transcript", icon: Subtitles, title: "Captions" },
   { id: "ai", icon: Sparkles, title: "AI assistant" },
 ] as const;

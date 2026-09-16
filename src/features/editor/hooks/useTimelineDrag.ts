@@ -6,6 +6,7 @@ import {
   type RefObject,
 } from "react";
 import type { EditOperation, Project, Range } from "@/shared/types";
+import { segmentSourceDuration } from "@/shared/timeline";
 import { useStableCallback } from "@/src/controllers/useStableCallback";
 import type { TimelineInterval } from "@/src/features/editor/hooks/useTimelineGeometry";
 import type { TimelineDrag, TimelinePointerEvents } from "@/src/features/editor/timelineTypes";
@@ -97,8 +98,8 @@ export function useTimelineDrag({
     if (value.kind === "clip") {
       const segment = intervals[value.index]!;
       const sourceDelta = delta * (segment.speed ?? 1);
-      const minimum = intervals[value.index - 1]?.endMs ?? 0;
-      const maximum = intervals[value.index + 1]?.startMs ?? project.source!.durationMs;
+      const minimum = 0;
+      const maximum = segmentSourceDuration(project, segment);
       next =
         value.edge === "start"
           ? {

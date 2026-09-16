@@ -10,6 +10,7 @@ import type {
 import type { TimelineDrag, TimelinePointerEvents } from "@/src/features/editor/timelineTypes";
 
 export function ScreenTrack({
+  projectId,
   intervals,
   gaps,
   draft,
@@ -17,7 +18,7 @@ export function ScreenTrack({
   disabled,
   ratio,
   timeAt,
-  setSelection,
+  onSelectClip,
   openClipMenu,
   openTrackMenu,
   startDrag,
@@ -25,6 +26,7 @@ export function ScreenTrack({
   apply,
   hasSource,
 }: {
+  projectId: string;
   intervals: TimelineInterval[];
   gaps: TimelineGap[];
   draft: TimelineDrag | null;
@@ -32,7 +34,7 @@ export function ScreenTrack({
   disabled: boolean;
   ratio: (value: number) => string;
   timeAt: (clientX: number) => number;
-  setSelection: (range: Range) => void;
+  onSelectClip: (index: number) => void;
   openClipMenu: (index: number, clientX?: number, clientY?: number) => void;
   openTrackMenu: (event: MouseEvent<HTMLElement>, kind: "screen") => void;
   startDrag: (
@@ -57,7 +59,6 @@ export function ScreenTrack({
           (interval) => at >= interval.outputStart && at <= interval.outputEnd,
         );
         if (clip) {
-          setSelection({ startMs: clip.outputStart, endMs: clip.outputEnd });
           openClipMenu(clip.index, event.clientX, event.clientY);
         } else openTrackMenu(event, "screen");
       }}
@@ -67,16 +68,14 @@ export function ScreenTrack({
           draft?.kind === "clip" && draft.index === interval.index ? draft.next : interval;
         return (
           <TimelineClip
+            projectId={projectId}
             key={`${interval.startMs}-${interval.endMs}-${interval.index}`}
             interval={interval}
             current={current}
-            intervalCount={intervals.length}
             selected={selectedClip === interval.index}
             disabled={disabled}
             ratio={ratio}
-            select={() =>
-              setSelection({ startMs: interval.outputStart, endMs: interval.outputEnd })
-            }
+            select={() => onSelectClip(interval.index)}
             openMenu={(event) =>
               openClipMenu(
                 interval.index,
@@ -100,7 +99,14 @@ export function ScreenTrack({
           aria-label={`Restore cut from source ${seconds(gap.startMs)} to ${seconds(gap.endMs)} seconds`}
           title={`Restore ${seconds(gap.endMs - gap.startMs)}s of deleted footage`}
           onClick={() =>
-            void apply([{ type: "source.restore", startMs: gap.startMs, endMs: gap.endMs }])
+            void apply([
+              {
+                type: "source.restore",
+                startMs: gap.startMs,
+                endMs: gap.endMs,
+                atMs: gap.outputMs,
+              },
+            ])
           }
         >
           <Plus size={11} />

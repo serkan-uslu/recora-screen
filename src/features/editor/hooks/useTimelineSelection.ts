@@ -66,6 +66,8 @@ export function useTimelineSelection({
     if (disabled || !total || event.button !== 0) return;
     event.preventDefault();
     event.stopPropagation();
+    const focusTarget = event.currentTarget.tabIndex >= 0 ? event.currentTarget : tracks.current;
+    focusTarget?.focus({ preventScroll: true });
     closeMenu();
     const origin = timeAt(event.clientX);
     event.currentTarget.setPointerCapture(event.pointerId);

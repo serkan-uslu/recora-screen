@@ -2,7 +2,7 @@ import Foundation
 import AVFoundation
 import AppKit
 
-struct MediaRange: Codable { var startMs: Double; var endMs: Double; var speed: Double? = nil
+struct MediaRange: Codable { var startMs: Double; var endMs: Double; var speed: Double? = nil; var assetId: String? = nil
     var rate: Double { speed ?? 1 }
     var outputDuration: Double { max(0, endMs - startMs) / rate }
     func contains(_ time: Double) -> Bool { time >= startMs && time < endMs }
@@ -23,10 +23,12 @@ struct CursorEvent: Codable { var tMs: Double; var x: Double; var y: Double; var
 struct CameraLayout: Codable {
     var id: String; var startMs: Double; var endMs: Double
     var shape: String; var x: Double; var y: Double; var size: Double; var shadow: Bool
+    var mirror: Bool? = nil; var radius: Double? = nil; var shadowOpacity: Double? = nil; var zoomReactive: Bool? = nil
 }
 struct CameraSettings: Codable {
     var visible: Bool; var shape: String; var x: Double; var y: Double; var size: Double; var shadow: Bool; var hiddenRanges: [MediaRange]
     var layouts: [CameraLayout]? = nil
+    var mirror: Bool? = nil; var radius: Double? = nil; var shadowOpacity: Double? = nil; var zoomReactive: Bool? = nil
 }
 struct Zoom: Codable { var id: String; var startMs: Double; var endMs: Double; var scale: Double; var x: Double; var y: Double; var motion: String? = nil; var followCursor: Bool? = nil }
 struct CanvasSettings: Codable {
@@ -40,12 +42,15 @@ struct Overlay: Codable {
     var id: String; var kind: String; var startMs: Double; var endMs: Double
     var text: String?; var assetId: String?; var x: Double; var y: Double; var width: Double
     var fontSize: Double; var color: String; var animation: String
+    var height: Double? = nil; var rotation: Double? = nil; var blur: Double? = nil
 }
 struct TranscriptSegment: Codable { var id: String; var startMs: Double; var endMs: Double; var text: String }
-struct MediaAsset: Codable { var id: String; var name: String; var path: String; var kind: String }
+struct MediaAsset: Codable { var id: String; var name: String; var path: String; var kind: String; var durationMs: Double? = nil; var width: Int? = nil; var height: Int? = nil }
+struct AudioClip: Codable { var id: String; var assetId: String; var startMs: Double; var endMs: Double; var offsetMs: Double; var volume: Double }
 struct EditState: Codable {
+    var audioClips: [AudioClip]? = nil
     struct Audio: Codable { var microphoneVolume: Double; var systemVolume: Double }
-    struct Cursor: Codable { var visible: Bool; var highlight: Bool; var smooth: Bool; var size: Double }
+    struct Cursor: Codable { var visible: Bool; var highlight: Bool; var smooth: Bool; var size: Double; var motionBlur: Bool? = nil; var bounce: Bool? = nil; var sway: Bool? = nil; var loop: Bool? = nil; var style: String? = nil }
     struct Captions: Codable { var enabled: Bool; var fontSize: Double; var color: String; var background: String }
     var segments: [MediaRange]; var camera: CameraSettings; var zooms: [Zoom]; var overlays: [Overlay]
     var audio: Audio; var cursor: Cursor; var captions: Captions
@@ -66,10 +71,15 @@ func decode<T: Decodable>(_ type: T.Type, _ object: Any) throws -> T {
 func jsonObject<T: Encodable>(_ value: T) throws -> Any { try JSONSerialization.jsonObject(with: JSONEncoder().encode(value)) }
 func milliseconds(_ time: CMTime) -> Double { let n = time.seconds * 1000; return n.isFinite ? n : 0 }
 func mediaTime(_ ms: Double) -> CMTime { CMTime(seconds: ms / 1000, preferredTimescale: 600_000) }
+func timelineSegment(_ ranges: [MediaRange], at timelineMs: Double) -> MediaRange? {
+    var remaining = max(0, timelineMs)
+    for range in ranges { if remaining < range.outputDuration { return range }; remaining -= range.outputDuration }
+    return ranges.last
+}
 func sourceTime(_ ranges: [MediaRange], _ timelineMs: Double) -> Double {
     var remaining = max(0, timelineMs)
-    for range in ranges { let n = range.outputDuration; if remaining < n { return range.startMs + remaining * range.rate }; remaining -= n }
-    return ranges.last?.endMs ?? 0
+    for range in ranges { let n = range.outputDuration; if remaining < n { return range.assetId == nil ? range.startMs + remaining * range.rate : -1 }; remaining -= n }
+    return ranges.last.map { $0.assetId == nil ? $0.endMs : -1 } ?? 0
 }
 func timelineDuration(_ ranges: [MediaRange]) -> Double { ranges.reduce(0) { $0 + $1.outputDuration } }
 func renderDimensions(_ project: Project, longEdge: Int? = nil) -> CGSize {

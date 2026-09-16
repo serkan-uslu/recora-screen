@@ -34,4 +34,17 @@ test("documentation shares the site layout and covers both audiences", async ({ 
   await expect(page.getByRole("heading", { name: "Connect Claude or Codex." })).toBeVisible();
   await expect(page.getByRole("heading", { name: "Understand the architecture." })).toBeVisible();
   await expect(page.getByRole("link", { name: "Documentation ↗" })).toBeVisible();
+  for (const heading of [
+    "Move clips and insert media",
+    "Start with an existing video",
+    "Your first edit",
+    "Arrows and privacy covers",
+    "Imported audio",
+    "Cursor and camera effects",
+  ]) {
+    await expect(page.getByRole("heading", { name: heading, exact: true })).toBeVisible();
+  }
+  await expect(page.getByText(/GIF supports up to 60 seconds/)).toBeVisible();
+  await expect(page.getByText(/Videos support MP4, MOV and M4V up to 2 GB/)).toBeVisible();
+  await expect(page.getByText(/Use Restore deleted footage at playhead/)).toBeVisible();
 });
