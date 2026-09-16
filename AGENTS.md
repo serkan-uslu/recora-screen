@@ -24,4 +24,4 @@ After modifying code, run `npm run check` and resolve every failure before consi
 
 ## Repository knowledge graph
 
-Follow the parent repository's Graphify guidance: query the existing graph first when investigating code relationships and run `graphify update .` after code changes. Keep intentional graph updates.
+Follow the parent repository's Graphify guidance: query the local graph first when investigating code relationships and run `graphify update .` after code changes. Keep generated `graphify-out/` files local; never commit them.
