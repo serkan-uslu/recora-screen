@@ -181,7 +181,7 @@ if (process.argv.includes("--self-check")) {
   const evidencePath =
     siteOnly && exactUrl
       ? new URL("release-evidence.json", download).href
-      : process.env.SCREENREC_RELEASE_EVIDENCE || `docs/releases/${packageJson.version}.json`;
+      : process.env.SCREENREC_RELEASE_EVIDENCE || `release/${packageJson.version}.json`;
   const evidence = evidenceSchema.parse(
     evidencePath.startsWith("https:")
       ? await fetch(evidencePath, { signal: AbortSignal.timeout(30_000) }).then(

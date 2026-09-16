@@ -4,11 +4,11 @@ import { site } from "@/website/lib/site";
 
 export const metadata: Metadata = {
   title: "Documentation",
-  description: `User and technical documentation for ${product.name}, the open-source macOS screen recorder controlled through MCP.`,
+  description: `User documentation for ${product.name}, the open-source macOS screen recorder controlled through MCP.`,
   alternates: { canonical: `${site.SITE_URL}documentation/` },
   openGraph: {
     title: `Documentation — ${product.name}`,
-    description: `Creator and contributor documentation for ${product.name}.`,
+    description: `Creator documentation for ${product.name}.`,
     url: `${site.SITE_URL}documentation/`,
   },
 };
@@ -17,13 +17,13 @@ export default function DocumentationPage() {
   return (
     <main id="main">
       <header className="docs-hero wrap">
-        <p className="eyebrow">FOR CREATORS AND CONTRIBUTORS</p>
+        <p className="eyebrow">FOR CREATORS</p>
         <h1>
           Documentation<span className="accent">.</span>
         </h1>
         <p>
-          Learn the complete recording workflow, connect Claude or Codex, understand local data and
-          permissions, or start contributing to the app.
+          Learn the complete recording workflow, connect Claude or Codex, and understand local data
+          and permissions.
         </p>
       </header>
 
@@ -36,8 +36,6 @@ export default function DocumentationPage() {
           <a href="#ai">Local AI</a>
           <a href="#mcp">MCP</a>
           <a href="#projects">Projects & privacy</a>
-          <a href="#architecture">Architecture</a>
-          <a href="#develop">Development</a>
         </aside>
 
         <article className="docs-content">
@@ -396,88 +394,6 @@ and export a 1080p MP4 to Movies.`}</code>
               may send requested transcripts or preview frames to its own provider. Review that
               client's privacy policy before connecting sensitive work. Read the{" "}
               <a href={`${product.repository}/blob/main/docs/privacy.md`}>full privacy model</a>.
-            </p>
-          </section>
-
-          <section className="docs-section" id="architecture">
-            <p className="eyebrow">TECHNICAL GUIDE</p>
-            <h2>Understand the architecture.</h2>
-            <pre className="docs-architecture">
-              <code>{`React views → React controllers → command service → desktop transport
-                                      ↓
-UI / MCP / socket → CommandController → ApplicationService
-                                      ├─ domain edits and cursor analysis
-                                      ├─ atomic ProjectStore and background Jobs
-                                      ├─ local / optional cloud AI
-                                      └─ native Swift capture and composition`}</code>
-            </pre>
-            <p>
-              Node owns project state and application commands. The React UI and external MCP
-              clients call the same schemas and use cases. Swift handles ScreenCaptureKit,
-              AVFoundation, AVPlayer preview and export composition; frames do not pass through
-              React. Tauri keeps the desktop shell and native bridge small.
-            </p>
-            <ul>
-              <li>
-                <code>src/features</code> contains creator-facing views;{" "}
-                <code>src/controllers</code> owns UI orchestration.
-              </li>
-              <li>
-                <code>server/services</code> contains application use cases;{" "}
-                <code>server/domain</code> contains timeline rules.
-              </li>
-              <li>
-                <code>server/contracts</code> validates commands and persisted data at trust
-                boundaries.
-              </li>
-              <li>
-                <code>native</code> owns capture, playback geometry and preview/export composition
-                parity.
-              </li>
-              <li>
-                <code>shared</code> contains cross-layer project and timeline types;{" "}
-                <code>design-system</code> contains theme tokens.
-              </li>
-            </ul>
-            <p>
-              See the{" "}
-              <a href={`${product.repository}/blob/main/docs/architecture.md`}>
-                architecture and contribution guide
-              </a>{" "}
-              for invariants, edit timing and migration rules.
-            </p>
-          </section>
-
-          <section className="docs-section" id="develop">
-            <p className="eyebrow">CONTRIBUTING</p>
-            <h2>Build it with us.</h2>
-            <p>
-              Development requires macOS 15+, Xcode and command-line tools, Rust, Node.js 22.12+,
-              Git and CMake. Clone the repository, then run:
-            </p>
-            <pre>
-              <code>{`npm ci
-npm run prepare:whisper
-npm run dev`}</code>
-            </pre>
-            <p>Before submitting a change, run the repository checks that match your work:</p>
-            <pre>
-              <code>{`npm run check
-npm run build
-npm run test:native
-npm run desktop:check
-npm run build:site
-npm run test:e2e`}</code>
-            </pre>
-            <p>
-              Native checks require macOS and Xcode. Start with{" "}
-              <a href={`${product.repository}/blob/main/AGENTS.md`}>development standards</a>, then
-              read the <a href={`${product.repository}/blob/main/docs/release.md`}>release guide</a>
-              . Open an issue on{" "}
-              <a data-author="repository" href={product.repository}>
-                GitHub
-              </a>{" "}
-              or email <a href="mailto:info@serkanuslu.com">info@serkanuslu.com</a>.
             </p>
           </section>
         </article>

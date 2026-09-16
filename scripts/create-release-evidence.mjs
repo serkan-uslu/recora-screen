@@ -29,9 +29,7 @@ const dmg = value("--dmg");
 const notarizationPath = value("--notarization");
 const output = value("--output");
 const { version } = JSON.parse(await readFile(path.join(root, "package.json"), "utf8"));
-const template = JSON.parse(
-  await readFile(path.join(root, "docs/releases", `${version}.json`), "utf8"),
-);
+const template = JSON.parse(await readFile(path.join(root, "release", `${version}.json`), "utf8"));
 assert.equal(path.basename(dmg), template.artifact.name, "DMG name does not match this release.");
 const notarization = JSON.parse(await readFile(notarizationPath, "utf8"));
 const signature = run("/usr/bin/codesign", ["--display", "--verbose=4", app]);

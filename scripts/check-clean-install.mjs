@@ -15,6 +15,4 @@ run(process.execPath, [path.join(root, "scripts/verify-bundle.mjs"), app]);
 run("/usr/bin/codesign", ["--verify", "--deep", "--strict", "--verbose=2", app]);
 run("/usr/sbin/spctl", ["--assess", "--type", "execute", "--verbose=2", app]);
 run("/usr/bin/xcrun", ["stapler", "validate", app]);
-console.log(
-  "Automated clean-install checks passed. Complete the hardware, restart, MCP-client and offline-language rows in docs/clean-mac-acceptance.md.",
-);
+console.log("Automated clean-install checks passed.");

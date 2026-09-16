@@ -14,7 +14,6 @@ The source is available under the MIT license. **There is no verified public bet
 
 - [Build and run from source](#develop).
 - [Product documentation](https://recora-screen.vercel.app/documentation/).
-- [Release status and remaining checks](docs/release.md).
 - Product site: [recora-screen.vercel.app](https://recora-screen.vercel.app/). Locally, `npm run dev:site` serves `http://127.0.0.1:4174/`.
 
 The current development-signed DMG is not a notarized public release. Public installation, final branding and release acceptance must pass before a beta is advertised as ready to download.
@@ -58,7 +57,7 @@ The optional in-app cloud assistant sends your prompt, necessary transcript and 
 
 Screen, camera and microphone permissions depend on what you capture. Pointer sampling works without Input Monitoring; typing activity and precise short-click detection require the optional event monitor. Typed text and key codes are not recorded.
 
-Public readiness still requires Developer ID signing, notarization, clean-Mac installation, long-recording synchronization/memory checks and remaining device, failure-recovery and client acceptance scenarios. Historical synthetic checks do not establish these results. [Release evidence](docs/releases/0.1.0.json) and [historical validation](docs/editor-validation.md) distinguish measured results from pending work. Windows, Linux and Intel distribution are outside the current Apple silicon beta target. [ScreenCursor comparison](docs/screencursor-parity.md).
+Public readiness still requires Developer ID signing and notarization. Windows, Linux and Intel distribution are outside the current Apple silicon beta target.
 
 ## Develop
 
@@ -90,16 +89,12 @@ npm run test:launch
 npm run check:launch -- --json
 ```
 
-App bundles and DMGs are written under `src-tauri/target/release/bundle/`. `check:launch` is read-only and exits nonzero while release evidence is incomplete. [Signing, packaging and hardware checks](docs/release.md).
-
-See the current [launch readiness report](docs/launch-readiness.md). Marketing and Product Hunt preparation materials are maintained locally and are not included in this repository.
+App bundles and DMGs are written under `src-tauri/target/release/bundle/`. `check:launch` is read-only and exits nonzero while release evidence is incomplete.
 
 ## Contribute
 
-Start with [architecture and layer boundaries](docs/architecture.md), [design-system tokens](docs/design-system.md), [MCP setup](docs/mcp.md) and [website/analytics setup](docs/website.md). The in-app **Quick start** dialog covers the creator workflow. Open an issue or contact [Serkan Uslu](https://serkanuslu.com) at [info@serkanuslu.com](mailto:info@serkanuslu.com).
+Read the [MCP setup guide](docs/mcp.md). The in-app **Quick start** dialog covers the creator workflow. Open an issue or contact [Serkan Uslu](https://serkanuslu.com) at [info@serkanuslu.com](mailto:info@serkanuslu.com).
 
 ## License
 
 MIT. Dependency and model notices are in [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
-
-Code quality commands and contributor rules: [Development standards](docs/development-standards.md).

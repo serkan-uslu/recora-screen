@@ -41,14 +41,14 @@ test("MCP onboarding and download remain accessible on desktop and mobile", asyn
   expect(errors).toEqual([]);
 });
 
-test("documentation shares the site layout and covers both audiences", async ({ page }) => {
+test("documentation shares the site layout and covers the creator workflow", async ({ page }) => {
   await page.goto("/documentation/");
   await expect(page.getByRole("heading", { level: 1 })).toHaveText("Documentation.");
   await expect(page.getByRole("link", { name: "Recora Screen home" })).toBeVisible();
   await expect(page.getByRole("link", { name: "Docs" })).toHaveAttribute("aria-current", "page");
   await expect(page.getByRole("heading", { name: "Record your first take." })).toBeVisible();
   await expect(page.getByRole("heading", { name: "Connect Claude or Codex." })).toBeVisible();
-  await expect(page.getByRole("heading", { name: "Understand the architecture." })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Your projects remain yours." })).toBeVisible();
   await expect(page.getByRole("link", { name: "Documentation ↗" })).toBeVisible();
   for (const heading of [
     "Move clips and insert media",
