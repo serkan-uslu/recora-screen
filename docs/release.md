@@ -102,8 +102,6 @@ The manual `release.yml` workflow requires a base64 PKCS#12 Developer ID certifi
 
 ## Website publication after the approved release
 
-The manual `pages.yml` workflow is prepared but does not run on pushes. Enable GitHub Pages with **GitHub Actions** as its source only when the beta is approved. Publish a GitHub prerelease with tag `v0.1.0` pointing at the tested commit, the exact DMG, checksum, `release-evidence.json`, reports and release notes. Set the repository variable `PLAUSIBLE_SCRIPT_URL` to the verified HTTPS `pa-*.js` script from the project's Plausible settings.
-
-Dispatch **Publish verified beta website** on the same commit and provide the exact `https://github.com/serkan-uslu/recora-screen/releases/download/v0.1.0/Recora-Screen_0.1.0_macOS-arm64.dmg` URL. The gate downloads companion evidence, confirms the tag/source match, requires passed acceptance and distribution evidence, and hashes the actual public asset before building the site. It rejects `latest` links, a missing release, absent analytics configuration, dirty source, or a different artifact. The static Next.js output is `website/out`, deployed to `https://serkan-uslu.github.io/recora-screen/`.
+Vercel deploys the static `website/out` output from `main`. Publish a GitHub prerelease with tag `v0.1.0` pointing at the tested commit, the exact DMG, checksum, `release-evidence.json`, reports and release notes. Update the download URL only after that exact asset passes the release checks.
 
 Site analytics count visits and explicit button events. A Download Click is not a completed transfer or installation. `npm run stats:downloads` reports GitHub asset transfers separately. No install count is collected. Verify production events in Plausible before recording `analyticsVerified` as passed; keep privacy signals and failed/blocked analytics from interrupting downloads.

@@ -23,7 +23,6 @@ jobs:
       - run: npm run build:site
         env:
           NEXT_PUBLIC_DOWNLOAD_URL: https://github.com/serkan-uslu/recora-screen/releases/latest/download/Recora-Screen_0.1.0_macOS-arm64.dmg
-          NEXT_PUBLIC_BASE_PATH: /recora-screen
       - run: npm run test:native
       - run: npm run prepare:runtime
       - run: npm run desktop:check

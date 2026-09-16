@@ -2,7 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { siteValues } from "@/website/src/site-config";
 
-test("Pages metadata preserves its project path and rejects unsafe deployment URLs", () => {
+test("site metadata preserves URL paths and rejects unsafe deployment URLs", () => {
   const values = siteValues(
     "https://example.github.io/recora-screen",
     "https://github.com/a/b/releases/download/v1/app.dmg?x=1&y=2",

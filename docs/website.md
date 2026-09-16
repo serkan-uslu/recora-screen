@@ -9,7 +9,7 @@ npm run preview:site  # preview website/out on port 4174
 npm run test:site
 ```
 
-Stop the development server before using the preview server on the same port. The planned public address is `https://serkan-uslu.github.io/recora-screen/`; Pages publication is pending. Running or building locally does not publish the site.
+Stop the development server before using the preview server on the same port. The public address is `https://recora-screen.vercel.app/`. Running or building locally does not publish the site.
 
 ## Content and metadata
 
@@ -19,7 +19,7 @@ The hero presents MCP control through Claude and Codex below **Edit less.**, fol
 
 Feature copy covers capture, editing, zooms, framing, projects, export, optional local/cloud AI, permissions and privacy. Silence cleanup requires a microphone track. External MCP clients may send requested transcript and preview content to their provider; this differs from local recording and the optional in-app cloud assistant.
 
-Next.js prerenders HTML for `/` and `/documentation/` and generates canonical, Open Graph/Twitter metadata, `robots.txt`, `sitemap.xml` and the web manifest. The actual editor image is the provisional social image. Favicon and header icons use the shared `design-system/product-icon.svg` source. `NEXT_PUBLIC_BASE_PATH=/recora-screen` keeps Next assets and public media valid under the GitHub Pages project path.
+Next.js prerenders HTML for `/` and `/documentation/` and generates canonical, Open Graph/Twitter metadata, `robots.txt`, `sitemap.xml` and the web manifest. The actual editor image is the provisional social image. Favicon and header icons use the shared `design-system/product-icon.svg` source.
 
 ## Downloads and publication
 
@@ -29,16 +29,7 @@ Vercel uses the public GitHub Releases download URL from `vercel.json`, so its L
 
 Without a download override, `build:site` copies the current packaged Apple silicon DMG into the ignored `website/public/downloads/` directory. Run `npm run desktop:build` first. A missing local DMG fails the site build instead of producing a broken download. This is a **development preview**, not a verified public beta. Rebuilding can change its checksum under the same development filename.
 
-Public deployment uses `.github/workflows/pages.yml` through **manual dispatch only**. It does not run on pushes. Before dispatch:
-
-1. Complete the acceptance/distribution record in [release.md](release.md), including the exact clean source commit and signed/notarized DMG checksum.
-2. Publish the approved GitHub prerelease with its version tag, exact DMG, reports and companion `release-evidence.json`.
-3. Configure Pages to use GitHub Actions and set repository variable `PLAUSIBLE_SCRIPT_URL` to the verified script for this site.
-4. Dispatch **Publish verified beta website** at the tested commit with the exact HTTPS GitHub Release asset URL, not a `latest` link.
-
-The gate checks version/source/tag alignment, passed release evidence, analytics configuration and the actual public download's SHA-256 before building the static `website/out` directory. Only then can the workflow deploy. The same output can be hosted on GitHub Pages, Cloudflare Pages, Netlify or any static web server. Local builds do not create a release, analytics account or Product Hunt submission. Change public beta labels only when the corresponding verified release exists.
-
-After publication, verify fresh loads of `/recora-screen/` and `/recora-screen/documentation/`, image/assets/favicon, canonical/social URLs, sitemap, MCP links, keyboard navigation and the real DMG transfer. Final branded social artwork replaces the provisional editor image after the name is selected and the artwork reviewed.
+Vercel deploys the static output from `main` using `vercel.json`. After publication, verify fresh loads of `/` and `/documentation/`, image/assets/favicon, canonical/social URLs, sitemap, MCP links, keyboard navigation and the real DMG transfer. Local builds do not create a release, analytics account or Product Hunt submission. Change public beta labels only when the corresponding verified release exists.
 
 ## Analytics
 

@@ -14,7 +14,7 @@ export const product = {
   name: "Recora Screen",
   description: "The open-source screen recorder you can control with Claude and Codex.",
   tagline: "The screen recorder you can edit with Claude or Codex",
-  website: "https://serkan-uslu.github.io/recora-screen/",
+  website: "https://recora-screen.vercel.app/",
   repository: author.repository,
   version: packageInfo.version,
   platform: "macOS-arm64",
