@@ -119,6 +119,10 @@ nav a.selected {
   background: var(--raised);
   font-weight: 650;
 }
+.menu-toggle,
+.mobile-download {
+  display: none;
+}
 .button {
   display: inline-flex;
   align-items: center;
@@ -913,12 +917,54 @@ h2 {
   }
 }
 @media (max-width: 540px) {
+  .nav {
+    position: relative;
+  }
   .nav nav {
     display: none;
   }
-  .nav .button {
-    font-size: 10px;
-    padding: 10px;
+  .nav nav.open {
+    position: absolute;
+    top: 100%;
+    left: -18px;
+    display: grid;
+    width: calc(100% + 36px);
+    gap: 4px;
+    padding: 12px 18px 18px;
+    border-bottom: 1px solid var(--line);
+    background: var(--bg);
+    box-shadow: 0 14px 24px rgb(23 33 29 / 10%);
+  }
+  .nav nav a {
+    padding: 12px;
+    font-size: 14px;
+  }
+  .menu-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    margin-left: auto;
+    padding: 9px 11px;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    background: var(--surface);
+    color: var(--text);
+    font-size: 12px;
+    font-weight: 650;
+  }
+  .nav-download {
+    display: none;
+  }
+  .nav nav.open .mobile-download {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px;
+    border-radius: 8px;
+    background: var(--accent);
+    color: var(--color-white);
+    font-size: 14px;
+    font-weight: 650;
   }
   .brand {
     font-size: 13px;
@@ -946,6 +992,8 @@ h2 {
   }
   .typewriter {
     min-width: 0;
+    font-size: 0.76em;
+    line-height: 1;
   }
   .hero-mcp-copy {
     padding-top: 12px;

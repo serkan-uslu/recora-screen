@@ -1,6 +1,6 @@
 # Product website
 
-The site uses Next.js App Router, React, TypeScript and the shared desktop theme tokens. The landing page and documentation share one root layout, header, footer, analytics boundary and metadata configuration. It does not ship the recorder service or user projects to visitors. All public copy is English. Vercel Web Analytics is mounted in the root layout for cookie-free pageview measurement; enable Analytics in the Vercel project dashboard after deployment.
+The site uses Next.js App Router, React, TypeScript and the shared desktop theme tokens. The landing page and documentation share one root layout, header, footer, analytics boundary and metadata configuration. The fixed header keeps the primary links in an accessible mobile menu. It does not ship the recorder service or user projects to visitors. All public copy is English. Vercel Web Analytics is mounted in the root layout for cookie-free pageview measurement; enable Analytics in the Vercel project dashboard after deployment.
 
 ```sh
 npm run dev:site      # http://127.0.0.1:4174/

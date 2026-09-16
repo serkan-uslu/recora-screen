@@ -10,6 +10,7 @@ import { assetPath } from "@/website/lib/site";
 export function SiteHeader() {
   const pathname = usePathname();
   const [active, setActive] = useState(pathname.startsWith("/documentation") ? "docs" : "");
+  const [menuOpen, setMenuOpen] = useState(false);
 
   useEffect(() => {
     if (pathname.startsWith("/documentation")) {
@@ -42,14 +43,31 @@ export function SiteHeader() {
           {product.name}
           <span className="accent">.</span>
         </Link>
-        <nav aria-label="Main navigation">
+        <button
+          className="menu-toggle"
+          type="button"
+          aria-expanded={menuOpen}
+          aria-controls="main-navigation"
+          onClick={() => setMenuOpen((open) => !open)}
+        >
+          <span aria-hidden="true">{menuOpen ? "×" : "☰"}</span>
+          Menu
+        </button>
+        <nav
+          id="main-navigation"
+          className={menuOpen ? "open" : undefined}
+          aria-label="Main navigation"
+        >
           <Link
             className={active === "features" ? "selected" : undefined}
             aria-current={active === "features" ? "location" : undefined}
             href="/#features"
             data-event="Navigation Click"
             data-placement="features"
-            onClick={() => setActive("features")}
+            onClick={() => {
+              setActive("features");
+              setMenuOpen(false);
+            }}
           >
             Features
           </Link>
@@ -59,7 +77,10 @@ export function SiteHeader() {
             href="/#workflow"
             data-event="Navigation Click"
             data-placement="workflow"
-            onClick={() => setActive("workflow")}
+            onClick={() => {
+              setActive("workflow");
+              setMenuOpen(false);
+            }}
           >
             How it works
           </Link>
@@ -69,7 +90,10 @@ export function SiteHeader() {
             href="/#mcp"
             data-event="Navigation Click"
             data-placement="mcp"
-            onClick={() => setActive("mcp")}
+            onClick={() => {
+              setActive("mcp");
+              setMenuOpen(false);
+            }}
           >
             MCP
           </Link>
@@ -79,13 +103,25 @@ export function SiteHeader() {
             href="/documentation/"
             data-event="Navigation Click"
             data-placement="documentation"
-            onClick={() => setActive("docs")}
+            onClick={() => {
+              setActive("docs");
+              setMenuOpen(false);
+            }}
           >
             Docs
           </Link>
+          <Link
+            className="mobile-download"
+            href="/#download"
+            data-event="Navigation Click"
+            data-placement="mobile-nav-download"
+            onClick={() => setMenuOpen(false)}
+          >
+            Get the app <span>↗</span>
+          </Link>
         </nav>
         <Link
-          className="button small"
+          className="button small nav-download"
           href="/#download"
           data-event="Navigation Click"
           data-placement="nav-download"

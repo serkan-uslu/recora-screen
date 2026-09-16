@@ -14,6 +14,13 @@ test("MCP onboarding and download remain accessible on desktop and mobile", asyn
         "aria-current",
         "location",
       );
+    } else {
+      const menu = page.getByRole("button", { name: "Menu" });
+      await expect(menu).toBeVisible();
+      await menu.click();
+      await expect(page.getByRole("navigation", { name: "Main navigation" })).toBeVisible();
+      await expect(page.locator('[data-placement="mobile-nav-download"]')).toBeVisible();
+      await menu.click();
     }
     await page.locator('[data-placement="hero-mcp-card"]').click();
     await expect(page).toHaveURL(/#mcp$/);

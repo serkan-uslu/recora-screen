@@ -26485,7 +26485,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "website/components/SiteHeader.tsx",
-      "source_location": "L41",
+      "source_location": "L42",
       "weight": 1.0
     },
     {
@@ -65365,5 +65365,5 @@
     }
   ],
   "hyperedges": [],
-  "built_at_commit": "e038c14db5e25b327e1e00865cad2150288e962b"
+  "built_at_commit": "bedb4d100e8a4a2d69ebbf1074cc0f5f616224dc"
 }
