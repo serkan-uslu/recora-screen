@@ -182,9 +182,10 @@ export default function HomePage() {
             <span className="feature-number">06 / KEEP CREATING</span>
             <h3>Every idea gets a home.</h3>
             <p>
-              Start with Record screen or Import video. Follow the first-edit guide, and reopen
-              Quick start whenever needed. Automatic saves and portable project folders keep your
-              work ready for the next session.
+              A focused branded opening takes you straight into your local workspace. Start with
+              Record screen or Import video, follow the first-edit guide, and reopen Quick start
+              whenever needed. Automatic saves and portable project folders keep your work ready for
+              the next session.
             </p>
           </article>
           <article className="feature">

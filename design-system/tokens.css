@@ -1,21 +1,21 @@
-/* Shared by the desktop app and website. Change these base colors to rebrand. */
+/* Dark desktop companions to the website's cream and forest-green palette. */
 :root {
-  --color-accent: #4ade80;
-  --color-neutral: #a5a9b8;
+  --color-accent: #57d7a0;
+  --color-neutral: #a7b0aa;
   --color-camera: #b28dff;
   --color-info: #68c7ff;
   --color-warning: #ffb45e;
   --color-danger: #ff6b6b;
   --color-white: #ffffff;
   --color-black: #000000;
-  --bg: #10111a;
-  --surface: #171824;
-  --raised: #202131;
-  --line: #34364a;
+  --bg: #111815;
+  --surface: #17201c;
+  --raised: #202b26;
+  --line: #34433c;
   --muted: var(--color-neutral);
   --accent: var(--color-accent);
   --accent-dark: color-mix(in srgb, var(--accent) 18%, var(--bg));
-  --text: #f5f5fa;
+  --text: #f7f8f3;
   --danger: var(--color-danger);
   --font-sans: "DM Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   --radius-sm: 6px;

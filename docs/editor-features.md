@@ -2,6 +2,8 @@
 
 ## Get started
 
+Recora Screen opens with a short branded splash while the local workspace service initializes, then takes you directly to your projects. Its cream, forest-green and dark editor palette matches the product website while preserving contrast for long editing sessions.
+
 Choose **Record screen** on the Projects screen to open capture setup directly. A draft is created automatically; rename it from the editor header when ready. Choose **Import video** to begin with an MP4, MOV or M4V instead, or **Open project** to reopen a saved Recora Screen project folder.
 
 Drag the empty top bar to move the desktop window, both in Projects and in the editor. Header buttons keep their normal click actions.

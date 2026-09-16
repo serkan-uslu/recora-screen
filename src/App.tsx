@@ -1,4 +1,4 @@
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Check, X } from "lucide-react";
 import { IconButton } from "@/src/components/atoms/IconButton";
 import { ErrorContext, DraftPreviewContext } from "@/src/controllers/StudioContexts";
@@ -12,6 +12,10 @@ import { StudioDialogs } from "@/src/components/organisms/StudioDialogs";
 
 export default function App() {
   const studio = useStudioController();
+  const splashStartedAt = useRef(Date.now());
+  const [splash, setSplash] = useState<"visible" | "leaving" | "hidden">(
+    studio.desktop ? "visible" : "hidden",
+  );
   const {
     desktop,
     project,
@@ -22,11 +26,23 @@ export default function App() {
     exportPath,
     setExportPath,
     connected,
+    loading,
     draftPreview,
     initialize,
     activeJobs,
     openExport,
   } = studio;
+  useEffect(() => {
+    if (!desktop || loading || splash !== "visible") return;
+    const delay = Math.max(0, 2500 - (Date.now() - splashStartedAt.current));
+    const exit = window.setTimeout(() => setSplash("leaving"), delay);
+    return () => window.clearTimeout(exit);
+  }, [desktop, loading, splash]);
+  useEffect(() => {
+    if (splash !== "leaving") return;
+    const hide = window.setTimeout(() => setSplash("hidden"), 260);
+    return () => window.clearTimeout(hide);
+  }, [splash]);
   const draftContext = useMemo(
     () => ({ send: draftPreview, scope: `${project?.id ?? ""}:${project?.revision ?? ""}` }),
     [draftPreview, project?.id, project?.revision],
@@ -58,6 +74,26 @@ export default function App() {
     <ErrorContext.Provider value={error}>
       <DraftPreviewContext.Provider value={draftContext}>
         <div className={`app ${project ? "editing" : "library"} ${desktop ? "desktop" : ""}`}>
+          {splash !== "hidden" && (
+            <div
+              className={`launch-splash ${splash}`}
+              role="status"
+              aria-label="Opening Recora Screen"
+            >
+              <div className="launch-splash-content">
+                <svg className="launch-splash-logo" viewBox="0 0 64 64" aria-hidden="true">
+                  <rect width="64" height="64" rx="16" />
+                  <rect className="screen" x="14" y="17" width="36" height="27" rx="5" />
+                  <circle cx="32" cy="30" r="7" />
+                  <path d="M25 50h14" />
+                </svg>
+                <h1>
+                  Recora Screen<span>.</span>
+                </h1>
+                <p>Record once. Edit less.</p>
+              </div>
+            </div>
+          )}
           <StudioHeader studio={studio} />
           {error && (
             <div className="error-banner" role="alert">

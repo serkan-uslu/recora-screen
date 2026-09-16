@@ -19,6 +19,16 @@
   flex-direction: column;
   background: color-mix(in srgb, var(--color-neutral) 18%, var(--color-black));
 }
+.library-brand {
+  font-size: 17px;
+  letter-spacing: -0.7px;
+  margin: 1px 8px 29px;
+}
+.library-brand .brand-mark {
+  width: 30px;
+  height: 30px;
+  border-radius: 8px;
+}
 .workspace-label {
   font-size: 9px;
   letter-spacing: 1.8px;

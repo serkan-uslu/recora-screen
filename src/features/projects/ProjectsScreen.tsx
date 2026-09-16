@@ -18,6 +18,8 @@ import {
   WandSparkles,
 } from "lucide-react";
 import { formatTime } from "@/shared/timeline";
+import { product } from "@/shared/brand";
+import productIcon from "@/design-system/product-icon.svg";
 import { ProjectThumbnail } from "@/src/features/projects/ProjectThumbnail";
 import { date } from "@/src/lib/format";
 import { type StudioController } from "@/src/controllers/useStudioController";
@@ -74,6 +76,15 @@ export function ProjectsScreen({
   return (
     <div className="library-layout">
       <aside className="library-sidebar">
+        <div className="brand library-brand" aria-label={product.name}>
+          <span className="brand-mark">
+            <img src={productIcon} width="32" height="32" alt="" />
+          </span>
+          <span>
+            {product.name}
+            <span className="brand-dot">.</span>
+          </span>
+        </div>
         <nav className="sidebar-navigation" aria-label="Workspace">
           <div className="workspace-label">YOUR WORKSPACE</div>
           <button className="sidebar-link selected">
