@@ -2,7 +2,7 @@
 
 ## Get started
 
-Choose **Record screen** on the Projects screen to open capture setup directly. A draft is created automatically; rename it from the editor header when ready. Choose **Import video** to begin with an MP4, MOV or M4V instead, or **Open project** to reopen a saved Screen Recorder project folder.
+Choose **Record screen** on the Projects screen to open capture setup directly. A draft is created automatically; rename it from the editor header when ready. Choose **Import video** to begin with an MP4, MOV or M4V instead, or **Open project** to reopen a saved Recora Screen project folder.
 
 Drag the empty top bar to move the desktop window, both in Projects and in the editor. Header buttons keep their normal click actions.
 

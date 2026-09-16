@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Image from "next/image";
 import { product } from "@/shared/brand";
+import { HeroTypewriter } from "@/website/components/HeroTypewriter";
 import { assetPath, downloadUrl, site } from "@/website/lib/site";
 
 export const metadata: Metadata = { alternates: { canonical: site.SITE_URL } };
@@ -10,12 +11,10 @@ export default function HomePage() {
     <main id="main">
       <section className="hero wrap">
         <p className="eyebrow">
-          <span className="dot"></span> OPEN-SOURCE SCREEN RECORDER FOR MACOS
+          <span className="record-dot"></span> OPEN-SOURCE SCREEN RECORDER FOR MACOS
         </p>
         <h1>
-          Record once.
-          <br />
-          <em>Edit less.</em>
+          <HeroTypewriter />
         </h1>
         <a
           className="hero-mcp"
@@ -23,18 +22,20 @@ export default function HomePage() {
           data-event="Navigation Click"
           data-placement="hero-mcp-card"
         >
-          <span className="agent-mark codex-mark">
-            <Image src={assetPath("brands/codex.png")} width="40" height="40" alt="" />
-            <b>Codex</b>
+          <span className="agent-logos">
+            <span className="agent-mark codex-mark">
+              <Image src={assetPath("brands/codex.png")} width="40" height="40" alt="" />
+              <b>Codex</b>
+            </span>
+            <span className="agent-mark claude-mark">
+              <Image src={assetPath("brands/claude.png")} width="40" height="40" alt="" />
+              <b>Claude</b>
+            </span>
           </span>
           <span className="hero-mcp-copy">
             <small>WORKS WITH CLAUDE &amp; CODEX · MCP</small>
             <strong>Direct the whole studio.</strong>
             <span>Create projects, edit timelines and export by asking.</span>
-          </span>
-          <span className="agent-mark claude-mark">
-            <Image src={assetPath("brands/claude.png")} width="40" height="40" alt="" />
-            <b>Claude</b>
           </span>
         </a>
         <p className="intro">{product.description}</p>

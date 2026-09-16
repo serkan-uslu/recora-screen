@@ -1,6 +1,6 @@
 # Product website
 
-The site uses Next.js App Router, React, TypeScript and the shared desktop theme tokens. The landing page and documentation share one root layout, header, footer, analytics boundary and metadata configuration. It does not ship the recorder service or user projects to visitors. All public copy is English.
+The site uses Next.js App Router, React, TypeScript and the shared desktop theme tokens. The landing page and documentation share one root layout, header, footer, analytics boundary and metadata configuration. It does not ship the recorder service or user projects to visitors. All public copy is English. Vercel Web Analytics is mounted in the root layout for cookie-free pageview measurement; enable Analytics in the Vercel project dashboard after deployment.
 
 ```sh
 npm run dev:site      # http://127.0.0.1:4174/
@@ -9,7 +9,7 @@ npm run preview:site  # preview website/out on port 4174
 npm run test:site
 ```
 
-Stop the development server before using the preview server on the same port. The planned public address is `https://serkan-uslu.github.io/screen-recorder/`; Pages publication is pending. Running or building locally does not publish the site.
+Stop the development server before using the preview server on the same port. The planned public address is `https://serkan-uslu.github.io/recora-screen/`; Pages publication is pending. Running or building locally does not publish the site.
 
 ## Content and metadata
 
@@ -19,11 +19,13 @@ The hero presents MCP control through Claude and Codex below **Edit less.**, fol
 
 Feature copy covers capture, editing, zooms, framing, projects, export, optional local/cloud AI, permissions and privacy. Silence cleanup requires a microphone track. External MCP clients may send requested transcript and preview content to their provider; this differs from local recording and the optional in-app cloud assistant.
 
-Next.js prerenders HTML for `/` and `/documentation/` and generates canonical, Open Graph/Twitter metadata, `robots.txt`, `sitemap.xml` and the web manifest. The actual editor image is the provisional social image. Favicon and header icons use the shared `design-system/product-icon.svg` source. `NEXT_PUBLIC_BASE_PATH=/screen-recorder` keeps Next assets and public media valid under the GitHub Pages project path.
+Next.js prerenders HTML for `/` and `/documentation/` and generates canonical, Open Graph/Twitter metadata, `robots.txt`, `sitemap.xml` and the web manifest. The actual editor image is the provisional social image. Favicon and header icons use the shared `design-system/product-icon.svg` source. `NEXT_PUBLIC_BASE_PATH=/recora-screen` keeps Next assets and public media valid under the GitHub Pages project path.
 
 ## Downloads and publication
 
 `NEXT_PUBLIC_SITE_URL` overrides the planned public URL and requires HTTPS without credentials, query or fragment. `NEXT_PUBLIC_DOWNLOAD_URL` replaces the local preview download with an HTTPS release asset URL. These values are public; never place private credentials in `NEXT_PUBLIC_` settings.
+
+Vercel uses the public GitHub Releases download URL from `vercel.json`, so its Linux build does not depend on a locally built macOS DMG.
 
 Without a download override, `build:site` copies the current packaged Apple silicon DMG into the ignored `website/public/downloads/` directory. Run `npm run desktop:build` first. A missing local DMG fails the site build instead of producing a broken download. This is a **development preview**, not a verified public beta. Rebuilding can change its checksum under the same development filename.
 
@@ -36,11 +38,11 @@ Public deployment uses `.github/workflows/pages.yml` through **manual dispatch o
 
 The gate checks version/source/tag alignment, passed release evidence, analytics configuration and the actual public download's SHA-256 before building the static `website/out` directory. Only then can the workflow deploy. The same output can be hosted on GitHub Pages, Cloudflare Pages, Netlify or any static web server. Local builds do not create a release, analytics account or Product Hunt submission. Change public beta labels only when the corresponding verified release exists.
 
-After publication, verify fresh loads of `/screen-recorder/` and `/screen-recorder/documentation/`, image/assets/favicon, canonical/social URLs, sitemap, MCP links, keyboard navigation and the real DMG transfer. Final branded social artwork replaces the provisional editor image after the name is selected and the artwork reviewed.
+After publication, verify fresh loads of `/recora-screen/` and `/recora-screen/documentation/`, image/assets/favicon, canonical/social URLs, sitemap, MCP links, keyboard navigation and the real DMG transfer. Final branded social artwork replaces the provisional editor image after the name is selected and the artwork reviewed.
 
 ## Analytics
 
-Copy `website/.env.example` to `website/.env.local` and set `NEXT_PUBLIC_PLAUSIBLE_SCRIPT_URL` to the HTTPS `pa-*.js` script from your Plausible settings. Rebuild after changing it. Without a script, no analytics loads. Do Not Track and Global Privacy Control disable loading. A configured script does not prove events reached the dashboard.
+Vercel Analytics loads automatically on a Vercel deployment after Analytics is enabled in the project dashboard. Copy `website/.env.example` to `website/.env.local` and set `NEXT_PUBLIC_PLAUSIBLE_SCRIPT_URL` only when the optional explicit-event integration is also wanted. Do Not Track and Global Privacy Control disable the optional Plausible script. A configured provider does not prove events reached its dashboard.
 
 Plausible captures pageviews. Explicit page events are:
 

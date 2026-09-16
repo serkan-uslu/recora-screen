@@ -6,15 +6,15 @@ export const author = {
   medium: "https://medium.com/@serkan-uslu",
   website: "https://serkanuslu.com",
   email: "info@serkanuslu.com",
-  repository: "https://github.com/serkan-uslu/screen-recorder",
+  repository: "https://github.com/serkan-uslu/recora-screen",
 } as const;
 
 // Display branding may change; bundle IDs, storage paths and MCP tool names do not.
 export const product = {
-  name: "Screen Recorder",
+  name: "Recora Screen",
   description: "The open-source screen recorder you can control with Claude and Codex.",
   tagline: "The screen recorder you can edit with Claude or Codex",
-  website: "https://serkan-uslu.github.io/screen-recorder/",
+  website: "https://serkan-uslu.github.io/recora-screen/",
   repository: author.repository,
   version: packageInfo.version,
   platform: "macOS-arm64",
@@ -26,5 +26,5 @@ export const release = {
   status: "development-preview",
   // Set only after the exact signed, notarized artifact passes release acceptance.
   downloadUrl: "",
-  assetName: `Screen-Recorder_${product.version}_macOS-arm64.dmg`,
+  assetName: `Recora-Screen_${product.version}_macOS-arm64.dmg`,
 } as const;

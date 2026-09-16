@@ -74,7 +74,7 @@ import UniformTypeIdentifiers
         guard !isGranted() else { return }
         let pane = screen ? "Privacy_ScreenCapture" : "Privacy_ListenEvent", name = screen ? "Screen & System Audio Recording" : "Input Monitoring"
         let settings = URL(string: "x-apple.systempreferences:com.apple.preference.security?\(pane)")!
-        guard openSettings(settings) else { throw NativeFailure("Could not open \(name) settings. Open System Settings → Privacy & Security → \(name) and enable Screen Recorder.", code: "settings_unavailable") }
+        guard openSettings(settings) else { throw NativeFailure("Could not open \(name) settings. Open System Settings → Privacy & Security → \(name) and enable Recora Screen.", code: "settings_unavailable") }
     }
     func permissions() -> [String: Any] {
         func name(_ status: AVAuthorizationStatus) -> String { switch status { case .authorized: return "authorized"; case .denied: return "denied"; case .restricted: return "restricted"; default: return "notDetermined" } }

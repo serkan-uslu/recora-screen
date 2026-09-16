@@ -13,7 +13,9 @@ export function SiteFooter() {
           <span className="accent">.</span>
         </Link>
         <p>Good ideas deserve good videos.</p>
-        <small id="analytics-notice">Your projects stay on your Mac.</small>
+        <small id="analytics-notice">
+          Cookie-free site analytics measure visits. Your projects stay on your Mac.
+        </small>
       </div>
       <div>
         <span className="eyebrow">BUILT BY SERKAN USLU</span>

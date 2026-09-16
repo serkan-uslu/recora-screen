@@ -112,7 +112,7 @@ export default function DocumentationPage() {
               into a new editable project with its duration, dimensions, frame rate and embedded
               audio intact. This does not start a recording or require capture permissions. Its
               soundtrack appears as Video audio; a separate camera or cursor track is not created.
-              Open project instead reopens a saved Screen Recorder project folder.
+              Open project instead reopens a saved Recora Screen project folder.
             </p>
             <div className="docs-callout">
               <p>

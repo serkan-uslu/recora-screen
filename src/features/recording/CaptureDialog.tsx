@@ -264,7 +264,7 @@ export function CaptureDialog({
                 {permissionHelp === "screen"
                   ? "Screen & System Audio Recording"
                   : "Input Monitoring"}
-                , enable Screen Recorder, then quit and reopen the app. If it is already enabled but
+                , enable Recora Screen, then quit and reopen the app. If it is already enabled but
                 still unavailable, remove the old entry and use + to add this copy of Screen
                 Recorder.
               </p>

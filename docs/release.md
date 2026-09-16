@@ -27,7 +27,7 @@ The existing development DMG is inspectable, but its relationship to an exact cl
 
 ## Historical development validation
 
-- The release app at `src-tauri/target/release/bundle/macos/Screen Recorder.app` and DMG at `src-tauri/target/release/bundle/dmg/Screen-Recorder_0.1.0_macOS-arm64.dmg` were produced successfully. Bundle verification checked all four Mach-O binaries, their architectures, portable dynamic-library paths, and code signatures.
+- The release app at `src-tauri/target/release/bundle/macos/Recora Screen.app` and DMG at `src-tauri/target/release/bundle/dmg/Recora-Screen_0.1.0_macOS-arm64.dmg` were produced successfully. Bundle verification checked all four Mach-O binaries, their architectures, portable dynamic-library paths, and code signatures.
 - The main executable ran with `--bundle-check`, exercising its actual native-library loader. Bundled Node and Whisper ran with a system-only `PATH` and without injected `NODE_*` or `DYLD_*` settings. The server and MCP JavaScript passed bundled Node syntax checks.
 - Historical packaged MCP integration checks covered independent projects, revision conflicts, retry IDs, reconnects, edits, transient drafts without persistence, speed/cut mapping, editable zooms, transcript text timing, portrait native preview images and MP4 export, and moving test projects to Trash while preserving external exports. Current command totals are derived by `check:launch` from `server/contracts/commands.ts`; they are not maintained as a marketing claim here.
 - The signed release completed native audio extraction → bundled Whisper Base → three timed English transcript segments. A one-second cut preserved source timestamps while SRT/VTT exports shifted correctly. The native caption preview passed a visible-glyph pixel assertion and visual inspection.
@@ -49,7 +49,7 @@ npm run test:ai
 npm run desktop:build
 ```
 
-Without a configured certificate, the default build has an ad-hoc development signature and includes a DMG. `npm run verify:bundle -- 'src-tauri/target/release/bundle/macos/Screen Recorder.app'` checks bundled executables, notices, architectures, dynamic library paths, and signatures, then runs the main app's `--bundle-check`, Node, and Whisper with a system-only `PATH`. This catches development-machine dependencies without claiming a clean-machine installation test. The DMG script verifies the app first, uses `hdiutil` without Finder automation, verifies the image, and prints its SHA-256 checksum.
+Without a configured certificate, the default build has an ad-hoc development signature and includes a DMG. `npm run verify:bundle -- 'src-tauri/target/release/bundle/macos/Recora Screen.app'` checks bundled executables, notices, architectures, dynamic library paths, and signatures, then runs the main app's `--bundle-check`, Node, and Whisper with a system-only `PATH`. This catches development-machine dependencies without claiming a clean-machine installation test. The DMG script verifies the app first, uses `hdiutil` without Finder automation, verifies the image, and prints its SHA-256 checksum.
 
 For the actual desktop/MCP integration check, launch the app with `SCREENREC_DATA_DIR` and `SCREENREC_PROJECTS_DIR` set to isolated folders, then run `npm run test:desktop -- /absolute/path/to/synthetic.mp4` with the same environment. It records the display, stops and reopens the recording, edits the timeline, fetches a native preview, exports an MP4, verifies a cold service reopen, then runs the broader MCP edit suite. The script temporarily enables protected MCP categories through the desktop command channel and restores the previous policy when it finishes. It moves only its own projects to Trash and verifies that external exports and unrelated projects remain.
 
@@ -62,7 +62,7 @@ For the actual desktop/MCP integration check, launch the app with `SCREENREC_DAT
 For the full local-AI desktop check, first run `test:ai`, then launch the release app with isolated data/project directories under `.cache`. Run the following with the same `SCREENREC_DATA_DIR`, using the synthetic screen video printed by `test:native`:
 
 ```sh
-SCREENREC_RESOURCES="$PWD/src-tauri/target/release/bundle/macos/Screen Recorder.app/Contents/Resources" \
+SCREENREC_RESOURCES="$PWD/src-tauri/target/release/bundle/macos/Recora Screen.app/Contents/Resources" \
   npx tsx scripts/check-desktop-ai.ts /absolute/path/to/synthetic-screen.mov
 ```
 
@@ -88,7 +88,7 @@ Without signing configuration, the local build uses ad-hoc signatures and `harde
 
 For repeated local builds, put `APPLE_SIGNING_IDENTITY="Apple Development: Your Name (IDENTIFIER)"` in the git-ignored `.env.local`, using an identity listed by `security find-identity -v -p codesigning`. Both the build wrapper and runtime signer load this file; an explicitly exported environment value takes precedence. This avoids a new ad-hoc code identity invalidating macOS grants after every edit. Switching from an ad-hoc build still needs a one-time permission renewal, and a stale enabled entry may need removal and re-adding in System Settings. See [Apple's explanation of code identity and permission tracking](https://developer.apple.com/documentation/technotes/tn3127-inside-code-signing-requirements). The app never resets or grants these permissions itself.
 
-Launch the exact release bundle when checking permissions. An older `target/debug/bundle/macos/Screen Recorder.app` can have the same display name and bundle identifier with a different signature; opening by name alone may launch that copy instead. Verify the running executable path before troubleshooting an enabled Settings entry that the app reports as ungranted.
+Launch the exact release bundle when checking permissions. An older `target/debug/bundle/macos/Recora Screen.app` can have the same display name and bundle identifier with a different signature; opening by name alone may launch that copy instead. Verify the running executable path before troubleshooting an enabled Settings entry that the app reports as ungranted.
 
 Public distribution requires a **Developer ID Application** identity, an Apple Developer account with notarization access, and appropriate signing for both bundled executable runtimes and the native library. Apple Development identities alone are insufficient. The preparation script signs temporary Node and Whisper copies with stable identifiers and JIT entitlements, verifies them, and atomically replaces the prepared runtimes before Tauri seals the app. An existing development process can continue using its prior executable.
 
@@ -104,6 +104,6 @@ The manual `release.yml` workflow requires a base64 PKCS#12 Developer ID certifi
 
 The manual `pages.yml` workflow is prepared but does not run on pushes. Enable GitHub Pages with **GitHub Actions** as its source only when the beta is approved. Publish a GitHub prerelease with tag `v0.1.0` pointing at the tested commit, the exact DMG, checksum, `release-evidence.json`, reports and release notes. Set the repository variable `PLAUSIBLE_SCRIPT_URL` to the verified HTTPS `pa-*.js` script from the project's Plausible settings.
 
-Dispatch **Publish verified beta website** on the same commit and provide the exact `https://github.com/serkan-uslu/screen-recorder/releases/download/v0.1.0/Screen-Recorder_0.1.0_macOS-arm64.dmg` URL. The gate downloads companion evidence, confirms the tag/source match, requires passed acceptance and distribution evidence, and hashes the actual public asset before building the site. It rejects `latest` links, a missing release, absent analytics configuration, dirty source, or a different artifact. The static Next.js output is `website/out`, deployed to `https://serkan-uslu.github.io/screen-recorder/`.
+Dispatch **Publish verified beta website** on the same commit and provide the exact `https://github.com/serkan-uslu/recora-screen/releases/download/v0.1.0/Recora-Screen_0.1.0_macOS-arm64.dmg` URL. The gate downloads companion evidence, confirms the tag/source match, requires passed acceptance and distribution evidence, and hashes the actual public asset before building the site. It rejects `latest` links, a missing release, absent analytics configuration, dirty source, or a different artifact. The static Next.js output is `website/out`, deployed to `https://serkan-uslu.github.io/recora-screen/`.
 
 Site analytics count visits and explicit button events. A Download Click is not a completed transfer or installation. `npm run stats:downloads` reports GitHub asset transfers separately. No install count is collected. Verify production events in Plausible before recording `analyticsVerified` as passed; keep privacy signals and failed/blocked analytics from interrupting downloads.

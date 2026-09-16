@@ -45,7 +45,7 @@ const topics = [
   ],
   [
     "AI and connected assistants",
-    "Optional cloud assistance sends your message, transcript and editing context to your chosen provider and requires your own API key. Settings includes MCP configuration for Codex, Claude Code and Claude Desktop. Keep Screen Recorder open. Connected clients can send returned transcripts and requested preview frames to their model provider.",
+    "Optional cloud assistance sends your message, transcript and editing context to your chosen provider and requires your own API key. Settings includes MCP configuration for Codex, Claude Code and Claude Desktop. Keep Recora Screen open. Connected clients can send returned transcripts and requested preview frames to their model provider.",
   ],
 ];
 

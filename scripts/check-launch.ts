@@ -113,8 +113,8 @@ function distributionComplete(evidence: Evidence) {
 
 if (process.argv.includes("--self-check")) {
   const url =
-    "https://github.com/serkan-uslu/screen-recorder/releases/download/v0.1.0/Screen-Recorder_0.1.0_macOS-arm64.dmg";
-  assert(releaseUrl(url, product.repository, "0.1.0", "Screen-Recorder_0.1.0_macOS-arm64.dmg"));
+    "https://github.com/serkan-uslu/recora-screen/releases/download/v0.1.0/Recora-Screen_0.1.0_macOS-arm64.dmg";
+  assert(releaseUrl(url, product.repository, "0.1.0", "Recora-Screen_0.1.0_macOS-arm64.dmg"));
   for (const candidate of [
     url.replace("https:", "http:"),
     `${url}?download=1`,
@@ -122,7 +122,7 @@ if (process.argv.includes("--self-check")) {
     url.replace("github.com", "github.com.evil.example"),
   ]) {
     assert(
-      !releaseUrl(candidate, product.repository, "0.1.0", "Screen-Recorder_0.1.0_macOS-arm64.dmg"),
+      !releaseUrl(candidate, product.repository, "0.1.0", "Recora-Screen_0.1.0_macOS-arm64.dmg"),
     );
   }
   const evidence = {
@@ -130,7 +130,7 @@ if (process.argv.includes("--self-check")) {
     status: "public-beta",
     sourceCommit: "a".repeat(40),
     artifact: {
-      name: "Screen-Recorder_0.1.0_macOS-arm64.dmg",
+      name: "Recora-Screen_0.1.0_macOS-arm64.dmg",
       bytes: 1,
       sha256: "b".repeat(64),
     },

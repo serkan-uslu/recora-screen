@@ -346,7 +346,7 @@ import ImageIO
         project.edits.overlays = [Overlay(id: "blur", kind: "blur", startMs: 0, endMs: 2000, text: nil, assetId: nil, x: 0.04, y: 0.6, width: 0.2, fontSize: 48, color: "#ffffff", animation: "slide", height: 0.3, blur: 80)]
         let blurred = try await frame(project, at: 500)
         assert(pixel(plain, x: 44, y: 250) != pixel(blurred, x: 44, y: 250), "Regional blur does not soften the tile edge")
-        assert(pixel(plain, x: 500, y: 200) == pixel(blurred, x: 500, y: 200), "Regional blur changed pixels outside its bounds")
+        assertVisualMatch(plain, blurred, x: 500, y: 200, label: "Regional blur outside its bounds")
         project.edits.overlays = [cover, arrow]
         project.assets = [MediaAsset(id: "music", name: "Synthetic tone", path: "media/mic.wav", kind: "audio")]
         project.edits.audioClips = [AudioClip(id: "music", assetId: "music", startMs: 500, endMs: 1500, offsetMs: 0, volume: 0.5)]

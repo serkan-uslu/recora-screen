@@ -1,21 +1,21 @@
 /* Shared by the desktop app and website. Change these base colors to rebrand. */
 :root {
-  --color-accent: #d8ec97;
-  --color-neutral: #858c89;
-  --color-camera: #ad8dd4;
-  --color-info: #8caed7;
-  --color-warning: #e9b973;
-  --color-danger: #f59489;
+  --color-accent: #4ade80;
+  --color-neutral: #a5a9b8;
+  --color-camera: #b28dff;
+  --color-info: #68c7ff;
+  --color-warning: #ffb45e;
+  --color-danger: #ff6b6b;
   --color-white: #ffffff;
   --color-black: #000000;
-  --bg: #151717;
-  --surface: #1b1d1d;
-  --raised: #222424;
-  --line: #2c2f2e;
+  --bg: #10111a;
+  --surface: #171824;
+  --raised: #202131;
+  --line: #34364a;
   --muted: var(--color-neutral);
   --accent: var(--color-accent);
   --accent-dark: color-mix(in srgb, var(--accent) 18%, var(--bg));
-  --text: #e8e9e5;
+  --text: #f5f5fa;
   --danger: var(--color-danger);
   --font-sans: "DM Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   --radius-sm: 6px;

@@ -22,7 +22,7 @@ export async function pickPath(
     return await open({
       directory: true,
       multiple: false,
-      title: "Open a Screen Recorder project",
+      title: "Open a Recora Screen project",
     });
   if (kind === "audio")
     return await open({

@@ -7,6 +7,14 @@ test("MCP onboarding and download remain accessible on desktop and mobile", asyn
     await page.setViewportSize({ width, height: 900 });
     await page.goto("/");
     await expect(page.getByRole("heading", { level: 1 })).toContainText("Edit less.");
+    if (width === 1280) {
+      await expect(page.locator('[data-placement="hero-download"]')).toBeVisible();
+      await page.getByRole("link", { name: "Features" }).click();
+      await expect(page.getByRole("link", { name: "Features" })).toHaveAttribute(
+        "aria-current",
+        "location",
+      );
+    }
     await page.locator('[data-placement="hero-mcp-card"]').click();
     await expect(page).toHaveURL(/#mcp$/);
     for (const client of ["codex", "claude-code", "claude-desktop"]) {
@@ -29,7 +37,8 @@ test("MCP onboarding and download remain accessible on desktop and mobile", asyn
 test("documentation shares the site layout and covers both audiences", async ({ page }) => {
   await page.goto("/documentation/");
   await expect(page.getByRole("heading", { level: 1 })).toHaveText("Documentation.");
-  await expect(page.getByRole("link", { name: "Screen Recorder home" })).toBeVisible();
+  await expect(page.getByRole("link", { name: "Recora Screen home" })).toBeVisible();
+  await expect(page.getByRole("link", { name: "Docs" })).toHaveAttribute("aria-current", "page");
   await expect(page.getByRole("heading", { name: "Record your first take." })).toBeVisible();
   await expect(page.getByRole("heading", { name: "Connect Claude or Codex." })).toBeVisible();
   await expect(page.getByRole("heading", { name: "Understand the architecture." })).toBeVisible();

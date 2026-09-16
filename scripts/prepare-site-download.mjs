@@ -1,7 +1,7 @@
 import { copyFile, mkdir, rm, readFile } from "node:fs/promises";
 import { loadEnv } from "vite";
 const productPackage = JSON.parse(await readFile("package.json", "utf8"));
-const file = `Screen-Recorder_${productPackage.version}_macOS-arm64.dmg`;
+const file = `Recora-Screen_${productPackage.version}_macOS-arm64.dmg`;
 await copyFile("design-system/product-icon.svg", "website/public/icon.svg");
 const env = { ...loadEnv("production", "website", ""), ...process.env };
 if (env.NEXT_PUBLIC_DOWNLOAD_URL) {

@@ -202,7 +202,7 @@ fn request_quit(handle: tauri::AppHandle) {
 fn main() {
     // Exercise the real dyld/signature path without opening windows or touching project storage.
     if std::env::args().any(|arg| arg == "--bundle-check") {
-        println!("Screen Recorder {} native bundle ready", env!("CARGO_PKG_VERSION"));
+        println!("Recora Screen {} native bundle ready", env!("CARGO_PKG_VERSION"));
         return;
     }
     let app = tauri::Builder::default()
@@ -224,7 +224,7 @@ fn main() {
             Ok(())
         })
         .build(tauri::generate_context!())
-        .expect("Could not start Screen Recorder");
+        .expect("Could not start Recora Screen");
 
     app.run(|app, event| match event {
         tauri::RunEvent::ExitRequested { api, code, .. } if code.is_none() => {

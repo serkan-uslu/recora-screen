@@ -1,10 +1,10 @@
 # MCP setup
 
-Open Screen Recorder before connecting and keep it running. Its Node runtime and MCP entry point are bundled, so end users do not install Node. **Settings & MCP → MCP & shortcuts → MCP client** provides separate Codex, Claude Code and Claude Desktop configurations using the running installation's actual paths. Copy the configuration again after moving the app. If the runtime path is unavailable, Settings explains this instead of guessing an installation path.
+Open Recora Screen before connecting and keep it running. Its Node runtime and MCP entry point are bundled, so end users do not install Node. **Settings & MCP → MCP & shortcuts → MCP client** provides separate Codex, Claude Code and Claude Desktop configurations using the running installation's actual paths. Copy the configuration again after moving the app. If the runtime path is unavailable, Settings explains this instead of guessing an installation path.
 
 The examples below assume the app is in `/Applications`. Prefer the generated configuration when using another location: it escapes spaces, quotation marks and shell characters correctly. Preserve your other MCP servers when merging configuration. Earlier app versions used `screenRecorder` or `screen_recorder` as the client entry name; replace an old entry rather than adding a duplicate. The current examples use `screen-recorder` consistently.
 
-Screen Recorder is free and MCP requires no API key in the app. Your chosen client's plan or usage charges may apply. In-app OpenAI/Anthropic keys are only needed when invoking the optional cloud assistant; ordinary project/edit/preview/export tools do not require them. See [Privacy](privacy.md) before connecting a cloud model client to sensitive content.
+Recora Screen is free and MCP requires no API key in the app. Your chosen client's plan or usage charges may apply. In-app OpenAI/Anthropic keys are only needed when invoking the optional cloud assistant; ordinary project/edit/preview/export tools do not require them. See [Privacy](privacy.md) before connecting a cloud model client to sensitive content.
 
 ## Codex
 
@@ -12,8 +12,8 @@ Merge this into `~/.codex/config.toml`, or the `config.toml` inside your custom 
 
 ```toml
 [mcp_servers.screen-recorder]
-command = "/Applications/Screen Recorder.app/Contents/Resources/bin/node"
-args = ["/Applications/Screen Recorder.app/Contents/Resources/mcp.mjs"]
+command = "/Applications/Recora Screen.app/Contents/Resources/bin/node"
+args = ["/Applications/Recora Screen.app/Contents/Resources/mcp.mjs"]
 startup_timeout_sec = 30
 tool_timeout_sec = 120
 ```
@@ -23,7 +23,7 @@ Run `codex mcp get screen-recorder` to inspect the entry. In a Codex session, us
 ## Claude Code
 
 ```sh
-claude mcp add --transport stdio --scope user screen-recorder -- '/Applications/Screen Recorder.app/Contents/Resources/bin/node' '/Applications/Screen Recorder.app/Contents/Resources/mcp.mjs'
+claude mcp add --transport stdio --scope user screen-recorder -- '/Applications/Recora Screen.app/Contents/Resources/bin/node' '/Applications/Recora Screen.app/Contents/Resources/mcp.mjs'
 ```
 
 This makes the server available to your user account across projects. Run `claude mcp get screen-recorder`, then use `/mcp` in Claude Code to check its connection. See the [official Claude Code MCP documentation](https://code.claude.com/docs/en/mcp).
@@ -36,8 +36,8 @@ Merge this entry into `~/Library/Application Support/Claude/claude_desktop_confi
 {
   "mcpServers": {
     "screen-recorder": {
-      "command": "/Applications/Screen Recorder.app/Contents/Resources/bin/node",
-      "args": ["/Applications/Screen Recorder.app/Contents/Resources/mcp.mjs"]
+      "command": "/Applications/Recora Screen.app/Contents/Resources/bin/node",
+      "args": ["/Applications/Recora Screen.app/Contents/Resources/mcp.mjs"]
     }
   }
 }

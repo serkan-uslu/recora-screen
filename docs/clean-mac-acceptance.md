@@ -4,9 +4,9 @@ Use a Mac that has never run this product and has no system Node.js installation
 
 ## Installation and portability
 
-- [ ] Download the DMG from the candidate artifact, verify its published SHA-256, mount it and copy **Screen Recorder.app** to `/Applications`.
+- [ ] Download the DMG from the candidate artifact, verify its published SHA-256, mount it and copy **Recora Screen.app** to `/Applications`.
 - [ ] Launch it from Finder without using Terminal or installing Node, npm, Rust, ffmpeg or Whisper separately.
-- [ ] From a source checkout at the candidate commit, run `"/Applications/Screen Recorder.app/Contents/Resources/bin/node" scripts/check-clean-install.mjs "/Applications/Screen Recorder.app"`. This uses the app's bundled runtime; attach the terminal output.
+- [ ] From a source checkout at the candidate commit, run `"/Applications/Recora Screen.app/Contents/Resources/bin/node" scripts/check-clean-install.mjs "/Applications/Recora Screen.app"`. This uses the app's bundled runtime; attach the terminal output.
 - [ ] Confirm Gatekeeper opens the app without an unidentified-developer warning and the About/build version matches the evidence.
 - [ ] Download the Base and Small Whisper models in the app, disconnect the network and transcribe one English and one Turkish recording.
 

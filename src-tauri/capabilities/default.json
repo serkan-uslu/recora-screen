@@ -1,7 +1,7 @@
 {
   "$schema": "../gen/schemas/desktop-schema.json",
   "identifier": "main",
-  "description": "Desktop controls for the local Screen Recorder window.",
+  "description": "Desktop controls for the local Recora Screen window.",
   "windows": ["main"],
   "permissions": [
     "core:default",
@@ -26,7 +26,7 @@
           "url": "mailto:info@serkanuslu.com"
         },
         {
-          "url": "https://github.com/serkan-uslu/screen-recorder"
+          "url": "https://github.com/serkan-uslu/recora-screen"
         }
       ]
     }

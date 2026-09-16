@@ -222,7 +222,7 @@ export function SettingsDialog({
           </div>
           <h3 className="panel-section">CONNECT YOUR CLIENT</h3>
           <p className="helper">
-            Keep Screen Recorder running while using your client. The command below uses this
+            Keep Recora Screen running while using your client. The command below uses this
             installation’s bundled runtime; no separate Node installation is needed. Copy it again
             if you move the app.
           </p>

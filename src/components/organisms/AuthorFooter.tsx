@@ -25,7 +25,7 @@ export function AboutDialog({ onClose }: { onClose: () => void }) {
   return (
     <Dialog
       title="About Serkan Uslu"
-      subtitle="Creator of Screen Recorder. Built for people who share what they know."
+      subtitle="Creator of Recora Screen. Built for people who share what they know."
       onClose={onClose}
     >
       <div className="about-links">
@@ -35,7 +35,7 @@ export function AboutDialog({ onClose }: { onClose: () => void }) {
               "PROJECT",
               [
                 [
-                  "Screen Recorder on GitHub",
+                  "Recora Screen on GitHub",
                   "Explore the source, report an issue, or contribute to the project.",
                   author.repository,
                 ],

@@ -1,4 +1,4 @@
-# Screen Recorder
+# Recora Screen
 
 **The open-source screen recorder you can control with Claude and Codex.**
 
@@ -6,16 +6,16 @@ Record your screen, camera and audio, or start with an existing video. Select a 
 
 ![The desktop editor with separate screen, camera, audio and effects tracks](website/public/media/editor.jpg)
 
-_Actual desktop app with clean demonstration footage. Screen Recorder is the working name; final launch branding is pending._
+_Actual desktop app with clean demonstration footage._
 
 ## Try the development preview
 
 The source is available under the MIT license. **There is no verified public beta download yet.** Version 0.1.0 targets Apple silicon and macOS 15+. The local development package bundles Node and Whisper; end users will not need to install Node.
 
 - [Build and run from source](#develop).
-- [Product documentation](https://serkan-uslu.github.io/screen-recorder/documentation/).
+- [Product documentation](https://serkan-uslu.github.io/recora-screen/documentation/).
 - [Release status and remaining checks](docs/release.md).
-- Planned product site: [serkan-uslu.github.io/screen-recorder](https://serkan-uslu.github.io/screen-recorder/). Pages publication is pending. Locally, `npm run dev:site` serves `http://127.0.0.1:4174/`.
+- Planned product site: [serkan-uslu.github.io/recora-screen](https://serkan-uslu.github.io/recora-screen/). Pages publication is pending. Locally, `npm run dev:site` serves `http://127.0.0.1:4174/`.
 
 The current development-signed DMG is not a notarized public release. Public installation, final branding and release acceptance must pass before a beta is advertised as ready to download.
 

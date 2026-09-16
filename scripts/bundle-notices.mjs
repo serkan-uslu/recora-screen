@@ -193,7 +193,7 @@ async function rustNotices() {
 
 async function main() {
   section(
-    "Screen Recorder",
+    "Recora Screen",
     [],
     new Map([
       ["LICENSE", await readFile(path.join(root, "LICENSE"), "utf8")],
@@ -219,7 +219,7 @@ async function main() {
       `Missing license text; packaging stopped:\n${missing.map((name) => `- ${name}`).join("\n")}`,
     );
   const output = [
-    "Screen Recorder — Third-party license and copyright notices",
+    "Recora Screen — Third-party license and copyright notices",
     "",
     `Includes ${npmCount} installed production npm packages and ${rust.count} resolved Rust dependencies for ${rust.target}.`,
     "Rust dependencies include build helpers; development-only dependencies are excluded.",

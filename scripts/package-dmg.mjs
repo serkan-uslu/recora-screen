@@ -17,24 +17,24 @@ assert(
 );
 assert(["arm64", "x64"].includes(process.arch), "Only native arm64 and x64 bundles are supported.");
 const bundleRoot = path.join(root, "src-tauri/target/release/bundle");
-const app = path.join(bundleRoot, "macos/Screen Recorder.app");
+const app = path.join(bundleRoot, "macos/Recora Screen.app");
 execFileSync(process.execPath, [path.join(root, "scripts/verify-bundle.mjs"), app], {
   stdio: "inherit",
 });
 
 const outputDirectory = path.join(bundleRoot, "dmg");
 await mkdir(outputDirectory, { recursive: true });
-const output = path.join(outputDirectory, `Screen-Recorder_${version}_macOS-${process.arch}.dmg`);
+const output = path.join(outputDirectory, `Recora-Screen_${version}_macOS-${process.arch}.dmg`);
 const pending = path.join(outputDirectory, `.screen-recorder-${randomUUID()}.dmg`);
 const staging = await mkdtemp(path.join(tmpdir(), "screen-recorder-dmg-"));
 try {
-  execFileSync("/usr/bin/ditto", [app, path.join(staging, "Screen Recorder.app")], {
+  execFileSync("/usr/bin/ditto", [app, path.join(staging, "Recora Screen.app")], {
     stdio: "inherit",
   });
   await symlink("/Applications", path.join(staging, "Applications"));
   execFileSync(
     "/usr/bin/hdiutil",
-    ["create", "-volname", "Screen Recorder", "-srcfolder", staging, "-format", "UDZO", pending],
+    ["create", "-volname", "Recora Screen", "-srcfolder", staging, "-format", "UDZO", pending],
     { stdio: "inherit" },
   );
   execFileSync("/usr/bin/hdiutil", ["verify", pending], { stdio: "inherit" });

@@ -5,7 +5,7 @@ import { fileURLToPath } from "node:url";
 
 assert.equal(process.platform, "darwin", "Clean-install checks require macOS.");
 const root = fileURLToPath(new URL("../", import.meta.url));
-const app = path.resolve(process.argv[2] || "/Applications/Screen Recorder.app");
+const app = path.resolve(process.argv[2] || "/Applications/Recora Screen.app");
 assert(
   app.startsWith(`/Applications${path.sep}`),
   "Install the DMG application in /Applications before running this check.",

@@ -67,7 +67,7 @@ jobs:
         run: |
           set -euo pipefail
           env -u APPLE_ID -u APPLE_PASSWORD -u APPLE_TEAM_ID npm run desktop:app
-          app='src-tauri/target/release/bundle/macos/Screen Recorder.app'
+          app='src-tauri/target/release/bundle/macos/Recora Screen.app'
           codesign --verify --deep --strict --verbose=2 "$app"
           codesign --display --verbose=4 "$app" 2>&1 | grep '^Authority=Developer ID Application:'
       - name: Notarize and staple application
@@ -75,9 +75,9 @@ jobs:
         run: |
           set -euo pipefail
           mkdir -p artifacts
-          app='src-tauri/target/release/bundle/macos/Screen Recorder.app'
-          ditto -c -k --keepParent "$app" artifacts/Screen Recorder.app.zip
-          xcrun notarytool submit artifacts/Screen Recorder.app.zip \
+          app='src-tauri/target/release/bundle/macos/Recora Screen.app'
+          ditto -c -k --keepParent "$app" artifacts/Recora Screen.app.zip
+          xcrun notarytool submit artifacts/Recora Screen.app.zip \
             --apple-id "$APPLE_ID" --password "$APPLE_PASSWORD" --team-id "$APPLE_TEAM_ID" \
             --wait --output-format json > artifacts/app-notarization.json
           node -e "const r=require('./artifacts/app-notarization.json'); if(r.status!=='Accepted') process.exit(1)"
@@ -96,12 +96,12 @@ jobs:
           node -e "const r=require('./artifacts/notarization.json'); if(r.status!=='Accepted') process.exit(1)"
           xcrun stapler staple "$dmg"
           xcrun stapler validate "$dmg"
-          spctl --assess --type execute --verbose=2 'src-tauri/target/release/bundle/macos/Screen Recorder.app'
+          spctl --assess --type execute --verbose=2 'src-tauri/target/release/bundle/macos/Recora Screen.app'
       - name: Create immutable candidate evidence
         shell: bash
         run: |
           set -euo pipefail
-          app='src-tauri/target/release/bundle/macos/Screen Recorder.app'
+          app='src-tauri/target/release/bundle/macos/Recora Screen.app'
           dmg="$(find src-tauri/target/release/bundle/dmg -maxdepth 1 -name '*.dmg' -type f -print -quit)"
           npm run evidence:release -- \
             --app "$app" --dmg "$dmg" --notarization artifacts/notarization.json \
@@ -111,7 +111,7 @@ jobs:
       - name: Upload notarized candidate and evidence
         uses: actions/upload-artifact@v4
         with:
-          name: screen-recorder-macos-notarized-candidate-${{ github.sha }}
+          name: recora-screen-macos-notarized-candidate-${{ github.sha }}
           path: |
             artifacts/*.dmg
             artifacts/*.json

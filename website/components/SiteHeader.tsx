@@ -1,38 +1,98 @@
+"use client";
+
 import Image from "next/image";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { useEffect, useState } from "react";
 import { product } from "@/shared/brand";
 import { assetPath } from "@/website/lib/site";
 
 export function SiteHeader() {
+  const pathname = usePathname();
+  const [active, setActive] = useState(pathname.startsWith("/documentation") ? "docs" : "");
+
+  useEffect(() => {
+    if (pathname.startsWith("/documentation")) {
+      setActive("docs");
+      return;
+    }
+    const sections = ["features", "workflow", "mcp"]
+      .map((id) => document.getElementById(id))
+      .filter((section): section is HTMLElement => section !== null);
+    const update = () => {
+      const current = sections
+        .filter((section) => section.getBoundingClientRect().top <= 150)
+        .at(-1);
+      setActive(current?.id ?? "");
+    };
+    update();
+    window.addEventListener("scroll", update, { passive: true });
+    window.addEventListener("hashchange", update);
+    return () => {
+      window.removeEventListener("scroll", update);
+      window.removeEventListener("hashchange", update);
+    };
+  }, [pathname]);
+
   return (
-    <header className="nav wrap">
-      <Link className="brand" href="/" aria-label={`${product.name} home`}>
-        <Image className="brand-icon" src={assetPath("icon.svg")} width={34} height={34} alt="" />
-        {product.name}
-        <span className="accent">.</span>
-      </Link>
-      <nav aria-label="Main navigation">
-        <Link href="/#features" data-event="Navigation Click" data-placement="features">
-          Features
+    <header className="site-header">
+      <div className="nav wrap">
+        <Link className="brand" href="/" aria-label={`${product.name} home`}>
+          <Image className="brand-icon" src={assetPath("icon.svg")} width={34} height={34} alt="" />
+          {product.name}
+          <span className="accent">.</span>
         </Link>
-        <Link href="/#workflow" data-event="Navigation Click" data-placement="workflow">
-          How it works
+        <nav aria-label="Main navigation">
+          <Link
+            className={active === "features" ? "selected" : undefined}
+            aria-current={active === "features" ? "location" : undefined}
+            href="/#features"
+            data-event="Navigation Click"
+            data-placement="features"
+            onClick={() => setActive("features")}
+          >
+            Features
+          </Link>
+          <Link
+            className={active === "workflow" ? "selected" : undefined}
+            aria-current={active === "workflow" ? "location" : undefined}
+            href="/#workflow"
+            data-event="Navigation Click"
+            data-placement="workflow"
+            onClick={() => setActive("workflow")}
+          >
+            How it works
+          </Link>
+          <Link
+            className={active === "mcp" ? "selected" : undefined}
+            aria-current={active === "mcp" ? "location" : undefined}
+            href="/#mcp"
+            data-event="Navigation Click"
+            data-placement="mcp"
+            onClick={() => setActive("mcp")}
+          >
+            MCP
+          </Link>
+          <Link
+            className={active === "docs" ? "selected" : undefined}
+            aria-current={active === "docs" ? "page" : undefined}
+            href="/documentation/"
+            data-event="Navigation Click"
+            data-placement="documentation"
+            onClick={() => setActive("docs")}
+          >
+            Docs
+          </Link>
+        </nav>
+        <Link
+          className="button small"
+          href="/#download"
+          data-event="Navigation Click"
+          data-placement="nav-download"
+        >
+          Get the app <span>↗</span>
         </Link>
-        <Link href="/#mcp" data-event="Navigation Click" data-placement="mcp">
-          MCP
-        </Link>
-        <Link href="/documentation/" data-event="Navigation Click" data-placement="documentation">
-          Docs
-        </Link>
-      </nav>
-      <Link
-        className="button small"
-        href="/#download"
-        data-event="Navigation Click"
-        data-placement="nav-download"
-      >
-        Get the app <span>↗</span>
-      </Link>
+      </div>
     </header>
   );
 }

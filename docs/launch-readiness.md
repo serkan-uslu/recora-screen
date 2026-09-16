@@ -45,7 +45,7 @@ Claude Code could not run model calls: its OAuth session was expired. Claude Des
 
 ## Current development artifact
 
-- Filename: `Screen-Recorder_0.1.0_macOS-arm64.dmg`
+- Filename: `Recora-Screen_0.1.0_macOS-arm64.dmg`
 - Version: `0.1.0`; product/package/lock/Tauri/Cargo versions match.
 - Size: 47851962 bytes.
 - SHA-256: `bf900a9208e893982205a5425b1bd08365844c56bd43acd0c33d62cc7a3888aa`

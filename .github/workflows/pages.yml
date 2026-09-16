@@ -19,8 +19,8 @@ jobs:
   build:
     runs-on: ubuntu-latest
     env:
-      NEXT_PUBLIC_SITE_URL: https://serkan-uslu.github.io/screen-recorder/
-      NEXT_PUBLIC_BASE_PATH: /screen-recorder
+      NEXT_PUBLIC_SITE_URL: https://serkan-uslu.github.io/recora-screen/
+      NEXT_PUBLIC_BASE_PATH: /recora-screen
       NEXT_PUBLIC_DOWNLOAD_URL: ${{ inputs.download_url }}
       NEXT_PUBLIC_PLAUSIBLE_SCRIPT_URL: ${{ vars.PLAUSIBLE_SCRIPT_URL }}
     steps:

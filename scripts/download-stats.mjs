@@ -1,6 +1,6 @@
 // ponytail: report the latest 100 releases; paginate if the release history grows beyond that.
 const response = await fetch(
-  "https://api.github.com/repos/serkan-uslu/screen-recorder/releases?per_page=100",
+  "https://api.github.com/repos/serkan-uslu/recora-screen/releases?per_page=100",
   {
     headers: { Accept: "application/vnd.github+json" },
   },

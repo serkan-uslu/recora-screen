@@ -1,6 +1,10 @@
 # Privacy
 
-Screen Recorder stores projects and recordings on your Mac. It does not require an account and does not upload recordings to an application server.
+Recora Screen stores projects and recordings on your Mac. It does not require an account and does not upload recordings to an application server.
+
+## Website analytics
+
+The marketing website uses Vercel Web Analytics to measure page visits without cookies. Vercel receives ordinary web request data such as the visited page, referrer, browser, device, approximate location and a privacy-preserving visitor identifier. The desktop app sends no analytics, and recordings, transcripts, project names and local paths are never included. An optional Plausible configuration can additionally measure the explicit, non-personal button events listed in `docs/website.md`.
 
 ## Local processing
 
@@ -18,7 +22,7 @@ The assistant is off until you select a provider and supply an API key. Keys are
 
 The MCP server runs locally over standard input/output and connects to a private per-user socket. Connected clients can read project content, including names, file paths, edit state, transcripts and requested preview frames, and edit/export recordings. `preview_frame` returns a PNG image to the client, not only a file path. A client such as Claude or Codex may send this returned content to its model provider under that client's settings and policies. Review the client's permissions and data settings before connecting sensitive projects; a local MCP transport does not guarantee local model processing.
 
-MCP itself requires no API key in Screen Recorder. Your chosen client's subscription or API usage can cost money separately from this free, MIT-licensed app. In-app provider keys are not needed for a client to use local project, editing, preview and export tools.
+MCP itself requires no API key in Recora Screen. Your chosen client's subscription or API usage can cost money separately from this free, MIT-licensed app. In-app provider keys are not needed for a client to use local project, editing, preview and export tools.
 
 Operating-system screen, microphone, camera, and input-monitoring permissions still apply. The app shows recording state and does not bypass these permissions.
 

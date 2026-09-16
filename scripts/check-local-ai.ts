@@ -20,8 +20,7 @@ for (const sample of [
   {
     language: "en",
     voice: "Daniel",
-    speech:
-      "Welcome to Screen Recorder. Create a project, record your screen, and edit your video.",
+    speech: "Welcome to Recora Screen. Create a project, record your screen, and edit your video.",
     words: [/screen/, /project/],
   },
   {

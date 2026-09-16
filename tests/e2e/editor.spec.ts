@@ -121,7 +121,7 @@ test("layers, imported audio, GIF controls and cursor/camera settings survive th
     await expect(page.getByRole("button", { name: "Choose location & export" })).toBeEnabled();
     await page.screenshot({ path: testInfo.outputPath("gif.png") });
     await page.getByRole("button", { name: "Cancel", exact: true }).click();
-    await page.getByRole("button", { name: "Screen Recorder projects", exact: true }).click();
+    await page.getByRole("button", { name: "Recora Screen projects", exact: true }).click();
     await page.getByRole("button", { name: "Open Editor feature fixture" }).click();
     const reopened = await service.store.get(created.id);
     expect(reopened.edits.overlays).toHaveLength(2);

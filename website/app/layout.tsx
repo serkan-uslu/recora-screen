@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import type { ReactNode } from "react";
+import { Analytics as VercelAnalytics } from "@vercel/analytics/next";
 import { product } from "@/shared/brand";
 import { Analytics } from "@/website/components/Analytics";
 import { SiteFooter } from "@/website/components/SiteFooter";
@@ -27,7 +28,7 @@ export const metadata: Metadata = {
   twitter: { card: "summary_large_image", images: [site.SOCIAL_IMAGE] },
 };
 
-export const viewport: Viewport = { themeColor: "#151717", width: "device-width", initialScale: 1 };
+export const viewport: Viewport = { themeColor: "#f7f8f3", width: "device-width", initialScale: 1 };
 
 export default function RootLayout({ children }: Readonly<{ children: ReactNode }>) {
   return (
@@ -40,6 +41,7 @@ export default function RootLayout({ children }: Readonly<{ children: ReactNode 
         {children}
         <SiteFooter />
         <Analytics />
+        <VercelAnalytics />
       </body>
     </html>
   );

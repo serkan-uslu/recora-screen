@@ -1,6 +1,6 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
-  "productName": "Screen Recorder",
+  "productName": "Recora Screen",
   "version": "0.1.0",
   "identifier": "com.screenrecorder.desktop",
   "build": {
@@ -13,12 +13,12 @@
     "windows": [
       {
         "label": "main",
-        "title": "Screen Recorder",
+        "title": "Recora Screen",
         "width": 1440,
         "height": 940,
         "minWidth": 1080,
         "minHeight": 700,
-        "backgroundColor": "#111316",
+        "backgroundColor": "#10111a",
         "titleBarStyle": "Overlay",
         "hiddenTitle": true,
         "trafficLightPosition": { "x": 20, "y": 23 }
