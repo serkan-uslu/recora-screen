@@ -76,8 +76,8 @@ jobs:
           set -euo pipefail
           mkdir -p artifacts
           app='src-tauri/target/release/bundle/macos/Recora Screen.app'
-          ditto -c -k --keepParent "$app" artifacts/Recora Screen.app.zip
-          xcrun notarytool submit artifacts/Recora Screen.app.zip \
+          ditto -c -k --keepParent "$app" "artifacts/Recora Screen.app.zip"
+          xcrun notarytool submit "artifacts/Recora Screen.app.zip" \
             --apple-id "$APPLE_ID" --password "$APPLE_PASSWORD" --team-id "$APPLE_TEAM_ID" \
             --wait --output-format json > artifacts/app-notarization.json
           node -e "const r=require('./artifacts/app-notarization.json'); if(r.status!=='Accepted') process.exit(1)"
