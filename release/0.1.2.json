@@ -1,0 +1,96 @@
+{
+  "version": "0.1.2",
+  "status": "development-preview",
+  "sourceCommit": null,
+  "artifact": {
+    "name": "Recora-Screen_0.1.2_macOS-arm64.dmg",
+    "bytes": null,
+    "sha256": null
+  },
+  "distribution": {
+    "developerId": false,
+    "notarized": false,
+    "gatekeeperAccepted": false,
+    "signingIdentity": null,
+    "notarizationResult": null,
+    "evidence": null
+  },
+  "build": {
+    "runner": null,
+    "architecture": null,
+    "macOS": null,
+    "node": null,
+    "rustc": null,
+    "xcode": null
+  },
+  "acceptance": {
+    "brandApproved": {
+      "status": "pending",
+      "evidence": null
+    },
+    "cleanMacInstall": {
+      "status": "pending",
+      "evidence": null
+    },
+    "longRecordingSyncAndMemory": {
+      "status": "pending",
+      "evidence": null
+    },
+    "failureRecovery": {
+      "status": "pending",
+      "evidence": null
+    },
+    "capturePermissionsAndDevices": {
+      "status": "pending",
+      "evidence": null
+    },
+    "englishAndTurkishOfflineWhisper": {
+      "status": "pending",
+      "evidence": null
+    },
+    "previewExportParity": {
+      "status": "pending",
+      "evidence": null
+    },
+    "regressionChecks": {
+      "status": "pending",
+      "evidence": null
+    },
+    "bundledRuntimePortability": {
+      "status": "pending",
+      "evidence": null
+    },
+    "openaiProvider": {
+      "status": "pending",
+      "evidence": null
+    },
+    "anthropicProvider": {
+      "status": "pending",
+      "evidence": null
+    },
+    "codexClient": {
+      "status": "pending",
+      "evidence": null
+    },
+    "claudeCodeClient": {
+      "status": "pending",
+      "evidence": null
+    },
+    "claudeDesktopClient": {
+      "status": "pending",
+      "evidence": null
+    },
+    "analyticsVerified": {
+      "status": "pending",
+      "evidence": null
+    },
+    "launchMediaReviewed": {
+      "status": "pending",
+      "evidence": null
+    }
+  },
+  "notes": [
+    "Pending signed and notarized release candidate for version 0.1.2.",
+    "This public beta adds persistent MCP access controls and end-to-end MCP permission coverage."
+  ]
+}

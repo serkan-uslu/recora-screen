@@ -14,10 +14,10 @@ _Actual desktop app with clean demonstration footage._
 
 ## Download the public beta
 
-Version 0.1.1 is available as a Developer ID signed and Apple notarized public beta for Apple silicon and macOS 15+. The app bundles Node and Whisper; end users do not need to install Node.
+Version 0.1.2 is available as a Developer ID signed and Apple notarized public beta for Apple silicon and macOS 15+. The app bundles Node and Whisper; end users do not need to install Node.
 
-- [Download Recora Screen 0.1.1 for Apple silicon](https://github.com/serkan-uslu/recora-screen/releases/download/v0.1.1/Recora-Screen_0.1.1_macOS-arm64.dmg).
-- [Release notes](https://github.com/serkan-uslu/recora-screen/releases/tag/v0.1.1).
+- [Download Recora Screen 0.1.2 for Apple silicon](https://github.com/serkan-uslu/recora-screen/releases/download/v0.1.2/Recora-Screen_0.1.2_macOS-arm64.dmg).
+- [Release notes](https://github.com/serkan-uslu/recora-screen/releases/tag/v0.1.2).
 - [Build and run from source](#develop).
 - [Product documentation](https://recora-screen.vercel.app/documentation/).
 - Product site: [recora-screen.vercel.app](https://recora-screen.vercel.app/). Locally, `npm run dev:site` serves `http://127.0.0.1:4174/`.
