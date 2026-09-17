@@ -110,6 +110,13 @@ function distributionComplete(evidence: Evidence) {
     Boolean(evidence.distribution.evidence?.trim())
   );
 }
+function vercelAnalyticsConfigured(dependencies: Record<string, string>, layout: string) {
+  return (
+    Boolean(dependencies["@vercel/analytics"]) &&
+    layout.includes('from "@vercel/analytics/next"') &&
+    layout.includes("<VercelAnalytics />")
+  );
+}
 
 if (process.argv.includes("--self-check")) {
   const url =
@@ -165,8 +172,13 @@ if (process.argv.includes("--self-check")) {
   evidence.acceptance.cleanMacInstall = { status: "passed", evidence: "" };
   assert(!acceptanceComplete(evidence));
   assert(!evidenceSchema.safeParse({ ...evidence, distribution: {} }).success);
+  const analyticsLayout =
+    'import { Analytics as VercelAnalytics } from "@vercel/analytics/next";\n<VercelAnalytics />';
+  assert(vercelAnalyticsConfigured({ "@vercel/analytics": "^2.0.1" }, analyticsLayout));
+  assert(!vercelAnalyticsConfigured({}, analyticsLayout));
+  assert(!vercelAnalyticsConfigured({ "@vercel/analytics": "^2.0.1" }, ""));
   console.log(
-    "Launch checker self-check passed: exact release URLs and missing evidence fail closed.",
+    "Launch checker self-check passed: release URLs, evidence and Vercel Analytics fail closed.",
   );
 } else {
   const siteOnly = process.argv.includes("--site");
@@ -275,11 +287,30 @@ if (process.argv.includes("--self-check")) {
       releaseTag.passed && releaseTag.output === commit.output,
       releaseTag.output,
     );
-    check(
-      "analytics-configured",
-      /^https:\/\//.test(process.env.NEXT_PUBLIC_PLAUSIBLE_SCRIPT_URL || ""),
-      "The Plausible HTTPS pa-*.js script must be configured",
+    const layout = await readFile(path.join(root, "website/app/layout.tsx"), "utf8");
+    const analyticsDependencies = {
+      ...packageJson.dependencies,
+      ...packageJson.devDependencies,
+    };
+    const analyticsSourceConfigured = vercelAnalyticsConfigured(analyticsDependencies, layout);
+    const analyticsUrl = new URL(
+      "/_vercel/insights/script.js",
+      process.env.NEXT_PUBLIC_SITE_URL || product.website,
     );
+    try {
+      const response = await fetch(analyticsUrl, { signal: AbortSignal.timeout(30_000) });
+      const contentType = response.headers.get("content-type") || "";
+      check(
+        "analytics-configured",
+        analyticsSourceConfigured &&
+          response.ok &&
+          response.url.startsWith("https://") &&
+          contentType.includes("javascript"),
+        `${analyticsSourceConfigured ? "source integrated" : "source integration missing"}; ${response.status} ${response.url}; ${contentType}`,
+      );
+    } catch (error) {
+      check("analytics-configured", false, String(error));
+    }
     if (exactUrl) {
       try {
         const response = await fetch(download, { signal: AbortSignal.timeout(120_000) });

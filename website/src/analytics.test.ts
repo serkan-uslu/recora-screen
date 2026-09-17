@@ -14,11 +14,9 @@ test("analytics records intentional clicks, rejects unknown events and cannot br
     [
       "Download Click",
       {
-        props: {
-          placement: "download",
-          version: product.version,
-          platform: product.platform,
-        },
+        placement: "download",
+        version: product.version,
+        platform: product.platform,
       },
     ],
   ]);

@@ -4,7 +4,7 @@ Recora Screen stores projects and recordings on your Mac. It does not require an
 
 ## Website analytics
 
-The marketing website uses Vercel Web Analytics to measure page visits without cookies. Vercel receives ordinary web request data such as the visited page, referrer, browser, device, approximate location and a privacy-preserving visitor identifier. The desktop app sends no analytics, and recordings, transcripts, project names and local paths are never included.
+The marketing website uses Vercel Web Analytics to measure page visits and explicit button interactions without cookies. Custom events include only the control placement, public app version and platform. Vercel receives ordinary web request data such as the visited page, referrer, browser, device, approximate location and a privacy-preserving visitor identifier. The desktop app sends no analytics, and recordings, transcripts, project names and local paths are never included.
 
 ## Local processing
 

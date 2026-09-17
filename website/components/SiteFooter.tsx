@@ -14,7 +14,8 @@ export function SiteFooter() {
         </Link>
         <p>Good ideas deserve good videos.</p>
         <small id="analytics-notice">
-          Cookie-free site analytics measure visits. Your projects stay on your Mac.
+          Cookie-free site analytics measure visits and button clicks. Your projects stay on your
+          Mac.
         </small>
       </div>
       <div>

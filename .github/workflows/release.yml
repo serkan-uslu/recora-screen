@@ -108,7 +108,7 @@ jobs:
             --app "$app" --dmg "$dmg" --notarization artifacts/notarization.json \
             --output artifacts/release-evidence.json
           cp "$dmg" artifacts/
-          shasum -a 256 artifacts/*.dmg > artifacts/SHA256SUMS
+          (cd artifacts && shasum -a 256 *.dmg > SHA256SUMS)
       - name: Upload notarized candidate and evidence
         uses: actions/upload-artifact@v4
         with:
