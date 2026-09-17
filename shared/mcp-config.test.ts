@@ -1,6 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { execFileSync } from "node:child_process";
+import { product } from "@/shared/brand.js";
 import { formatMcpConfig } from "@/shared/mcp-config.js";
 
 test("client configs preserve detected paths and shell metacharacters without executing them", () => {
@@ -9,10 +10,10 @@ test("client configs preserve detected paths and shell metacharacters without ex
     args: ["/Users/Serkan\\Apps/çalışma\n\t\u007f/mcp.mjs", "", "--literal=$HOME"],
   };
   assert.deepEqual(JSON.parse(formatMcpConfig("claude-desktop", runtime)), {
-    mcpServers: { "screen-recorder": runtime },
+    mcpServers: { [product.mcpServerName]: runtime },
   });
   const toml = formatMcpConfig("codex", runtime).split("\n");
-  assert.equal(toml[0], "[mcp_servers.screen-recorder]");
+  assert.equal(toml[0], `[mcp_servers.${product.mcpServerName}]`);
   assert.equal(JSON.parse(toml[1]!.slice("command = ".length)), runtime.command);
   assert.deepEqual(JSON.parse(toml[2]!.slice("args = ".length)), runtime.args);
   assert(!toml.join("\n").includes("\u007f"), "TOML must escape the DEL control character");
@@ -32,7 +33,7 @@ test("client configs preserve detected paths and shell metacharacters without ex
     "stdio",
     "--scope",
     "user",
-    "screen-recorder",
+    product.mcpServerName,
     "--",
     runtime.command,
     ...runtime.args,

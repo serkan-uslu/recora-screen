@@ -3,6 +3,7 @@ import { AudioLines, Check, Download, Keyboard, Save, Sparkles, Trash2 } from "l
 import { Field } from "@/src/components/molecules/Field";
 import { Dialog } from "@/src/components/organisms/Dialog";
 import { Switch } from "@/src/components/atoms/Switch";
+import { product } from "@/shared/brand";
 import { formatMcpConfig, type McpClient } from "@/shared/mcp-config";
 import { type Settings, type McpConfig, type Model } from "@/src/controllers/studioTypes";
 import {
@@ -226,6 +227,11 @@ export function SettingsDialog({
             installation’s bundled runtime; no separate Node installation is needed. Copy it again
             if you move the app.
           </p>
+          <p className="inline-note">
+            This server appears as <strong>{product.mcpServerName}</strong>. Remove an older{" "}
+            <code>screen-recorder</code>, <code>screenRecorder</code> or{" "}
+            <code>screen_recorder</code> entry before adding the generated configuration.
+          </p>
           <Field label="MCP client">
             <select
               value={client}
@@ -243,7 +249,7 @@ export function SettingsDialog({
             {client === "codex"
               ? "Merge this into ~/.codex/config.toml, preserving your other servers, then reconnect Codex. If you use a custom CODEX_HOME, use its config.toml instead."
               : client === "claude-code"
-                ? "Run this in Terminal to add the server for your user account. Run claude mcp get screen-recorder to check it, then use /mcp in Claude Code."
+                ? `Run this in Terminal to add the server for your user account. Run claude mcp get ${product.mcpServerName} to check it, then use /mcp in Claude Code.`
                 : "Merge this server into ~/Library/Application Support/Claude/claude_desktop_config.json, preserving other entries, then fully quit and reopen Claude Desktop."}
           </p>
           {mcp ? (

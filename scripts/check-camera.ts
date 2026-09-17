@@ -44,7 +44,7 @@ try {
   );
   const microphone = caps.microphones.find((d) => /MacBook|built.?in/i.test(d.name));
   const source = caps.sources.find(
-    (d) => d.kind === "window" && d.name.includes("Screen Recorder Capture Test"),
+    (d) => d.kind === "window" && d.name.includes("Recora Screen Capture Test"),
   );
   assert(
     camera && microphone && source,

@@ -2,7 +2,7 @@
 
 Open Recora Screen before connecting and keep it running. Its Node runtime and MCP entry point are bundled, so end users do not install Node. **Settings & MCP → MCP & shortcuts → MCP client** provides separate Codex, Claude Code and Claude Desktop configurations using the running installation's actual paths. Copy the configuration again after moving the app. If the runtime path is unavailable, Settings explains this instead of guessing an installation path.
 
-The examples below assume the app is in `/Applications`. Prefer the generated configuration when using another location: it escapes spaces, quotation marks and shell characters correctly. Preserve your other MCP servers when merging configuration. Earlier app versions used `screenRecorder` or `screen_recorder` as the client entry name; replace an old entry rather than adding a duplicate. The current examples use `screen-recorder` consistently.
+The examples below assume the app is in `/Applications`. Prefer the generated configuration when using another location: it escapes spaces, quotation marks and shell characters correctly. Preserve your other MCP servers when merging configuration. The server is named `recora-screen`. Earlier app versions used `screen-recorder`, `screenRecorder` or `screen_recorder`; remove an old entry before adding the current configuration so the same server is not listed twice.
 
 Recora Screen is free and MCP requires no API key in the app. Your chosen client's plan or usage charges may apply. In-app OpenAI/Anthropic keys are only needed when invoking the optional cloud assistant; ordinary project/edit/preview/export tools do not require them. See [Privacy](privacy.md) before connecting a cloud model client to sensitive content.
 
@@ -11,22 +11,22 @@ Recora Screen is free and MCP requires no API key in the app. Your chosen client
 Merge this into `~/.codex/config.toml`, or the `config.toml` inside your custom `CODEX_HOME`, preserving existing settings. Reconnect Codex after saving:
 
 ```toml
-[mcp_servers.screen-recorder]
+[mcp_servers.recora-screen]
 command = "/Applications/Recora Screen.app/Contents/Resources/bin/node"
 args = ["/Applications/Recora Screen.app/Contents/Resources/mcp.mjs"]
 startup_timeout_sec = 30
 tool_timeout_sec = 120
 ```
 
-Run `codex mcp get screen-recorder` to inspect the entry. In a Codex session, use `/mcp` to check the available server. See the [official Codex MCP documentation](https://developers.openai.com/codex/mcp).
+Run `codex mcp get recora-screen` to inspect the entry. In a Codex session, use `/mcp` to check the available server. See the [official Codex MCP documentation](https://developers.openai.com/codex/mcp).
 
 ## Claude Code
 
 ```sh
-claude mcp add --transport stdio --scope user screen-recorder -- '/Applications/Recora Screen.app/Contents/Resources/bin/node' '/Applications/Recora Screen.app/Contents/Resources/mcp.mjs'
+claude mcp add --transport stdio --scope user recora-screen -- '/Applications/Recora Screen.app/Contents/Resources/bin/node' '/Applications/Recora Screen.app/Contents/Resources/mcp.mjs'
 ```
 
-This makes the server available to your user account across projects. Run `claude mcp get screen-recorder`, then use `/mcp` in Claude Code to check its connection. See the [official Claude Code MCP documentation](https://code.claude.com/docs/en/mcp).
+This makes the server available to your user account across projects. Run `claude mcp get recora-screen`, then use `/mcp` in Claude Code to check its connection. See the [official Claude Code MCP documentation](https://code.claude.com/docs/en/mcp).
 
 ## Claude Desktop
 
@@ -35,7 +35,7 @@ Merge this entry into `~/Library/Application Support/Claude/claude_desktop_confi
 ```json
 {
   "mcpServers": {
-    "screen-recorder": {
+    "recora-screen": {
       "command": "/Applications/Recora Screen.app/Contents/Resources/bin/node",
       "args": ["/Applications/Recora Screen.app/Contents/Resources/mcp.mjs"]
     }
@@ -61,7 +61,7 @@ Run these steps separately in Codex, Claude Code and Claude Desktop before claim
 
 Run `npm run dev` first. Use absolute paths to this repository's `resources/bin/node` and `resources/mcp.mjs` in the examples above. `npm run mcp` also starts the source MCP entry point for debugging. Do not run a second project service: the desktop app owns state and the MCP process only connects to it.
 
-The service uses a per-user Unix socket at `~/Library/Application Support/Screen Recorder/service.sock` with a private directory and file permissions. Closing or reconnecting an MCP client does not stop an ongoing recording. macOS still controls access to screen, camera, microphone, and input events.
+For upgrade compatibility, the service keeps its existing per-user Unix socket at `~/Library/Application Support/Screen Recorder/service.sock` with a private directory and file permissions. Closing or reconnecting an MCP client does not stop an ongoing recording. macOS still controls access to screen, camera, microphone, and input events.
 
 `permissions_request` with `kind: "screen"` or `kind: "input"` opens the corresponding System Settings privacy pane if access remains ungranted after the request. The command returns the actual permission state; opening Settings does not grant access. Quit and reopen after granting screen recording. If Settings shows an enabled entry but the app still cannot access it, remove the outdated entry and add the current app build. `input` enables optional typing activity and precise passive click/drag detection. Pointer movement and sampled button state still work without it; very short clicks require the event tap. `recording_status.monitoring` reports whether the monitor actually started, its failure message when applicable, and event counts. No typed text or keycodes are recorded.
 

@@ -22,7 +22,7 @@ SHA-256: `f905c4b148db5c6bb7caee8528d739bdfb19642203c2f8c040db9023fd124e5b`.
 
 ## Connect Claude or Codex
 
-Open the desktop app, then go to **Settings & MCP → MCP & shortcuts**. Choose your client and copy its configuration. Paths come from the running installation, including the bundled Node runtime.
+Open the desktop app, then go to **Settings & MCP → MCP & shortcuts**. Choose your client and copy its configuration. Paths come from the running installation, including the bundled Node runtime. The server is named `recora-screen`; remove an older `screen-recorder`, `screenRecorder` or `screen_recorder` entry before adding it.
 
 | Client         | Setup                                            |
 | -------------- | ------------------------------------------------ |
@@ -50,7 +50,7 @@ The app and local tools are free. Your connected Claude/Codex client may require
 - **Export:** H.264/AAC MP4 up to 4K or silent GIF (15–30 FPS, up to 1280 pixels and 60 seconds, optional looping), using the same native composition engine as preview; captions can be burned in or saved as SRT/VTT.
 - **Projects:** create, search, rename, reopen, import and move project folders to the macOS Trash. Edits save automatically; Save now remains in Project options. Exported movies remain separate; original media stays intact.
 
-Projects live in `~/Movies/Screen Recorder Projects/`. Each portable folder contains its document, a previous valid backup, original media and imported assets. Saves are atomic. There are no artificial project-count or recording-duration limits; disk space and hardware determine capacity. One recording runs at a time, and its project is protected while other projects remain editable.
+For upgrade compatibility, projects remain in `~/Movies/Screen Recorder Projects/`. Each portable folder contains its document, a previous valid backup, original media and imported assets. Saves are atomic. There are no artificial project-count or recording-duration limits; disk space and hardware determine capacity. One recording runs at a time, and its project is protected while other projects remain editable.
 
 ## Local processing and current limits
 

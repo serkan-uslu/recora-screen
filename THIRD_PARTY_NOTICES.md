@@ -1,6 +1,6 @@
 # Third-party notices
 
-Screen Recorder source is MIT licensed. Its dependencies retain their own licenses.
+Recora Screen source is MIT licensed. Its dependencies retain their own licenses.
 
 | Component                             | License / upstream                                                                                      |
 | ------------------------------------- | ------------------------------------------------------------------------------------------------------- |

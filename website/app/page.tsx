@@ -55,12 +55,12 @@ export default function HomePage() {
             Download for macOS <span>↓</span>
           </a>
           <a
-            className="text-link"
+            className="button secondary"
             data-event="Navigation Click"
             data-placement="hero-mcp"
             href="#mcp"
           >
-            Claude + Codex via MCP <span>↓</span>
+            Connect Claude + Codex <span>↓</span>
           </a>
         </div>
         <p className="fine">

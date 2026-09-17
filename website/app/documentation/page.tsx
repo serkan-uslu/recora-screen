@@ -312,7 +312,9 @@ export default function DocumentationPage() {
               The bundled local MCP server exposes the same validated project, recording, timeline,
               preview, AI and export commands as the UI. Keep the desktop app open, then go to{" "}
               <strong>Settings & MCP → MCP & shortcuts</strong>. Select Codex, Claude Code or Claude
-              Desktop and copy the generated configuration for the current installation.
+              Desktop and copy the generated configuration for the current installation. The server
+              appears as <code>recora-screen</code>. Remove an older <code>screen-recorder</code>,{" "}
+              <code>screenRecorder</code> or <code>screen_recorder</code> entry before adding it.
             </p>
             <div className="docs-grid">
               <div className="docs-card">
@@ -384,10 +386,11 @@ and export a 1080p MP4 to Movies.`}</code>
             <p className="eyebrow">DATA, RECOVERY & PRIVACY</p>
             <h2>Your projects remain yours.</h2>
             <p>
-              Project folders live under <code>~/Movies/Screen Recorder Projects/</code>. Each
-              folder contains the project document, a previous valid backup, original media and
-              imported assets. Saves are atomic. Deleting a project moves its folder and owned
-              source media to macOS Trash; previously exported videos stay where you saved them.
+              For upgrade compatibility, project folders remain under{" "}
+              <code>~/Movies/Screen Recorder Projects/</code>. Each folder contains the project
+              document, a previous valid backup, original media and imported assets. Saves are
+              atomic. Deleting a project moves its folder and owned source media to macOS Trash;
+              previously exported videos stay where you saved them.
             </p>
             <p>
               Recording, editing and local AI do not upload your footage. A connected model client

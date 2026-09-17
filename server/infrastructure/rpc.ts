@@ -123,10 +123,7 @@ export class AppClient {
       if (!startApp) throw error;
     }
     if (process.platform !== "darwin")
-      throw new AppError(
-        "APP_NOT_RUNNING",
-        "Open Screen Recorder before connecting the MCP server.",
-      );
+      throw new AppError("APP_NOT_RUNNING", "Open Recora Screen before connecting the MCP server.");
     await new Promise<void>((resolve, reject) => {
       const bundle = process.env.SCREENREC_APP_BUNDLE;
       const child = spawn(
@@ -141,7 +138,7 @@ export class AppClient {
           : reject(
               new AppError(
                 "APP_NOT_FOUND",
-                "Install and open Screen Recorder before using its MCP server.",
+                "Install and open Recora Screen before using its MCP server.",
               ),
             ),
       );
@@ -156,7 +153,7 @@ export class AppClient {
     }
     throw new AppError(
       "APP_NOT_RUNNING",
-      "Screen Recorder did not start its local service. Open the app and try reconnecting.",
+      "Recora Screen did not start its local service. Open the app and try reconnecting.",
     );
   }
   private async open() {

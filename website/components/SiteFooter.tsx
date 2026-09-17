@@ -20,23 +20,13 @@ export function SiteFooter() {
       <div>
         <span className="eyebrow">BUILT BY SERKAN USLU</span>
         <div className="footer-links">
-          <Link href="/documentation/" data-event="Navigation Click" data-placement="footer-docs">
-            Documentation ↗
-          </Link>
-          <a data-event="Author Link Click" data-placement="repository" href={author.repository}>
+          <a data-event="Author Link Click" data-placement="github" href={author.github}>
             GitHub ↗
           </a>
-          <a data-event="Author Link Click" data-placement="medium" href={author.medium}>
-            Medium ↗
-          </a>
-          <a data-event="Author Link Click" data-placement="website" href={author.website}>
-            serkanuslu.com ↗
+          <a data-event="Author Link Click" data-placement="linkedin" href={author.linkedin}>
+            LinkedIn ↗
           </a>
         </div>
-        <a href={`mailto:${author.email}`} data-event="Contact Click" data-placement="footer">
-          Questions? {author.email}
-        </a>
-        <p className="fine">Open source · {product.license} license</p>
       </div>
     </footer>
   );

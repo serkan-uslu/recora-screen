@@ -1,5 +1,5 @@
 [package]
-name = "screen-recorder"
+name = "recora-screen"
 version = "0.1.0"
 description = "Local-first screen recording studio"
 edition = "2021"

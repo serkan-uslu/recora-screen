@@ -1,3 +1,5 @@
+import { product } from "@/shared/brand";
+
 export type McpClient = "codex" | "claude-code" | "claude-desktop";
 
 export function formatMcpConfig(
@@ -9,7 +11,7 @@ export function formatMcpConfig(
     // JSON string escapes are valid TOML basic-string escapes; DEL also needs escaping.
     const quote = (value: string) => JSON.stringify(value).replace(/\x7f/g, "\\u007f");
     return [
-      "[mcp_servers.screen-recorder]",
+      `[mcp_servers.${product.mcpServerName}]`,
       `command = ${quote(command)}`,
       `args = [${args.map(quote).join(", ")}]`,
       "startup_timeout_sec = 30",
@@ -18,7 +20,7 @@ export function formatMcpConfig(
   }
   if (client === "claude-code") {
     const quote = (value: string) => `'${value.replace(/'/g, "'\\''")}'`;
-    return `claude mcp add --transport stdio --scope user screen-recorder -- ${[command, ...args].map(quote).join(" ")}`;
+    return `claude mcp add --transport stdio --scope user ${product.mcpServerName} -- ${[command, ...args].map(quote).join(" ")}`;
   }
-  return JSON.stringify({ mcpServers: { "screen-recorder": { command, args } } }, null, 2);
+  return JSON.stringify({ mcpServers: { [product.mcpServerName]: { command, args } } }, null, 2);
 }

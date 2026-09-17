@@ -146,6 +146,28 @@ nav a.selected {
   padding: 12px 17px;
   font-size: 12px;
 }
+.button.secondary {
+  border: 1px solid var(--accent);
+  background: var(--surface);
+  color: var(--accent);
+}
+.nav-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.nav-github {
+  padding: 11px 13px;
+  border: 1px solid var(--line);
+  border-radius: 9px;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 650;
+}
+.nav-github:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
 .hero {
   padding-top: 38px;
   text-align: center;
@@ -292,9 +314,6 @@ h1 {
   align-items: center;
   gap: 30px;
   margin-top: 18px;
-}
-.text-link {
-  font-size: 13px;
 }
 .fine {
   color: var(--muted);
@@ -852,7 +871,7 @@ h2 {
   border: 1px solid var(--line);
   border-radius: var(--radius-md);
   background: #101212;
-  color: var(--text);
+  color: var(--color-white);
   font:
     12px/1.7 ui-monospace,
     SFMono-Regular,
@@ -952,7 +971,7 @@ h2 {
     font-size: 12px;
     font-weight: 650;
   }
-  .nav-download {
+  .nav-actions {
     display: none;
   }
   .nav nav.open .mobile-download {

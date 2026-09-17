@@ -4,7 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
-import { product } from "@/shared/brand";
+import { author, product } from "@/shared/brand";
 import { assetPath } from "@/website/lib/site";
 
 export function SiteHeader() {
@@ -120,14 +120,24 @@ export function SiteHeader() {
             Get the app <span>↗</span>
           </Link>
         </nav>
-        <Link
-          className="button small nav-download"
-          href="/#download"
-          data-event="Navigation Click"
-          data-placement="nav-download"
-        >
-          Get the app <span>↗</span>
-        </Link>
+        <div className="nav-actions">
+          <a
+            className="nav-github"
+            href={author.repository}
+            data-event="Author Link Click"
+            data-placement="header-repository"
+          >
+            <span aria-hidden="true">☆</span> Star on GitHub <span>↗</span>
+          </a>
+          <Link
+            className="button small nav-download"
+            href="/#download"
+            data-event="Navigation Click"
+            data-placement="nav-download"
+          >
+            Get the app <span>↗</span>
+          </Link>
+        </div>
       </div>
     </header>
   );

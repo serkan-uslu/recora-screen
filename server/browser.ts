@@ -7,7 +7,7 @@ import { ApplicationService } from "@/server/service.js";
 import { AppClient } from "@/server/infrastructure/rpc.js";
 import { errorOf } from "@/server/contracts/validation.js";
 
-const isolated = path.join(os.tmpdir(), `screen-recorder-browser-${process.getuid?.() ?? "local"}`);
+const isolated = path.join(os.tmpdir(), `recora-screen-browser-${process.getuid?.() ?? "local"}`);
 const service = new ApplicationService({
   dataDir: process.env.SCREENREC_DATA_DIR || path.join(isolated, "data"),
   projectsDir: process.env.SCREENREC_PROJECTS_DIR || path.join(isolated, "projects"),

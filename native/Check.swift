@@ -15,7 +15,7 @@ import ImageIO
             if CommandLine.arguments.count > 1 && CommandLine.arguments[1] == "--pattern" {
                 NSApp.setActivationPolicy(.accessory)
                 let window = NSWindow(contentRect: CGRect(x: 100, y: 100, width: 640, height: 360), styleMask: [.titled], backing: .buffered, defer: false)
-                window.title = "Screen Recorder Capture Test"; window.contentView?.wantsLayer = true; window.contentView?.layer?.backgroundColor = NSColor.systemIndigo.cgColor
+                window.title = "Recora Screen Capture Test"; window.contentView?.wantsLayer = true; window.contentView?.layer?.backgroundColor = NSColor.systemIndigo.cgColor
                 window.orderFrontRegardless()
                 NSApp.run()
                 return
@@ -26,7 +26,7 @@ import ImageIO
                 try await Task.sleep(nanoseconds: 600_000_000)
                 let caps = await NativeApp.shared.capabilities()
                 let sources = caps["sources"] as? [[String: Any]] ?? []
-                guard let selected = sources.first(where: { ($0["name"] as? String ?? "").contains("Screen Recorder Capture Test") && $0["kind"] as? String == "window" }) else { throw NativeFailure("Synthetic capture window could not be located; screen permission may be missing.") }
+                guard let selected = sources.first(where: { ($0["name"] as? String ?? "").contains("Recora Screen Capture Test") && $0["kind"] as? String == "window" }) else { throw NativeFailure("Synthetic capture window could not be located; screen permission may be missing.") }
                 let dir = FileManager.default.temporaryDirectory.appendingPathComponent("screenrec-capture-check-\(UUID().uuidString)", isDirectory: true)
                 let settings = CaptureSettings(sourceId: selected["id"] as! String, sourceKind: "window", region: nil, cameraId: nil, microphoneId: "BuiltInMicrophoneDevice", systemAudio: true, cameraShape: "circle", width: 1280, height: 720, fps: 30)
                 _ = try await CaptureEngine.shared.start(projectID: "capture-check", directory: dir.path, settings: settings)

@@ -3,15 +3,17 @@ import packageInfo from "@/package.json";
 export const author = {
   name: "Serkan Uslu",
   github: "https://github.com/serkan-uslu",
+  linkedin: "https://www.linkedin.com/in/serkan-uslu",
   medium: "https://medium.com/@serkan-uslu",
   website: "https://serkanuslu.com",
   email: "info@serkanuslu.com",
   repository: "https://github.com/serkan-uslu/recora-screen",
 } as const;
 
-// Display branding may change; bundle IDs, storage paths and MCP tool names do not.
+// Bundle IDs and storage paths stay stable so upgrades retain permissions and projects.
 export const product = {
   name: "Recora Screen",
+  mcpServerName: "recora-screen",
   description: "The open-source screen recorder you can control with Claude and Codex.",
   tagline: "The screen recorder you can edit with Claude or Codex",
   website: "https://recora-screen.vercel.app/",

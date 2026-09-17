@@ -8,7 +8,14 @@ test("MCP onboarding and download remain accessible on desktop and mobile", asyn
     await page.goto("/");
     await expect(page.getByRole("heading", { level: 1 })).toContainText("Edit less.");
     if (width === 1280) {
+      await expect(page.locator('[data-placement="header-repository"]')).toHaveAttribute(
+        "href",
+        "https://github.com/serkan-uslu/recora-screen",
+      );
       await expect(page.locator('[data-placement="hero-download"]')).toBeVisible();
+      await expect(page.locator('[data-placement="hero-mcp"]')).toHaveText(
+        /Connect Claude \+ Codex/,
+      );
       await page.getByRole("link", { name: "Features" }).click();
       await expect(page.getByRole("link", { name: "Features" })).toHaveAttribute(
         "aria-current",
@@ -34,6 +41,14 @@ test("MCP onboarding and download remain accessible on desktop and mobile", asyn
     await question.click();
     await expect(question.locator("..")).toHaveAttribute("open", "");
     await expect(page.locator("[data-download]").first()).toHaveAttribute("href", /\.dmg$/);
+    await expect(page.locator('[data-placement="github"]')).toHaveAttribute(
+      "href",
+      "https://github.com/serkan-uslu",
+    );
+    await expect(page.locator('[data-placement="linkedin"]')).toHaveAttribute(
+      "href",
+      "https://www.linkedin.com/in/serkan-uslu",
+    );
     expect(
       await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth),
     ).toBe(true);
@@ -49,7 +64,10 @@ test("documentation shares the site layout and covers the creator workflow", asy
   await expect(page.getByRole("heading", { name: "Record your first take." })).toBeVisible();
   await expect(page.getByRole("heading", { name: "Connect Claude or Codex." })).toBeVisible();
   await expect(page.getByRole("heading", { name: "Your projects remain yours." })).toBeVisible();
-  await expect(page.getByRole("link", { name: "Documentation ↗" })).toBeVisible();
+  await expect(page.locator(".docs-section pre code").first()).toHaveCSS(
+    "color",
+    "rgb(255, 255, 255)",
+  );
   for (const heading of [
     "Move clips and insert media",
     "Start with an existing video",

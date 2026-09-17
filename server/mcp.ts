@@ -1,4 +1,3 @@
-import packageInfo from "@/package.json" with { type: "json" };
 import { Server } from "@modelcontextprotocol/sdk/server/index.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import {
@@ -13,6 +12,7 @@ import { pathToFileURL } from "node:url";
 import { AppClient } from "@/server/infrastructure/rpc.js";
 import { AppError, errorOf, object } from "@/server/contracts/validation.js";
 import { commandRegistry, mcpPermissionCategory, mcpPermissionsSchema } from "@/server/service.js";
+import { product } from "@/shared/brand.js";
 import { defaultMcpPermissions } from "@/shared/types.js";
 
 export const toolMethods = Object.fromEntries(
@@ -42,11 +42,11 @@ export function createMcpServer(
   call: (method: string, params: Record<string, unknown>) => Promise<unknown>,
 ) {
   const server = new Server(
-    { name: "screen-recorder", version: packageInfo.version },
+    { name: product.mcpServerName, version: product.version },
     {
       capabilities: { tools: {} },
       instructions:
-        "Control the running Screen Recorder desktop app. Read project_open before editing. Timed edits use CURRENT OUTPUT timeline milliseconds, except clip.trim sourceStartMs/sourceEndMs and source.restore startMs/endMs explicitly use SOURCE time. Persisted annotations use SOURCE time. timeline_apply batches are atomic and undoable; use expectedRevision from the latest project. For multiple cuts, work backwards. Start recording only at user request; operating-system capture permissions still require the user. Long AI/export operations return job IDs: poll jobs_get, cancel with jobs_cancel. Pass a unique requestId on mutations and reuse it for retries in the same app session. Never edit project files directly.",
+        "Control the running Recora Screen desktop app. Read project_open before editing. Timed edits use CURRENT OUTPUT timeline milliseconds, except clip.trim sourceStartMs/sourceEndMs and source.restore startMs/endMs explicitly use SOURCE time. Persisted annotations use SOURCE time. timeline_apply batches are atomic and undoable; use expectedRevision from the latest project. For multiple cuts, work backwards. Start recording only at user request; operating-system capture permissions still require the user. Long AI/export operations return job IDs: poll jobs_get, cancel with jobs_cancel. Pass a unique requestId on mutations and reuse it for retries in the same app session. Never edit project files directly.",
     },
   );
   server.setRequestHandler(ListToolsRequestSchema, async () => ({

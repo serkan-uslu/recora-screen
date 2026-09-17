@@ -25,8 +25,8 @@ execFileSync(process.execPath, [path.join(root, "scripts/verify-bundle.mjs"), ap
 const outputDirectory = path.join(bundleRoot, "dmg");
 await mkdir(outputDirectory, { recursive: true });
 const output = path.join(outputDirectory, `Recora-Screen_${version}_macOS-${process.arch}.dmg`);
-const pending = path.join(outputDirectory, `.screen-recorder-${randomUUID()}.dmg`);
-const staging = await mkdtemp(path.join(tmpdir(), "screen-recorder-dmg-"));
+const pending = path.join(outputDirectory, `.recora-screen-${randomUUID()}.dmg`);
+const staging = await mkdtemp(path.join(tmpdir(), "recora-screen-dmg-"));
 try {
   execFileSync("/usr/bin/ditto", [app, path.join(staging, "Recora Screen.app")], {
     stdio: "inherit",

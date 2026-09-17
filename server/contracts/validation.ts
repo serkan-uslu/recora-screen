@@ -268,7 +268,7 @@ export function parseProject(value: unknown): Project {
   if (typeof version === "number" && Number.isInteger(version) && version !== 1 && version !== 2)
     throw new AppError(
       "UNSUPPORTED_PROJECT_VERSION",
-      `Project format v${version} is not supported by this version of Screen Recorder. Update the app to open it.`,
+      `Project format v${version} is not supported by this version of Recora Screen. Update the app to open it.`,
     );
   if (version === 1) {
     const legacy = legacyProjectSchema.parse(value);

@@ -28,4 +28,4 @@ Operating-system screen, microphone, camera, and input-monitoring permissions st
 
 ## Removal
 
-Delete Project moves its folder and source media to the macOS Trash. Separately exported video files remain at their chosen locations. Provider keys can be removed through Settings. Downloaded models live in `~/Library/Application Support/Screen Recorder/models/` and can be removed in Finder while the app is closed. Uninstalling the app does not delete your projects.
+Delete Project moves its folder and source media to the macOS Trash. Separately exported video files remain at their chosen locations. Provider keys can be removed through Settings. For upgrade compatibility, downloaded models remain in `~/Library/Application Support/Screen Recorder/models/` and can be removed in Finder while the app is closed. Uninstalling the app does not delete your projects.
