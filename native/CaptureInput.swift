@@ -1,6 +1,11 @@
 import AppKit
 import CoreMedia
 
+struct FocusedWindowContext: Equatable {
+    let id: CGWindowID
+    let title: String?
+}
+
 func cursorPosition(_ point: CGPoint, captureRect: CGRect, normalizedContentRect: CGRect) -> CGPoint? {
     guard captureRect.width > 0, captureRect.height > 0 else { return nil }
     let x = (point.x - captureRect.minX) / captureRect.width, y = (point.y - captureRect.minY) / captureRect.height
@@ -14,7 +19,7 @@ func cursorPosition(_ point: CGPoint, captureRect: CGRect, normalizedContentRect
 final class CaptureInputMonitor: @unchecked Sendable {
     struct Sample {
         var hostTime: CMTime; var point: CGPoint; var pressed: Bool; var kind: String?
-        var focusedWindow: CGWindowID? = nil
+        var focusedWindow: FocusedWindowContext? = nil
     }
     private let lock = NSLock()
     private var loop: CFRunLoop?; private var tap: CFMachPort?
@@ -24,10 +29,12 @@ final class CaptureInputMonitor: @unchecked Sendable {
     init(receive: @escaping (Sample) -> Void, state: @escaping (String, String?) -> Void) { self.receive = receive; self.state = state }
     static func pointer() -> CGPoint { CGEvent(source: nil)?.location ?? .zero }
     static func pressed() -> Bool { CGEventSource.buttonState(.combinedSessionState, button: .left) || CGEventSource.buttonState(.combinedSessionState, button: .right) || CGEventSource.buttonState(.combinedSessionState, button: .center) }
-    static func focusedWindow() -> CGWindowID? {
+    static func focusedWindow() -> FocusedWindowContext? {
         guard let pid = NSWorkspace.shared.frontmostApplication?.processIdentifier,
               let windows = CGWindowListCopyWindowInfo([.optionOnScreenOnly, .excludeDesktopElements], kCGNullWindowID) as? [[String: Any]] else { return nil }
-        return windows.first { ($0[kCGWindowOwnerPID as String] as? Int32) == pid && ($0[kCGWindowLayer as String] as? Int) == 0 }?[kCGWindowNumber as String] as? CGWindowID
+        guard let window = windows.first(where: { ($0[kCGWindowOwnerPID as String] as? Int32) == pid && ($0[kCGWindowLayer as String] as? Int) == 0 }),
+              let id = window[kCGWindowNumber as String] as? CGWindowID else { return nil }
+        return FocusedWindowContext(id: id, title: window[kCGWindowName as String] as? String)
     }
     func start() async {
         await withCheckedContinuation { ready in
@@ -83,7 +90,8 @@ final class CaptureInputMonitor: @unchecked Sendable {
         let kind = Self.activity(for: type)
         let down = type == .leftMouseDown || type == .rightMouseDown || type == .otherMouseDown
         let up = type == .leftMouseUp || type == .rightMouseUp || type == .otherMouseUp
-        receive(Sample(hostTime: CMClockGetTime(CMClockGetHostTimeClock()), point: event.location, pressed: down || (!up && Self.pressed()), kind: kind, focusedWindow: kind == "typing" ? Self.focusedWindow() : nil))
+        let focusedWindow = kind == "typing" || kind == "click" ? Self.focusedWindow() : nil
+        receive(Sample(hostTime: CMClockGetTime(CMClockGetHostTimeClock()), point: event.location, pressed: down || (!up && Self.pressed()), kind: kind, focusedWindow: focusedWindow))
     }
     func stop() async {
         await withCheckedContinuation { continuation in
@@ -95,8 +103,12 @@ final class CaptureInputMonitor: @unchecked Sendable {
     }
 }
 
-func typingPosition(point: CGPoint, lastInteraction: CGPoint?, captureRect: CGRect, contentRect: CGRect, capturedWindow: CGWindowID?, focusedWindow: CGWindowID?) -> CGPoint? {
-    if let capturedWindow, capturedWindow != focusedWindow { return nil }
+func typingPosition(point: CGPoint, lastInteraction: CGPoint?, lastInteractionWindow: FocusedWindowContext?, captureRect: CGRect, contentRect: CGRect, capturedWindow: CGWindowID?, focusedWindow: FocusedWindowContext?) -> CGPoint? {
+    if let capturedWindow, capturedWindow != focusedWindow?.id { return nil }
+    if let lastInteraction {
+        guard lastInteractionWindow == focusedWindow else { return nil }
+        return lastInteraction
+    }
     // A focused captured window still receives typing when the pointer has left its bounds.
-    return lastInteraction ?? cursorPosition(point, captureRect: captureRect, normalizedContentRect: contentRect) ?? (capturedWindow != nil ? CGPoint(x: contentRect.midX, y: contentRect.midY) : nil)
+    return cursorPosition(point, captureRect: captureRect, normalizedContentRect: contentRect) ?? (capturedWindow != nil ? CGPoint(x: contentRect.midX, y: contentRect.midY) : nil)
 }

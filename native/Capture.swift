@@ -23,7 +23,7 @@ final class CaptureEngine: NSObject, SCStreamOutput, SCStreamDelegate, AVCapture
     private let statusLock = NSLock()
     private var cachedStatus: [String: Any] = ["active": false, "paused": false, "durationMs": 0, "phase": "idle", "cameraEnabled": false, "cameraVisible": false, "cameraRunning": false, "microphoneLevel": 0, "systemLevel": 0, "monitoring": ["pointer": "inactive", "input": "inactive", "pointerSamples": 0, "clicks": 0, "drags": 0, "typingEvents": 0]]
     private let inputLock = NSLock(); private var pendingInput: [CaptureInputMonitor.Sample] = []; private var drainingInput = false; private var inputOverflowed = false
-    private var lastInteractionPosition: CGPoint?; private var lastPointerPosition: CGPoint?; private var pointerPressed = false
+    private var lastInteractionPosition: CGPoint?; private var lastInteractionWindow: FocusedWindowContext?; private var lastPointerPosition: CGPoint?; private var pointerPressed = false
     private var lastBoundsCheck = Date.distantPast; private var lastRecoveryMs = 0.0
     private var cameraRanges: [MediaRange] = []; private var cameraRangeStart: Double?
     private var startupInProgress = false; private var finalizing = false
@@ -125,7 +125,7 @@ final class CaptureEngine: NSObject, SCStreamOutput, SCStreamDelegate, AVCapture
         queue.sync {
             self.cursorFile = newCursorFile; self.cursorBatch = []; self.cursorCount = 0; self.lastRecoveryMs = 0
             self.cameraRanges = []; self.cameraRangeStart = nil; self.cursorContentRect = CGRect(x: 0, y: 0, width: 1, height: 1)
-            self.sourceTitle = title; self.lastTypingMs = -1000; self.pointerSamples = 0; self.clickCount = 0; self.dragCount = 0; self.typingCount = 0; self.firstPointerMs = nil; self.lastBoundsCheck = .distantPast; self.lastInteractionPosition = nil; self.lastPointerPosition = nil; self.pointerPressed = false
+            self.sourceTitle = title; self.lastTypingMs = -1000; self.pointerSamples = 0; self.clickCount = 0; self.dragCount = 0; self.typingCount = 0; self.firstPointerMs = nil; self.lastBoundsCheck = .distantPast; self.lastInteractionPosition = nil; self.lastInteractionWindow = nil; self.lastPointerPosition = nil; self.pointerPressed = false
             self.capturedWindowID = settings.sourceKind == "window" ? numericID : nil
             self.writers = newWriters; self.stream = newStream; self.systemStream = newSystemStream; self.cameraSession = newCamera; self.settings = settings
             self.directory = directory; self.projectID = projectID; self.origin = CMClockGetTime(CMClockGetHostTimeClock()); self.originResolved = false
@@ -194,13 +194,16 @@ final class CaptureEngine: NSObject, SCStreamOutput, SCStreamDelegate, AVCapture
         }
         defer { publishStatus() }
         if sample.kind == "typing" {
-            guard elapsed - lastTypingMs >= 600, let focus = typingPosition(point: sample.point, lastInteraction: lastInteractionPosition, captureRect: captureRect, contentRect: cursorContentRect, capturedWindow: capturedWindowID, focusedWindow: sample.focusedWindow) else { return }
+            guard elapsed - lastTypingMs >= 600, let focus = typingPosition(point: sample.point, lastInteraction: lastInteractionPosition, lastInteractionWindow: lastInteractionWindow, captureRect: captureRect, contentRect: cursorContentRect, capturedWindow: capturedWindowID, focusedWindow: sample.focusedWindow) else { return }
             cursorBatch.append(CursorEvent(tMs: elapsed, x: focus.x, y: focus.y, click: nil, kind: "typing")); lastTypingMs = elapsed; typingCount += 1
         } else {
             if let p = cursorPosition(sample.point, captureRect: captureRect, normalizedContentRect: cursorContentRect) {
                 let moved = lastPointerPosition.map { hypot(p.x - $0.x, p.y - $0.y) > 0.002 } ?? false
                 let kind = sample.kind ?? (inputState != "active" ? (sample.pressed && !pointerPressed ? "click" : sample.pressed && moved ? "drag" : nil) : nil)
-                if sample.pressed { lastInteractionPosition = p }
+                if sample.pressed {
+                    lastInteractionPosition = p
+                    if let focusedWindow = sample.focusedWindow { lastInteractionWindow = focusedWindow }
+                }
                 lastPointerPosition = p; cursorBatch.append(CursorEvent(tMs: elapsed, x: p.x, y: p.y, click: sample.pressed, kind: kind))
                 pointerSamples += 1; if firstPointerMs == nil { firstPointerMs = elapsed }
                 if kind == "click" { clickCount += 1 }; if kind == "drag" { dragCount += 1 }
