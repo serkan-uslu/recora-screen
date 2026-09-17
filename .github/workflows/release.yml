@@ -90,12 +90,15 @@ jobs:
           node scripts/package-dmg.mjs
           dmg="$(find src-tauri/target/release/bundle/dmg -maxdepth 1 -name '*.dmg' -type f -print -quit)"
           test -n "$dmg"
+          codesign --force --timestamp --sign "$APPLE_SIGNING_IDENTITY" "$dmg"
+          codesign --verify --verbose=2 "$dmg"
           xcrun notarytool submit "$dmg" \
             --apple-id "$APPLE_ID" --password "$APPLE_PASSWORD" --team-id "$APPLE_TEAM_ID" \
             --wait --output-format json > artifacts/notarization.json
           node -e "const r=require('./artifacts/notarization.json'); if(r.status!=='Accepted') process.exit(1)"
           xcrun stapler staple "$dmg"
           xcrun stapler validate "$dmg"
+          spctl --assess --type open --context context:primary-signature --verbose=2 "$dmg"
           spctl --assess --type execute --verbose=2 'src-tauri/target/release/bundle/macos/Recora Screen.app'
       - name: Create immutable candidate evidence
         shell: bash
