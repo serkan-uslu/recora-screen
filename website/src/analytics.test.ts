@@ -1,5 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
+import { product } from "@/shared/brand";
 import { track } from "@/website/src/analytics";
 
 test("analytics records intentional clicks, rejects unknown events and cannot break downloads", () => {
@@ -15,8 +16,8 @@ test("analytics records intentional clicks, rejects unknown events and cannot br
       {
         props: {
           placement: "download",
-          version: "0.1.0",
-          platform: "macOS-arm64",
+          version: product.version,
+          platform: product.platform,
         },
       },
     ],

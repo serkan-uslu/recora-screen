@@ -27,6 +27,6 @@ export const product = {
 export const release = {
   status: "public-beta",
   downloadUrl:
-    "https://github.com/serkan-uslu/recora-screen/releases/download/v0.1.0/Recora-Screen_0.1.0_macOS-arm64.dmg",
+    "https://github.com/serkan-uslu/recora-screen/releases/download/v0.1.1/Recora-Screen_0.1.1_macOS-arm64.dmg",
   assetName: `Recora-Screen_${product.version}_macOS-arm64.dmg`,
 } as const;

@@ -1,6 +1,10 @@
-# Recora Screen
+<p align="center">
+  <img src="website/public/icon.svg" alt="Recora Screen logo" width="96" height="96">
+</p>
 
-**The open-source screen recorder you can control with Claude and Codex.**
+<h1 align="center">Recora Screen</h1>
+
+<p align="center"><strong>The open-source screen recorder you can control with Claude and Codex.</strong></p>
 
 Record your screen, camera and audio, or start with an existing video. Select a clip to edit its properties, then export your video. Claude and Codex can also control projects, edits and exports through MCP. Built for tutorials, walkthroughs and product demos on Mac.
 
@@ -10,15 +14,15 @@ _Actual desktop app with clean demonstration footage._
 
 ## Download the public beta
 
-Version 0.1.0 is available as a Developer ID signed and Apple notarized public beta for Apple silicon and macOS 15+. The app bundles Node and Whisper; end users do not need to install Node.
+Version 0.1.1 is available as a Developer ID signed and Apple notarized public beta for Apple silicon and macOS 15+. The app bundles Node and Whisper; end users do not need to install Node.
 
-- [Download Recora Screen 0.1.0 for Apple silicon](https://github.com/serkan-uslu/recora-screen/releases/download/v0.1.0/Recora-Screen_0.1.0_macOS-arm64.dmg).
-- [Release notes](https://github.com/serkan-uslu/recora-screen/releases/tag/v0.1.0).
+- [Download Recora Screen 0.1.1 for Apple silicon](https://github.com/serkan-uslu/recora-screen/releases/download/v0.1.1/Recora-Screen_0.1.1_macOS-arm64.dmg).
+- [Release notes](https://github.com/serkan-uslu/recora-screen/releases/tag/v0.1.1).
 - [Build and run from source](#develop).
 - [Product documentation](https://recora-screen.vercel.app/documentation/).
 - Product site: [recora-screen.vercel.app](https://recora-screen.vercel.app/). Locally, `npm run dev:site` serves `http://127.0.0.1:4174/`.
 
-SHA-256: `f905c4b148db5c6bb7caee8528d739bdfb19642203c2f8c040db9023fd124e5b`.
+SHA-256 is published in the release assets.
 
 ## Connect Claude or Codex
 
