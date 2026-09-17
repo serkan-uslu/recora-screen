@@ -1,6 +1,6 @@
 # MCP setup
 
-Open Recora Screen before connecting and keep it running. Its Node runtime and MCP entry point are bundled, so end users do not install Node. **Settings & MCP → MCP & shortcuts → MCP client** provides separate Codex, Claude Code and Claude Desktop configurations using the running installation's actual paths. Copy the configuration again after moving the app. If the runtime path is unavailable, Settings explains this instead of guessing an installation path.
+Open Recora Screen before connecting and keep it running. Its Node runtime and MCP entry point are bundled, so end users do not install Node. **Settings & MCP → MCP & shortcuts → MCP client** provides separate Codex, Claude Code and Claude Desktop configurations using the running installation's actual paths. Run Recora Screen from `/Applications`; mounted-DMG and AppTranslocation paths are temporary, so the app blocks copying them. If the runtime path is unavailable, Settings explains this instead of guessing an installation path.
 
 The examples below assume the app is in `/Applications`. Prefer the generated configuration when using another location: it escapes spaces, quotation marks and shell characters correctly. Preserve your other MCP servers when merging configuration. The server is named `recora-screen`. Earlier app versions used `screen-recorder`, `screenRecorder` or `screen_recorder`; remove an old entry before adding the current configuration so the same server is not listed twice.
 
@@ -69,6 +69,8 @@ For upgrade compatibility, the service keeps its existing per-user Unix socket a
 
 Tools expose the same validated commands as the UI. Tool names replace dots and slashes with underscores; for example `project.open` becomes `project_open`. `tools/list` supplies the current JSON Schemas.
 
+Choose MCP access in **Settings & MCP → MCP & shortcuts**. Connected clients cannot change these access switches themselves. Recording and destructive commands stay off by default. Model downloads, the cloud assistant, Keychain changes and macOS permission prompts require the sensitive-access switch.
+
 | Area           | Examples                                                                                                                                                                    |
 | -------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Projects       | `project_list`, `project_create`, `project_open`, `project_rename`, `project_save`, `project_import`, `project_delete`                                                      |
@@ -111,4 +113,4 @@ Local transcription needs a downloaded Whisper model and an audio track. Silence
 
 ## Additional editor features
 
-See [timeline editing, arrows, privacy covers, imported audio, GIF export and cursor/camera controls](editor-features.md) for the UI workflow, exact operation fields, timing rules and limits. All edits use `timeline_apply`, retain revision checks and support undo. `asset_import` accepts image, audio and video kinds; `export_start` accepts `format: "gif"`, `gifFps` and `loop`.
+See [timeline editing, arrows, privacy covers, imported audio, GIF export and cursor/camera controls](editor-features.md) for the UI workflow, exact operation fields, timing rules and limits. All edits use `timeline_apply`, retain revision checks and support undo. `asset_import` accepts image, audio and video kinds and requires the latest `expectedRevision`; `export_start` accepts `format: "gif"`, `gifFps` and `loop`.

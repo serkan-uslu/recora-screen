@@ -66,7 +66,7 @@ export class EditingService {
   private async importAsset(p: CommandParams) {
     this.store.assertIdle(p.projectId);
     const project = await this.store.get(p.projectId);
-    if (p.expectedRevision !== undefined) checkRevision(project.revision, p.expectedRevision);
+    checkRevision(project.revision, p.expectedRevision);
     const inputInfo = await fs.lstat(p.path);
     if (inputInfo.isSymbolicLink())
       throw new AppError("INVALID_PATH", "Symbolic links cannot be imported");

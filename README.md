@@ -26,7 +26,7 @@ SHA-256 is published in the release assets.
 
 ## Connect Claude or Codex
 
-Open the desktop app, then go to **Settings & MCP → MCP & shortcuts**. Choose your client and copy its configuration. Paths come from the running installation, including the bundled Node runtime. The server is named `recora-screen`; remove an older `screen-recorder`, `screenRecorder` or `screen_recorder` entry before adding it.
+Open the desktop app, then go to **Settings & MCP → MCP & shortcuts**. Choose your client and copy its configuration. Run Recora Screen from `/Applications` first; MCP setup blocks mounted-DMG and AppTranslocation paths because they are temporary. Paths come from the running installation, including the bundled Node runtime. The server is named `recora-screen`; remove an older `screen-recorder`, `screenRecorder` or `screen_recorder` entry before adding it.
 
 | Client         | Setup                                            |
 | -------------- | ------------------------------------------------ |

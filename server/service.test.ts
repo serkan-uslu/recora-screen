@@ -159,7 +159,28 @@ test("official MCP client and UI command share one revision and one undo history
     await server.close();
   });
   const tools = await client.listTools();
-  assert.equal(tools.tools.length, Object.keys(commandRegistry).length);
+  assert.deepEqual(
+    tools.tools.map((tool) => tool.name).sort(),
+    Object.keys(commandRegistry)
+      .map((method) => method.replace(/[./]/g, "_"))
+      .sort(),
+  );
+  for (const tool of tools.tools) {
+    const method = Object.keys(commandRegistry).find(
+      (candidate) => candidate.replace(/[./]/g, "_") === tool.name,
+    )!;
+    const metadata = commandRegistry[method]!;
+    assert.equal(tool.annotations?.readOnlyHint, metadata.readOnly, method);
+    assert.equal(tool.annotations?.destructiveHint, metadata.destructive, method);
+    assert.equal(tool.annotations?.idempotentHint, metadata.readOnly, method);
+    assert.equal(tool.annotations?.openWorldHint, metadata.openWorld, method);
+    assert("requestId" in (tool.inputSchema.properties ?? {}), method);
+  }
+  assert.equal(
+    "mcpPermissions" in
+      (tools.tools.find((tool) => tool.name === "settings_update")!.inputSchema.properties ?? {}),
+    false,
+  );
   assert(
     Object.values(commandRegistry).every(
       (metadata) =>
@@ -171,9 +192,23 @@ test("official MCP client and UI command share one revision and one undo history
   );
   assert(tools.tools.some((t) => t.name === "recording_start"));
   assert(tools.tools.some((t) => t.name === "ai_models_download"));
+  assert.equal(commandRegistry["ai.models/download"]!.permission, "sensitive");
+  assert.equal(commandRegistry["recording.status"]!.permission, "read");
+  assert.equal(commandRegistry["preview.metrics"]!.permission, "read");
+  assert.deepEqual(
+    Object.values(commandRegistry)
+      .filter(({ openWorld }) => openWorld)
+      .map(({ method }) => method)
+      .sort(),
+    ["ai.assistant", "ai.models/download"],
+  );
+  assert.equal(
+    tools.tools.find((t) => t.name === "keychain_delete")!.annotations!.destructiveHint,
+    true,
+  );
   assert.equal(
     tools.tools.find((t) => t.name === "recording_status")!.annotations!.readOnlyHint,
-    true,
+    false,
   );
   assert.equal(
     tools.tools.find((t) => t.name === "app_shutdown")!.annotations!.destructiveHint,
@@ -382,16 +417,39 @@ test("MCP access policy blocks protected commands until the desktop setting enab
     await server.close();
   });
 
-  for (const [name, arguments_] of [
-    ["recording_start", { projectId: project.id }],
-    ["project_delete", { projectId: project.id }],
-    ["keychain_set", { provider: "openai", key: "unused-test-key" }],
-    ["permissions_request", { kind: "screen" }],
+  for (const [name, arguments_, category, control] of [
+    ["recording_start", { projectId: project.id }, "recording", "Control screen recording"],
+    [
+      "project_delete",
+      { projectId: project.id },
+      "destructive",
+      "Delete projects and shut down the app",
+    ],
+    [
+      "keychain_set",
+      { provider: "openai", key: "unused-test-key" },
+      "sensitive",
+      "Use cloud AI, Keychain and permission prompts",
+    ],
+    [
+      "permissions_request",
+      { kind: "screen" },
+      "sensitive",
+      "Use cloud AI, Keychain and permission prompts",
+    ],
+    [
+      "ai_models_download",
+      { model: "base" },
+      "sensitive",
+      "Use cloud AI, Keychain and permission prompts",
+    ],
   ] as const) {
     const denied = await client.callTool({ name, arguments: arguments_ });
+    const error = (denied.structuredContent as { error: { code: string; message: string } }).error;
+    assert.equal(error.code, "MCP_PERMISSION_DENIED");
     assert.equal(
-      (denied.structuredContent as { error: { code: string } }).error.code,
-      "MCP_PERMISSION_DENIED",
+      error.message,
+      `MCP ${category} commands are disabled. In Recora Screen, open Settings > MCP & shortcuts, turn on "${control}", then click "Save MCP access".`,
     );
   }
 
@@ -405,7 +463,51 @@ test("MCP access policy blocks protected commands until the desktop setting enab
     destructive: false,
   });
   await service.command("settings.update", {
+    mcpPermissions: {
+      read: false,
+      edit: false,
+      export: false,
+      recording: false,
+      sensitive: false,
+      destructive: false,
+    },
+  });
+  for (const [method, metadata] of Object.entries(commandRegistry)) {
+    const denied = await client.callTool({
+      name: method.replace(/[./]/g, "_"),
+      arguments: {},
+    });
+    const error = (denied.structuredContent as { error: { code: string; message: string } }).error;
+    assert.equal(error.code, "MCP_PERMISSION_DENIED", method);
+    assert.match(error.message, new RegExp(`MCP ${metadata.permission} commands are disabled`));
+  }
+  await service.command("settings.update", {
     mcpPermissions: { ...settings.mcpPermissions, sensitive: true },
+  });
+  const escalation = await client.callTool({
+    name: "settings_update",
+    arguments: {
+      mcpPermissions: {
+        read: true,
+        edit: true,
+        export: true,
+        recording: true,
+        sensitive: true,
+        destructive: true,
+      },
+    },
+  });
+  assert.deepEqual(
+    (escalation.structuredContent as { error: { code: string } }).error.code,
+    "MCP_PERMISSION_DENIED",
+  );
+  assert.deepEqual((await service.command("settings.get")).mcpPermissions, {
+    read: true,
+    edit: true,
+    export: true,
+    recording: false,
+    sensitive: true,
+    destructive: false,
   });
   const allowed = await client.callTool({
     name: "permissions_request",
@@ -483,9 +585,14 @@ test("backup recovery and source traversal validation protect project media", as
   );
   const sourceLink = path.join(root, "source-link.png");
   await fs.symlink(external, sourceLink);
-  await assert.rejects(service.command("asset.import", { projectId: p.id, path: sourceLink }), {
-    code: "INVALID_PATH",
-  });
+  await assert.rejects(
+    service.command("asset.import", {
+      projectId: p.id,
+      expectedRevision: recovered.revision,
+      path: sourceLink,
+    }),
+    { code: "INVALID_PATH" },
+  );
   await assert.rejects(service.command("project.import", { path: sourceLink }), {
     code: "INVALID_PATH",
   });
@@ -1988,7 +2095,12 @@ test("audio imports are copied, type checked and independent of screen timing", 
   const link = path.join(root, "link.wav");
   await fs.symlink(file, link);
   await assert.rejects(
-    service.command("asset.import", { projectId: p.id, path: link, kind: "audio" }),
+    service.command("asset.import", {
+      projectId: p.id,
+      expectedRevision: p.revision,
+      path: link,
+      kind: "audio",
+    }),
     /Symbolic/,
   );
 });
@@ -2195,13 +2307,23 @@ test("video and image inserts split at output time, retain copied assets and val
   const linked = path.join(root, "linked.mp4");
   await fs.symlink(file, linked);
   await assert.rejects(
-    service.command("asset.import", { projectId: p.id, path: linked, kind: "video" }),
+    service.command("asset.import", {
+      projectId: p.id,
+      expectedRevision: p.revision,
+      path: linked,
+      kind: "video",
+    }),
     { code: "INVALID_PATH" },
   );
   const invalid = path.join(root, "not-video.mp4");
   await fs.mkdir(invalid);
   await assert.rejects(
-    service.command("asset.import", { projectId: p.id, path: invalid, kind: "video" }),
+    service.command("asset.import", {
+      projectId: p.id,
+      expectedRevision: p.revision,
+      path: invalid,
+      kind: "video",
+    }),
     { code: "INVALID_ASSET" },
   );
 });

@@ -2,6 +2,12 @@ import { product } from "@/shared/brand";
 
 export type McpClient = "codex" | "claude-code" | "claude-desktop";
 
+export function isTransientMcpRuntime(runtime: { command: string; args: string[] }): boolean {
+  return [runtime.command, ...runtime.args].some(
+    (value) => value.startsWith("/Volumes/") || value.includes("/AppTranslocation/"),
+  );
+}
+
 export function formatMcpConfig(
   client: McpClient,
   runtime: { command: string; args: string[] },

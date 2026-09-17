@@ -164,7 +164,11 @@ export function StudioDialogs({
           onClose={() => setModal(null)}
           onSave={saveSettings}
           onKey={saveKey}
-          onDownload={(model) => void startJob("ai.models/download", { model })}
+          onDownload={(model) => {
+            void (async () => {
+              if (await startJob("ai.models/download", { model })) setModal(null);
+            })();
+          }}
         />
       )}
       {modal === "export" && project && (

@@ -13,10 +13,16 @@ test("first use offers recording or importing a video without creating a named p
   const video = path.join(root, "My first video.mp4");
   await fs.writeFile(video, "isolated import fixture");
   const methods: string[] = [];
+  let deleteExpectedRevision: unknown;
   const service = new ApplicationService({
     projectsDir: path.join(root, "projects"),
     dataDir: path.join(root, "data"),
-    native: async (method) => {
+    native: async (method, params) => {
+      if (method === "project.trash") {
+        const { path: projectPath } = z.object({ path: z.string() }).parse(params);
+        await fs.rm(projectPath, { recursive: true, force: true });
+        return { ok: true };
+      }
       if (method === "media.inspect")
         return { durationMs: 6000, width: 1280, height: 720, fps: 30, hasAudio: true };
       if (method === "capabilities")
@@ -66,6 +72,8 @@ test("first use offers recording or importing a video without creating a named p
     await page.route("**/api/command", async (route) => {
       const request = requestSchema.parse(route.request().postDataJSON());
       methods.push(request.method);
+      if (request.method === "project.delete")
+        deleteExpectedRevision = request.params?.expectedRevision;
       try {
         await route.fulfill({
           json: { id: request.id, result: await service.command(request.method, request.params) },
@@ -118,13 +126,22 @@ test("first use offers recording or importing a video without creating a named p
     await page.getByRole("button", { name: "Back to projects", exact: true }).click();
     await page.screenshot({ path: testInfo.outputPath("start-actions.png") });
 
-    await page.getByRole("button", { name: "Record screen", exact: true }).click();
+    const [imported] = await service.store.list();
+    await page.locator('summary[aria-label="Actions for My first video"]').click();
+    await page.getByRole("button", { name: "Move My first video to Trash", exact: true }).click();
+    await page.getByRole("button", { name: "Move to Trash", exact: true }).click();
+    await expect(
+      page.getByRole("button", { name: "Open My first video", exact: true }),
+    ).toHaveCount(0);
+    expect(deleteExpectedRevision).toBe(imported!.revision);
+
+    await page.getByRole("button", { name: "Record screen", exact: true }).first().click();
     await expect(page.getByRole("dialog")).toBeVisible();
     await expect(page.getByLabel("Capture source", { exact: true })).toBeVisible();
     await expect(page.getByRole("button", { name: "Start recording", exact: true })).toBeEnabled();
     await expect(page.getByLabel("Project name", { exact: true })).toHaveCount(0);
     expect(methods).not.toContain("recording.start");
-    expect(await service.store.list()).toHaveLength(2);
+    expect(await service.store.list()).toHaveLength(1);
     expect(errors).toEqual([]);
   } finally {
     await page.close();

@@ -134,7 +134,10 @@ export function useProjectController({
   function confirmDelete() {
     if (!actionProject) return;
     return void run(async () => {
-      await command("project.delete", { projectId: actionProject.id });
+      await command("project.delete", {
+        projectId: actionProject.id,
+        expectedRevision: actionProject.revision,
+      });
       if (project?.id === actionProject.id) setProject(null);
       await refreshProjects();
       setModal(null);

@@ -313,8 +313,10 @@ export default function DocumentationPage() {
               preview, AI and export commands as the UI. Keep the desktop app open, then go to{" "}
               <strong>Settings & MCP → MCP & shortcuts</strong>. Select Codex, Claude Code or Claude
               Desktop and copy the generated configuration for the current installation. The server
-              appears as <code>recora-screen</code>. Remove an older <code>screen-recorder</code>,{" "}
-              <code>screenRecorder</code> or <code>screen_recorder</code> entry before adding it.
+              blocks mounted-DMG and AppTranslocation paths, so run Recora Screen from{" "}
+              <code>/Applications</code> first. It appears as <code>recora-screen</code>. Remove an
+              older <code>screen-recorder</code>, <code>screenRecorder</code> or{" "}
+              <code>screen_recorder</code> entry before adding it.
             </p>
             <div className="docs-grid">
               <div className="docs-card">
@@ -371,6 +373,12 @@ and export a 1080p MP4 to Movies.`}</code>
                 optional assistant.
               </li>
             </ul>
+            <p>
+              Choose MCP access in the app under <strong>Settings & MCP → MCP & shortcuts</strong>.
+              Connected clients cannot change those switches themselves. Recording and destructive
+              commands stay off by default; model downloads, the cloud assistant, Keychain changes
+              and macOS permission prompts require sensitive access.
+            </p>
             <p>
               Read a project before editing and use its latest revision as{" "}
               <code>expectedRevision</code>. Mutations accept a retry-safe request ID. Long

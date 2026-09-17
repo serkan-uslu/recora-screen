@@ -17,6 +17,15 @@ export const mcpPermissionCategories = [
 ] as const;
 export type McpPermissionCategory = (typeof mcpPermissionCategories)[number];
 export type McpPermissions = Record<McpPermissionCategory, boolean>;
+export const mcpPermissionLabels: Record<McpPermissionCategory, string> = {
+  read: "Read projects and preview state",
+  edit: "Create projects and edit timelines",
+  export: "Export video and subtitles",
+  recording: "Control screen recording",
+  sensitive: "Use cloud AI, Keychain and permission prompts",
+  destructive: "Delete projects and shut down the app",
+};
+export const mcpPermissionSaveLabel = "Save MCP access";
 export const defaultMcpPermissions: McpPermissions = {
   read: true,
   edit: true,

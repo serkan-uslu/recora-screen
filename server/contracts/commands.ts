@@ -80,9 +80,8 @@ export const methodSchemas: Record<string, z.ZodType> = {
   "asset.import": z
     .object({
       kind: z.enum(["image", "audio", "video"]).optional(),
-      ...projectId,
+      ...revision,
       path: absolutePath,
-      expectedRevision: finite.int().min(0).optional(),
     })
     .strict(),
   "transcript.export": z
@@ -209,12 +208,10 @@ const readOnly = new Set([
   "app.canQuit",
   "project.list",
   "project.open",
-  "recording.status",
   "settings.get",
   "ai.models/list",
   "jobs.list",
   "jobs.get",
-  "preview.metrics",
   "preview.status",
   "preview.geometry",
   "preview.frame",
@@ -222,12 +219,18 @@ const readOnly = new Set([
 ]);
 export const isReadOnly = (method: string) => readOnly.has(method);
 
+const destructive = new Set(["app.shutdown", "project.delete", "keychain.delete"]);
+const openWorld = new Set(["ai.assistant", "ai.models/download"]);
+
 const permissionOverrides: Partial<Record<string, McpPermissionCategory>> = {
   "app.shutdown": "destructive",
   "permissions.request": "sensitive",
   "project.delete": "destructive",
+  "recording.status": "read",
+  "preview.metrics": "read",
   "transcript.export": "export",
   "ai.assistant": "sensitive",
+  "ai.models/download": "sensitive",
   "settings.update": "sensitive",
   "keychain.set": "sensitive",
   "keychain.delete": "sensitive",
@@ -242,12 +245,18 @@ export function mcpPermissionCategory(method: string): McpPermissionCategory {
 }
 
 const descriptions: Partial<Record<string, string>> = {
+  "recording.status":
+    "Read the current recording state. If native capture ended unexpectedly, this also starts safe project finalization and recovery.",
   "preview.draft":
     "Render validated edits transiently in the active project preview. Requires expectedRevision. Does not save, add history, or affect export. Commit with timeline_apply; reload preview_load to discard.",
+  "preview.metrics":
+    "Read bounded preview latency samples. reset=true clears the native counters after returning the snapshot.",
   "project.open":
     "Read a project, its current revision and source-time edit state. Source media remains immutable.",
   "timeline.apply":
     "Apply sequential edits atomically. Times are OUTPUT milliseconds except clip.trim/clip.insert sourceStartMs/sourceEndMs and source.restore startMs/endMs use SOURCE time. clip.move uses final zero-based toIndex; clip.insert splits the timeline at atMs. source.restore optionally inserts at output atMs without reordering existing clips. Speed is 0.25–8. Stale expectedRevision is rejected. One batch is one undo step.",
+  "asset.import":
+    "Copy an image, audio or video file into the project as one undoable revision. Requires the latest expectedRevision and returns the project with the new asset ID.",
   "ai.cleanSilence":
     "Analyze source microphone RMS audio and protect audible system audio. By default returns suggested OUTPUT cut ranges and operations; apply=true commits one undoable edit. Returns a Job; poll jobs_get.",
   "ai.transcribe":
@@ -285,6 +294,7 @@ export type CommandMetadata = {
   description: string;
   readOnly: boolean;
   destructive: boolean;
+  openWorld: boolean;
   permission: McpPermissionCategory;
   examples: string[];
 };
@@ -301,7 +311,8 @@ export const commandRegistry: Record<string, CommandMetadata> = Object.fromEntri
           descriptions[method] ??
           "Run the corresponding desktop application command and return its current state or background job.",
         readOnly: isReadOnly(method),
-        destructive: permission === "destructive",
+        destructive: destructive.has(method),
+        openWorld: openWorld.has(method),
         permission,
         examples: examples[method] ?? [`${method.replace(/[./]/g, "_")}({ ... })`],
       },

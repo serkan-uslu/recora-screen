@@ -4,12 +4,13 @@ import { Field } from "@/src/components/molecules/Field";
 import { Dialog } from "@/src/components/organisms/Dialog";
 import { Switch } from "@/src/components/atoms/Switch";
 import { product } from "@/shared/brand";
-import { formatMcpConfig, type McpClient } from "@/shared/mcp-config";
+import { formatMcpConfig, isTransientMcpRuntime, type McpClient } from "@/shared/mcp-config";
 import { type Settings, type McpConfig, type Model } from "@/src/controllers/studioTypes";
 import {
   defaultMcpPermissions,
   mcpPermissionCategories,
-  type McpPermissionCategory,
+  mcpPermissionLabels,
+  mcpPermissionSaveLabel,
 } from "@/shared/types";
 
 export function SettingsDialog({
@@ -39,7 +40,8 @@ export function SettingsDialog({
   const [mcpPermissions, setMcpPermissions] = useState(
     settings?.mcpPermissions ?? defaultMcpPermissions,
   );
-  const mcpConfig = mcp ? formatMcpConfig(client, mcp) : "";
+  const transientMcpRuntime = Boolean(mcp && isTransientMcpRuntime(mcp));
+  const mcpConfig = mcp && !transientMcpRuntime ? formatMcpConfig(client, mcp) : "";
   return (
     <Dialog
       wide
@@ -252,7 +254,14 @@ export function SettingsDialog({
                 ? `Run this in Terminal to add the server for your user account. Run claude mcp get ${product.mcpServerName} to check it, then use /mcp in Claude Code.`
                 : "Merge this server into ~/Library/Application Support/Claude/claude_desktop_config.json, preserving other entries, then fully quit and reopen Claude Desktop."}
           </p>
-          {mcp ? (
+          {transientMcpRuntime ? (
+            <p className="inline-note" role="alert">
+              Recora Screen is running from a temporary macOS location. Quit it, move{" "}
+              <strong>Recora Screen</strong> to <code>/Applications</code>, eject the disk image if
+              it is open, then reopen Recora Screen from Applications. Your permanent MCP
+              configuration will appear here.
+            </p>
+          ) : mcp ? (
             <pre className="config-example">{mcpConfig}</pre>
           ) : (
             <p className="inline-note" role="status">
@@ -262,7 +271,7 @@ export function SettingsDialog({
           )}
           <button
             className="button secondary full"
-            disabled={!mcp}
+            disabled={!mcp || transientMcpRuntime}
             onClick={() =>
               void navigator.clipboard
                 .writeText(mcpConfig)
@@ -271,7 +280,11 @@ export function SettingsDialog({
             }
           >
             {copyStatus ||
-              (client === "claude-code" ? "Copy Terminal command" : "Copy MCP configuration")}
+              (transientMcpRuntime
+                ? "Install in Applications first"
+                : client === "claude-code"
+                  ? "Copy Terminal command"
+                  : "Copy MCP configuration")}
           </button>
           <p className="helper" role="status" aria-live="polite">
             {copyStatus}
@@ -306,7 +319,7 @@ export function SettingsDialog({
             onClick={() => onSave({ mcpPermissions })}
           >
             <Save size={14} />
-            Save MCP access
+            {mcpPermissionSaveLabel}
           </button>
           <h3 className="panel-section">KEYBOARD SHORTCUTS</h3>
           <div className="shortcut-list">
@@ -340,12 +353,3 @@ export function SettingsDialog({
     </Dialog>
   );
 }
-
-const mcpPermissionLabels: Record<McpPermissionCategory, string> = {
-  read: "Read projects and preview state",
-  edit: "Create projects and edit timelines",
-  export: "Export video and subtitles",
-  recording: "Control screen recording",
-  sensitive: "Use cloud AI, Keychain and permission prompts",
-  destructive: "Delete projects and shut down the app",
-};

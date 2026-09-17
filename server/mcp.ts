@@ -13,7 +13,11 @@ import { AppClient } from "@/server/infrastructure/rpc.js";
 import { AppError, errorOf, object } from "@/server/contracts/validation.js";
 import { commandRegistry, mcpPermissionCategory, mcpPermissionsSchema } from "@/server/service.js";
 import { product } from "@/shared/brand.js";
-import { defaultMcpPermissions } from "@/shared/types.js";
+import {
+  defaultMcpPermissions,
+  mcpPermissionLabels,
+  mcpPermissionSaveLabel,
+} from "@/shared/types.js";
 
 export const toolMethods = Object.fromEntries(
   Object.keys(commandRegistry).map((method) => [method.replace(/[./]/g, "_"), method]),
@@ -25,6 +29,11 @@ export async function callAppTool(
 ) {
   const method = toolMethods[name];
   if (!method) throw new Error(`Unknown tool: ${name}`);
+  if (method === "settings.update" && Object.hasOwn(args, "mcpPermissions"))
+    throw new AppError(
+      "MCP_PERMISSION_DENIED",
+      'MCP clients cannot change their own access. Change it in Recora Screen under Settings > MCP & shortcuts, then click "Save MCP access".',
+    );
   return call(method, args);
 }
 
@@ -35,7 +44,7 @@ export function assertMcpPermission(method: string, settings: unknown) {
   if (!permissions[category])
     throw new AppError(
       "MCP_PERMISSION_DENIED",
-      `MCP ${category} commands are disabled. Enable ${category} access in Settings > MCP & shortcuts.`,
+      `MCP ${category} commands are disabled. In Recora Screen, open Settings > MCP & shortcuts, turn on "${mcpPermissionLabels[category]}", then click "${mcpPermissionSaveLabel}".`,
     );
 }
 export function createMcpServer(
@@ -54,6 +63,7 @@ export function createMcpServer(
       const metadata = commandRegistry[method]!;
       const schema = z.toJSONSchema(metadata.schema, { unrepresentable: "any" });
       delete schema.$schema;
+      if (method === "settings.update") delete schema.properties?.mcpPermissions;
       schema.properties = {
         ...schema.properties,
         requestId: {
@@ -70,7 +80,7 @@ export function createMcpServer(
           readOnlyHint: metadata.readOnly,
           destructiveHint: metadata.destructive,
           idempotentHint: metadata.readOnly,
-          openWorldHint: method.startsWith("ai.") || method.startsWith("keychain."),
+          openWorldHint: metadata.openWorld,
         },
       };
     }),
