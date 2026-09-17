@@ -24,7 +24,7 @@ export function siteValues(site: string, download = "") {
     DOWNLOAD_URL: download ? httpsUrl(download).href : `./downloads/${release.assetName}`,
     RELEASE_LABEL: beta ? "Public beta" : "Development preview",
     RELEASE_NOTE: beta
-      ? "Public beta for Apple silicon. See release notes for known limitations."
+      ? "Developer ID signed and Apple notarized public beta for Apple silicon."
       : "Preview build: public beta validation and notarization are pending.",
   };
 }

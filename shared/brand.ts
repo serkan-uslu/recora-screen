@@ -23,8 +23,8 @@ export const product = {
 } as const;
 
 export const release = {
-  status: "development-preview",
-  // Set only after the exact signed, notarized artifact passes release acceptance.
-  downloadUrl: "",
+  status: "public-beta",
+  downloadUrl:
+    "https://github.com/serkan-uslu/recora-screen/releases/download/v0.1.0/Recora-Screen_0.1.0_macOS-arm64.dmg",
   assetName: `Recora-Screen_${product.version}_macOS-arm64.dmg`,
 } as const;

@@ -25,3 +25,10 @@ After modifying code, run `npm run check` and resolve every failure before consi
 ## Repository knowledge graph
 
 Follow the parent repository's Graphify guidance: query the local graph first when investigating code relationships and run `graphify update .` after code changes. Keep generated `graphify-out/` files local; never commit them.
+
+## Release workflow
+
+- Do not create a tag, GitHub Release or public asset without explicit user authorization. Do not commit or push unless the user asks.
+- For version `X.Y.Z`, keep `package.json`, `package-lock.json`, `src-tauri/tauri.conf.json`, `src-tauri/Cargo.toml`, `src-tauri/Cargo.lock` and `release/X.Y.Z.json` aligned. Update the versioned download URL in `shared/brand.ts`, `vercel.json`, `.github/workflows/checks.yml`, the README and site copy.
+- After all required checks pass and the user pushes, run the **Signed macOS release candidate** workflow for that commit. Download its artifact and verify the SHA-256, Developer ID signature, stapling and Gatekeeper acceptance.
+- With explicit user approval, create tag `vX.Y.Z`, publish the GitHub Release with the exact notarized DMG, confirm the public asset URL returns HTTP 200, then redeploy the site.

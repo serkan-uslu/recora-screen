@@ -343,8 +343,7 @@ export default function HomePage() {
             <summary>Which Macs can run it?</summary>
             <p>
               The current download targets Apple silicon Macs running macOS 15 or later. Node.js is
-              included with the app. This is an early preview; a notarized public release is still
-              pending.
+              included with the app. The public beta is Developer ID signed and Apple notarized.
             </p>
           </details>
           <details>

@@ -1,6 +1,6 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "framework": null,
-  "buildCommand": "NEXT_PUBLIC_DOWNLOAD_URL=https://github.com/serkan-uslu/recora-screen/releases/latest/download/Recora-Screen_0.1.0_macOS-arm64.dmg npm run build:site",
+  "buildCommand": "NEXT_PUBLIC_DOWNLOAD_URL=https://github.com/serkan-uslu/recora-screen/releases/download/v0.1.0/Recora-Screen_0.1.0_macOS-arm64.dmg npm run build:site",
   "outputDirectory": "website/out"
 }

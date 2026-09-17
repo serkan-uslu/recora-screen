@@ -22,7 +22,7 @@ jobs:
       - run: npm run test:e2e
       - run: npm run build:site
         env:
-          NEXT_PUBLIC_DOWNLOAD_URL: https://github.com/serkan-uslu/recora-screen/releases/latest/download/Recora-Screen_0.1.0_macOS-arm64.dmg
+          NEXT_PUBLIC_DOWNLOAD_URL: https://github.com/serkan-uslu/recora-screen/releases/download/v0.1.0/Recora-Screen_0.1.0_macOS-arm64.dmg
       - run: npm run test:native
       - run: npm run prepare:runtime
       - run: npm run desktop:check

@@ -8,15 +8,17 @@ Record your screen, camera and audio, or start with an existing video. Select a 
 
 _Actual desktop app with clean demonstration footage._
 
-## Try the development preview
+## Download the public beta
 
-The source is available under the MIT license. **There is no verified public beta download yet.** Version 0.1.0 targets Apple silicon and macOS 15+. The local development package bundles Node and Whisper; end users will not need to install Node.
+Version 0.1.0 is available as a Developer ID signed and Apple notarized public beta for Apple silicon and macOS 15+. The app bundles Node and Whisper; end users do not need to install Node.
 
+- [Download Recora Screen 0.1.0 for Apple silicon](https://github.com/serkan-uslu/recora-screen/releases/download/v0.1.0/Recora-Screen_0.1.0_macOS-arm64.dmg).
+- [Release notes](https://github.com/serkan-uslu/recora-screen/releases/tag/v0.1.0).
 - [Build and run from source](#develop).
 - [Product documentation](https://recora-screen.vercel.app/documentation/).
 - Product site: [recora-screen.vercel.app](https://recora-screen.vercel.app/). Locally, `npm run dev:site` serves `http://127.0.0.1:4174/`.
 
-The current development-signed DMG is not a notarized public release. Public installation, final branding and release acceptance must pass before a beta is advertised as ready to download.
+SHA-256: `f905c4b148db5c6bb7caee8528d739bdfb19642203c2f8c040db9023fd124e5b`.
 
 ## Connect Claude or Codex
 
@@ -58,7 +60,7 @@ The optional in-app cloud assistant sends your prompt, necessary transcript and 
 
 Screen, camera and microphone permissions depend on what you capture. Pointer sampling works without Input Monitoring; typing activity and precise short-click detection require the optional event monitor. Typed text and key codes are not recorded.
 
-Public readiness still requires Developer ID signing and notarization. Windows, Linux and Intel distribution are outside the current Apple silicon beta target.
+The public beta is Developer ID signed and Apple notarized. Windows, Linux and Intel distribution are outside the current Apple silicon beta target.
 
 ## Develop
 
