@@ -172,7 +172,7 @@ final class ScreenrecCompositor: NSObject, AVVideoCompositing {
             while low < high { let middle = (low + high) / 2; if instruction.clicks[middle].tMs <= t { low = middle + 1 } else { high = middle } }
             let age = low > 0 ? t - instruction.clicks[low - 1].tMs : 1000
             let bounce = edits.cursor.bounce == true && age >= 0 && age < 300 ? 1 - 0.22 * sin(.pi * age / 300) : 1
-            let scale = max(0.3, min(5, edits.cursor.size)) * sw / 1920 * bounce
+            let scale = CGFloat(max(0.3, min(5, edits.cursor.size)) * bounce) * sw / 1920
             var pointer = edits.cursor.style == "light" ? arrow.applyingFilter("CIColorInvert") : arrow
             pointer = pointer.transformed(by: CGAffineTransform(translationX: -3, y: -46)).transformed(by: CGAffineTransform(scaleX: scale, y: scale))
             if edits.cursor.sway == true { pointer = pointer.transformed(by: CGAffineTransform(rotationAngle: max(-0.25, min(0.25, -dx / max(1, sw) * 6)))) }
