@@ -76,6 +76,8 @@ npm run prepare:whisper
 npm run dev
 ```
 
+For stable macOS Screen Recording and Input Monitoring permissions during development, copy `.env.example` to `.env.local` and set your Apple Development and Developer ID Application identities. `npm run dev` signs a stable debug app and launches it with its own privacy identity, so rebuilding source files does not create a new permission entry.
+
 Initial preparation downloads a checksum-verified Node runtime and builds a pinned whisper.cpp release. Models download separately from Settings and are not committed to Git.
 
 For browser UI development, run these in separate terminals:

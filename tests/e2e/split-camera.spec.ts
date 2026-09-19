@@ -63,7 +63,7 @@ test("split camera clips retain separate appearance and visibility through reloa
     const second = page.getByRole("button", { name: "Camera clip 2", exact: true });
     const shown = page.getByRole("switch", { name: "Show camera in this selection", exact: true });
     const mirror = page.getByRole("switch", { name: "Mirror camera", exact: true });
-    const undo = page.getByRole("button", { name: "Undo (⌘Z)", exact: true });
+    const undo = () => page.keyboard.press("Meta+z");
     await page.setViewportSize({ width: 1440, height: 1000 });
     await page.goto("http://127.0.0.1:1421");
     await page.getByRole("button", { name: "Open Split camera fixture" }).click();
@@ -99,7 +99,7 @@ test("split camera clips retain separate appearance and visibility through reloa
     await page.getByText("Position and appearance details", { exact: true }).click();
     await expect(mirror).toBeChecked();
     await expect(shown).not.toBeChecked();
-    await undo.click();
+    await undo();
     await expect(shown).toBeChecked();
     expect(cameraAt(await project(), 2500).shape).toBe("circle");
     expect(cameraAt(await project(), 7500).mirror).toBe(true);
@@ -113,7 +113,7 @@ test("split camera clips retain separate appearance and visibility through reloa
       .poll(async () => (await project()).edits.camera.hiddenRanges)
       .toEqual([{ startMs: 0, endMs: 5000 }]);
     expect((await project()).edits.camera.visible).toBe(true);
-    await undo.click();
+    await undo();
     await expect.poll(async () => (await project()).edits.camera.visible).toBe(false);
     expect((await project()).edits.camera.hiddenRanges).toEqual([]);
     expect(errors).toEqual([]);

@@ -21,6 +21,7 @@ export function useTimelineDrag({
   draftPreview,
   apply,
   onSelectZoom,
+  onSelectOverlay,
 }: {
   project: Project;
   total: number;
@@ -31,6 +32,7 @@ export function useTimelineDrag({
   draftPreview: (operations: EditOperation[] | null) => void;
   apply: (operations: EditOperation[], revision?: number) => Promise<void>;
   onSelectZoom: (id: string) => void;
+  onSelectOverlay: (id: string) => void;
 }) {
   const [draft, setDraft] = useState<TimelineDrag | null>(null);
   const active = useRef<TimelineDrag | null>(null);
@@ -42,7 +44,9 @@ export function useTimelineDrag({
       value.revision === project.revision &&
       (value.kind === "clip"
         ? Boolean(project.source) && Boolean(intervals[value.index])
-        : project.edits.zooms.some((zoom) => zoom.id === value.id)),
+        : value.kind === "zoom"
+          ? project.edits.zooms.some((zoom) => zoom.id === value.id)
+          : project.edits.overlays.some((overlay) => overlay.id === value.id)),
   );
   const releasePointer = () => {
     const captured = pointer.current;
@@ -58,7 +62,7 @@ export function useTimelineDrag({
   });
   const startDrag = (
     event: ReactPointerEvent<HTMLElement>,
-    kind: "zoom" | "clip",
+    kind: "zoom" | "overlay" | "clip",
     id: string,
     index: number,
     edge: TimelineDrag["edge"],
@@ -85,6 +89,7 @@ export function useTimelineDrag({
     active.current = value;
     setDraft(value);
     if (kind === "zoom") onSelectZoom(id);
+    if (kind === "overlay") onSelectOverlay(id);
   };
   const moveDrag = (event: ReactPointerEvent<HTMLElement>) => {
     const value = active.current;
@@ -136,14 +141,16 @@ export function useTimelineDrag({
     draftPreview(
       value.kind === "zoom"
         ? [{ type: "zoom.update", id: value.id, zoom: next }]
-        : [
-            {
-              type: "clip.trim",
-              index: value.index,
-              sourceStartMs: next.startMs,
-              sourceEndMs: next.endMs,
-            },
-          ],
+        : value.kind === "overlay"
+          ? [{ type: "overlay.update", id: value.id, overlay: next }]
+          : [
+              {
+                type: "clip.trim",
+                index: value.index,
+                sourceStartMs: next.startMs,
+                sourceEndMs: next.endMs,
+              },
+            ],
     );
   };
   const finishDrag = (event: ReactPointerEvent<HTMLElement>) => {
@@ -166,14 +173,16 @@ export function useTimelineDrag({
     void apply(
       value.kind === "zoom"
         ? [{ type: "zoom.update", id: value.id, zoom: value.next }]
-        : [
-            {
-              type: "clip.trim",
-              index: value.index,
-              sourceStartMs: value.next.startMs,
-              sourceEndMs: value.next.endMs,
-            },
-          ],
+        : value.kind === "overlay"
+          ? [{ type: "overlay.update", id: value.id, overlay: value.next }]
+          : [
+              {
+                type: "clip.trim",
+                index: value.index,
+                sourceStartMs: value.next.startMs,
+                sourceEndMs: value.next.endMs,
+              },
+            ],
       value.revision,
     );
   };

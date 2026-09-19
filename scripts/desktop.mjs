@@ -11,6 +11,8 @@ try {
 }
 const env = { ...process.env };
 if (env.APPLE_SIGNING_IDENTITY) env.APPLE_SIGNING_IDENTITY = env.APPLE_SIGNING_IDENTITY.trim();
+if (env.RECORA_DEV_SIGNING_IDENTITY)
+  env.RECORA_DEV_SIGNING_IDENTITY = env.RECORA_DEV_SIGNING_IDENTITY.trim();
 try {
   await access(env.CARGO_HOME || path.join(homedir(), ".cargo"), constants.W_OK);
 } catch {
@@ -18,6 +20,16 @@ try {
   await mkdir(env.CARGO_HOME, { recursive: true });
 }
 const args = process.argv.slice(2);
+if (
+  args[0] === "dev" &&
+  process.platform === "darwin" &&
+  (env.RECORA_DEV_SIGNING_IDENTITY || env.APPLE_SIGNING_IDENTITY) &&
+  (env.RECORA_DEV_SIGNING_IDENTITY || env.APPLE_SIGNING_IDENTITY) !== "-"
+) {
+  const target = process.arch === "arm64" ? "AARCH64_APPLE_DARWIN" : "X86_64_APPLE_DARWIN";
+  env.RECORA_DEV_SIGNING_IDENTITY ||= env.APPLE_SIGNING_IDENTITY;
+  env[`CARGO_TARGET_${target}_RUNNER`] = path.resolve("scripts/run-signed-dev.mjs");
+}
 // Ad-hoc binaries have no team identity for hardened library validation. Certificate-signed builds enable it.
 if (args[0] === "build")
   args.push(

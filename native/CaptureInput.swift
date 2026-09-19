@@ -6,6 +6,24 @@ struct FocusedWindowContext: Equatable {
     let title: String?
 }
 
+// On macOS 26 the preflight API can remain false after the user enables Input
+// Monitoring. A real listen-only event tap is the authoritative capability
+// check and does not capture or persist event contents.
+func inputMonitoringAvailable() -> Bool {
+    if CGPreflightListenEventAccess() { return true }
+    let mask = CGEventMask(1) << CGEventType.keyDown.rawValue
+    guard let tap = CGEvent.tapCreate(
+        tap: .cgSessionEventTap,
+        place: .tailAppendEventTap,
+        options: .listenOnly,
+        eventsOfInterest: mask,
+        callback: { _, _, event, _ in Unmanaged.passUnretained(event) },
+        userInfo: nil
+    ) else { return false }
+    CFMachPortInvalidate(tap)
+    return true
+}
+
 func cursorPosition(_ point: CGPoint, captureRect: CGRect, normalizedContentRect: CGRect) -> CGPoint? {
     guard captureRect.width > 0, captureRect.height > 0 else { return nil }
     let x = (point.x - captureRect.minX) / captureRect.width, y = (point.y - captureRect.minY) / captureRect.height
@@ -44,17 +62,15 @@ final class CaptureInputMonitor: @unchecked Sendable {
                 let types: [CGEventType] = [.leftMouseDown, .rightMouseDown, .otherMouseDown, .leftMouseUp, .rightMouseUp, .otherMouseUp, .leftMouseDragged, .rightMouseDragged, .otherMouseDragged, .keyDown]
                 let mask = types.reduce(CGEventMask(0)) { $0 | (CGEventMask(1) << $1.rawValue) }
                 var source: CFRunLoopSource?
-                if CGPreflightListenEventAccess() {
-                    tap = CGEvent.tapCreate(tap: .cgSessionEventTap, place: .tailAppendEventTap, options: .listenOnly, eventsOfInterest: mask, callback: { _, type, event, context in
-                        guard let context else { return Unmanaged.passUnretained(event) }
-                        let monitor = Unmanaged<CaptureInputMonitor>.fromOpaque(context).takeUnretainedValue()
-                        monitor.handle(type, event: event)
-                        return Unmanaged.passUnretained(event)
-                    }, userInfo: Unmanaged.passUnretained(self).toOpaque())
-                    if let tap { source = CFMachPortCreateRunLoopSource(kCFAllocatorDefault, tap, 0) }
-                    if let source { CFRunLoopAddSource(runLoop, source, .commonModes); state("active", nil) }
-                    else { state("failed", "Input monitoring could not start. Reopen the app after granting Input Monitoring permission.") }
-                } else { state("unavailable", "Input Monitoring is off. Pointer movement still records; typing and short-click detection require permission.") }
+                tap = CGEvent.tapCreate(tap: .cgSessionEventTap, place: .tailAppendEventTap, options: .listenOnly, eventsOfInterest: mask, callback: { _, type, event, context in
+                    guard let context else { return Unmanaged.passUnretained(event) }
+                    let monitor = Unmanaged<CaptureInputMonitor>.fromOpaque(context).takeUnretainedValue()
+                    monitor.handle(type, event: event)
+                    return Unmanaged.passUnretained(event)
+                }, userInfo: Unmanaged.passUnretained(self).toOpaque())
+                if let tap { source = CFMachPortCreateRunLoopSource(kCFAllocatorDefault, tap, 0) }
+                if let source { CFRunLoopAddSource(runLoop, source, .commonModes); state("active", nil) }
+                else { state("unavailable", "Input Monitoring is off. Pointer movement still records; typing and short-click detection require permission.") }
                 let timer = CFRunLoopTimerCreateWithHandler(kCFAllocatorDefault, CFAbsoluteTimeGetCurrent(), 1 / 30, 0, 0) { [self] _ in
                     receive(Sample(hostTime: CMClockGetTime(CMClockGetHostTimeClock()), point: Self.pointer(), pressed: Self.pressed(), kind: nil))
                 }!
@@ -81,7 +97,7 @@ final class CaptureInputMonitor: @unchecked Sendable {
     }
     private func handle(_ type: CGEventType, event: CGEvent) {
         if type == .tapDisabledByTimeout || type == .tapDisabledByUserInput {
-            if type == .tapDisabledByTimeout, CGPreflightListenEventAccess(), let tap {
+            if type == .tapDisabledByTimeout, let tap {
                 CGEvent.tapEnable(tap: tap, enable: true)
                 if CGEvent.tapIsEnabled(tap: tap) { state("active", nil); return }
             }

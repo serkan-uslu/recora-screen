@@ -74,7 +74,7 @@ const zoom = z
   .object({
     ...rangeShape,
     id,
-    scale: finite.min(1).max(4),
+    scale: finite.min(1).max(8),
     x: unit,
     y: unit,
     motion: motion.optional(),
@@ -84,7 +84,7 @@ const zoom = z
 const autoZoom = z
   .object({
     enabled: z.boolean(),
-    scale: finite.min(1).max(4),
+    scale: finite.min(1).max(8),
     leadMs: time.max(10000),
     holdMs: time.min(200).max(30000),
     gapMs: time.max(30000),

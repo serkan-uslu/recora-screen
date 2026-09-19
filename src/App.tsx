@@ -94,7 +94,7 @@ export default function App() {
               </div>
             </div>
           )}
-          <StudioHeader studio={studio} />
+          {!project && <StudioHeader studio={studio} />}
           {error && (
             <div className="error-banner" role="alert">
               <span>{error}</span>

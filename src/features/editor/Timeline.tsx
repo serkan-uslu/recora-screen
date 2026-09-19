@@ -114,6 +114,7 @@ export function Timeline({
     draftPreview,
     apply,
     onSelectZoom: selectZoom,
+    onSelectOverlay: selectOverlay,
   });
   const { timeAt, startRange, moveRange, finishRange } = useTimelineSelection({
     project,

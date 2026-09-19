@@ -39,7 +39,7 @@ export function EffectsTrack({
   ) => void;
   startDrag: (
     event: PointerEvent<HTMLElement>,
-    kind: "zoom",
+    kind: "zoom" | "overlay",
     id: string,
     index: number,
     edge: TimelineDrag["edge"],
@@ -123,33 +123,68 @@ export function EffectsTrack({
         onContextMenu={(event) => openTrackMenu(event, "effects")}
       >
         {project.edits.overlays.flatMap((overlay) =>
-          outputRanges(project.edits.segments, overlay).map((range, index) => (
-            <button
-              key={`${overlay.id}-${index}`}
-              className={`clip overlay-clip ${selectedOverlay === overlay.id ? "selected" : ""}`}
-              aria-pressed={selectedOverlay === overlay.id}
-              disabled={disabled}
-              style={{
-                left: ratio(range.startMs),
-                width: ratio(range.endMs - range.startMs),
-                top: 5,
-              }}
-              onClick={() => {
-                setSelection(range);
-                onSelectOverlay(overlay.id);
-                void seek((range.startMs + range.endMs) / 2);
-              }}
-              onContextMenu={(event) => {
-                setSelection(range);
-                onSelectOverlay(overlay.id);
-                openTrackMenu(event, "effects", { overlayId: overlay.id });
-              }}
-              title={overlay.text || overlay.kind}
-            >
-              <Layers size={10} />
-              <span>{overlay.text || overlay.kind}</span>
-            </button>
-          )),
+          outputRanges(project.edits.segments, overlay).map((range, index) => {
+            const current =
+              draft?.kind === "overlay" && draft.id === overlay.id && draft.index === index
+                ? draft.next
+                : range;
+            const select = () => {
+              if (disabled) return;
+              setSelection(current);
+              onSelectOverlay(overlay.id);
+              void seek((current.startMs + current.endMs) / 2);
+            };
+            return (
+              <div
+                key={`${overlay.id}-${index}`}
+                className={`clip overlay-clip ${selectedOverlay === overlay.id ? "selected" : ""}`}
+                style={{
+                  left: ratio(current.startMs),
+                  width: ratio(current.endMs - current.startMs),
+                  top: 5,
+                }}
+                onContextMenu={(event) => {
+                  setSelection(current);
+                  onSelectOverlay(overlay.id);
+                  openTrackMenu(event, "effects", { overlayId: overlay.id });
+                }}
+                {...pointerEvents}
+              >
+                <TrimHandle
+                  edge="start"
+                  label={`Resize ${overlay.text || overlay.kind} layer start`}
+                  disabled={disabled}
+                  onPointerDown={(event) =>
+                    startDrag(event, "overlay", overlay.id, index, "start", range)
+                  }
+                  pointerEvents={pointerEvents}
+                />
+                <button
+                  className="clip-select"
+                  aria-label={`Move ${overlay.text || overlay.kind} layer`}
+                  aria-pressed={selectedOverlay === overlay.id}
+                  disabled={disabled}
+                  onClick={select}
+                  onPointerDown={(event) =>
+                    startDrag(event, "overlay", overlay.id, index, "move", range)
+                  }
+                  title="Drag to move this layer; use the edges to change its duration"
+                >
+                  <Layers size={10} />
+                  <span>{overlay.text || overlay.kind}</span>
+                </button>
+                <TrimHandle
+                  edge="end"
+                  label={`Resize ${overlay.text || overlay.kind} layer end`}
+                  disabled={disabled}
+                  onPointerDown={(event) =>
+                    startDrag(event, "overlay", overlay.id, index, "end", range)
+                  }
+                  pointerEvents={pointerEvents}
+                />
+              </div>
+            );
+          }),
         )}
       </div>
     </>

@@ -65,6 +65,19 @@ test("layers, imported audio, GIF controls and cursor/camera settings survive th
     await page.setViewportSize({ width: 1440, height: 1000 });
     await page.goto("http://127.0.0.1:1421");
     await page.getByRole("button", { name: "Open Editor feature fixture" }).click();
+    for (const name of [
+      "Go to start",
+      "Previous clip boundary",
+      "Back 5 seconds",
+      "Back 1 second",
+      "Forward 1 second",
+      "Forward 5 seconds",
+      "Next clip boundary",
+      "Go to end",
+    ])
+      await expect(page.getByRole("button", { name, exact: true })).toBeVisible();
+    await page.getByRole("button", { name: "Forward 1 second", exact: true }).click();
+    await expect(page.locator(".playback-time")).toContainText("00:01");
     await page.getByText("Time range", { exact: true }).click();
     await page.getByRole("button", { name: "Select entire video", exact: true }).click();
     await page.getByRole("button", { name: "Layers", exact: true }).click();
@@ -113,15 +126,14 @@ test("layers, imported audio, GIF controls and cursor/camera settings survive th
     await expect
       .poll(async () => (await service.store.get(created.id)).edits.cursor.loop)
       .toBe(true);
-    await page.getByRole("button", { name: "Export video", exact: true }).click();
+    await page.getByRole("button", { name: "Export", exact: true }).click();
     await page.getByRole("combobox", { name: "Format", exact: true }).selectOption("gif");
     await page.getByRole("combobox", { name: "GIF frame rate", exact: true }).selectOption("25");
     await page.getByLabel("Loop continuously", { exact: true }).uncheck();
     await expect(page.getByText("GIF · no audio", { exact: false })).toBeVisible();
     await expect(page.getByRole("button", { name: "Choose location & export" })).toBeEnabled();
     await page.screenshot({ path: testInfo.outputPath("gif.png") });
-    await page.getByRole("button", { name: "Cancel", exact: true }).click();
-    await page.getByRole("button", { name: "Recora Screen projects", exact: true }).click();
+    await page.getByRole("button", { name: "Back to projects", exact: true }).click();
     await page.getByRole("button", { name: "Open Editor feature fixture" }).click();
     const reopened = await service.store.get(created.id);
     expect(reopened.edits.overlays).toHaveLength(2);
@@ -243,7 +255,7 @@ test("recording clips can be split, moved, deleted and joined with imported vide
       { startMs: 0, endMs: 2000, assetId },
       { startMs: 4000, endMs: 6000 },
     ]);
-    await page.getByRole("button", { name: "Undo (⌘Z)", exact: true }).click();
+    await page.keyboard.press("Meta+z");
     await expect.poll(async () => (await clips()).length).toBe(3);
     await ruler.press("Shift+ArrowRight");
     await page.getByRole("button", { name: "Split video", exact: true }).click();
@@ -270,7 +282,7 @@ test("recording clips can be split, moved, deleted and joined with imported vide
     expect((await clips()).filter((segment) => segment.assetId === assetId)).toEqual([
       { startMs: 0, endMs: 1000, assetId },
     ]);
-    await page.getByRole("button", { name: "Undo (⌘Z)", exact: true }).click();
+    await page.keyboard.press("Meta+z");
     await expect.poll(async () => (await clips()).length).toBe(4);
     await page.getByRole("button", { name: "Go to end", exact: true }).click();
     page.once("dialog", (dialog) => dialog.accept(image));

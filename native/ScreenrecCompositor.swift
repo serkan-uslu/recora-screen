@@ -183,7 +183,7 @@ final class ScreenrecCompositor: NSObject, AVVideoCompositing {
             screen = pointer.composited(over: screen)
         }
         if t >= 0, let zoom = instruction.renderZooms.last(where: { t >= $0.startMs && t < $0.endMs }) {
-            let scale = 1 + (max(1, min(5, zoom.scale)) - 1) * zoomAmount(zoom, at: t)
+            let scale = 1 + (max(1, min(8, zoom.scale)) - 1) * zoomAmount(zoom, at: t)
             let focus = zoomFocus(zoom, path: instruction.focusPaths[zoom.id] ?? [], at: t)
             let tx = min(0, max(sw * (1 - scale), sw / 2 - focus.x * sw * scale))
             let ty = min(0, max(sh * (1 - scale), sh / 2 - (1 - focus.y) * sh * scale))

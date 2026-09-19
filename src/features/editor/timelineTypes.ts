@@ -14,7 +14,7 @@ export type TimelineMenu =
 export type TimelineDrag = {
   projectId: string;
   revision: number;
-  kind: "zoom" | "clip";
+  kind: "zoom" | "overlay" | "clip";
   id: string;
   index: number;
   edge: "start" | "end" | "move";

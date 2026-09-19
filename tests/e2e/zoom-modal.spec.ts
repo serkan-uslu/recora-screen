@@ -96,6 +96,28 @@ test("zoom settings open without moving the list and contain editing shortcuts",
     await expect(page.getByRole("button", { name: "Pause preview", exact: true })).toHaveCount(0);
     await dialog.getByRole("spinbutton", { name: "Start (seconds)" }).fill("114");
 
+    const depth = dialog.getByRole("slider", { name: "Zoom depth", exact: true });
+    await expect(depth).toHaveAttribute("max", "8");
+    const sliderBox = await depth.boundingBox();
+    expect(sliderBox).not.toBeNull();
+    const startRatio = (1.7 - 1.1) / (8 - 1.1);
+    await page.mouse.move(
+      sliderBox!.x + 8 + startRatio * (sliderBox!.width - 16),
+      sliderBox!.y + sliderBox!.height / 2,
+    );
+    await page.mouse.down();
+    await page.mouse.move(
+      sliderBox!.x + sliderBox!.width - 10,
+      sliderBox!.y + sliderBox!.height / 2,
+      {
+        steps: 6,
+      },
+    );
+    await page.mouse.up();
+    await expect
+      .poll(async () => (await service.store.get(created.id)).edits.zooms[38]?.scale)
+      .toBeGreaterThan(7);
+
     await dialog.getByRole("combobox", { name: "Zoom motion", exact: true }).selectOption("snappy");
     await expect
       .poll(async () => (await service.store.get(created.id)).edits.zooms[38]?.motion)

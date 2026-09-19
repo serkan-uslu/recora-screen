@@ -258,11 +258,11 @@
   box-shadow: 0 6px 20px #0008;
 }
 .tool-rail {
-  width: 84px;
-  min-width: 84px;
-  overflow-y: auto;
+  width: 65px;
+  min-width: 65px;
+  overflow: hidden;
 }
-.tool-rail > * {
+.tool-rail-controls > * {
   flex-shrink: 0;
 }
 .rail-tool {

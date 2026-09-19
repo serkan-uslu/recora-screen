@@ -16,7 +16,7 @@ export function siteValues(site: string, download = "") {
     PRODUCT_NAME: product.name,
     PRODUCT_DESCRIPTION: product.description,
     SITE_URL: url.href,
-    SOCIAL_IMAGE: new URL("media/editor.jpg", url).href,
+    SOCIAL_IMAGE: new URL("media/social-share.png", url).href,
     REPOSITORY: product.repository,
     VERSION: product.version,
     MINIMUM_MACOS: product.minimumMacOS,

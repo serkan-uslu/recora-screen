@@ -1,4 +1,5 @@
 import {
+  ArrowDownToLine,
   AudioLines,
   Camera,
   Layers,
@@ -9,6 +10,7 @@ import {
 } from "lucide-react";
 
 export const tabItems = [
+  { id: "export", icon: ArrowDownToLine, title: "Export" },
   { id: "general", icon: SlidersHorizontal, title: "Canvas" },
   { id: "camera", icon: Camera, title: "Camera" },
   { id: "zoom", icon: MousePointer2, title: "Zoom & cursor" },

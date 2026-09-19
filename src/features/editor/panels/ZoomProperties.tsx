@@ -69,7 +69,7 @@ export function ZoomProperties({
       <Slider
         label="Zoom depth"
         min={1.1}
-        max={4}
+        max={8}
         step={0.1}
         suffix="×"
         value={zoom.scale}

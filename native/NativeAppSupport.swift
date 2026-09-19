@@ -67,7 +67,7 @@ import UniformTypeIdentifiers
     func requestDesktopPermission(_ kind: String, check: (() -> Bool)? = nil, request: (() -> Bool)? = nil, openSettings: (URL) -> Bool = { NSWorkspace.shared.open($0) }) throws {
         guard kind == "screen" || kind == "input" else { throw NativeFailure("Unknown desktop permission kind.", code: "invalid_params") }
         let screen = kind == "screen"
-        let isGranted = check ?? (screen ? CGPreflightScreenCaptureAccess : CGPreflightListenEventAccess)
+        let isGranted = check ?? (screen ? CGPreflightScreenCaptureAccess : inputMonitoringAvailable)
         let requestAccess = request ?? (screen ? CGRequestScreenCaptureAccess : CGRequestListenEventAccess)
         guard !isGranted() else { return }
         _ = requestAccess()
@@ -78,7 +78,7 @@ import UniformTypeIdentifiers
     }
     func permissions() -> [String: Any] {
         func name(_ status: AVAuthorizationStatus) -> String { switch status { case .authorized: return "authorized"; case .denied: return "denied"; case .restricted: return "restricted"; default: return "notDetermined" } }
-        return ["screen": CGPreflightScreenCaptureAccess(), "camera": name(AVCaptureDevice.authorizationStatus(for: .video)), "microphone": name(AVCaptureDevice.authorizationStatus(for: .audio)), "input": CGPreflightListenEventAccess()]
+        return ["screen": CGPreflightScreenCaptureAccess(), "camera": name(AVCaptureDevice.authorizationStatus(for: .video)), "microphone": name(AVCaptureDevice.authorizationStatus(for: .audio)), "input": inputMonitoringAvailable()]
     }
     func capabilities() async -> [String: Any] {
         var sources: [[String: Any]] = []

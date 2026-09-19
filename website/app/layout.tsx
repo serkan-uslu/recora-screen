@@ -23,7 +23,14 @@ export const metadata: Metadata = {
     description:
       "Automatic zooms, camera, local AI and MCP control from Claude or Codex in one open-source macOS studio.",
     url: site.SITE_URL,
-    images: [{ url: site.SOCIAL_IMAGE, width: 1231, height: 768, alt: `${product.name} editor` }],
+    images: [
+      {
+        url: site.SOCIAL_IMAGE,
+        width: 1200,
+        height: 630,
+        alt: `${product.name} — Record once. Shape every moment.`,
+      },
+    ],
   },
   twitter: { card: "summary_large_image", images: [site.SOCIAL_IMAGE] },
 };

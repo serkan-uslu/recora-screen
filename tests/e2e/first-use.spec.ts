@@ -104,25 +104,19 @@ test("first use offers recording or importing a video without creating a named p
     expect(await service.store.list()).toHaveLength(0);
     page.once("dialog", (dialog) => dialog.accept(video));
     await page.getByRole("button", { name: "Import video", exact: true }).first().click();
-    await expect(page.getByRole("button", { name: "Export video", exact: true })).toBeEnabled();
-    await expect(page.locator("header.app-header")).toHaveAttribute(
-      "data-tauri-drag-region",
-      "true",
-    );
-    await expect(
-      page.getByRole("button", { name: "Export video", exact: true }),
-    ).not.toHaveAttribute("data-tauri-drag-region");
+    await expect(page.getByRole("button", { name: "Export", exact: true })).toBeEnabled();
+    await expect(page.locator(".preview-toolbar")).toHaveAttribute("data-tauri-drag-region");
+    await expect(page.locator("header.app-header")).toHaveCount(0);
     expect(methods).toContain("project.import");
     expect(methods).not.toContain("recording.start");
     expect(methods).not.toContain("project.create");
     const [project] = await service.store.list();
     expect(project.name).toBe("My first video");
     expect(project.durationMs).toBe(6000);
-    await page.getByRole("button", { name: "Export video", exact: true }).click();
+    await page.getByRole("button", { name: "Export", exact: true }).click();
     await expect(
       page.getByRole("button", { name: "Choose location & export", exact: true }),
     ).toBeEnabled();
-    await page.getByRole("button", { name: "Cancel", exact: true }).click();
     await page.getByRole("button", { name: "Back to projects", exact: true }).click();
     await page.screenshot({ path: testInfo.outputPath("start-actions.png") });
 

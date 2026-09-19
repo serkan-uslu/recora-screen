@@ -25,15 +25,8 @@ export function Slider({
   const draftValue = useRef(value);
   const lastCommit = useRef(value);
   const gesture = useRef<{ scope: string; cancelled: boolean } | null>(null);
-  const pointer = useRef<{ target: HTMLInputElement; id: number } | null>(null);
   const { send: cancelPreview, scope } = useContext(DraftPreviewContext);
   const error = useContext(ErrorContext);
-  function releasePointer() {
-    const captured = pointer.current;
-    pointer.current = null;
-    if (captured?.target.hasPointerCapture(captured.id))
-      captured.target.releasePointerCapture(captured.id);
-  }
   const resetValue = useStableCallback(() => {
     setDraft(value);
     draftValue.current = value;
@@ -41,7 +34,6 @@ export function Slider({
   });
   const cancelGesture = useStableCallback(() => {
     if (gesture.current) gesture.current.cancelled = true;
-    releasePointer();
     resetValue();
     cancelPreview(null);
   });
@@ -55,14 +47,12 @@ export function Slider({
   useEffect(
     () => () => {
       if (gesture.current) cancelPreview(null);
-      releasePointer();
     },
     [cancelPreview],
   );
   const commit = () => {
     const active = gesture.current;
     gesture.current = null;
-    releasePointer();
     if (active && (active.cancelled || active.scope !== scope)) {
       resetValue();
       cancelPreview(null);
@@ -91,10 +81,7 @@ export function Slider({
         value={draft}
         onPointerDown={(e) => {
           if (e.button !== 0) return;
-          releasePointer();
           gesture.current = { scope, cancelled: false };
-          pointer.current = { target: e.currentTarget, id: e.pointerId };
-          e.currentTarget.setPointerCapture(e.pointerId);
         }}
         onKeyDown={(e) => {
           if (e.key === "Escape" && gesture.current) {

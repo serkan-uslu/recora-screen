@@ -67,6 +67,12 @@
 }
 .editor-layout {
   display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+}
+.editor-workspace {
+  display: flex;
   flex: 1;
   min-height: 0;
 }
@@ -76,10 +82,19 @@
   background: color-mix(in srgb, var(--color-neutral) 19%, var(--color-black));
   border-right: 1px solid color-mix(in srgb, var(--color-neutral) 33%, var(--color-black));
   display: flex;
+  flex-direction: column;
+  padding: 0;
+  overflow: hidden;
+}
+.tool-rail-controls {
+  min-height: 0;
+  flex: 1;
+  display: flex;
   align-items: center;
   flex-direction: column;
   gap: 8px;
   padding: 13px 6px;
+  overflow-y: auto;
 }
 .rail-divider {
   height: 1px;
@@ -137,6 +152,13 @@
   font-size: 12px;
   color: color-mix(in srgb, var(--color-accent) 70%, var(--color-black));
   min-height: 42px;
+  border-bottom: 1px solid color-mix(in srgb, var(--color-neutral) 33%, var(--color-black));
+  background: color-mix(in srgb, var(--color-neutral) 19%, var(--color-black));
+  flex: none;
+}
+.desktop.editing .preview-toolbar {
+  min-height: 58px;
+  padding-left: 126px;
 }
 .preview-toolbar > span {
   display: flex;
@@ -232,7 +254,22 @@
 .playback-toolbar > div {
   display: flex;
   align-items: center;
-  gap: 11px;
+  gap: 6px;
+}
+.playback-step {
+  min-width: 34px;
+  height: 28px;
+  padding: 0 5px;
+  border-radius: 6px;
+  color: color-mix(in srgb, var(--color-accent) 72%, var(--color-white));
+  background: color-mix(in srgb, var(--color-neutral) 28%, var(--color-black));
+  border: 1px solid color-mix(in srgb, var(--color-accent) 28%, var(--color-black));
+  font-size: 10px;
+  font-variant-numeric: tabular-nums;
+}
+.playback-step:hover:not(:disabled) {
+  color: color-mix(in srgb, var(--color-accent) 96%, var(--color-white));
+  border-color: color-mix(in srgb, var(--color-accent) 54%, var(--color-black));
 }
 .playback-time {
   font-variant-numeric: tabular-nums;
@@ -381,6 +418,16 @@
   min-height: 0;
   flex: 1;
 }
+.export-panel .dialog-actions > .button {
+  flex: 1;
+}
+.status-save {
+  margin-left: 10px;
+  color: color-mix(in srgb, var(--color-accent) 64%, var(--color-black));
+}
+.status-save.failed {
+  color: color-mix(in srgb, var(--color-danger) 72%, var(--color-white));
+}
 .panel-intro {
   margin-bottom: 22px;
 }
@@ -503,13 +550,14 @@ input[type="range"] {
   display: block;
   accent-color: var(--accent);
   cursor: pointer;
+  touch-action: none;
 }
 input[type="range"]::-webkit-slider-thumb {
   -webkit-appearance: none;
   appearance: none;
   background: var(--accent);
-  height: 10px;
-  width: 10px;
+  height: 16px;
+  width: 16px;
   border-radius: 50%;
   border: 2px solid color-mix(in srgb, var(--color-accent) 100%, var(--color-white));
   box-shadow: 0 1px 4px

@@ -69,7 +69,7 @@ func cameraVisual(_ runs: [CameraRun], at time: Double, fallback: CameraVisual) 
 func renderedCamera(_ instruction: RenderInstruction, outputMs: Double, sourceMs: Double) -> CameraVisual {
     var visual = cameraVisual(instruction.cameraRuns, at: outputMs, fallback: CameraVisual(instruction.project.edits.camera))
     if visual.zoomReactive, let zoom = instruction.renderZooms.last(where: { sourceMs >= $0.startMs && sourceMs < $0.endMs }) {
-        visual.size /= 1 + (max(1, min(5, zoom.scale)) - 1) * zoomAmount(zoom, at: sourceMs)
+        visual.size /= 1 + (max(1, min(8, zoom.scale)) - 1) * zoomAmount(zoom, at: sourceMs)
     }
     return visual
 }

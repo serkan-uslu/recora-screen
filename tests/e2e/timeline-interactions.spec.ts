@@ -92,7 +92,7 @@ test("timeline selection, keyboard deletion and resizing keep the editor stable"
     const errors: string[] = [];
     page.on("pageerror", (error) => errors.push(error.message));
     const project = () => service.store.get(created.id);
-    const undo = page.getByRole("button", { name: "Undo (⌘Z)", exact: true });
+    const undo = () => page.keyboard.press("Meta+z");
     const selectionStart = page.locator('input[aria-label="Selection start in seconds"]');
     const selectionEnd = page.locator('input[aria-label="Selection end in seconds"]');
     const zoom = page.getByRole("button", { name: "Edit 1.7 times zoom", exact: true });
@@ -114,7 +114,7 @@ test("timeline selection, keyboard deletion and resizing keep the editor stable"
     await expect(
       page.getByRole("button", { name: "Screen clip 2, 2 times speed", exact: true }),
     ).toHaveAttribute("aria-pressed", "true");
-    await undo.click();
+    await undo();
     await expect(
       page.getByRole("button", { name: "Screen clip 2, 1 times speed", exact: true }),
     ).toHaveAttribute("aria-pressed", "true");
@@ -128,7 +128,7 @@ test("timeline selection, keyboard deletion and resizing keep the editor stable"
         { startMs: 5000, endMs: 6000 },
         { startMs: 6000, endMs: 10000 },
       ]);
-    await undo.click();
+    await undo();
     await expect.poll(async () => (await project()).edits.segments.length).toBe(2);
     await page.getByRole("button", { name: "Screen clip 2, 1 times speed", exact: true }).click();
     await page.locator(".timeline").focus();
@@ -137,7 +137,7 @@ test("timeline selection, keyboard deletion and resizing keep the editor stable"
     await expect
       .poll(async () => (await project()).edits.segments)
       .toEqual([{ startMs: 0, endMs: 5000 }]);
-    await undo.click();
+    await undo();
     await expect.poll(async () => (await project()).edits.segments.length).toBe(2);
 
     await page
@@ -170,7 +170,7 @@ test("timeline selection, keyboard deletion and resizing keep the editor stable"
       "aria-pressed",
       "true",
     );
-    await undo.click();
+    await undo();
     await expect.poll(async () => (await project()).edits.camera.hiddenRanges).toEqual([]);
 
     await zoom.click();
@@ -187,21 +187,54 @@ test("timeline selection, keyboard deletion and resizing keep the editor stable"
     await zoom.click();
     await page.keyboard.press("Control+Backspace");
     expect((await project()).edits.zooms).toHaveLength(1);
-    await page.getByRole("button", { name: "Export video", exact: true }).click();
+    await page.getByRole("button", { name: "Export", exact: true }).click();
     await page.keyboard.press("Delete");
     expect((await project()).edits.zooms).toHaveLength(1);
-    await page.getByRole("button", { name: "Cancel", exact: true }).click();
+    await page.getByRole("button", { name: "Zoom & cursor", exact: true }).click();
     await zoom.click();
     await page.keyboard.press("Delete");
     await expect.poll(async () => (await project()).edits.zooms).toEqual([]);
     expect((await project()).edits.segments).toHaveLength(2);
-    await undo.click();
+    await undo();
     await expect.poll(async () => (await project()).edits.zooms.length).toBe(1);
+
+    const layerTrack = await page.locator(".timeline-tracks").boundingBox();
+    if (!layerTrack) throw new Error("Layer timeline is not visible");
+    const dragLayer = async (locator: ReturnType<typeof page.locator>, deltaX: number) => {
+      const box = await locator.boundingBox();
+      if (!box) throw new Error("Layer control is not visible");
+      await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
+      await page.mouse.down();
+      await page.mouse.move(box.x + box.width / 2 + deltaX, box.y + box.height / 2, {
+        steps: 6,
+      });
+      await page.mouse.up();
+    };
+    await dragLayer(
+      page.getByRole("button", { name: "Move Private region layer", exact: true }),
+      layerTrack.width * 0.1,
+    );
+    await expect
+      .poll(async () => (await project()).edits.overlays[0]?.startMs)
+      .toBeCloseTo(7000, -1);
+    await expect.poll(async () => (await project()).edits.overlays[0]?.endMs).toBeCloseTo(9000, -1);
+    await dragLayer(
+      page.getByRole("button", { name: "Resize Private region layer start", exact: true }),
+      -layerTrack.width * 0.05,
+    );
+    await expect
+      .poll(async () => (await project()).edits.overlays[0]?.startMs)
+      .toBeCloseTo(6500, -1);
+    await dragLayer(
+      page.getByRole("button", { name: "Resize Private region layer end", exact: true }),
+      -layerTrack.width * 0.05,
+    );
+    await expect.poll(async () => (await project()).edits.overlays[0]?.endMs).toBeCloseTo(8500, -1);
 
     await page.locator(".overlay-clip").filter({ hasText: "Private region" }).click();
     await page.keyboard.press("Backspace");
     await expect.poll(async () => (await project()).edits.overlays).toEqual([]);
-    await undo.click();
+    await undo();
     await expect.poll(async () => (await project()).edits.overlays.length).toBe(1);
     await page.locator(".audio-clip").filter({ hasText: "voice.wav" }).click();
     await expect(page.locator(".inspector-title")).toHaveText("Audio");
@@ -211,7 +244,7 @@ test("timeline selection, keyboard deletion and resizing keep the editor stable"
     ).toBeEnabled();
     await page.keyboard.press("Delete");
     await expect.poll(async () => (await project()).edits.audioClips).toEqual([]);
-    await undo.click();
+    await undo();
     await expect.poll(async () => (await project()).edits.audioClips?.length).toBe(1);
 
     await zoom.click();
@@ -239,7 +272,7 @@ test("timeline selection, keyboard deletion and resizing keep the editor stable"
         { startMs: 0, endMs: expect.closeTo(selectedStartMs, -1) },
         { startMs: expect.closeTo(selectedEndMs, -1), endMs: 10_000 },
       ]);
-    await undo.click();
+    await undo();
     await expect
       .poll(async () => (await project()).edits.segments)
       .toEqual([

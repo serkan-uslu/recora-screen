@@ -40,10 +40,10 @@ export default function HomePage() {
         </a>
         <p className="intro">{product.description}</p>
         <p className="hero-description">
-          Record your screen, camera and audio, or import a video and start editing.
+          Record your screen, camera and audio, or import a video and start shaping it.
           <br className="desktop-break" />
-          Select a clip, remove unwanted moments and export up to 4K. Quick start help stays close
-          by, and edits save automatically. Connect Claude or Codex through MCP for more help.
+          Automatic zooms follow the action. Every zoom, layer and camera moment stays editable.
+          Connect Claude or Codex through MCP, transcribe locally, then export up to 4K.
         </p>
         <div className="actions">
           <a
@@ -69,14 +69,15 @@ export default function HomePage() {
         </p>
         <figure className="product-proof">
           <Image
-            src={assetPath("media/editor.jpg")}
-            width="1231"
-            height="768"
-            alt="Actual desktop editor: independent screen, camera, audio and effects tracks in a clean demonstration project"
+            src={assetPath("media/editor-current.webp")}
+            width="1440"
+            height="900"
+            alt="Recora Screen editor with a video filmstrip, editable zoom and timed text layer"
+            priority
           />
           <figcaption>
-            Captured in the desktop app using a clean demonstration project. Original media stays
-            editable.
+            The current editor. Original media stays untouched while clips, zooms and layers remain
+            editable on the timeline.
           </figcaption>
         </figure>
       </section>
@@ -93,6 +94,72 @@ export default function HomePage() {
           BY DEFAULT ↗
         </span>
       </div>
+      <section className="wrap section product-tour" aria-labelledby="product-tour-title">
+        <div className="section-heading split-heading">
+          <div>
+            <p className="eyebrow">THE PRODUCT, TODAY</p>
+            <h2 id="product-tour-title">
+              A focused studio.
+              <br />
+              <span className="muted">From first take to final file.</span>
+            </h2>
+          </div>
+          <p>
+            Start in a local project library, make precise changes on a visual timeline, and keep
+            every effect available for another pass.
+          </p>
+        </div>
+        <div className="tour-grid">
+          <article className="tour-card tour-card-wide">
+            <div className="tour-copy">
+              <span>01 / LOCAL WORKSPACE</span>
+              <h3>Your recordings have a home.</h3>
+              <p>
+                Record or import, reopen any project, and carry the whole project folder with you.
+                No account is required to organize or edit your work.
+              </p>
+            </div>
+            <Image
+              src={assetPath("media/projects-current.webp")}
+              width="1440"
+              height="895"
+              alt="Recora Screen local project library with one clean demonstration project"
+            />
+          </article>
+          <article className="tour-card">
+            <div className="tour-copy">
+              <span>02 / EDITABLE FOCUS</span>
+              <h3>Zooms you can still change.</h3>
+              <p>
+                Clicks, drags and typing can become focus moments. Adjust timing, depth, motion and
+                cursor following without baking the effect into your recording.
+              </p>
+            </div>
+            <Image
+              src={assetPath("media/zoom-current.webp")}
+              width="1440"
+              height="900"
+              alt="Zoom and cursor controls beside an editable zoom track"
+            />
+          </article>
+          <article className="tour-card">
+            <div className="tour-copy">
+              <span>03 / TIMED LAYERS</span>
+              <h3>Show it only when it matters.</h3>
+              <p>
+                Add text, images, arrows, blur or solid covers. Move layers on the timeline and drag
+                their edges to control exactly when they appear.
+              </p>
+            </div>
+            <Image
+              src={assetPath("media/layers-current.webp")}
+              width="1440"
+              height="900"
+              alt="Layer controls and a timed text layer in the Recora Screen timeline"
+            />
+          </article>
+        </div>
+      </section>
       <section className="wrap section" id="features">
         <div className="section-heading">
           <p className="eyebrow">FROM FIRST TAKE TO FINAL CUT</p>
@@ -198,6 +265,41 @@ export default function HomePage() {
           </article>
         </div>
       </section>
+      <section className="wrap section ai-story" aria-labelledby="ai-story-title">
+        <div className="ai-story-copy">
+          <p className="eyebrow">AI, WITH A CLEAR JOB</p>
+          <h2 id="ai-story-title">
+            Ask for the edit.
+            <br />
+            <em>Keep the control.</em>
+          </h2>
+          <p>
+            Use the optional in-app assistant with your own OpenAI or Anthropic key, or connect
+            Claude and Codex through the bundled MCP server. The same validated editing commands
+            power both the visual editor and agent workflows.
+          </p>
+          <ul>
+            <li>Transcribe on your Mac with local Whisper.</li>
+            <li>Review suggested microphone silence cuts before applying them.</li>
+            <li>Create projects, edit timelines, inspect previews and export through MCP.</li>
+            <li>Undo agent-made timeline changes in the app.</li>
+          </ul>
+          <a className="text-link" href="#mcp">
+            See the MCP workflow ↓
+          </a>
+        </div>
+        <figure>
+          <Image
+            src={assetPath("media/ai-current.webp")}
+            width="1440"
+            height="900"
+            alt="Recora Screen AI assistant panel beside the visual timeline"
+          />
+          <figcaption>
+            AI is optional. Local recording and editing do not require an API key.
+          </figcaption>
+        </figure>
+      </section>
       <section className="wrap section workflow" id="workflow">
         <div>
           <p className="eyebrow">ONE IDEA. THREE SIMPLE STEPS.</p>
@@ -295,7 +397,7 @@ export default function HomePage() {
             controls
             playsInline
             preload="none"
-            poster={assetPath("media/editor.jpg")}
+            poster={assetPath("media/editor-current.webp")}
             aria-label="Real Codex MCP edit and export demonstration"
           >
             <source src={assetPath("media/codex-proof.mp4")} type="video/mp4" />
@@ -311,8 +413,9 @@ export default function HomePage() {
             Captions explain the recorded tool calls. No camera or audio is used in this sample.
           </small>
           <p className="mcp-privacy">
-            Codex CLI flow verified on this development build. Claude client acceptance remains
-            pending. <a href={assetPath("media/codex-proof.json")}>Read the actual tool trace ↗</a>
+            The bundled server exposes the same project, timeline, recording, preview and export
+            operations used by the app.{" "}
+            <a href={assetPath("media/codex-proof.json")}>Read an actual Codex tool trace ↗</a>
           </p>
           <p className="mcp-privacy">
             Recording and editing run on your Mac. Connected AI clients may send requested

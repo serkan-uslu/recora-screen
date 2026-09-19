@@ -447,6 +447,13 @@
   padding-left: 11px;
   padding-right: 11px;
 }
+.effect-track .overlay-clip {
+  cursor: grab;
+  touch-action: none;
+  min-width: 19px;
+  padding-left: 11px;
+  padding-right: 11px;
+}
 .zoom-clip.selected {
   border-color: color-mix(in srgb, var(--color-warning) 87%, var(--color-white));
   background: color-mix(in srgb, var(--color-warning) 49%, var(--color-black));

@@ -2,16 +2,19 @@ import { useSyncExternalStore, useContext, useRef } from "react";
 import { DraftPreviewContext } from "@/src/controllers/StudioContexts";
 import {
   ArrowLeft,
-  ArrowRight,
+  ChevronsLeft,
+  ChevronsRight,
   Circle,
   Clapperboard,
   Mic,
   Pause,
   Play,
   Scissors,
+  SkipBack,
+  SkipForward,
   Video,
 } from "lucide-react";
-import { formatTime, duration } from "@/shared/timeline";
+import { formatTime, duration, segmentDuration } from "@/shared/timeline";
 import { IconButton } from "@/src/components/atoms/IconButton";
 import { Slider } from "@/src/components/molecules/Slider";
 import { PanelIntro } from "@/src/components/molecules/PanelIntro";
@@ -37,6 +40,8 @@ import { ClipContextMenu } from "@/src/features/editor/menus/ClipContextMenu";
 import { EditorQuickStart } from "@/src/features/help/EditorQuickStart";
 import { seconds, formatTimecode } from "@/src/lib/format";
 import { type StudioController } from "@/src/controllers/useStudioController";
+import { ExportPanel } from "@/src/features/export/ExportDialog";
+import { useProjectSaveState } from "@/src/controllers/useProjectController";
 
 export function EditorScreen({
   studio,
@@ -77,6 +82,7 @@ export function EditorScreen({
     | "togglePlayback"
     | "startJob"
     | "projectBusy"
+    | "exportVideo"
   >;
 }) {
   const {
@@ -113,9 +119,11 @@ export function EditorScreen({
     seek,
     startJob,
     projectBusy,
+    exportVideo,
   } = studio;
   const { send: draftPreview } = useContext(DraftPreviewContext);
   const clipPanelRef = useRef<HTMLDivElement>(null);
+  const saveState = useProjectSaveState(project?.id);
   if (!project) return null;
   const editingZoom = project.edits.zooms.find((zoom) => zoom.id === selectedZoom);
   function editZoom(id: string) {
@@ -130,378 +138,398 @@ export function EditorScreen({
   return (
     <>
       <div className="editor-layout">
-        <nav className="tool-rail">
-          <IconButton label="Back to projects" onClick={() => void backToLibrary()}>
-            <ArrowLeft />
-          </IconButton>
-          <div className="rail-divider" />
-          {tabItems.map((item) => (
-            <button
-              key={item.id}
-              className={`rail-tool ${tab === item.id ? "active" : ""}`}
-              aria-label={item.title}
-              aria-pressed={tab === item.id}
-              title={item.title}
-              onClick={() => {
-                if (item.id === tab) return;
-                if (
-                  item.id === "camera" &&
-                  project.source?.camera &&
-                  selection.endMs > selection.startMs
-                )
-                  selectEditorTarget({
-                    kind: "camera",
-                    range: selection,
-                    source: cameraSource(project),
-                  });
-                else {
-                  setSelection(selection);
-                  setTab(item.id);
+        <div className="preview-toolbar" data-tauri-drag-region>
+          <span>
+            <Clapperboard size={14} />
+            {project.source ? "Preview" : "Recording studio"}
+          </span>
+          <div>
+            {project.source && (
+              <span className="resolution-tag">
+                {project.source.width} × {project.source.height}
+                <span>•</span>
+                {project.source.fps} fps
+              </span>
+            )}
+            <span className="preview-fit">Fit</span>
+          </div>
+        </div>
+        <div className="editor-workspace">
+          <nav className="tool-rail">
+            <div className="tool-rail-controls">
+              <IconButton label="Back to projects" onClick={() => void backToLibrary()}>
+                <ArrowLeft />
+              </IconButton>
+              <div className="rail-divider" />
+              {tabItems.map((item) => (
+                <button
+                  key={item.id}
+                  className={`rail-tool ${tab === item.id ? "active" : ""}`}
+                  aria-label={item.title}
+                  aria-pressed={tab === item.id}
+                  title={item.title}
+                  onClick={() => {
+                    if (item.id === tab) return;
+                    if (item.id === "export") selectEditorTarget(null);
+                    if (
+                      item.id === "camera" &&
+                      project.source?.camera &&
+                      selection.endMs > selection.startMs
+                    )
+                      selectEditorTarget({
+                        kind: "camera",
+                        range: selection,
+                        source: cameraSource(project),
+                      });
+                    else {
+                      setSelection(selection);
+                      setTab(item.id);
+                    }
+                  }}
+                >
+                  <item.icon size={19} />
+                  <span>{item.title} </span>
+                </button>
+              ))}
+            </div>
+          </nav>
+          <main className="editor-main">
+            {project.source && <EditorQuickStart onHelp={() => setModal("help")} />}
+            {project.source ? (
+              <NativePreview
+                project={project}
+                hidden={Boolean(modal)}
+                onError={setError}
+                playback={playback}
+                selection={selection}
+                cameraScope={cameraScope}
+                selected={
+                  editorTarget?.kind === "camera"
+                    ? { kind: "camera" }
+                    : editorTarget?.kind === "overlay"
+                      ? { kind: "overlay", id: editorTarget.id }
+                      : null
                 }
-              }}
-            >
-              <item.icon size={19} />
-              <span>{item.title} </span>
-            </button>
-          ))}
-        </nav>
-        <main className="editor-main">
-          <div className="preview-toolbar">
-            <span>
-              <Clapperboard size={14} />
-              {project.source ? "Preview" : "Recording studio"}
-            </span>
-            <div>
-              {project.source && (
-                <span className="resolution-tag">
-                  {project.source.width} × {project.source.height}
-                  <span>•</span>
-                  {project.source.fps} fps
-                </span>
-              )}
-              <span className="preview-fit">Fit</span>
-            </div>
-          </div>
-          {project.source && <EditorQuickStart onHelp={() => setModal("help")} />}
-          {project.source ? (
-            <NativePreview
-              project={project}
-              hidden={Boolean(modal)}
-              onError={setError}
-              playback={playback}
-              selection={selection}
-              cameraScope={cameraScope}
-              selected={
-                editorTarget?.kind === "camera"
-                  ? { kind: "camera" }
-                  : editorTarget?.kind === "overlay"
-                    ? { kind: "overlay", id: editorTarget.id }
-                    : null
-              }
-              onSelect={(item) => {
-                if (item?.kind === "camera") {
-                  const scope = tab === "camera" ? cameraScope : "selection";
-                  const range = previewCameraRange(
-                    project,
-                    playback.getSnapshot().timeMs,
-                    selection,
-                    scope,
-                    editorTarget?.kind === "camera",
-                  );
-                  if (range) {
-                    selectEditorTarget({
-                      kind: "camera",
-                      range,
-                      source: cameraSource(project),
-                      scope,
-                    });
-                    return { selection: range, cameraScope: scope };
-                  }
-                } else if (item?.kind === "overlay" && item.id) {
-                  selectEditorTarget({ kind: "overlay", id: item.id });
-                } else selectEditorTarget(null);
-              }}
-              apply={apply}
-              disabled={projectBusy}
-            />
-          ) : (
-            <div className="record-empty">
-              <span className="record-empty-icon">
-                <Video size={33} strokeWidth={1.3} />
-              </span>
-              <div className="eyebrow">THE FLOOR IS YOURS</div>
-              <h2>Ready when you are.</h2>
-              <p>
-                Pick your screen, turn on your camera,
-                <br />
-                and bring your idea to life.
-              </p>
-              <button
-                className="button primary large"
-                disabled={busy || recording.active}
-                onClick={() => setModal("record")}
-              >
-                <Circle size={16} fill="currentColor" />
-                Set up recording
-              </button>
-              <button
-                className="button secondary"
-                disabled={busy || recording.active}
-                onClick={() => void importVideo()}
-              >
-                Import video
-              </button>
-              <span className="record-empty-note">
-                <Mic size={12} />
-                Separate screen, camera & audio tracks
-              </span>
-            </div>
-          )}
-          <PlaybackToolbar
-            project={project}
-            total={total}
-            playback={playback}
-            disabled={projectBusy}
-          />
-        </main>
-        <aside className="inspector">
-          <div className="inspector-title">
-            <span>{tab === "clip" ? "Video clip" : tabItems.find((i) => i.id === tab)?.title}</span>
-            {tab === "ai" && <span className="mini-tag">BYOK</span>}
-          </div>
-          <div className="inspector-body" ref={inspectorRef}>
-            <fieldset disabled={projectBusy} className="unstyled-fieldset">
-              {tab === "clip" && editorTarget?.kind === "clip" && (
-                <SelectedClipPanel
-                  project={project}
-                  selection={selection}
-                  index={editorTarget.index}
-                  playback={playback}
-                  disabled={projectBusy}
-                  apply={apply}
-                  panelRef={clipPanelRef}
-                />
-              )}
-              {tab === "clip" && editorTarget?.kind !== "clip" && (
-                <p className="helper">Select a video clip to edit its timing, speed or position.</p>
-              )}
-              {tab === "general" && (
-                <CanvasPanel
-                  project={project}
-                  apply={apply}
-                  importImage={importImage}
-                  onError={setError}
-                />
-              )}
-              {tab === "camera" && (
-                <CameraPanel
-                  project={project}
-                  selection={selection}
-                  cameraScope={cameraScope}
-                  onScopeChange={(scope) => {
+                onSelect={(item) => {
+                  if (item?.kind === "camera") {
+                    const scope = tab === "camera" ? cameraScope : "selection";
                     const range = previewCameraRange(
                       project,
                       playback.getSnapshot().timeMs,
                       selection,
                       scope,
-                      cameraScope === "selection",
+                      editorTarget?.kind === "camera",
                     );
-                    if (range)
+                    if (range) {
                       selectEditorTarget({
                         kind: "camera",
                         range,
                         source: cameraSource(project),
                         scope,
                       });
-                    else setCameraScope(scope);
-                  }}
-                  apply={apply}
-                />
-              )}
-              {tab === "zoom" && (
-                <ZoomPanel
-                  project={project}
-                  selection={selection}
-                  apply={apply}
-                  selectedId={editorTarget?.kind === "zoom" ? editorTarget.id : null}
-                  onEdit={editZoom}
-                  onSelect={(id) => selectEditorTarget(id ? { kind: "zoom", id } : null)}
-                />
-              )}
-              {tab === "overlays" && (
-                <OverlaysPanel
-                  project={project}
-                  selection={selection}
-                  apply={apply}
-                  importImage={importImage}
-                  onError={setError}
-                  selected={editorTarget?.kind === "overlay" ? editorTarget.id : null}
-                  onSelect={(id) => {
-                    selectEditorTarget(id ? { kind: "overlay", id } : null);
-                    if (!id) return;
-                    const time = targetPreviewTime(
-                      project,
-                      { kind: "overlay", id },
-                      playback.getSnapshot().timeMs,
-                    );
-                    if (time !== null) void seek(time);
-                  }}
-                />
-              )}
-              {tab === "audio" && (
-                <>
-                  <PanelIntro
-                    title={editorTarget?.kind === "audio" ? "Audio clip" : "Video audio"}
-                    text={
-                      editorTarget?.kind === "audio"
-                        ? "Timing and volume apply only to this imported audio clip."
-                        : "The recorded audio mix applies to the entire video. Imported clips have their own volume."
+                      return { selection: range, cameraScope: scope };
                     }
+                  } else if (item?.kind === "overlay" && item.id) {
+                    selectEditorTarget({ kind: "overlay", id: item.id });
+                  } else selectEditorTarget(null);
+                }}
+                apply={apply}
+                disabled={projectBusy}
+              />
+            ) : (
+              <div className="record-empty">
+                <span className="record-empty-icon">
+                  <Video size={33} strokeWidth={1.3} />
+                </span>
+                <div className="eyebrow">THE FLOOR IS YOURS</div>
+                <h2>Ready when you are.</h2>
+                <p>
+                  Pick your screen, turn on your camera,
+                  <br />
+                  and bring your idea to life.
+                </p>
+                <button
+                  className="button primary large"
+                  disabled={busy || recording.active}
+                  onClick={() => setModal("record")}
+                >
+                  <Circle size={16} fill="currentColor" />
+                  Set up recording
+                </button>
+                <button
+                  className="button secondary"
+                  disabled={busy || recording.active}
+                  onClick={() => void importVideo()}
+                >
+                  Import video
+                </button>
+                <span className="record-empty-note">
+                  <Mic size={12} />
+                  Separate screen, camera & audio tracks
+                </span>
+              </div>
+            )}
+            <PlaybackToolbar
+              project={project}
+              total={total}
+              playback={playback}
+              disabled={projectBusy}
+            />
+          </main>
+          <aside className="inspector">
+            <div className="inspector-title" data-tauri-drag-region>
+              <span>
+                {tab === "clip" ? "Video clip" : tabItems.find((i) => i.id === tab)?.title}
+              </span>
+              {tab === "ai" && <span className="mini-tag">BYOK</span>}
+            </div>
+            <div className="inspector-body" ref={inspectorRef}>
+              <fieldset disabled={projectBusy} className="unstyled-fieldset">
+                {tab === "clip" && editorTarget?.kind === "clip" && (
+                  <SelectedClipPanel
+                    project={project}
+                    selection={selection}
+                    index={editorTarget.index}
+                    playback={playback}
+                    disabled={projectBusy}
+                    apply={apply}
+                    panelRef={clipPanelRef}
                   />
-                  {editorTarget?.kind !== "audio" && (
-                    <>
-                      <h3 className="panel-section">VIDEO DEFAULT MIX</h3>
-                      <Slider
-                        label={
-                          project.source?.microphone === project.source?.screen
-                            ? "Video audio"
-                            : "Microphone"
-                        }
-                        value={project.edits.audio.microphoneVolume}
-                        max={2}
-                        onPreview={(v) =>
-                          draftPreview([
-                            { type: "audio.update", settings: { microphoneVolume: v } },
-                          ])
-                        }
-                        onChange={(v) =>
-                          void apply([
-                            {
-                              type: "audio.update",
-                              settings: { microphoneVolume: v },
-                            },
-                          ])
-                        }
-                      />
-                      <Slider
-                        label="System audio"
-                        value={project.edits.audio.systemVolume}
-                        max={2}
-                        onPreview={(v) =>
-                          draftPreview([{ type: "audio.update", settings: { systemVolume: v } }])
-                        }
-                        onChange={(v) =>
-                          void apply([
-                            {
-                              type: "audio.update",
-                              settings: { systemVolume: v },
-                            },
-                          ])
-                        }
-                      />
-                      <div className="panel-divider" />
-                    </>
-                  )}
-                  <AudioClipsPanel
-                    selectedId={editorTarget?.kind === "audio" ? editorTarget.id : null}
-                    onSelect={(id) => selectEditorTarget({ kind: "audio", id })}
+                )}
+                {tab === "clip" && editorTarget?.kind !== "clip" && (
+                  <p className="helper">
+                    Select a video clip to edit its timing, speed or position.
+                  </p>
+                )}
+                {tab === "general" && (
+                  <CanvasPanel
+                    project={project}
+                    apply={apply}
+                    importImage={importImage}
+                    onError={setError}
+                  />
+                )}
+                {tab === "camera" && (
+                  <CameraPanel
+                    project={project}
+                    selection={selection}
+                    cameraScope={cameraScope}
+                    onScopeChange={(scope) => {
+                      const range = previewCameraRange(
+                        project,
+                        playback.getSnapshot().timeMs,
+                        selection,
+                        scope,
+                        cameraScope === "selection",
+                      );
+                      if (range)
+                        selectEditorTarget({
+                          kind: "camera",
+                          range,
+                          source: cameraSource(project),
+                          scope,
+                        });
+                      else setCameraScope(scope);
+                    }}
+                    apply={apply}
+                  />
+                )}
+                {tab === "zoom" && (
+                  <ZoomPanel
                     project={project}
                     selection={selection}
                     apply={apply}
-                    importAudio={importAudio}
+                    selectedId={editorTarget?.kind === "zoom" ? editorTarget.id : null}
+                    onEdit={editZoom}
+                    onSelect={(id) => selectEditorTarget(id ? { kind: "zoom", id } : null)}
+                  />
+                )}
+                {tab === "overlays" && (
+                  <OverlaysPanel
+                    project={project}
+                    selection={selection}
+                    apply={apply}
+                    importImage={importImage}
                     onError={setError}
+                    selected={editorTarget?.kind === "overlay" ? editorTarget.id : null}
+                    onSelect={(id) => {
+                      selectEditorTarget(id ? { kind: "overlay", id } : null);
+                      if (!id) return;
+                      const time = targetPreviewTime(
+                        project,
+                        { kind: "overlay", id },
+                        playback.getSnapshot().timeMs,
+                      );
+                      if (time !== null) void seek(time);
+                    }}
                   />
-                  <h3 className="panel-section">SMART CLEANUP</h3>
-                  <p className="helper">
-                    Find pauses using the recorded audio. Review every suggested cut before applying
-                    it.
-                  </p>
-                  <SilenceControls
-                    disabled={!project.source}
-                    onAnalyze={(params) =>
-                      void startJob("ai.cleanSilence", {
-                        ...params,
-                        apply: false,
-                        expectedRevision: project.revision,
-                      })
-                    }
-                  />
-                  {silenceReview && (
-                    <div className="review-card">
-                      <strong>
-                        {silenceReview.ranges.length
-                          ? `${silenceReview.ranges.length} pauses found`
-                          : "No pauses found"}
-                      </strong>
-                      <p>{formatTime(silenceReview.removedMs)} can be removed.</p>
-                      <div className="review-ranges">
-                        {silenceReview.ranges.map((r, i) => (
+                )}
+                {tab === "audio" && (
+                  <>
+                    <PanelIntro
+                      title={editorTarget?.kind === "audio" ? "Audio clip" : "Video audio"}
+                      text={
+                        editorTarget?.kind === "audio"
+                          ? "Timing and volume apply only to this imported audio clip."
+                          : "The recorded audio mix applies to the entire video. Imported clips have their own volume."
+                      }
+                    />
+                    {editorTarget?.kind !== "audio" && (
+                      <>
+                        <h3 className="panel-section">VIDEO DEFAULT MIX</h3>
+                        <Slider
+                          label={
+                            project.source?.microphone === project.source?.screen
+                              ? "Video audio"
+                              : "Microphone"
+                          }
+                          value={project.edits.audio.microphoneVolume}
+                          max={2}
+                          onPreview={(v) =>
+                            draftPreview([
+                              { type: "audio.update", settings: { microphoneVolume: v } },
+                            ])
+                          }
+                          onChange={(v) =>
+                            void apply([
+                              {
+                                type: "audio.update",
+                                settings: { microphoneVolume: v },
+                              },
+                            ])
+                          }
+                        />
+                        <Slider
+                          label="System audio"
+                          value={project.edits.audio.systemVolume}
+                          max={2}
+                          onPreview={(v) =>
+                            draftPreview([{ type: "audio.update", settings: { systemVolume: v } }])
+                          }
+                          onChange={(v) =>
+                            void apply([
+                              {
+                                type: "audio.update",
+                                settings: { systemVolume: v },
+                              },
+                            ])
+                          }
+                        />
+                        <div className="panel-divider" />
+                      </>
+                    )}
+                    <AudioClipsPanel
+                      selectedId={editorTarget?.kind === "audio" ? editorTarget.id : null}
+                      onSelect={(id) => selectEditorTarget({ kind: "audio", id })}
+                      project={project}
+                      selection={selection}
+                      apply={apply}
+                      importAudio={importAudio}
+                      onError={setError}
+                    />
+                    <h3 className="panel-section">SMART CLEANUP</h3>
+                    <p className="helper">
+                      Find pauses using the recorded audio. Review every suggested cut before
+                      applying it.
+                    </p>
+                    <SilenceControls
+                      disabled={!project.source}
+                      onAnalyze={(params) =>
+                        void startJob("ai.cleanSilence", {
+                          ...params,
+                          apply: false,
+                          expectedRevision: project.revision,
+                        })
+                      }
+                    />
+                    {silenceReview && (
+                      <div className="review-card">
+                        <strong>
+                          {silenceReview.ranges.length
+                            ? `${silenceReview.ranges.length} pauses found`
+                            : "No pauses found"}
+                        </strong>
+                        <p>{formatTime(silenceReview.removedMs)} can be removed.</p>
+                        <div className="review-ranges">
+                          {silenceReview.ranges.map((r, i) => (
+                            <button
+                              key={i}
+                              onClick={() => {
+                                setSelection(r);
+                                void seek(r.startMs);
+                              }}
+                            >
+                              {seconds(r.startMs)}s – {seconds(r.endMs)}s
+                            </button>
+                          ))}
+                        </div>
+                        {silenceReview.ranges.length > 0 && (
                           <button
-                            key={i}
+                            className="button primary full"
                             onClick={() => {
-                              setSelection(r);
-                              void seek(r.startMs);
+                              void (async () => {
+                                await apply(silenceReview.operations, silenceReview.revision);
+                                setSilenceReview(null);
+                              })();
                             }}
                           >
-                            {seconds(r.startMs)}s – {seconds(r.endMs)}s
+                            <Scissors size={14} />
+                            Apply cuts
                           </button>
-                        ))}
-                      </div>
-                      {silenceReview.ranges.length > 0 && (
+                        )}
                         <button
-                          className="button primary full"
-                          onClick={() => {
-                            void (async () => {
-                              await apply(silenceReview.operations, silenceReview.revision);
-                              setSilenceReview(null);
-                            })();
-                          }}
+                          className="button subtle full"
+                          onClick={() => setSilenceReview(null)}
                         >
-                          <Scissors size={14} />
-                          Apply cuts
+                          Dismiss
                         </button>
-                      )}
-                      <button className="button subtle full" onClick={() => setSilenceReview(null)}>
-                        Dismiss
-                      </button>
-                    </div>
-                  )}
-                </>
-              )}
-              {tab === "transcript" && (
-                <TranscriptPanel
-                  project={project}
+                      </div>
+                    )}
+                  </>
+                )}
+                {tab === "transcript" && (
+                  <TranscriptPanel
+                    project={project}
+                    settings={settings}
+                    apply={apply}
+                    onJob={startJob}
+                    onSelect={(range) => {
+                      setSelection(range);
+                      void seek(range.startMs);
+                    }}
+                    onExport={exportTranscript}
+                  />
+                )}
+                {tab === "export" && (
+                  <ExportPanel
+                    project={project}
+                    busy={busy}
+                    onExport={exportVideo}
+                    onError={setError}
+                  />
+                )}
+              </fieldset>
+              {tab === "ai" && (
+                <AssistantPanel
+                  messages={chats[project.id] || []}
                   settings={settings}
-                  apply={apply}
-                  onJob={startJob}
-                  onSelect={(range) => {
-                    setSelection(range);
-                    void seek(range.startMs);
+                  disabled={projectBusy || !project.source}
+                  onSettings={() => setModal("settings")}
+                  onSend={async (prompt) => {
+                    setChats((c) => ({
+                      ...c,
+                      [project.id]: [...(c[project.id] || []), { role: "user", text: prompt }],
+                    }));
+                    await startJob("ai.assistant", {
+                      prompt,
+                      provider: settings?.provider,
+                    });
                   }}
-                  onExport={exportTranscript}
                 />
               )}
-            </fieldset>
-            {tab === "ai" && (
-              <AssistantPanel
-                messages={chats[project.id] || []}
-                settings={settings}
-                disabled={projectBusy || !project.source}
-                onSettings={() => setModal("settings")}
-                onSend={async (prompt) => {
-                  setChats((c) => ({
-                    ...c,
-                    [project.id]: [...(c[project.id] || []), { role: "user", text: prompt }],
-                  }));
-                  await startJob("ai.assistant", {
-                    prompt,
-                    provider: settings?.provider,
-                  });
-                }}
-              />
-            )}
-          </div>
-        </aside>
+            </div>
+          </aside>
+        </div>
       </div>
       <LiveTimeline
         insertMedia={insertMedia}
@@ -539,6 +567,13 @@ export function EditorScreen({
             ? `${project.edits.segments.length} clip${project.edits.segments.length === 1 ? "" : "s"}`
             : "Draft"}
           {project.recovered && <span className="recovered">Recovered after an interruption</span>}
+          <span className={`status-save ${saveState}`} role="status">
+            {saveState === "saving"
+              ? "Saving changes…"
+              : saveState === "failed"
+                ? "Change could not be saved"
+                : "Saved automatically"}
+          </span>
         </span>
         <span>
           <kbd>⌘ S</kbd> Save<span className="status-separator">·</span>
@@ -563,6 +598,12 @@ function PlaybackToolbar({
   const { timeMs, playing } = useSyncExternalStore(playback.subscribe, playback.getSnapshot);
   const seek = playback.seek,
     togglePlayback = playback.toggle;
+  const boundaries = [0];
+  for (const segment of project.edits.segments)
+    boundaries.push(boundaries.at(-1)! + segmentDuration(segment));
+  const previousBoundary = boundaries.filter((time) => time < timeMs - 1).at(-1) ?? 0;
+  const nextBoundary = boundaries.find((time) => time > timeMs + 1) ?? total;
+  const unavailable = !project.source || disabled;
   return (
     <div className="playback-toolbar">
       <span className="playback-time">
@@ -570,12 +611,35 @@ function PlaybackToolbar({
         <span>/ {formatTime(total)}</span>
       </span>
       <div>
-        <IconButton label="Go to start" disabled={!project.source} onClick={() => void seek(0)}>
-          <ArrowLeft size={16} />
+        <IconButton label="Go to start" disabled={unavailable} onClick={() => void seek(0)}>
+          <SkipBack size={16} />
+        </IconButton>
+        <IconButton
+          label="Previous clip boundary"
+          disabled={unavailable}
+          onClick={() => void seek(previousBoundary)}
+        >
+          <ChevronsLeft size={16} />
         </IconButton>
         <button
+          className="playback-step"
+          aria-label="Back 5 seconds"
+          disabled={unavailable}
+          onClick={() => void seek(timeMs - 5000)}
+        >
+          −5s
+        </button>
+        <button
+          className="playback-step"
+          aria-label="Back 1 second"
+          disabled={unavailable}
+          onClick={() => void seek(timeMs - 1000)}
+        >
+          −1s
+        </button>
+        <button
           className="play-button"
-          disabled={!project.source || disabled}
+          disabled={unavailable}
           aria-label={playing ? "Pause preview" : "Play preview"}
           onClick={() => void togglePlayback()}
         >
@@ -585,8 +649,31 @@ function PlaybackToolbar({
             <Play size={18} fill="currentColor" />
           )}
         </button>
-        <IconButton label="Go to end" disabled={!project.source} onClick={() => void seek(total)}>
-          <ArrowRight size={16} />
+        <button
+          className="playback-step"
+          aria-label="Forward 1 second"
+          disabled={unavailable}
+          onClick={() => void seek(timeMs + 1000)}
+        >
+          +1s
+        </button>
+        <button
+          className="playback-step"
+          aria-label="Forward 5 seconds"
+          disabled={unavailable}
+          onClick={() => void seek(timeMs + 5000)}
+        >
+          +5s
+        </button>
+        <IconButton
+          label="Next clip boundary"
+          disabled={unavailable}
+          onClick={() => void seek(nextBoundary)}
+        >
+          <ChevronsRight size={16} />
+        </IconButton>
+        <IconButton label="Go to end" disabled={unavailable} onClick={() => void seek(total)}>
+          <SkipForward size={16} />
         </IconButton>
       </div>
       <span className="playback-shortcut">

@@ -108,7 +108,7 @@ export function ZoomPanel({
         <Slider
           label="Default zoom depth"
           min={1.1}
-          max={4}
+          max={8}
           step={0.1}
           suffix="×"
           value={automatic.scale}
