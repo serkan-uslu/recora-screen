@@ -1,16 +1,35 @@
 <p align="center">
-  <img src="website/public/icon.svg" alt="Recora Screen logo" width="96" height="96">
+  <img src="website/public/media/social-share.png" alt="Recora Screen — Record once. Shape every moment." width="1200">
 </p>
 
 <h1 align="center">Recora Screen</h1>
 
 <p align="center"><strong>The open-source screen recorder you can control with Claude and Codex.</strong></p>
 
-Record your screen, camera and audio, or start with an existing video. Select a clip to edit its properties, then export your video. Claude and Codex can also control projects, edits and exports through MCP. Built for tutorials, walkthroughs and product demos on Mac.
+<p align="center">
+  <a href="https://recora-screen.vercel.app/">Website</a> ·
+  <a href="https://github.com/serkan-uslu/recora-screen/releases/download/v0.1.2/Recora-Screen_0.1.2_macOS-arm64.dmg">Download for macOS</a> ·
+  <a href="https://recora-screen.vercel.app/documentation/">Documentation</a> ·
+  <a href="https://github.com/serkan-uslu/recora-screen/releases/tag/v0.1.2">Release notes</a>
+</p>
 
-![The desktop editor with separate screen, camera, audio and effects tracks](website/public/media/editor.jpg)
+Record your screen, camera and audio, or start with an existing video. Shape the result with automatic zooms, timed layers, local transcription and a visual timeline, then export up to 4K. Claude and Codex can control the same project, editing, preview and export tools through MCP. Built for tutorials, walkthroughs and product demos on Mac.
 
-_Actual desktop app with clean demonstration footage._
+![Recora Screen editor with separate screen, camera, audio, zoom and layer tracks](website/public/media/editor-current.png)
+
+_The current desktop editor with local project media and separate timeline tracks._
+
+## Shape every moment
+
+| Automatic zooms                                                                                              | Timed visual layers                                                                                |
+| ------------------------------------------------------------------------------------------------------------ | -------------------------------------------------------------------------------------------------- |
+| Clicks, drags and typing become editable zoom moments with timing, depth, motion and cursor-follow controls. | Add text, images, arrows, blur and privacy covers; move them on the timeline and trim either edge. |
+| ![Editing an automatic zoom moment](website/public/media/zoom-current.png)                                   | ![Editing timed visual layers](website/public/media/layers-current.png)                            |
+
+| Local AI and reviewable assistance                                                                                  | Projects that stay on your Mac                                                                     |
+| ------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------- |
+| Transcribe with local Whisper, review silence suggestions, or use your own provider key for the optional assistant. | Search and reopen portable projects without creating an account. Original media remains untouched. |
+| ![Recora Screen local AI tools](website/public/media/ai-current.png)                                                | ![Recora Screen local project library](website/public/media/projects-current.png)                  |
 
 ## Download the public beta
 
